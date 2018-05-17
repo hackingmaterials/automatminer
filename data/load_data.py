@@ -31,6 +31,9 @@ def load_mp_data(filename='data_files/mp_nostruct.csv'):
     """
     Loads a pregenerated csv file containing properties of ALL materials in MP
     (approximately 70k).
+
+    If you need a version WITH structures, use generate_data.py to create
+    mp_all.csv, and use filename="data_files/mp_all.csv"
     """
 
     df = pd.read_csv(filename)
