@@ -11,7 +11,7 @@ atom:
     description: Name of the atom
     example: "Hg"
     units: None
-    notes: None
+    notes: Can be prefixed or suffixed depending on the study (ie perovskites have atom1, atom2, etc.)
 
 element:
     description: Name of the atom
@@ -37,4 +37,33 @@ lumo:
     units: eV
     notes: None
 
+mpid:
+    description: Materials project material_id, shortened to mpid
+    example: "mp-1234"
+    units: None
+    notes: *_load() function should return this as a column preferably, not index
+
+ehull:
+    description: Energy above the convex hull in the chemical system
+    example: 0.002
+    units: eV
+    notes: None
+
+structure:
+    description: The pymatgen structure object, as the object (not a dict!)
+    example: <class 'pymatgen.core.structure.Structure'>
+    units: None
+    notes: None
+
+bulkmod:
+    description: The bulk modulus
+    example: 20.3
+    units: GPa
+    notes: It is ok to put the kind of bulk modulus after, e.g., bulkmod_VRH
+
+shearmod:
+    description: The shear modulus
+    example: 20.3
+    units: GPa
+    notes: It is ok to put the kind of bulk modulus after, e.g., shearmod_VRH
 
