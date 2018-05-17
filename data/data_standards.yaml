@@ -65,5 +65,5 @@ shearmod:
     description: The shear modulus
     example: 20.3
     units: GPa
-    notes: It is ok to put the kind of bulk modulus after, e.g., shearmod_VRH
+    notes: It is ok to put the kind of shear modulus after, e.g., shearmod_VRH
 
