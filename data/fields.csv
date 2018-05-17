@@ -1,5 +1,0 @@
-﻿field,units,description
-formula,,chemical formula (e.g. NaCl)
-atom/element/specie,,"examples: H, Li, Si, Au"
-gap,eV,"electronic band gap, the name may be followed by the type of data (e.g. gap expt or gap pbe or gap gllbsc)"
-lumo,eV,lowest unoccupied molecular orbital

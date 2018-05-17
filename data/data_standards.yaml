@@ -1,0 +1,40 @@
+
+# In this file, you'll find naming and unit conventions for common fields across the datasets in matbench
+
+formula:
+    description: Chemical formula
+    example: "NaCl"
+    units: None
+    notes: must be in form compatible with matminer composition featurizers
+
+atom:
+    description: Name of the atom
+    example: "Hg"
+    units: None
+    notes: None
+
+element:
+    description: Name of the atom
+    example: "Hg"
+    units: None
+    notes: Same as atom
+
+specie:
+    description: Name of the specie or ion
+    example: "Na+1"
+    units: None
+    notes: Oxidation state should always be present in pymatgen format, e.g., Na0+
+
+gap:
+    description: The band gap of the material
+    example: 2.1
+    units: eV
+    notes: 'gap' may be followed by the kind of gap data; e.g., 'gap expt', 'gap pbe', or 'gap gllbsc'
+
+lumo:
+    description: Lowest unoccupied molecular orbital
+    example: -1.532
+    units: eV
+    notes: None
+
+
