@@ -49,6 +49,12 @@ ehull:
     units: eV
     notes: None
 
+eformation:
+    description: Energy of formation, for crystal structures
+    example: -2.744
+    units: eV/atom
+    notes: Add on words that specifiy the type, e.g., "eformation oxygen vacancy"
+
 structure:
     description: The pymatgen structure object, as the object (not a dict!)
     example: <class 'pymatgen.core.structure.Structure'>
@@ -61,9 +67,22 @@ bulkmod:
     units: GPa
     notes: It is ok to put the kind of bulk modulus after, e.g., bulkmod VRH
 
+elasticmod:
+    description: The elastic modulus
+    example: 184.1
+    units: GPa
+    notes: None
+
 shearmod:
     description: The shear modulus
     example: 20.3
     units: GPa
     notes: It is ok to put the kind of shear modulus after, e.g., shearmod VRH
+
+mu_B:
+    description: The magnetic moment of the material (mu_B)
+    example: 0.01
+    units: None
+    notes: None
+
 
