@@ -1,5 +1,6 @@
 import ast
 import pandas as pd
+import numpy as np
 from pymatgen import Structure
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 
@@ -27,7 +28,7 @@ def load_double_perovskites_gap(return_lumo=False):
     else:
         return df
 
-def load_mp_data(filename='sources/mp_nostruct.csv'):
+def load_mp(filename='sources/mp_nostruct.csv'):
     """
     Loads a pregenerated csv file containing properties of ALL materials in MP
     (approximately 70k).
@@ -85,9 +86,38 @@ def load_m2ax():
               "E": "elasticmod"}
     return df.rename(columns=colmap)
 
+
+def load_castelli_perovskites():
+    """
+    A dataset of 18,927 perovskites generated with ABX combinatorics, calculating
+    gbllsc band gap and pbe structure, and also reporting absolute band edge
+    positions and (delta)H_f
+
+    From http://pubs.rsc.org/en/content/articlehtml/2012/ee/c2ee22341d
+
+    """
+    df = pd.read_csv("sources/castelli_perovskites.csv")
+    df["formula"] = df["A"] + df["B"] + df["anion"]
+    df['valence band edge'] = np.where(df['is_direct'], df['VB_dir'], df['VB_ind'])
+    df['conduction band edge'] = np.where(df['is_direct'], df['CB_dir'], df['CB_ind'])
+    df['gap gllbsc'] = np.where(df['is_direct'], df['gllbsc_dir-gap'], df['gllbsc_ind-gap'])
+    df['structure'] = df['structure'].map(ast.literal_eval).map(Structure.from_dict)
+    dropcols = ["filename", "XCFunctional", "anion_idx", "Unnamed: 0", "A", "B",
+                "anion", "gllbsc_ind-gap", "gllbsc_dir-gap", "CB_dir", "CB_ind",
+                "VB_dir", "VB_ind"]
+    df = df.drop(dropcols, axis=1)
+    colmap = {"sum_magnetic_moments": "mu_B",
+              "is_direct": "gap is direct",
+              "heat_of_formation_all": "heat of formation"}
+    df = df.rename(columns=colmap)
+    df.reindex(sorted(df.columns), axis=1)
+    return df
+
+
+
+
+
 if __name__ == "__main__":
     # print(load_double_perovskites_gap().head())
-    print(load_wolverton_oxides())
-    # load_m2ax()
-    # print(load_mp_data())
-
+    # print(load_wolverton_oxides())
+    print(load_castelli_perovskites())

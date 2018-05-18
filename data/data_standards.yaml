@@ -59,7 +59,7 @@ structure:
     description: The pymatgen structure object, as the object (not a dict!)
     example: <class 'pymatgen.core.structure.Structure'>
     units: None
-    notes: None
+    notes: Should be loaded as an object, not a dict (so we can featurize right away)
 
 bulkmod:
     description: The bulk modulus
