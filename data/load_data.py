@@ -20,20 +20,20 @@ def load_double_perovskites_gap(return_lumo=False):
         1) https://www.nature.com/articles/srep19375
         2) CMR database: https://cmr.fysik.dtu.dk/
     """
-    df = pd.read_excel('data_files/double_perovskites.xlsx', sheet_name='bandgap')
-    lumo = pd.read_excel('data_files/double_perovskites.xlsx', sheet_name='lumo')
+    df = pd.read_excel('sources/double_perovskites.xlsx', sheet_name='bandgap')
+    lumo = pd.read_excel('sources/double_perovskites.xlsx', sheet_name='lumo')
     if return_lumo:
         return df, lumo
     else:
         return df
 
-def load_mp_data(filename='data_files/mp_nostruct.csv'):
+def load_mp_data(filename='sources/mp_nostruct.csv'):
     """
     Loads a pregenerated csv file containing properties of ALL materials in MP
     (approximately 70k).
 
     If you need a version WITH structures, use generate_data.py to create
-    mp_all.csv, and use filename="data_files/mp_all.csv"
+    mp_all.csv, and use filename="sources/mp_all.csv"
     """
 
     df = pd.read_csv(filename)
@@ -58,7 +58,7 @@ def load_wolverton_oxides():
 
     From https://www.nature.com/articles/sdata2017153#ref40
     """
-    df = pd.read_csv("data_files/wolverton_oxides.csv")
+    df = pd.read_csv("sources/wolverton_oxides.csv")
     colmap = {"Chemical formula": "formula",
               "A": "atom A",
               "B": "atom B",
@@ -78,7 +78,7 @@ def load_m2ax():
 
     From http://iopscience.iop.org/article/10.1088/0953-8984/21/30/305403/meta
     """
-    df = pd.read_csv("data_files/m2ax_elastic.csv")
+    df = pd.read_csv("sources/m2ax_elastic.csv")
     colmap = {"M2AX phase": "formula",
               "B": "bulkmod",
               "G": "shearmod",
@@ -87,7 +87,7 @@ def load_m2ax():
 
 if __name__ == "__main__":
     # print(load_double_perovskites_gap().head())
-    # print(load_wolverton_oxides())
-    load_m2ax()
+    print(load_wolverton_oxides())
+    # load_m2ax()
     # print(load_mp_data())
 
