@@ -10,10 +10,10 @@ All load* methods return the data in pandas.DataFrame
 Possible other datasets to consider:
     matminer dielectric dataset
     matminer piezoelectric dataset
-    https://www.nature.com/articles/sdata201865
-    https://www.nature.com/articles/sdata201882
+    https://www.nature.com/articles/sdata201865 (Shyam phonon)
+    https://www.nature.com/articles/sdata201882 (JARVIS-DFT optoelectronic)
     https://www.nature.com/articles/s41598-017-05402-0 (JARVIS-DFT-2D)
-    
+    OQMD?
 """
 
 def load_double_perovskites_gap(return_lumo=False):
