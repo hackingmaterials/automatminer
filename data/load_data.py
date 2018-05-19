@@ -2,10 +2,18 @@ import ast
 import pandas as pd
 import numpy as np
 from pymatgen import Structure
-from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
+
 
 """
 All load* methods return the data in pandas.DataFrame
+
+Possible other datasets to consider:
+    matminer dielectric dataset
+    matminer piezoelectric dataset
+    https://www.nature.com/articles/sdata201865
+    https://www.nature.com/articles/sdata201882
+    https://www.nature.com/articles/s41598-017-05402-0 (JARVIS-DFT-2D)
+    
 """
 
 def load_double_perovskites_gap(return_lumo=False):
@@ -114,10 +122,5 @@ def load_castelli_perovskites():
     return df
 
 
-
-
-
 if __name__ == "__main__":
-    # print(load_double_perovskites_gap().head())
-    # print(load_wolverton_oxides())
-    print(load_castelli_perovskites())
+    print(load_double_perovskites_gap().head())
