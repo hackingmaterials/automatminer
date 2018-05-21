@@ -25,6 +25,18 @@ specie:
     units: None
     notes: Oxidation state should always be present in pymatgen format, e.g., Na0+
 
+chemsys:
+    description: Chemical system of the composition or structure
+    example: "Na-Cl"
+    units: None
+    notes: None
+
+chemsys_abc:
+    description: Chemical system of the composition or structure
+    example: "Cl-Na"
+    units: None
+    notes: Sorted alphabetically, for normalization
+
 gap:
     description: The band gap of the material
     example: 2.1
