@@ -67,6 +67,18 @@ eformation:
     units: eV/atom
     notes: Add on words that specifiy the type, e.g., "eformation oxygen vacancy"
 
+enthalpy_formation:
+    description: Enthalpy of formation
+    example: -2.390
+    units: eV/atom
+    notes: Add on words that specifiy the type, e.g., "enthalpy_formation_exp"
+
+composition:
+    description: The pymatgen composition object, as the object (not a dict!)
+    example: <class 'pymatgen.core.composition.Composition'>
+    units: None
+    notes: Should be loaded as an object, not a dict (so we can featurize right away)
+
 structure:
     description: The pymatgen structure object, as the object (not a dict!)
     example: <class 'pymatgen.core.structure.Structure'>
@@ -97,4 +109,8 @@ mu_B:
     units: None
     notes: None
 
-
+contains_errors:
+    description: If the entry contains errors in parsing the structure/composition, or has incomplete data, etc
+    example: True
+    units: None
+    notes: None
