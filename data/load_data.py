@@ -131,5 +131,33 @@ def load_castelli_perovskites():
     return df
 
 
+def load_glass_formation(phase="ternary"):
+    """
+    Datasets of metallic glass formation, including ternary and binary systems,
+    collected from various experimental techniques such as melt-spinning or
+    mechanical alloying.
+    There are 5958 alloys in the "binary" dataset and 7741 alloys in the
+    "ternary" dataset.
+
+    Args:
+        phase (str): "ternary" (as default) or "binary".
+
+    References:
+        "ternary": https://materials.springer.com/bp/docs/978-3-540-47679-5
+                   https://www.nature.com/articles/npjcompumats201628
+        "binary": https://pubs.acs.org/doi/10.1021/acs.jpclett.7b01046
+    """
+    if phase == "ternary":
+        df = pd.read_csv(os.path.join(data_dir, 'glasses_ternary.csv'),
+                         index_col=0)
+    elif phase == "binary":
+        df = pd.read_csv(os.path.join(data_dir, 'glasses_binary.csv'),
+                         index_col=0)
+    else:
+        raise ValueError("Unknown phase designation for glass formation "
+                         "dataset: {}".format(phase))
+    return df
+
+
 if __name__ == "__main__":
     print(load_double_perovskites_gap().head())
