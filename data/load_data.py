@@ -159,5 +159,18 @@ def load_glass_formation(phase="ternary"):
     return df
 
 
+def load_exp_formation_enthalpy():
+    """
+    Datasets of experimental formation enthalpies for inorganic compounds,
+    collected from years of calorimetric experiments. There are 1,276 entries
+    in this dataset, mostly are binary compounds. Matching mp-ids or oqmd-ids
+    as well as the DFT-computed formation energies are also added, if any.
+
+    References:
+        https://www.nature.com/articles/sdata2017162
+    """
+    df = pd.read_excel(os.path.join(data_dir, 'exp_formation_enthalpy.csv'))
+    return df
+
 if __name__ == "__main__":
     print(load_double_perovskites_gap().head())
