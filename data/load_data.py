@@ -1,3 +1,4 @@
+import os
 import ast
 import pandas as pd
 import numpy as np
@@ -16,6 +17,10 @@ Possible other datasets to consider:
     OQMD?
 """
 
+module_dir = os.path.dirname(os.path.abspath(__file__))
+data_dir = os.path.join(module_dir, "sources")
+
+
 def load_double_perovskites_gap(return_lumo=False):
     """
     Electronic band gaps of double perovskites calculated using ﻿Gritsenko,
@@ -29,14 +34,17 @@ def load_double_perovskites_gap(return_lumo=False):
         1) https://www.nature.com/articles/srep19375
         2) CMR database: https://cmr.fysik.dtu.dk/
     """
-    df = pd.read_excel('sources/double_perovskites.xlsx', sheet_name='bandgap')
-    lumo = pd.read_excel('sources/double_perovskites.xlsx', sheet_name='lumo')
+    df = pd.read_excel(os.path.join(data_dir, 'double_perovskites.xlsx'),
+                       sheet_name='bandgap')
+    lumo = pd.read_excel(os.path.join(data_dir, 'double_perovskites.xlsx'),
+                         sheet_name='lumo')
     if return_lumo:
         return df, lumo
     else:
         return df
 
-def load_mp(filename='sources/mp_nostruct.csv'):
+
+def load_mp(filename='mp_nostruct.csv'):
     """
     Loads a pregenerated csv file containing properties of ALL materials in MP
     (approximately 70k).
@@ -45,7 +53,7 @@ def load_mp(filename='sources/mp_nostruct.csv'):
     mp_all.csv, and use filename="sources/mp_all.csv"
     """
 
-    df = pd.read_csv(filename)
+    df = pd.read_csv(os.path.join(data_dir, filename))
     df = df.drop("mpid", axis=1)
     if 'structure' in df.columns.values:
         df['structure'] = df['structure'].map(ast.literal_eval).map(Structure.from_dict)
@@ -59,6 +67,7 @@ def load_mp(filename='sources/mp_nostruct.csv'):
               'total_magnetization': 'mu_B'}
     return df.rename(columns=colmap)
 
+
 def load_wolverton_oxides():
     """
     Wolverton's perovskite oxides containing composition data, lattice constants,
@@ -67,7 +76,7 @@ def load_wolverton_oxides():
 
     From https://www.nature.com/articles/sdata2017153#ref40
     """
-    df = pd.read_csv("sources/wolverton_oxides.csv")
+    df = pd.read_csv(os.path.join(data_dir, "wolverton_oxides.csv"))
     colmap = {"Chemical formula": "formula",
               "A": "atom A",
               "B": "atom B",
@@ -87,7 +96,7 @@ def load_m2ax():
 
     From http://iopscience.iop.org/article/10.1088/0953-8984/21/30/305403/meta
     """
-    df = pd.read_csv("sources/m2ax_elastic.csv")
+    df = pd.read_csv(os.path.join(data_dir, "m2ax_elastic.csv"))
     colmap = {"M2AX phase": "formula",
               "B": "bulkmod",
               "G": "shearmod",
@@ -104,7 +113,7 @@ def load_castelli_perovskites():
     From http://pubs.rsc.org/en/content/articlehtml/2012/ee/c2ee22341d
 
     """
-    df = pd.read_csv("sources/castelli_perovskites.csv")
+    df = pd.read_csv(os.path.join(data_dir, "castelli_perovskites.csv"))
     df["formula"] = df["A"] + df["B"] + df["anion"]
     df['valence band edge'] = np.where(df['is_direct'], df['VB_dir'], df['VB_ind'])
     df['conduction band edge'] = np.where(df['is_direct'], df['CB_dir'], df['CB_ind'])
