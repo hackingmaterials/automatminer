@@ -6,15 +6,29 @@ from pymatgen import Structure
 
 
 """
-All load* methods return the data in pandas.DataFrame
+All load* methods return the data in pandas.DataFrame. In each method a raw
+data file is loaded, some preliminary transformation/renaming/cleaning done and
+the results are returned. For specific columns returned refer to the documentation
+of each function. If you plan to add a new dataset please follow the guidelines
+and refer to documentation in load_castelli_perovskites for consistent docs.
+
+Naming convention guidelines:
+    - use small letters consistently
+    - use spaces between words; use _ only when it makes sense as a subscript
+        e.g. "e_form" means energy of formation
+    - start with property name followed by method/additional description: 
+        e.g. "gap expt" means band gap measured experimentallly
+        e.g. "gap pbe" means band gap calculated via DFT using PBE functional
+    - avoid including units in the column name, instead explain in the docs
+    - roghly use a 15-character limit for column names
 
 Possible other datasets to consider:
     matminer dielectric dataset
     matminer piezoelectric dataset
-    https://www.nature.com/articles/sdata201865 (Shyam phonon)
+    https://www.nature.com/articles/sdata201865 (Shyam phonon) - AF
     https://www.nature.com/articles/sdata201882 (JARVIS-DFT optoelectronic)
     https://www.nature.com/articles/s41598-017-05402-0 (JARVIS-DFT-2D)
-    OQMD?
+    OQMD? - AF
 """
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
