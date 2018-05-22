@@ -164,10 +164,11 @@ def load_glass_formation(phase="ternary"):
 
 def load_expt_formation_enthalpy():
     """
-    Experimental formation enthalpies for inorganic compounds,
-    collected from years of calorimetric experiments. There are 1,276 entries
-    in this dataset, mostly are binary compounds. Matching mp-ids or oqmd-ids
-    as well as the DFT-computed formation energies are also added, if any.
+    Experimental formation enthalpies for inorganic compounds, collected from
+    years of calorimetric experiments.
+    There are 1,276 entries in this dataset, mostly binary compounds. Matching
+    mp-ids or oqmd-ids as well as the DFT-computed formation energies are also
+    added (if any).
 
     References:
         https://www.nature.com/articles/sdata2017162
