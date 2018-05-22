@@ -172,7 +172,7 @@ def load_expt_formation_enthalpy():
     References:
         https://www.nature.com/articles/sdata2017162
     """
-    df = pd.read_excel(os.path.join(data_dir, 'expt_formation_enthalpy.csv'))
+    df = pd.read_csv(os.path.join(data_dir, 'expt_formation_enthalpy.csv'))
     return df
 
 
