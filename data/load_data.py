@@ -162,7 +162,7 @@ def load_glass_formation(phase="ternary"):
     return df
 
 
-def load_exp_formation_enthalpy():
+def load_expt_formation_enthalpy():
     """
     Experimental formation enthalpies for inorganic compounds,
     collected from years of calorimetric experiments. There are 1,276 entries
@@ -172,7 +172,7 @@ def load_exp_formation_enthalpy():
     References:
         https://www.nature.com/articles/sdata2017162
     """
-    df = pd.read_excel(os.path.join(data_dir, 'exp_formation_enthalpy.csv'))
+    df = pd.read_excel(os.path.join(data_dir, 'expt_formation_enthalpy.csv'))
     return df
 
 
