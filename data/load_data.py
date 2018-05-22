@@ -133,11 +133,11 @@ def load_castelli_perovskites():
 
 def load_glass_formation(phase="ternary"):
     """
-    Datasets of metallic glass formation, including ternary and binary systems,
+    Datasets of metallic glass formation, including ternary and binary alloys,
     collected from various experimental techniques such as melt-spinning or
     mechanical alloying.
-    There are 5958 alloys in the "binary" dataset and 7741 alloys in the
-    "ternary" dataset.
+    There are 7742 alloys in the "ternary" dataset and 5959 alloys in the
+    "binary" dataset.
 
     Args:
         phase (str): "ternary" (as default) or "binary".
@@ -158,6 +158,19 @@ def load_glass_formation(phase="ternary"):
                          "dataset: {}".format(phase))
     return df
 
+
+def load_exp_formation_enthalpy():
+    """
+    Dataset of experimental formation enthalpies for inorganic compounds,
+    collected from years of calorimetric experiments. There are 1,276 entries
+    in this dataset, mostly are binary compounds. Matching mp-ids or oqmd-ids
+    as well as the DFT-computed formation energies are also added, if any.
+
+    References:
+        https://www.nature.com/articles/sdata2017162
+    """
+    df = pd.read_excel(os.path.join(data_dir, 'exp_formation_enthalpy.csv'))
+    return df
 
 if __name__ == "__main__":
     print(load_double_perovskites_gap().head())
