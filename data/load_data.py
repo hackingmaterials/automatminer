@@ -21,6 +21,48 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(module_dir, "sources")
 
 
+def load_castelli_perovskites():
+    """
+    A dataset of 18,927 perovskites generated with ABX combinatorics, calculating
+    gbllsc band gap and pbe structure, and also reporting absolute band edge
+    positions and (delta)H_f
+
+    References:
+        http://pubs.rsc.org/en/content/articlehtml/2012/ee/c2ee22341d
+
+    Returns:
+        formula (input):
+        fermi level (input): in eV
+        fermi width (input): fermi bandwidth ??? calculated by ???
+        e_form (input): heat of formation in eV???
+        gap is direct (input):
+        structure (input): crystal structure as pymatgen Structure object
+        mu_b (input): magnetic moment in units of ????
+
+        gap gllbsc (output): electronic band gap in eV calculated via gllbsc functional???
+        vbm (output): absolute value of valence band edge calculated via gllbsc
+            absolute value means that the number output from ??? is directly used
+        cbm (output): similar tp vbm but for conduction band
+
+    """
+    df = pd.read_csv(os.path.join(data_dir, "castelli_perovskites.csv"))
+    df["formula"] = df["A"] + df["B"] + df["anion"]
+    df['vbm'] = np.where(df['is_direct'], df['VB_dir'], df['VB_ind'])
+    df['cbm'] = np.where(df['is_direct'], df['CB_dir'], df['CB_ind'])
+    df['gap gllbsc'] = np.where(df['is_direct'], df['gllbsc_dir-gap'], df['gllbsc_ind-gap'])
+    df['structure'] = df['structure'].map(ast.literal_eval).map(Structure.from_dict)
+    dropcols = ["filename", "XCFunctional", "anion_idx", "Unnamed: 0", "A", "B",
+                "anion", "gllbsc_ind-gap", "gllbsc_dir-gap", "CB_dir", "CB_ind",
+                "VB_dir", "VB_ind"]
+    df = df.drop(dropcols, axis=1)
+    colmap = {"sum_magnetic_moments": "mu_B",
+              "is_direct": "gap is direct",
+              "heat_of_formation_all": "heat of formation"}
+    df = df.rename(columns=colmap)
+    df.reindex(sorted(df.columns), axis=1)
+    return df
+
+
 def load_double_perovskites_gap(return_lumo=False):
     """
     Electronic band gaps of double perovskites calculated using ﻿Gritsenko,
@@ -107,33 +149,6 @@ def load_m2ax():
     return df.rename(columns=colmap)
 
 
-def load_castelli_perovskites():
-    """
-    A dataset of 18,927 perovskites generated with ABX combinatorics, calculating
-    gbllsc band gap and pbe structure, and also reporting absolute band edge
-    positions and (delta)H_f
-
-    References:
-        http://pubs.rsc.org/en/content/articlehtml/2012/ee/c2ee22341d
-    """
-    df = pd.read_csv(os.path.join(data_dir, "castelli_perovskites.csv"))
-    df["formula"] = df["A"] + df["B"] + df["anion"]
-    df['valence band edge'] = np.where(df['is_direct'], df['VB_dir'], df['VB_ind'])
-    df['conduction band edge'] = np.where(df['is_direct'], df['CB_dir'], df['CB_ind'])
-    df['gap gllbsc'] = np.where(df['is_direct'], df['gllbsc_dir-gap'], df['gllbsc_ind-gap'])
-    df['structure'] = df['structure'].map(ast.literal_eval).map(Structure.from_dict)
-    dropcols = ["filename", "XCFunctional", "anion_idx", "Unnamed: 0", "A", "B",
-                "anion", "gllbsc_ind-gap", "gllbsc_dir-gap", "CB_dir", "CB_ind",
-                "VB_dir", "VB_ind"]
-    df = df.drop(dropcols, axis=1)
-    colmap = {"sum_magnetic_moments": "mu_B",
-              "is_direct": "gap is direct",
-              "heat_of_formation_all": "heat of formation"}
-    df = df.rename(columns=colmap)
-    df.reindex(sorted(df.columns), axis=1)
-    return df
-
-
 def load_glass_formation(phase="ternary"):
     """
     Metallic glass formation data, including ternary and binary alloys,
@@ -190,7 +205,8 @@ def load_expt_gap():
 
 
 if __name__ == "__main__":
+    df = load_castelli_perovskites()
     # df = load_double_perovskites_gap()
-    df = load_expt_gap()
+    # df = load_expt_gap()
 
     print(df.head())
