@@ -49,8 +49,9 @@ def load_mp(filename='mp_nostruct.csv'):
     Loads a pregenerated csv file containing properties of ALL materials in MP
     (approximately 70k).
 
-    If you need a version WITH structures, use generate_data.py to create
-    mp_all.csv, and use filename="sources/mp_all.csv"
+    References:
+        If you need a version WITH structures, use generate_data.py to create
+        mp_all.csv, and use filename="sources/mp_all.csv"
     """
 
     df = pd.read_csv(os.path.join(data_dir, filename))
@@ -74,7 +75,8 @@ def load_wolverton_oxides():
     and formation + vacancy formation energies. There are 5,329 compounds
     in this dataset.
 
-    From https://www.nature.com/articles/sdata2017153#ref40
+    References:
+        https://www.nature.com/articles/sdata2017153#ref40
     """
     df = pd.read_csv(os.path.join(data_dir, "wolverton_oxides.csv"))
     colmap = {"Chemical formula": "formula",
@@ -94,7 +96,8 @@ def load_m2ax():
     of M2AX phase elastic properties" by Cover et al. Calculations are PAW
     PW91.
 
-    From http://iopscience.iop.org/article/10.1088/0953-8984/21/30/305403/meta
+    References:
+        http://iopscience.iop.org/article/10.1088/0953-8984/21/30/305403/meta
     """
     df = pd.read_csv(os.path.join(data_dir, "m2ax_elastic.csv"))
     colmap = {"M2AX phase": "formula",
@@ -110,8 +113,8 @@ def load_castelli_perovskites():
     gbllsc band gap and pbe structure, and also reporting absolute band edge
     positions and (delta)H_f
 
-    From http://pubs.rsc.org/en/content/articlehtml/2012/ee/c2ee22341d
-
+    References:
+        http://pubs.rsc.org/en/content/articlehtml/2012/ee/c2ee22341d
     """
     df = pd.read_csv(os.path.join(data_dir, "castelli_perovskites.csv"))
     df["formula"] = df["A"] + df["B"] + df["anion"]
@@ -133,7 +136,7 @@ def load_castelli_perovskites():
 
 def load_glass_formation(phase="ternary"):
     """
-    Datasets of metallic glass formation, including ternary and binary alloys,
+    Metallic glass formation data, including ternary and binary alloys,
     collected from various experimental techniques such as melt-spinning or
     mechanical alloying.
     There are 7742 alloys in the "ternary" dataset and 5959 alloys in the
@@ -161,7 +164,7 @@ def load_glass_formation(phase="ternary"):
 
 def load_exp_formation_enthalpy():
     """
-    Dataset of experimental formation enthalpies for inorganic compounds,
+    Experimental formation enthalpies for inorganic compounds,
     collected from years of calorimetric experiments. There are 1,276 entries
     in this dataset, mostly are binary compounds. Matching mp-ids or oqmd-ids
     as well as the DFT-computed formation energies are also added, if any.
@@ -172,5 +175,21 @@ def load_exp_formation_enthalpy():
     df = pd.read_excel(os.path.join(data_dir, 'exp_formation_enthalpy.csv'))
     return df
 
+
+def load_expt_gap():
+    """
+    Experimental band gap of inorganic semiconductors.
+
+    References:
+        https://pubs.acs.org/doi/suppl/10.1021/acs.jpclett.8b00124
+    """
+    df = pd.read_csv(os.path.join(data_dir, 'zhuo_gap_expt.csv'))
+    df = df.rename(columns={'composition': 'formula', 'Eg (eV)': 'gap expt'})
+    return df
+
+
 if __name__ == "__main__":
-    print(load_double_perovskites_gap().head())
+    # df = load_double_perovskites_gap()
+    df = load_expt_gap()
+
+    print(df.head())
