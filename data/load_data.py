@@ -18,10 +18,10 @@ Naming convention guidelines:
     - use spaces between words; use _ only when it makes sense as a subscript
         e.g. "e_form" means energy of formation
     - start with property name followed by method/additional description: 
-        e.g. "gap expt" means band gap measured experimentallly
+        e.g. "gap expt" means band gap measured experimentally
         e.g. "gap pbe" means band gap calculated via DFT using PBE functional
     - avoid including units in the column name, instead explain in the docs
-    - roghly use a 15-character limit for column names
+    - roughly use a 15-character limit for column names
 
 Possible other datasets to consider:
     matminer dielectric dataset
