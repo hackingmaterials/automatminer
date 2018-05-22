@@ -13,7 +13,8 @@ of each function. If you plan to add a new dataset please follow the guidelines
 and refer to documentation in load_castelli_perovskites for consistent docs.
 
 Naming convention guidelines:
-    - use small letters consistently
+    - use small letters for column names consistently
+    - return only those columns that cannot be derived from other available ones
     - use spaces between words; use _ only when it makes sense as a subscript
         e.g. "e_form" means energy of formation
     - start with property name followed by method/additional description: 
