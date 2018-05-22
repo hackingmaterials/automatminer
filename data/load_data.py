@@ -81,18 +81,26 @@ def load_castelli_perovskites():
 def load_double_perovskites_gap(return_lumo=False):
     """
     Electronic band gaps of double perovskites calculated using ﻿Gritsenko,
-    van Leeuwen, van Lenthe and Baerends potential in GPAW.
+    van Leeuwen, van Lenthe and Baerends potential (gllbsc) in GPAW.
+
+    References:
+        1) https://www.nature.com/articles/srep19375
+        2) CMR database: https://cmr.fysik.dtu.dk/
 
     Args:
         return_lumo (bool): whether to return the lowest unoccupied molecular
             orbital (LUMO) energy levels (in eV).
 
-    References:
-        1) https://www.nature.com/articles/srep19375
-        2) CMR database: https://cmr.fysik.dtu.dk/
+    Returns:
+        formula (input)
+        gap gllbsc (output): electronic band gap (in eV) calculated via gllbsc
+
     """
     df = pd.read_excel(os.path.join(data_dir, 'double_perovskites.xlsx'),
                        sheet_name='bandgap')
+    #TODO: make sure formula is in A1B1A2B2O6 order, if yes drop A1_atom ... columns
+    # df = df.rename(columns={'A1_atom': 'A1', 'B1_atom': 'B1',
+    #                         'A2_atom': 'A2', 'B2_atom': 'B2'})
     lumo = pd.read_excel(os.path.join(data_dir, 'double_perovskites.xlsx'),
                          sheet_name='lumo')
     if return_lumo:
@@ -213,6 +221,10 @@ def load_expt_gap():
 
     References:
         https://pubs.acs.org/doi/suppl/10.1021/acs.jpclett.8b00124
+
+    Returns:
+        formula (input):
+        gap expt (output): band gap (in eV) measured experimentally.
     """
     df = pd.read_csv(os.path.join(data_dir, 'zhuo_gap_expt.csv'))
     df = df.rename(columns={'composition': 'formula', 'Eg (eV)': 'gap expt'})
@@ -220,8 +232,8 @@ def load_expt_gap():
 
 
 if __name__ == "__main__":
-    df = load_castelli_perovskites()
+    # df = load_castelli_perovskites()
     # df = load_double_perovskites_gap()
-    # df = load_expt_gap()
+    df = load_expt_gap()
 
     print(df.head())
