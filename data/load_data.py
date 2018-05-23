@@ -180,13 +180,27 @@ def load_glass_formation(phase="ternary"):
     There are 7742 alloys in the "ternary" dataset and 5959 alloys in the
     "binary" dataset.
 
-    Args:
-        phase (str): "ternary" (as default) or "binary".
-
     References:
         "ternary": https://materials.springer.com/bp/docs/978-3-540-47679-5
                    https://www.nature.com/articles/npjcompumats201628
         "binary": https://pubs.acs.org/doi/10.1021/acs.jpclett.7b01046
+
+    Args:
+        phase (str): "ternary" (as default) or "binary".
+
+    Returns:
+        formula (input): chemical formula
+        phase (output): only in the "ternary" dataset, designating the phase
+                        obtained in glass producing experiments,
+                        "AM": amorphous phase
+                        "CR": crystalline phase
+                        "AC": amorphous-crystalline composite phase
+                        "QC": quasi-crystalline phase
+        gfa (output): glass forming ability, i.e. whether the composition can
+                      form monolithic glass or not,
+                      1: glass forming
+                      0: non-glass forming
+
     """
     if phase == "ternary":
         df = pd.read_csv(os.path.join(data_dir, 'glasses_ternary.csv'),
@@ -205,11 +219,21 @@ def load_expt_formation_enthalpy():
     Experimental formation enthalpies for inorganic compounds, collected from
     years of calorimetric experiments.
     There are 1,276 entries in this dataset, mostly binary compounds. Matching
-    mp-ids or oqmd-ids as well as the DFT-computed formation energies are also
+    mpids or oqmdids as well as the DFT-computed formation energies are also
     added (if any).
 
     References:
         https://www.nature.com/articles/sdata2017162
+
+    Returns:
+        formula (input): chemical formula
+        pearson symbol (input): Pearson symbol of the structure
+        space group (input): space group of the structure
+        e_form expt (output): experimental formation enthaply (in eV/atom)
+        mpid (input): Materials project id (if any)
+        e_form mp (output): formation enthalpy from Materials Project (in eV/atom)
+        oqmdid (input): OQMD id (if any)
+        e_form oqmd (output): formation enthalpy from OQMD (in eV/atom)
     """
     df = pd.read_csv(os.path.join(data_dir, 'formation_enthalpy_expt.csv'))
     return df
