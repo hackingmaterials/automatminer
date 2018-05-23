@@ -92,15 +92,15 @@ def load_double_perovskites_gap(return_lumo=False):
             orbital (LUMO) energy levels (in eV).
 
     Returns:
-        formula (input)
+        formula (input): chemical formula w/ sites in the order A1+B1+A2+B2+O6
+            for example in KTaGaTaO6, A1=="K", B1=="Ta", A2=="Ga" and B2=="Ta"
         gap gllbsc (output): electronic band gap (in eV) calculated via gllbsc
-
+        A1/B1/A2/B2 (input): species occupying the corresponding sites.
     """
     df = pd.read_excel(os.path.join(data_dir, 'double_perovskites.xlsx'),
                        sheet_name='bandgap')
-    #TODO: make sure formula is in A1B1A2B2O6 order, if yes drop A1_atom ... columns
-    # df = df.rename(columns={'A1_atom': 'A1', 'B1_atom': 'B1',
-    #                         'A2_atom': 'A2', 'B2_atom': 'B2'})
+    df = df.rename(columns={'A1_atom': 'A1', 'B1_atom': 'B1',
+                            'A2_atom': 'A2', 'B2_atom': 'B2'})
     lumo = pd.read_excel(os.path.join(data_dir, 'double_perovskites.xlsx'),
                          sheet_name='lumo')
     if return_lumo:
