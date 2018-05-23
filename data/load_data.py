@@ -229,10 +229,11 @@ def load_expt_formation_enthalpy():
         formula (input): chemical formula
         pearson symbol (input): Pearson symbol of the structure
         space group (input): space group of the structure
-        e_form expt (output): experimental formation enthaply (in eV/atom)
         mpid (input): Materials project id (if any)
-        e_form mp (output): formation enthalpy from Materials Project (in eV/atom)
         oqmdid (input): OQMD id (if any)
+        e_form expt (output): experimental formation enthaply (in eV/atom)
+        e_form mp (output): formation enthalpy from Materials Project
+                            (in eV/atom)
         e_form oqmd (output): formation enthalpy from OQMD (in eV/atom)
     """
     df = pd.read_csv(os.path.join(data_dir, 'formation_enthalpy_expt.csv'))
