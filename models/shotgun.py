@@ -1,9 +1,13 @@
 from matminer.featurizers.base import MultipleFeaturizer
 import matminer.featurizers.composition as cf
+import matminer.featurizers.structure as sf
 from pymatgen import Composition
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import KFold, cross_val_score
 from matbench.data.load_data import load_double_perovskites_gap
+from matbench.utils.utils import MatbenchError
+from warnings import warn
+
 
 
 class PrepareData(object):
@@ -17,62 +21,97 @@ class PrepareData(object):
     Args:
         df (pandas.DataFrame): the input data containing at least one of preset
             inputs (e.g. "formula")
-        target_cols ([str]):
-        input_cols ([str])
-        ignore_cols ([str]):
-        nonna_ratio ([str]):
+        target_cols ([str]): target columns separated from training data
+        ignore_cols ([str]): if set, these columns are excluded
     """
-    def __init__(self, df, target_cols, input_cols, ignore_cols=None,
-                 nonna_ratio=0.95):
-        pass
+    def __init__(self, df, target_cols, ignore_cols=None):
+        for t in target_cols:
+            if t not in df:
+                raise MatbenchError('target "{}" not in the data!'.format(t))
+        self.target_df = df[target_cols]
+        self.df = df.drop(target_cols+ignore_cols, axis=1)
+        self.ignore_cols = ignore_cols
 
 
-# user inputs:
-nonna_ratio = 0.95
-ignore_columns = ['A1', 'A2', 'B1', 'B2']
-target = 'gap gllbsc'
+    def featurize_columns(self, input_cols=None):
+        """
+        Featurizes the dataframe based on input_columns.
 
-# load data
-df_init, lumos = load_double_perovskites_gap(return_lumo=True)
-if target not in df_init:
-    raise ValueError('target feature {} not in the data!'.format(target))
+        Args:
+            input_cols ([str]): columns used for featurization (e.g. "structure"),
+                set to None to try all preset columns.
 
-df_init['composition'] = df_init['formula'].apply(Composition)
+        Returns (None):
+            self.df gets updated w/ new features if the is featurizer available
+        """
+        input_cols = input_cols or ["formula"]
+        for column in input_cols:
+            featurizer = getattr(self, "featurize_{}".format(column), None)
+            if featurizer is not None:
+                featurizer()
+            elif column not in self.df:
+                raise MatbenchError('no "{}" in the data!')
+            else:
+                warn('No method available to featurize "{}"'.format(column))
 
-# featurize
-featurizer = MultipleFeaturizer([
-    cf.ElementProperty.from_preset(preset_name='matminer'),
-    cf.IonProperty()
-])
 
-df = featurizer.featurize_dataframe(df_init, col_id='composition')
-df = df.drop(['composition'], axis=1)
+    def featurize_formula(self, preset_name="matminer", compcol="composition"):
+        if compcol not in self.df:
+            self.df[compcol] = self.df["formula"].apply(Composition)
+        featurizer = MultipleFeaturizer([
+            cf.ElementProperty.from_preset(preset_name=preset_name),
+            cf.IonProperty()
+        ])
 
-# clean
-df = df.drop(ignore_columns, axis=1)
-df = df.dropna(axis=1, thresh=int(nonna_ratio*len(df))).dropna(axis=0)
+        self.df = featurizer.featurize_dataframe(self.df, col_id='composition')
+        self.df = self.df.drop([compcol], axis=1)
 
-possible_indexes = ['formula']
-for possible_index in possible_indexes:
-    if possible_index in df:
-        df = df.set_index(possible_index)
-        break
-# print(df_trimmed.head())
 
-# encode categorical vars
-print(df.select_dtypes(include=['object']))
-print(df.head())
+    def featurize_structure(self, preset_name="ops"):
+        featurizer = MultipleFeaturizer([
+            sf.SiteStatsFingerprint(
+                site_featurizer=sf.CrystalSiteFingerprint.from_preset(
+                    preset=preset_name), stats=('mean', 'std_dev', 'minimum','maximum')
+            ),
+            sf.DensityFeatures(),
+            sf.GlobalSymmetryFeatures()
+        ])
+        self.df = featurizer.featurize_dataframe(col_id="structure")
 
-# train
-y = df[target]
-X = df.drop(target, axis=1)
 
-rfr = RandomForestRegressor(n_jobs=-1)
+    def handle_nulls(self, max_null_ratio=0.05, method='drop'):
+        """
 
-rfr.fit(X, y)
-kf = KFold(n_splits=10, random_state=0)
-score = cross_val_score(rfr, X, y, cv=kf, scoring="neg_mean_squared_error")
-score_r2 = cross_val_score(rfr, X, y, cv=kf, scoring="r2")
+        Args:
+            max_null_ratio ([str]): after generating features, drop the columns
+                that have null/na rows with more than this ratio. Default 0.05
+            method (str): method of handling null rows.
+                Options: "drop", "mode", ... (see pandas fillna method options)
+        Returns:
 
-print('rmse score', score)
-print('r2 score', score_r2)
+        """
+        self.df = self.df.dropna(
+                        axis=1, thresh=int((1-max_null_ratio)*len(self.df)))
+        if method == "drop": # drop all rows that contain any null
+            self.df = self.df.dropna(axis=0)
+        else:
+            self.df = self.df.fillna(method=method)
+
+
+    def get_train_target(self):
+        return self.df, self.target_df
+
+
+if __name__ == "__main__":
+    df_init, lumos = load_double_perovskites_gap(return_lumo=True)
+    prep = PrepareData(df_init,
+                       target_cols=['gap gllbsc'],
+                       ignore_cols=['A1', 'A2', 'B1', 'B2'])
+    prep.featurize_columns()
+    prep.handle_nulls()
+    X, y = prep.get_train_target()
+    print('here data')
+    print(X.head())
+
+    print('here targets')
+    print(y.head())
