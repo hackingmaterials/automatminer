@@ -114,6 +114,11 @@ def load_mp(filename='mp_nostruct.csv'):
     Loads a pregenerated csv file containing properties of ALL materials in MP
     (approximately 70k).
 
+    Returns:
+        formula (input)
+        ehull (output)
+
+
     References:
         If you need a version WITH structures, use generate_data.py to create
         mp_all.csv, and use filename="sources/mp_all.csv"
@@ -259,6 +264,4 @@ def load_expt_gap():
 if __name__ == "__main__":
     # df = load_castelli_perovskites()
     # df = load_double_perovskites_gap()
-    df = load_expt_gap()
-
-    print(df.head())
+    print(load_mp())
