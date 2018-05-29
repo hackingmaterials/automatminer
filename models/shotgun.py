@@ -3,8 +3,29 @@ import matminer.featurizers.composition as cf
 from pymatgen import Composition
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import KFold, cross_val_score
-
 from matbench.data.load_data import load_double_perovskites_gap
+
+
+class PrepareData(object):
+    """
+    Takes in a dataframe and generate features from preset columns such as
+    "formula", "structure", "bandstructure", "dos", etc.
+
+    This class has several methods to featurize, clean and prepare the data
+    for visualization and training.
+
+    Args:
+        df (pandas.DataFrame): the input data containing at least one of preset
+            inputs (e.g. "formula")
+        target_cols ([str]):
+        input_cols ([str])
+        ignore_cols ([str]):
+        nonna_ratio ([str]):
+    """
+    def __init__(self, df, target_cols, input_cols, ignore_cols=None,
+                 nonna_ratio=0.95):
+        pass
+
 
 # user inputs:
 nonna_ratio = 0.95
