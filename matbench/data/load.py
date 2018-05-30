@@ -1,6 +1,5 @@
 import os
 import ast
-import json
 import pandas as pd
 import numpy as np
 from pymatgen import Structure
@@ -30,11 +29,11 @@ Naming convention guidelines:
     - roughly use a 15-character limit for column names
 
 Possible other datasets to consider:
-    matminer dielectric dataset - AD
-    matminer piezoelectric dataset - AD
+    matminer dielectric dataset
+    matminer piezoelectric dataset
     https://www.nature.com/articles/sdata201865 (Shyam phonon) - AF
-    https://www.nature.com/articles/sdata201882 (JARVIS-DFT optoelectronic) - AD
-    https://www.nature.com/articles/s41598-017-05402-0 (JARVIS-DFT-2D) - AD
+    https://www.nature.com/articles/sdata201882 (JARVIS-DFT optoelectronic)
+    https://www.nature.com/articles/s41598-017-05402-0 (JARVIS-DFT-2D)
     OQMD? - AF
 """
 
@@ -58,7 +57,7 @@ def load_castelli_perovskites():
         e_form (input): heat of formation (eV)
         gap is direct (input):
         structure (input): crystal structure as pymatgen Structure object
-        mu_b (input): magnetic moment in terms of Bohr magneton
+        mu_b (input): magnetic moment
 
         gap gllbsc (output): electronic band gap in eV calculated via gllbsc
             functional
@@ -332,49 +331,10 @@ def load_expt_gap():
     df = df.rename(columns={'composition': 'formula', 'Eg (eV)': 'gap expt'})
     return df
 
-def load_jdft2d():
-    """
-    Properties of 493 2D materials, most of which (in their bulk forms) are in
-    Materials Project. All energy calculations in the refined columns and
-    structural relaxations were performed with the optB88-vdw functional.
-    Magnetic properties were computed without +U correction.
-
-    References:
-        https://www.nature.com/articles/s41598-017-05402-0
-
-    Returns:
-        formula (input):
-        mpid (input): Corresponding mpid string referring to MP bulk material
-        structure (input): Pymatgen structure object
-        stucture initial (input): Pymatgen structure before relaxation
-        mu_b (input): Magnetic moment, in terms of bohr magneton
-
-        e_form (output): Formation energy in eV
-        gap optb88 (output): Band gap in eV using functional optB88-VDW
-        e_exfol (output): Exfoliation energy (monolayer formation E) in eV
-    """
-    with open(os.path.join(data_dir, "jdft_2d.json")) as f:
-        x = json.load(f)
-    df = pd.DataFrame(x)
-    colmap={'exfoliation_en': 'e_exfol',
-            'final_str': 'structure',
-            'initial_str': 'structure initial',
-            'form_enp': 'e_form',
-            'magmom': 'mu_b',
-            'op_gap': 'gap optb88',
-            }
-    dropcols = ['epsx', 'epsy', 'epsz', 'mepsx', 'mepsy', 'mepsz', 'kv', 'gv',
-                'jid', 'kpoints', 'incar', 'icsd', 'mbj_gap', 'fin_en']
-    df = df.drop(dropcols, axis=1)
-    df = df.rename(columns=colmap)
-    df['structure'] = df['structure'].map(Structure.from_dict)
-    df['structure initial'] = df['structure initial'].map(Structure.from_dict)
-    df['formula'] = [s.composition.reduced_formula for s in df['structure']]
-    return df
 
 if __name__ == "__main__":
-    pd.set_option('display.height', 1000)
-    pd.set_option('display.max_rows', 500)
-    pd.set_option('display.max_columns', 500)
-    pd.set_option('display.width', 1000)
-    print(load_jdft2d())
+    # df = load_castelli_perovskites()
+    # df = load_double_perovskites_gap()
+    df = load_m2ax()
+    print(df)
+    # print(df[df['e_form'] > 0])
