@@ -388,16 +388,15 @@ def load_matminer_dielectric():
         mpid (input): material id via MP
         formula (input):
         structure (input):
+        nsites (input): The number of sites in the structure
 
         gap pbe (output): Band gap in eV
         refractive index (output): Estimated refractive index
-        epsilon_e- polycrystalline (output): Polycrystalline electronic
-            contribution to dielectric constant (estimate/avg)
-        epsilon polycrystalline (output): Polycrystalline dielectric constant
-            (estimate/avg)
-        potentially ferroelectic (output): If imaginary optical phonon modes
-            present at the Gamma point, the material is potentially f
-            erroelectric
+        ep_e- poly (output): Polycrystalline electronic contribution to
+            dielectric constant (estimate/avg)
+        ep poly (output): Polycrystalline dielectric constant (estimate/avg)
+        pot. ferroelectic (output): If imaginary optical phonon modes present at
+            the Gamma point, the material is potentially ferroelectric
     """
     df = load_dielectric_constant()
     dropcols = ['volume', 'space_group', 'e_electronic', 'e_total']
@@ -405,15 +404,44 @@ def load_matminer_dielectric():
     colmap={'material_id': 'mpid',
             'band_gap': 'gap pbe',
             'n': 'refractive index',
-            'poly_electronic': 'epsilon_e- polycrystalline',
-            'poly_total': 'epsilon polycrystalline',
-            'pot_ferroelectric': 'potentially ferroelectric'
+            'poly_electronic': 'ep_e- poly',
+            'poly_total': 'ep poly',
+            'pot_ferroelectric': 'pot. ferroelectric'
             }
     df = df.rename(columns=colmap)
     return df
 
 def load_matminer_elastic():
+    """
+    1,180 structures with elastic properties calculated with DFT-PBE.
+
+    References:
+        1) https://www.nature.com/articles/sdata20159
+        2) https://www.sciencedirect.com/science/article/pii/S0927025618303252
+
+    Returns:
+        mpid (input): material id via MP
+        formula (input):
+        structure (input):
+        nsites (input): The number of sites in the structure
+
+        elastic anisotropy (output): ratio of anisotropy of elastic properties
+        shear modulus (output): in GPa
+        bulk modulus (output): in GPa
+        poisson ratio (output): 
+    """
     df = load_elastic_tensor()
+    dropcols = ['volume', 'space_group', 'G_Reuss', 'G_Voigt', 'K_Reuss',
+                'K_Voigt', 'compliance_tensor', 'elastic_tensor',
+                'elastic_tensor_original']
+    df = df.drop(dropcols, axis=1)
+    colmap = {'material_id': 'mpid',
+              'elastic_anisotropy': 'elastic anisotropy',
+              'G_VRH': 'shear modulus',
+              'K_VRH': 'bulk modulus',
+              'poisson_ratio': 'poisson ratio',
+              }
+    df = df.rename(columns=colmap)
     return df
 
 def load_matminer_piezoelectric():
