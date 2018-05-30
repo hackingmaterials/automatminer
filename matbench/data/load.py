@@ -86,8 +86,8 @@ def load_castelli_perovskites():
 
 def load_double_perovskites_gap(return_lumo=False):
     """
-    Electronic band gaps of double perovskites calculated using ﻿Gritsenko,
-    van Leeuwen, van Lenthe and Baerends potential (gllbsc) in GPAW.
+    Band gap of 1306 double perovskites (A1B1A2B2O6) calculated using ﻿
+    Gritsenko, van Leeuwen, van Lenthe and Baerends potential (gllbsc) in GPAW.
 
     References:
         1) https://www.nature.com/articles/srep19375
@@ -318,7 +318,7 @@ def load_expt_formation_enthalpy():
 
 def load_expt_gap():
     """
-    Experimental band gap of inorganic semiconductors.
+    Experimental band gap of 6354 inorganic semiconductors.
 
     References:
         https://pubs.acs.org/doi/suppl/10.1021/acs.jpclett.8b00124
@@ -335,6 +335,8 @@ def load_expt_gap():
 if __name__ == "__main__":
     # df = load_castelli_perovskites()
     # df = load_double_perovskites_gap()
-    df = load_m2ax()
+    df = load_expt_gap()
+    # df = load_m2ax()
+
     print(df)
     # print(df[df['e_form'] > 0])
