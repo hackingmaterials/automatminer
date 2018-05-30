@@ -1,4 +1,4 @@
-from matbench.data.load_data import load_double_perovskites_gap
+from matbench.data.load import load_double_perovskites_gap
 from matbench.prepare import PrepareData
 
 

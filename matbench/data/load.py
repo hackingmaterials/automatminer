@@ -8,9 +8,14 @@ from pymatgen import Structure
 """
 All load* methods return the data in pandas.DataFrame. In each method a raw
 data file is loaded, some preliminary transformation/renaming/cleaning done and
-the results are returned. For specific columns returned refer to the documentation
-of each function. If you plan to add a new dataset please follow the guidelines
-and refer to documentation in load_castelli_perovskites for consistent docs.
+the result df is returned. For specific columns returned refer to the 
+documentation of each function. All columns come with a ML input/output
+suggestion, although some columns may be used as either input or output.
+
+If you plan to add a new dataset please follow the guidelines and refer to 
+documentation in load_castelli_perovskites for consistent docs. Generally, using
+column names and unit conventions already used in other load methods is 
+preferred (e.g., always using e_form for heat of formation in eV).
 
 Naming convention guidelines:
     - use small letters for column names consistently
@@ -38,9 +43,9 @@ data_dir = os.path.join(module_dir, "sources")
 
 def load_castelli_perovskites():
     """
-    A dataset of 18,927 perovskites generated with ABX combinatorics, calculating
-    gbllsc band gap and pbe structure, and also reporting absolute band edge
-    positions and (delta)H_f
+    18,927 perovskites generated with ABX combinatorics, calculating gbllsc band
+    gap and pbe structure, and also reporting absolute band edge positions and
+    heat of formation.
 
     References:
         http://pubs.rsc.org/en/content/articlehtml/2012/ee/c2ee22341d
@@ -48,17 +53,16 @@ def load_castelli_perovskites():
     Returns:
         formula (input):
         fermi level (input): in eV
-        fermi width (input): fermi bandwidth ??? calculated by ???
-        e_form (input): heat of formation in eV???
+        fermi width (input): fermi bandwidth
+        e_form (input): heat of formation (eV)
         gap is direct (input):
         structure (input): crystal structure as pymatgen Structure object
-        mu_b (input): magnetic moment in units of ????
+        mu_b (input): magnetic moment
 
-        gap gllbsc (output): electronic band gap in eV calculated via gllbsc functional???
+        gap gllbsc (output): electronic band gap in eV calculated via gllbsc
+            functional
         vbm (output): absolute value of valence band edge calculated via gllbsc
-            absolute value means that the number output from ??? is directly used
-        cbm (output): similar tp vbm but for conduction band
-
+        cbm (output): similar to vbm but for conduction band
     """
     df = pd.read_csv(os.path.join(data_dir, "castelli_perovskites.csv"))
     df["formula"] = df["A"] + df["B"] + df["anion"]
@@ -70,9 +74,11 @@ def load_castelli_perovskites():
                 "anion", "gllbsc_ind-gap", "gllbsc_dir-gap", "CB_dir", "CB_ind",
                 "VB_dir", "VB_ind"]
     df = df.drop(dropcols, axis=1)
-    colmap = {"sum_magnetic_moments": "mu_B",
+    colmap = {"sum_magnetic_moments": "mu_b",
               "is_direct": "gap is direct",
-              "heat_of_formation_all": "heat of formation"}
+              "heat_of_formation_all": "e_form",
+              "FermiLevel": "fermi level",
+              "FermiWidth": "fermi width"}
     df = df.rename(columns=colmap)
     df.reindex(sorted(df.columns), axis=1)
     return df
@@ -94,8 +100,8 @@ def load_double_perovskites_gap(return_lumo=False):
     Returns:
         formula (input): chemical formula w/ sites in the order A1+B1+A2+B2+O6
             for example in KTaGaTaO6, A1=="K", B1=="Ta", A2=="Ga" and B2=="Ta"
-        gap gllbsc (output): electronic band gap (in eV) calculated via gllbsc
         A1/B1/A2/B2 (input): species occupying the corresponding sites.
+        gap gllbsc (output): electronic band gap (in eV) calculated via gllbsc
     """
     df = pd.read_excel(os.path.join(data_dir, 'double_perovskites.xlsx'),
                        sheet_name='bandgap')
@@ -112,16 +118,28 @@ def load_double_perovskites_gap(return_lumo=False):
 def load_mp(filename='mp_nostruct.csv'):
     """
     Loads a pregenerated csv file containing properties of ALL materials in MP
-    (approximately 70k).
-
-    Returns:
-        formula (input)
-        ehull (output)
-
+    (approximately 70k). To regenerate the file, use generate.py. To use a
+    version with structures, run generate_mp in generate.py and use the option
+    filename='mp_all.csv'.
 
     References:
-        If you need a version WITH structures, use generate_data.py to create
-        mp_all.csv, and use filename="sources/mp_all.csv"
+        https://materialsproject.org/citing
+
+    Args:
+        filename (str): The generated file to be loaded. By default, loads the
+            generated MP file not containing structures.
+
+    Returns:
+        mpid (input): The Materials Project mpid, as a string.
+        formula (input):
+        structure (input): The Pymatgen structure object. Only present if the
+            csv file containing structure is generated and loaded.
+        e_hull (output): The calculated energy above the convex hull, in eV.
+        gap pbe (output): The band gap in eV calculated with PBE-DFT functional
+        mu_b (output): The total magnetization of the unit cell.
+        bulk modulus (output): in GPa, average of Voight, Reuss, and Hill
+        shear modulus (output): in GPa, average of Voight, Reuss, and Hill
+        elastic anisotropy (output): The ratio of elastic anisotropy.
     """
 
     df = pd.read_csv(os.path.join(data_dir, filename))
@@ -131,49 +149,102 @@ def load_mp(filename='mp_nostruct.csv'):
     colmap = {'material_id': 'mpid',
               'pretty_formula': 'formula',
               'band_gap': 'gap pbe',
-              'e_above_hull': 'ehull',
-              'elasticity.K_VRH': 'bulkmod',
-              'elasticity.G_VRH': 'shearmod',
-              'elasticity.elastic_anisotropy': 'elastic_anisotropy',
-              'total_magnetization': 'mu_B'}
+              'e_above_hull': 'e_hull',
+              'elasticity.K_VRH': 'bulk modulus',
+              'elasticity.G_VRH': 'shear modulus',
+              'elasticity.elastic_anisotropy': 'elastic anisotropy',
+              'total_magnetization': 'mu_b'}
     return df.rename(columns=colmap)
 
 
 def load_wolverton_oxides():
     """
-    Wolverton's perovskite oxides containing composition data, lattice constants,
-    and formation + vacancy formation energies. There are 5,329 compounds
-    in this dataset.
+    5,329 perovskite oxides containing composition data, lattice constants,
+    and formation + vacancy formation energies. All perovskites are of the form
+    ABO3.
 
     References:
         https://www.nature.com/articles/sdata2017153#ref40
+
+    Returns:
+        formula (input):
+        atom A (input): The atom in the 'A' site of the pervoskite.
+        atom B (input): The atom in the 'B' site of the perovskite.
+        a (input): Lattice parameter a, in A (angstrom)
+        b (input): Lattice parameter b, in A
+        c (input): Lattice parameter c, in A
+        alpha (input): Lattice angle alpha, in degrees
+        beta (input): Lattice angle beta, in degrees
+        gamma (input): Lattice angle gamma, in degrees
+
+        lowest distortion (output): Local distortion crystal structure with
+            lowest energy among all considered distortions.
+        e_form (output): Formation energy in eV
+        gap pbe (output): Bandgap in eV from PBE calculations
+        mu_b (output): Magnetic moment
+        e_form oxygen vacancy (output): Formation energy of oxygen vacancy (eV)
+        e_hull (output): Energy above convex hull, wrt. OQMD db (eV)
+        vpa (output): Volume per atom (A^3/atom)
     """
     df = pd.read_csv(os.path.join(data_dir, "wolverton_oxides.csv"))
+    dropcols = ['In literature', 'Valence A', 'Valence B', 'Radius A [ang]',
+                'Radius B [ang]']
+    df = df.drop(dropcols, axis=1)
     colmap = {"Chemical formula": "formula",
               "A": "atom A",
               "B": "atom B",
-              "Formation energy [eV/atom]": "eformation",
+              "Formation energy [eV/atom]": "e_form",
               "Band gap [eV]": "gap pbe",
-              "Magnetic moment [mu_B]": "mu_B",
-              "Vacancy energy [eV/O atom]": "eformation oxygen vacancy",
-              "Stability [eV/atom]": "ehull"}
-    return df.rename(columns=colmap)
+              "Magnetic moment [mu_B]": "mu_b",
+              "Vacancy energy [eV/O atom]": "e_form oxygen vacancy",
+              "Stability [eV/atom]": "e_hull",
+              "Volume per atom [A^3/atom]": 'vpa',
+              "a [ang]": "a",
+              "b [ang]": "b",
+              "c [ang]": "c",
+              "alpha [deg]": "alpha",
+              "beta [deg]": "beta",
+              "gamma [deg]": "gamma",
+              "Lowest distortion": "lowest distortion"}
+    df = df.rename(columns=colmap)
+    df['e_form'] = pd.to_numeric(df['e_form'], errors='coerce')
+    return df.dropna()
 
 
 def load_m2ax():
     """
-    An elastic dataset of 224 stable M2AX compounds from "A comprehensive survey
+    Elastic properties of 224 stable M2AX compounds from "A comprehensive survey
     of M2AX phase elastic properties" by Cover et al. Calculations are PAW
     PW91.
 
     References:
         http://iopscience.iop.org/article/10.1088/0953-8984/21/30/305403/meta
+
+    Returns:
+        formula (input):
+        a (input): Lattice parameter a, in A (angstrom)
+        c (input): Lattice parameter c, in A
+        d_mx (input): Distance from the M atom to the X atom
+        d_ma (input): Distance from the M atom to the A atom
+
+        c11/c12/c13/c33/c44 (output): Elastic constants of the M2AX material.
+            These are specific to hexagonal materials.
+        bulk modulus (output): in GPa
+        shear modulus (output): in GPa
+        elastic modulus (output): in GPa
     """
     df = pd.read_csv(os.path.join(data_dir, "m2ax_elastic.csv"))
-    colmap = {"M2AX phase": "formula",
-              "B": "bulkmod",
-              "G": "shearmod",
-              "E": "elasticmod"}
+    colmap = {"M2AXphase": "formula",
+              "B": "bulk modulus",
+              "G": "shear modulus",
+              "E": "elastic modulus",
+              "C11": "c11",
+              "C12": "c12",
+              "C13": "c13",
+              "C33": "c33",
+              "C44": "c44",
+              "dMX": "d_mx",
+              "dMA": "d_ma"}
     return df.rename(columns=colmap)
 
 
@@ -264,4 +335,6 @@ def load_expt_gap():
 if __name__ == "__main__":
     # df = load_castelli_perovskites()
     # df = load_double_perovskites_gap()
-    print(load_mp())
+    df = load_m2ax()
+    print(df)
+    # print(df[df['e_form'] > 0])

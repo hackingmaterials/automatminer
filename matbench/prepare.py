@@ -4,7 +4,7 @@ import matminer.featurizers.structure as sf
 from pymatgen import Composition
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import KFold, cross_val_score
-from matbench.data.load_data import load_double_perovskites_gap
+from matbench.data.load import load_double_perovskites_gap
 from matbench.utils.utils import MatbenchError
 from warnings import warn
 
