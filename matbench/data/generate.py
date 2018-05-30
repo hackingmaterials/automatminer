@@ -6,6 +6,7 @@ Functions for generating data to csv form from various resources, if it is not
 already in csv form.
 """
 
+
 def generate_mp(max_nsite=0):
     """
     Grabs all mp materials. Size of spreadsheet with all structures is
