@@ -42,16 +42,10 @@ def generate_mp(max_nsite=0, initial_structures=True):
             mpdf = df
         else:
             mpdf = pd.concat([mpdf, df])
-
-    print("SHAPE:, ", mpdf.shape)
     mpdf.to_csv("sources/mp_all.csv")
     mpdf = mpdf.drop(['structure', 'initial_structure'], axis=1)
     mpdf.to_csv("sources/mp_nostruct.csv")
 
 
 if __name__ == "__main__":
-    pd.set_option('display.height', 1000)
-    pd.set_option('display.max_rows', 500)
-    pd.set_option('display.max_columns', 500)
-    pd.set_option('display.width', 1000)
     generate_mp(initial_structures=False)
