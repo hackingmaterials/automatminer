@@ -428,7 +428,12 @@ def load_matminer_elastic():
         elastic anisotropy (output): ratio of anisotropy of elastic properties
         shear modulus (output): in GPa
         bulk modulus (output): in GPa
-        poisson ratio (output): 
+        poisson ratio (output):
+
+    Notes:
+        This function may return a subset of information which is present in
+        load_mp. However, this dataframe is 'clean' with regard to elastic
+        properties.
     """
     df = load_elastic_tensor()
     dropcols = ['volume', 'space_group', 'G_Reuss', 'G_Voigt', 'K_Reuss',
@@ -445,7 +450,36 @@ def load_matminer_elastic():
     return df
 
 def load_matminer_piezoelectric():
-    pass
+    """
+    941 structures with piezoelectric properties calculated with DFT-PBE.
+
+    References:
+        1) https://www.nature.com/articles/sdata201553
+        2) https://www.sciencedirect.com/science/article/pii/S0927025618303252
+
+    Returns:
+        mpid (input):
+        formula (input):
+        structure (input):
+
+        eij_max (output): Maximum attainable absolute value of the longitudinal
+            piezoelectric modulus
+        vmax_x/y/z (output): vmax = [vmax_x, vmax_y, vmax_z]. vmax is the
+            direction of eij_max (or family of directions, e.g., <111>)
+
+    """
+    df = load_piezoelectric_tensor()
+    df['v_max'] = [np.fromstring(str(x)[1:-1], sep=',') for x in df['v_max']]
+    df['vmax_x'] = [v[0] for v in df['v_max']]
+    df['vmax_y'] = [v[1] for v in df['v_max']]
+    df['vmax_z'] = [v[2] for v in df['v_max']]
+
+    dropcols = ['point_group', 'piezoelectric_tensor', 'volume', 'space_group',
+                'v_max']
+    df = df.drop(columns=dropcols, axis=1)
+    colmap = {'material_id': 'mpid'}
+    df = df.rename(columns=colmap)
+    return df
 
 if __name__ == "__main__":
     pd.set_option('display.height', 1000)
@@ -453,4 +487,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
     # print(load_mp('mp_all.csv'))
-    print(load_matminer_elastic())
+    print(load_matminer_piezoelectric())
