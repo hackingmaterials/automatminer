@@ -7,7 +7,6 @@ from matbench.utils.utils import MatbenchError
 from warnings import warn
 
 
-
 class Featurize(object):
     """
     Takes in a dataframe and generate features from preset columns such as
