@@ -82,7 +82,7 @@ class Featurize(object):
 
 if __name__ == "__main__":
     df_init, lumos = load_double_perovskites_gap(return_lumo=True)
-    prep = PrepareData(df_init,
+    prep = Featurize(df_init,
                        target_cols=['gap gllbsc'],
                        ignore_cols=['A1', 'A2', 'B1', 'B2'])
     prep.featurize_columns()
