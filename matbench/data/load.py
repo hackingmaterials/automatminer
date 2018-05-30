@@ -128,6 +128,9 @@ def load_mp(filename='mp_nostruct.csv'):
         formula (input):
         structure (input): The Pymatgen structure object. Only present if the
             csv file containing structure is generated and loaded.
+        initial structure (input): The Pymatgen structure object before
+            relaxation. Only present if the csv file containing initial
+            structure is generated and loaded.
 
         e_hull (output): The calculated energy above the convex hull, in eV.
         gap pbe (output): The band gap in eV calculated with PBE-DFT functional
