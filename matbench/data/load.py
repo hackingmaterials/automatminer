@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from pymatgen import Structure
 from matminer.datasets.dataframe_loader import load_piezoelectric_tensor, \
-    load_dielectric_constant
+    load_dielectric_constant, load_elastic_tensor, load_flla
 
 """
 All load* methods return the data in pandas.DataFrame. In each method a raw
@@ -31,10 +31,7 @@ Naming convention guidelines:
     - roughly use a 15-character limit for column names
 
 Possible other datasets to consider:
-    matminer dielectric dataset
-    matminer piezoelectric dataset
     https://www.nature.com/articles/sdata201865 (Shyam phonon) - AF
-    https://www.nature.com/articles/sdata201882 (JARVIS-DFT optoelectronic)
     OQMD? - AF
 """
 
@@ -142,6 +139,11 @@ def load_mp(filename='mp_nostruct.csv'):
         bulk modulus (output): in GPa, average of Voight, Reuss, and Hill
         shear modulus (output): in GPa, average of Voight, Reuss, and Hill
         elastic anisotropy (output): The ratio of elastic anisotropy.
+
+    Notes:
+        If loading the csv with structures, loading will typically take ~10 min
+        if using initial structures and about ~3-4 min if only using final
+        structures.
     """
 
     df = pd.read_csv(os.path.join(data_dir, filename))
@@ -374,10 +376,53 @@ def load_jdft2d():
     df['formula'] = [s.composition.reduced_formula for s in df['structure']]
     return df
 
+def load_matminer_dielectric():
+    """
+    1,056 structures with dielectric properties calculated with DFPT-PBE.
+
+    References:
+        1) https://www.nature.com/articles/sdata2016134
+        2) https://www.sciencedirect.com/science/article/pii/S0927025618303252
+
+    Returns:
+        mpid (input): material id via MP
+        formula (input):
+        structure (input):
+
+        gap pbe (output): Band gap in eV
+        refractive index (output): Estimated refractive index
+        epsilon_e- polycrystalline (output): Polycrystalline electronic
+            contribution to dielectric constant (estimate/avg)
+        epsilon polycrystalline (output): Polycrystalline dielectric constant
+            (estimate/avg)
+        potentially ferroelectic (output): If imaginary optical phonon modes
+            present at the Gamma point, the material is potentially f
+            erroelectric
+    """
+    df = load_dielectric_constant()
+    dropcols = ['volume', 'space_group', 'e_electronic', 'e_total']
+    df = df.drop(dropcols, axis=1)
+    colmap={'material_id': 'mpid',
+            'band_gap': 'gap pbe',
+            'n': 'refractive index',
+            'poly_electronic': 'epsilon_e- polycrystalline',
+            'poly_total': 'epsilon polycrystalline',
+            'pot_ferroelectric': 'potentially ferroelectric'
+            }
+    df = df.rename(columns=colmap)
+    return df
+
+def load_matminer_elastic():
+    df = load_elastic_tensor()
+    return df
+
+def load_matminer_piezoelectric():
+    pass
 
 if __name__ == "__main__":
     pd.set_option('display.height', 1000)
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    print(load_mp('mp_all.csv'))
+    # print(load_mp('mp_all.csv'))
+    print(load_matminer_elastic())
