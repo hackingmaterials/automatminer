@@ -15,16 +15,10 @@ class Featurize(object):
     Args:
         df (pandas.DataFrame): the input data containing at least one of preset
             inputs (e.g. "formula")
-        target_cols ([str]): target columns separated from training data
         ignore_cols ([str]): if set, these columns are excluded
     """
-    def __init__(self, df, target_cols, ignore_cols=None):
-        for t in target_cols:
-            if t not in df:
-                raise MatbenchError('target "{}" not in the data!'.format(t))
-        self.target_df = df[target_cols]
-        self.df = df.drop(target_cols+ignore_cols, axis=1)
-        self.ignore_cols = ignore_cols
+    def __init__(self, df, ignore_cols=None):
+        self.df = df.drop(ignore_cols, axis=1)
 
 
     def featurize_columns(self, input_cols=None):
@@ -35,33 +29,38 @@ class Featurize(object):
             input_cols ([str]): columns used for featurization (e.g. "structure"),
                 set to None to try all preset columns.
 
-        Returns (None):
-            self.df gets updated w/ new features if the is featurizer available
+        Returns (pandas.DataFrame):
+            self.df w/ new features added via featurizering input_cols
         """
+        df = self.df.copy(deep=True)
         input_cols = input_cols or ["formula"]
         for column in input_cols:
             featurizer = getattr(self, "featurize_{}".format(column), None)
             if featurizer is not None:
-                featurizer()
-            elif column not in self.df:
+                df = featurizer(df)
+            elif column not in df:
                 raise MatbenchError('no "{}" in the data!')
             else:
                 warn('No method available to featurize "{}"'.format(column))
+        return df
 
-
-    def featurize_formula(self, preset_name="matminer", compcol="composition"):
-        if compcol not in self.df:
-            self.df[compcol] = self.df["formula"].apply(Composition)
+    #TODO: -AF see if the only use of featurize_* methods is to be called in featurize_columns, think about defining them outside of the class
+    @staticmethod
+    def featurize_formula(df, col_id="formula",
+                          preset_name="matminer", compcol="composition"):
+        if compcol not in df:
+            df[compcol] = df[col_id].apply(Composition)
         featurizer = MultipleFeaturizer([
             cf.ElementProperty.from_preset(preset_name=preset_name),
             cf.IonProperty()
         ])
+        df = featurizer.featurize_dataframe(df, col_id=compcol)
+        df = df.drop([compcol], axis=1)
+        return df
 
-        self.df = featurizer.featurize_dataframe(self.df, col_id='composition')
-        self.df = self.df.drop([compcol], axis=1)
 
-
-    def featurize_structure(self, preset_name="ops"):
+    @staticmethod
+    def featurize_structure(df, col_id="structure", preset_name="ops"):
         featurizer = MultipleFeaturizer([
             sf.SiteStatsFingerprint(
                 site_featurizer=sf.CrystalSiteFingerprint.from_preset(
@@ -70,23 +69,14 @@ class Featurize(object):
             sf.DensityFeatures(),
             sf.GlobalSymmetryFeatures()
         ])
-        self.df = featurizer.featurize_dataframe(col_id="structure")
+        df = featurizer.featurize_dataframe(col_id=col_id)
+        return df
 
-
-    def get_train_target(self):
-        return self.df, self.target_df
 
 
 if __name__ == "__main__":
-    df_init, lumos = load_double_perovskites_gap(return_lumo=True)
+    df_init = load_double_perovskites_gap(return_lumo=False)
     prep = Featurize(df_init,
-                       target_cols=['gap gllbsc'],
                        ignore_cols=['A1', 'A2', 'B1', 'B2'])
-    prep.featurize_columns()
-    prep.handle_nulls()
-    X, y = prep.get_train_target()
-    print('here data')
-    print(X.head())
-
-    print('here targets')
-    print(y.head())
+    df = prep.featurize_columns()
+    print(df.head())
