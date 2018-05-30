@@ -6,7 +6,7 @@ Functions for generating data to csv form from various resources, if it is not
 already in csv form.
 """
 
-def generate_mp_data():
+def generate_mp():
     """
     Grabs all mp materials. Size of spreadsheet with all structures is
     about 0.6GB. Size of spreadsheet without structures is 0.005GB.
@@ -32,4 +32,4 @@ def generate_mp_data():
 
 
 if __name__ == "__main__":
-    generate_mp_data()
+    generate_mp()
