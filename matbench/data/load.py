@@ -183,7 +183,7 @@ def load_wolverton_oxides():
         e_form (output): Formation energy in eV
         gap pbe (output): Bandgap in eV from PBE calculations
         mu_b (output): Magnetic moment
-        e_form oxygen vacancy (output): Formation energy of oxygen vacancy (eV)
+        e_form oxygen (output): Formation energy of oxygen vacancy (eV)
         e_hull (output): Energy above convex hull, wrt. OQMD db (eV)
         vpa (output): Volume per atom (A^3/atom)
     """
@@ -197,7 +197,7 @@ def load_wolverton_oxides():
               "Formation energy [eV/atom]": "e_form",
               "Band gap [eV]": "gap pbe",
               "Magnetic moment [mu_B]": "mu_b",
-              "Vacancy energy [eV/O atom]": "e_form oxygen vacancy",
+              "Vacancy energy [eV/O atom]": "e_form oxygen",
               "Stability [eV/atom]": "e_hull",
               "Volume per atom [A^3/atom]": 'vpa',
               "a [ang]": "a",
