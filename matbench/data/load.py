@@ -4,7 +4,8 @@ import json
 import pandas as pd
 import numpy as np
 from pymatgen import Structure
-
+from matminer.datasets.dataframe_loader import load_piezoelectric_tensor, \
+    load_dielectric_constant
 
 """
 All load* methods return the data in pandas.DataFrame. In each method a raw
@@ -134,6 +135,7 @@ def load_mp(filename='mp_nostruct.csv'):
         formula (input):
         structure (input): The Pymatgen structure object. Only present if the
             csv file containing structure is generated and loaded.
+
         e_hull (output): The calculated energy above the convex hull, in eV.
         gap pbe (output): The band gap in eV calculated with PBE-DFT functional
         mu_b (output): The total magnetization of the unit cell.
@@ -144,8 +146,9 @@ def load_mp(filename='mp_nostruct.csv'):
 
     df = pd.read_csv(os.path.join(data_dir, filename))
     df = df.drop("mpid", axis=1)
-    if 'structure' in df.columns.values:
-        df['structure'] = df['structure'].map(ast.literal_eval).map(Structure.from_dict)
+    for alias in ['structure', 'initial_structure']:
+        if alias in df.columns.values:
+            df[alias] = df[alias].map(ast.literal_eval).map(Structure.from_dict)
     colmap = {'material_id': 'mpid',
               'pretty_formula': 'formula',
               'band_gap': 'gap pbe',
@@ -377,4 +380,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    print(load_jdft2d())
+    print(load_mp('mp_all.csv'))
