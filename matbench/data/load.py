@@ -169,8 +169,8 @@ def load_wolverton_oxides():
 
     Returns:
         formula (input):
-        atom A (input): The atom in the 'A' site of the pervoskite.
-        atom B (input): The atom in the 'B' site of the perovskite.
+        atom a (input): The atom in the 'A' site of the pervoskite.
+        atom b (input): The atom in the 'B' site of the perovskite.
         a (input): Lattice parameter a, in A (angstrom)
         b (input): Lattice parameter b, in A
         c (input): Lattice parameter c, in A
@@ -192,8 +192,8 @@ def load_wolverton_oxides():
                 'Radius B [ang]']
     df = df.drop(dropcols, axis=1)
     colmap = {"Chemical formula": "formula",
-              "A": "atom A",
-              "B": "atom B",
+              "A": "atom a",
+              "B": "atom b",
               "Formation energy [eV/atom]": "e_form",
               "Band gap [eV]": "gap pbe",
               "Magnetic moment [mu_B]": "mu_b",
@@ -316,7 +316,6 @@ def load_expt_formation_enthalpy():
     df = pd.read_csv(os.path.join(data_dir, 'formation_enthalpy_expt.csv'))
     return df
 
-
 def load_expt_gap():
     """
     Experimental band gap of inorganic semiconductors.
@@ -388,7 +387,7 @@ def load_matminer_dielectric():
 
         gap pbe (output): Band gap in eV
         refractive index (output): Estimated refractive index
-        ep_e- poly (output): Polycrystalline electronic contribution to
+        ep_e poly (output): Polycrystalline electronic contribution to
             dielectric constant (estimate/avg)
         ep poly (output): Polycrystalline dielectric constant (estimate/avg)
         pot. ferroelectic (output): If imaginary optical phonon modes present at
@@ -400,7 +399,7 @@ def load_matminer_dielectric():
     colmap={'material_id': 'mpid',
             'band_gap': 'gap pbe',
             'n': 'refractive index',
-            'poly_electronic': 'ep_e- poly',
+            'poly_electronic': 'ep_e poly',
             'poly_total': 'ep poly',
             'pot_ferroelectric': 'pot. ferroelectric'
             }
