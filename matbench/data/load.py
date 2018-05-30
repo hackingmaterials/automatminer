@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from pymatgen import Structure
 from matminer.datasets.dataframe_loader import load_piezoelectric_tensor, \
-    load_dielectric_constant, load_elastic_tensor, load_flla
+    load_dielectric_constant, load_elastic_tensor
 
 """
 All load* methods return the data in pandas.DataFrame. In each method a raw
