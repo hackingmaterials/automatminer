@@ -466,7 +466,6 @@ def load_matminer_piezoelectric():
             piezoelectric modulus
         vmax_x/y/z (output): vmax = [vmax_x, vmax_y, vmax_z]. vmax is the
             direction of eij_max (or family of directions, e.g., <111>)
-
     """
     df = load_piezoelectric_tensor()
     df['v_max'] = [np.fromstring(str(x)[1:-1], sep=',') for x in df['v_max']]
