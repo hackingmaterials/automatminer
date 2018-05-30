@@ -84,34 +84,30 @@ def load_castelli_perovskites():
 
 def load_double_perovskites_gap(return_lumo=False):
     """
-    Electronic band gaps of double perovskites calculated using ﻿Gritsenko,
-    van Leeuwen, van Lenthe and Baerends potential (gllbsc) in GPAW.
-
+    Band gap of 1306 double perovskites (a_1b_1a_2b_2O6) calculated using ﻿
+    Gritsenko, van Leeuwen, van Lenthe and Baerends potential (gllbsc) in GPAW.
     References:
         1) https://www.nature.com/articles/srep19375
         2) CMR database: https://cmr.fysik.dtu.dk/
-
     Args:
         return_lumo (bool): whether to return the lowest unoccupied molecular
             orbital (LUMO) energy levels (in eV).
-
     Returns:
-        formula (input): chemical formula w/ sites in the order A1+B1+A2+B2+O6
-            for example in KTaGaTaO6, A1=="K", B1=="Ta", A2=="Ga" and B2=="Ta"
-        A1/B1/A2/B2 (input): species occupying the corresponding sites.
+        formula (input): chemical formula w/ sites in the a_1+b_1+a_2+b_2+O6
+            order; e.g. in KTaGaTaO6, a_1=="K", b_1=="Ta", a_2=="Ga", b_2=="Ta"
+        a1/b1/a2/b2 (input): species occupying the corresponding sites.
         gap gllbsc (output): electronic band gap (in eV) calculated via gllbsc
     """
     df = pd.read_excel(os.path.join(data_dir, 'double_perovskites.xlsx'),
                        sheet_name='bandgap')
-    df = df.rename(columns={'A1_atom': 'A1', 'B1_atom': 'B1',
-                            'A2_atom': 'A2', 'B2_atom': 'B2'})
+    df = df.rename(columns={'A1_atom': 'a_1', 'B1_atom': 'b_1',
+                            'A2_atom': 'a_2', 'B2_atom': 'b_2'})
     lumo = pd.read_excel(os.path.join(data_dir, 'double_perovskites.xlsx'),
                          sheet_name='lumo')
     if return_lumo:
         return df, lumo
     else:
         return df
-
 
 def load_mp(filename='mp_nostruct.csv'):
     """
