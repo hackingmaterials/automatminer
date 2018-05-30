@@ -15,9 +15,6 @@ class Featurize(object):
     Takes in a dataframe and generate features from preset columns such as
     "formula", "structure", "bandstructure", "dos", etc.
 
-    This class has several methods to featurize, clean and prepare the data
-    for visualization and training.
-
     Args:
         df (pandas.DataFrame): the input data containing at least one of preset
             inputs (e.g. "formula")
@@ -79,32 +76,13 @@ class Featurize(object):
         self.df = featurizer.featurize_dataframe(col_id="structure")
 
 
-    def handle_nulls(self, max_null_ratio=0.05, method='drop'):
-        """
-
-        Args:
-            max_null_ratio ([str]): after generating features, drop the columns
-                that have null/na rows with more than this ratio. Default 0.05
-            method (str): method of handling null rows.
-                Options: "drop", "mode", ... (see pandas fillna method options)
-        Returns:
-
-        """
-        self.df = self.df.dropna(
-                        axis=1, thresh=int((1-max_null_ratio)*len(self.df)))
-        if method == "drop": # drop all rows that contain any null
-            self.df = self.df.dropna(axis=0)
-        else:
-            self.df = self.df.fillna(method=method)
-
-
     def get_train_target(self):
         return self.df, self.target_df
 
 
 if __name__ == "__main__":
     df_init, lumos = load_double_perovskites_gap(return_lumo=True)
-    prep = PrepareData(df_init,
+    prep = Featurize(df_init,
                        target_cols=['gap gllbsc'],
                        ignore_cols=['A1', 'A2', 'B1', 'B2'])
     prep.featurize_columns()
