@@ -5,8 +5,6 @@ import sklearn.metrics
 try:
     import autosklearn.classification
     import autosklearn.regression
-    from autosklearn.automl import BaseAutoML
-    from autosklearn.constants import *
     from autosklearn.metrics import make_scorer
     from autosklearn.metrics import classification_metrics
 except ImportError:
