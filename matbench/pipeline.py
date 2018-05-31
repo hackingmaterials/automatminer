@@ -13,7 +13,7 @@ from matminer.figrecipes.plot import PlotlyFig
 # Try predict ehull from initial structure
 
 print("Reading csv...")
-df = load_mp('mp_all10.csv').iloc[-100:]
+df = load_mp('mp_all.csv').iloc[-100:]
 
 rf = RandomForestRegressor()
 cv = KFold(n_splits=10, shuffle=True)
