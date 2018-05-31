@@ -29,19 +29,20 @@ class AutoSklearnML:
        The input features.
     y: array-like, shape = [n_samples] or [n_samples, n_outputs]
        The target.
-    dataset_name: dataset_name : str, optional (default=None)
-                  For creating nicer output. If None, a string will be
-                  determined by the md5 hash of the dataset.
     output_folder:
     tmp_folder:
+    dataset_name: dataset_name : str, optional (default=None)
+        For creating nicer output. If None, a string will be determined by the
+        md5 hash of the dataset.
+
     """
 
     def __init__(self,
                  X, y,
                  output_folder,
                  tmp_folder,
-                 delete_output_folder=False,
-                 delete_tmp_folder=False,
+                 delete_output_folder_after_terminate=False,
+                 delete_tmp_folder_after_terminate=False,
                  dataset_name=None,
                  time_left_for_this_task=3600,
                  per_run_time_limit=1800,
@@ -60,8 +61,10 @@ class AutoSklearnML:
         self.auto_sklearn_kwargs = \
             {"output_folder": output_folder,
              "tmp_folder": tmp_folder,
-             "delete_output_folder": delete_output_folder,
-             "delete_tmp_folder": delete_tmp_folder,
+             "delete_output_folder_after_terminate":
+                 delete_output_folder_after_terminate,
+             "delete_tmp_folder_after_terminate":
+                 delete_tmp_folder_after_terminate,
              "time_left_for_this_task": time_left_for_this_task,
              "per_run_time_limit": per_run_time_limit,
              "ml_memory_limit": ml_memory_limit,
@@ -80,7 +83,9 @@ class AutoSklearnML:
     def auto_classification(self, metric=None):
         auto_classifier = autosklearn.classification.AutoSklearnClassifier(
             **self.auto_sklearn_kwargs)
-        classification_metric = AutoSklearnML.get_auto_sklearn_metric(metric)
+        classification_metric = make_scorer('accuracy',
+                                            sklearn.metrics.accuracy_score) \
+            if metric is None else AutoSklearnML.get_auto_sklearn_metric(metric)
         auto_classifier.fit(self.X_train.copy(),
                             self.y_train.copy(),
                             metric=classification_metric,
@@ -154,7 +159,22 @@ if __name__ == '__main__':
     from matbench.data.load import load_glass_formation
     from pymatgen.core import Composition
     from matminer.featurizers.composition import ElementProperty
+
     df = load_glass_formation()
     df['composition'] = df["formula"].apply(lambda x: Composition(x))
-    df = ElementProperty.from_preset("magpie"). \
-        featurize_dataframe(df, col_id="composition")
+
+    elemprop = ElementProperty.from_preset("matminer")
+    df = elemprop.featurize_dataframe(df, col_id="composition")
+
+    feature_cols = elemprop.feature_labels()
+    target_col = "gfa"
+
+    automl = AutoSklearnML(X=df[feature_cols],
+                           y=df[target_col],
+                           output_folder="/tmp/matbench_automl_tmp2",
+                           tmp_folder="/tmp/matbench_automl_out2",
+                           dataset_name="glasses_ternary",
+                           time_left_for_this_task=60,
+                           per_run_time_limit=30,
+                           )
+    automl.auto_classification()
