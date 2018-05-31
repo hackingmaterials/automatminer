@@ -10,10 +10,19 @@ try:
     import autosklearn.regression
     from autosklearn.automl import BaseAutoML
     from autosklearn.constants import *
+    from autosklearn.metrics import make_scorer
+    from autosklearn.metrics import classification_metrics
 except ImportError:
-    sys.stderr.write('Please install auto-sklearn first!')
+    sys.stderr.write("Please install auto-sklearn first!")
     sys.exit(1)
 # from glass_learning.glass_learning.utils.check import check_output_path
+
+
+task_dict = {"multilabel-indicator": MULTILABEL_CLASSIFICATION,
+             "multiclass": MULTICLASS_CLASSIFICATION,
+             "binary": BINARY_CLASSIFICATION}
+
+metric_dict = {""}
 
 
 class AutoSklearnML:
@@ -39,13 +48,14 @@ class AutoSklearnML:
                  X, y,
                  output_folder,
                  tmp_folder,
+                 delete_output_folder=False,
                  delete_tmp_folder=False,
                  metric=None,
                  dataset_name=None,
                  time_left_for_this_task=3600,
                  per_run_time_limit=1800,
                  ml_memory_limit=3072,
-                 resampling_strategy='holdout',
+                 resampling_strategy="holdout",
                  ensemble_size=1,
                  ensemble_nbest=1,
                  include_estimators=None,
@@ -60,6 +70,7 @@ class AutoSklearnML:
         self.auto_sklearn_kwargs = \
             {"output_folder": output_folder,
              "tmp_folder": tmp_folder,
+             "delete_output_folder": delete_output_folder,
              "delete_tmp_folder": delete_tmp_folder,
              "time_left_for_this_task": time_left_for_this_task,
              "per_run_time_limit": per_run_time_limit,
@@ -88,7 +99,7 @@ class AutoSklearnML:
         print(auto_classifier.show_models())
 
         prediction = auto_classifier.predict(self.X_test)
-        print("Accuracy score: ",
+        print("{} score:".format(self.metric),
               sklearn.metrics.accuracy_score(self.y_test, prediction))
 
     def auto_regression(self):
@@ -100,5 +111,48 @@ class AutoSklearnML:
         print(auto_regressor.show_models())
 
         prediction = auto_regressor.predict(self.X_test)
-        print("R2 score: ",
+        print("{} score:".format(self.metric),
               sklearn.metrics.r2_score(self.y_test, prediction))
+
+    @staticmethod
+    def get_auto_sklearn_metric(metric):
+        standard_regression_metrics = \
+            {"r2":
+                make_scorer('r2', sklearn.metrics.r2_score),
+             "mean_squared_error":
+                 make_scorer('mean_squared_error',
+                             sklearn.metrics.mean_squared_error,
+                             greater_is_better=False),
+             "mean_absolute_error":
+                 make_scorer('mean_absolute_error',
+                             sklearn.metrics.mean_absolute_error,
+                             greater_is_better=False),
+             "median_absolute_error":
+                 make_scorer('median_absolute_error',
+                             sklearn.metrics.median_absolute_error,
+                             greater_is_better=False)
+             }
+
+        standard_classification_metrics = \
+            {"accuracy":
+                make_scorer('accuracy', sklearn.metrics.accuracy_score),
+             "balanced_accuracy":
+                 make_scorer('balanced_accuracy',
+                             classification_metrics.balanced_accuracy),
+             "f1":
+                 make_scorer('f1', sklearn.metrics.f1_score),
+             "roc_auc":
+                 make_scorer('roc_auc', sklearn.metrics.roc_auc_score,
+                             greater_is_better=True, needs_threshold=True),
+             "average_precision":
+                 make_scorer('average_precision',
+                             sklearn.metrics.average_precision_score,
+                             needs_threshold=True),
+             "precision":
+                 make_scorer('precision', sklearn.metrics.precision_score),
+             "recall":
+                 make_scorer('recall', sklearn.metrics.recall_score)
+             }
+
+        return standard_regression_metrics.get(
+            metric, standard_classification_metrics.get(metric))
