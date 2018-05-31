@@ -6,14 +6,14 @@ Functions for generating data to csv form from various resources, if it is not
 already in csv form.
 """
 
-def generate_mp(max_nsite=0, initial_structures=True):
+def generate_mp(max_nsites=0, initial_structures=True):
     """
     Grabs all mp materials. This will return two csv files:
         * mp_nostruct.csv: All MP materials, not including structures (.005GB)
         * mp_all.csv: All MP materials, including structures (0.6 - 1.2 GB)
 
     Args:
-        max_nsite (int): The maximum number of sites to include in the query.
+        max_nsites (int): The maximum number of sites to include in the query.
         initial_structures (bool): If true, include the structures before
             relaxation.
 
@@ -26,7 +26,7 @@ def generate_mp(max_nsite=0, initial_structures=True):
     mpdr = MPDataRetrieval()
     mpdf = None
     for nsites in list(range(1, 101)) + [{'$gt': 100}]:
-        if nsites==max_nsite:
+        if nsites==max_nsites:
             break
         print("Processing nsites= {}".format(nsites))
         df = mpdr.get_dataframe(criteria={'nsites': nsites},
@@ -48,4 +48,4 @@ def generate_mp(max_nsite=0, initial_structures=True):
 
 
 if __name__ == "__main__":
-    generate_mp(initial_structures=False)
+    generate_mp()

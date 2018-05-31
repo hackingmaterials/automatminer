@@ -157,7 +157,8 @@ def load_mp(filename='mp_nostruct.csv'):
               'elasticity.K_VRH': 'bulk modulus',
               'elasticity.G_VRH': 'shear modulus',
               'elasticity.elastic_anisotropy': 'elastic anisotropy',
-              'total_magnetization': 'mu_b'}
+              'total_magnetization': 'mu_b',
+              'initial_structure': 'initial structure'}
     return df.rename(columns=colmap)
 
 
