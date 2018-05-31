@@ -1,3 +1,4 @@
+import warnings
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
@@ -151,7 +152,7 @@ class AutoSklearnML:
         """
         auto_classifier = autosklearn.classification.AutoSklearnClassifier(
             **self.auto_sklearn_kwargs)
-        classification_metric = AutoSklearnML.get_auto_sklearn_metric(metric)
+        classification_metric = AutoSklearnML.get_classification_metric(metric)
         auto_classifier.fit(self.X_train.copy(),
                             self.y_train.copy(),
                             metric=classification_metric,
@@ -183,7 +184,7 @@ class AutoSklearnML:
         """
         auto_regressor = autosklearn.regression.AutoSklearnRegressor(
             **self.auto_sklearn_kwargs)
-        regression_metric = AutoSklearnML.get_auto_sklearn_metric(metric)
+        regression_metric = AutoSklearnML.get_regression_metric(metric)
         auto_regressor.fit(self.X_train, self.y_train,
                            metric=regression_metric,
                            dataset_name=self.dataset_name)
@@ -194,24 +195,7 @@ class AutoSklearnML:
               regression_metric._score_func(self.y_test, prediction))
 
     @staticmethod
-    def get_auto_sklearn_metric(metric):
-        standard_regression_metrics = \
-            {"r2":
-                make_scorer('r2', sklearn.metrics.r2_score),
-             "mean_squared_error":
-                 make_scorer('mean_squared_error',
-                             sklearn.metrics.mean_squared_error,
-                             greater_is_better=False),
-             "mean_absolute_error":
-                 make_scorer('mean_absolute_error',
-                             sklearn.metrics.mean_absolute_error,
-                             greater_is_better=False),
-             "median_absolute_error":
-                 make_scorer('median_absolute_error',
-                             sklearn.metrics.median_absolute_error,
-                             greater_is_better=False)
-             }
-
+    def get_classification_metric(metric):
         standard_classification_metrics = \
             {"accuracy":
                 make_scorer('accuracy', sklearn.metrics.accuracy_score),
@@ -232,9 +216,41 @@ class AutoSklearnML:
              "recall":
                  make_scorer('recall', sklearn.metrics.recall_score)
              }
+        classification_metric = standard_classification_metrics.get(metric)
+        if metric is not None and classification_metric is None:
+            warnings.warn("This metric \"{}\" is not a supported metric for "
+                          "classification. The metric will be reset as default "
+                          "\"accuracy\".".format(metric))
+            classification_metric = standard_classification_metrics.get(
+                "accuracy")
+        return classification_metric
 
-        return standard_regression_metrics.get(
-            metric, standard_classification_metrics.get(metric))
+    @staticmethod
+    def get_regression_metric(metric):
+        standard_regression_metrics = \
+            {"r2":
+                make_scorer('r2', sklearn.metrics.r2_score),
+             "mean_squared_error":
+                 make_scorer('mean_squared_error',
+                             sklearn.metrics.mean_squared_error,
+                             greater_is_better=False),
+             "mean_absolute_error":
+                 make_scorer('mean_absolute_error',
+                             sklearn.metrics.mean_absolute_error,
+                             greater_is_better=False),
+             "median_absolute_error":
+                 make_scorer('median_absolute_error',
+                             sklearn.metrics.median_absolute_error,
+                             greater_is_better=False)
+             }
+        regression_metric = standard_regression_metrics.get(metric)
+        if metric is not None and regression_metric is None:
+            warnings.warn("This metric \"{}\" is not a supported metric for "
+                          "regression. The metric will be reset as default "
+                          "\"r2\".".format(metric))
+            regression_metric = standard_regression_metrics.get("r2")
+        return regression_metric
+
 
 if __name__ == '__main__':
     from matbench.data.load import load_glass_formation
