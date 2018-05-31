@@ -15,14 +15,6 @@ try:
 except ImportError:
     sys.stderr.write("Please install auto-sklearn first!")
     sys.exit(1)
-# from glass_learning.glass_learning.utils.check import check_output_path
-
-
-task_dict = {"multilabel-indicator": MULTILABEL_CLASSIFICATION,
-             "multiclass": MULTICLASS_CLASSIFICATION,
-             "binary": BINARY_CLASSIFICATION}
-
-metric_dict = {""}
 
 
 class AutoSklearnML:
@@ -50,7 +42,6 @@ class AutoSklearnML:
                  tmp_folder,
                  delete_output_folder=False,
                  delete_tmp_folder=False,
-                 metric=None,
                  dataset_name=None,
                  time_left_for_this_task=3600,
                  per_run_time_limit=1800,
@@ -65,7 +56,6 @@ class AutoSklearnML:
 
         self.X = X
         self.y = y
-        self.metric = metric
         self.dataset_name = dataset_name
         self.auto_sklearn_kwargs = \
             {"output_folder": output_folder,
@@ -87,32 +77,35 @@ class AutoSklearnML:
             sklearn.model_selection.train_test_split(self.X, self.y,
                                                      random_state=1)
 
-    def auto_classification(self):
+    def auto_classification(self, metric=None):
         auto_classifier = autosklearn.classification.AutoSklearnClassifier(
             **self.auto_sklearn_kwargs)
-
-        auto_classifier.fit(self.X_train.copy(), self.y_train.copy(),
-                            metric=self.metric,
+        classification_metric = AutoSklearnML.get_auto_sklearn_metric(metric)
+        auto_classifier.fit(self.X_train.copy(),
+                            self.y_train.copy(),
+                            metric=classification_metric,
                             dataset_name=self.dataset_name)
 
-        auto_classifier.refit(self.X_train.copy(), self.y_train.copy())
+        # auto_classifier.refit(self.X_train.copy(), self.y_train.copy())
         print(auto_classifier.show_models())
 
         prediction = auto_classifier.predict(self.X_test)
-        print("{} score:".format(self.metric),
-              sklearn.metrics.accuracy_score(self.y_test, prediction))
 
-    def auto_regression(self):
+        print("{} score:".format(metric),
+              classification_metric._score_func(self.y_test, prediction))
+
+    def auto_regression(self, metric=None):
         auto_regressor = autosklearn.regression.AutoSklearnRegressor(
             **self.auto_sklearn_kwargs)
+        regression_metric = AutoSklearnML.get_auto_sklearn_metric(metric)
         auto_regressor.fit(self.X_train, self.y_train,
-                           metric=self.metric,
+                           metric=regression_metric,
                            dataset_name=self.dataset_name)
         print(auto_regressor.show_models())
 
         prediction = auto_regressor.predict(self.X_test)
-        print("{} score:".format(self.metric),
-              sklearn.metrics.r2_score(self.y_test, prediction))
+        print("{} score:".format(metric),
+              regression_metric._score_func(self.y_test, prediction))
 
     @staticmethod
     def get_auto_sklearn_metric(metric):
@@ -156,3 +149,12 @@ class AutoSklearnML:
 
         return standard_regression_metrics.get(
             metric, standard_classification_metrics.get(metric))
+
+if __name__ == '__main__':
+    from matbench.data.load import load_glass_formation
+    from pymatgen.core import Composition
+    from matminer.featurizers.composition import ElementProperty
+    df = load_glass_formation()
+    df['composition'] = df["formula"].apply(lambda x: Composition(x))
+    df = ElementProperty.from_preset("magpie"). \
+        featurize_dataframe(df, col_id="composition")
