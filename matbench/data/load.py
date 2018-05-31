@@ -285,11 +285,9 @@ def load_glass_formation(phase="ternary"):
 
     """
     if phase == "ternary":
-        df = pd.read_csv(os.path.join(data_dir, 'glasses_ternary.csv'),
-                         index_col=0)
+        df = pd.read_csv(os.path.join(data_dir, 'glasses_ternary.csv'))
     elif phase == "binary":
-        df = pd.read_csv(os.path.join(data_dir, 'glasses_binary.csv'),
-                         index_col=0)
+        df = pd.read_csv(os.path.join(data_dir, 'glasses_binary.csv'))
     else:
         raise ValueError("Unknown phase designation for glass formation "
                          "dataset: {}".format(phase))
