@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 import sys
 import sklearn.model_selection
 import sklearn.datasets
@@ -13,59 +12,111 @@ try:
     from autosklearn.metrics import make_scorer
     from autosklearn.metrics import classification_metrics
 except ImportError:
-    sys.stderr.write("Please install auto-sklearn first!")
-    sys.exit(1)
+    raise ImportError("Please install auto-sklearn first! "
+                      "See: https://github.com/automl/auto-sklearn")
 
 
 class AutoSklearnML:
     """
     Perform machine learning based on auto-sklearn for automatic algorithm
-    selection and hyperparameter optimization.
+    selection and hyperparameter optimization. Data preprocessing will also
+    be performed before machine learning.
     Installation of auto-sklearn (https://github.com/automl/auto-sklearn)
     is needed.
 
     Args:
-    X: array-like or sparse matrix of shape = [n_samples, n_features]
-       The input features.
-    y: array-like, shape = [n_samples] or [n_samples, n_outputs]
-       The target.
-    output_folder:
-    tmp_folder:
-    dataset_name: dataset_name : str, optional (default=None)
-        For creating nicer output. If None, a string will be determined by the
-        md5 hash of the dataset.
+        X: array-like or sparse matrix of shape = [n_samples, n_features]
+           The input features.
+        y: array-like, shape = [n_samples] or [n_samples, n_outputs]
+           The target.
+        dataset_name: dataset_name (str): optional (default=None)
+            For creating nicer output. If None, a string will be determined by
+            md5 hash of the dataset.
+        time_left_for_this_task (int): optional (default=3600)
+            Time limit in seconds for the search of appropriate
+            models. By increasing this value, *auto-sklearn* has a higher
+            chance of finding better models.
+        per_run_time_limit (int): optional (default=360)
+            Time limit for a single call to the machine learning model.
+            Model fitting will be terminated if the machine learning
+            algorithm runs over the time limit. Set this value high enough so
+            that typical machine learning algorithms can be fit on the
+            training data.
+        ml_memory_limit (int): optional (3072)
+            Memory limit in MB for the machine learning algorithm.
+            `auto-sklearn` will stop fitting the machine learning algorithm if
+            it tries to allocate more than `ml_memory_limit` MB.
+        ensemble_size (int): optional (default=50)
+            Number of models added to the ensemble built by *Ensemble
+            selection from libraries of models*. Models are drawn with
+            replacement.
 
+        ensemble_nbest (int): optional (default=50)
+            Only consider the ``ensemble_nbest`` models when building an
+            ensemble. Implements `Model Library Pruning` from `Getting the
+            most out of ensemble selection`.
+        include_estimators (list): optional (None)
+            If None, all possible estimators are used. Otherwise specifies
+            set of estimators to use.
+
+        exclude_estimators (list):  optional (None)
+            If None, all possible estimators are used. Otherwise specifies
+            set of estimators not to use. Incompatible with include_estimators.
+
+        include_preprocessors (list): optional (None)
+            If None all possible preprocessors are used. Otherwise specifies
+             set of preprocessors to use.
+
+        exclude_preprocessors (list): optional (None)
+            If None all possible preprocessors are used. Otherwise specifies set
+            of preprocessors not to use. Incompatible with
+            include_preprocessors.
+
+        resampling_strategy (string):  optional ('holdout')
+            how to handle overfitting, might need 'resampling_strategy_arguments'
+            * 'holdout': 67:33 (train:test) split
+            * 'holdout-iterative-fit':  67:33 (train:test) split, calls
+              iterative fit where possible
+            * 'cv': crossvalidation, requires 'folds'
+
+        output_folder : string, optional (None)
+            folder to store predictions for optional test set, if ``None``
+            automatically use ``/tmp/autosklearn_output_$pid_$random_number``
+
+        tmp_folder : string, optional (None)
+            folder to store configuration output and log files, if ``None``
+            automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
+
+        delete_output_folder_after_terminate: bool, optional (False)
+            remove output_folder, when finished.
+
+        delete_tmp_folder_after_terminate: string, optional (False)
+            remove tmp_folder, when finished.
     """
 
     def __init__(self,
                  X, y,
-                 output_folder,
-                 tmp_folder,
-                 delete_output_folder_after_terminate=False,
-                 delete_tmp_folder_after_terminate=False,
                  dataset_name=None,
                  time_left_for_this_task=3600,
-                 per_run_time_limit=1800,
+                 per_run_time_limit=360,
                  ml_memory_limit=3072,
-                 resampling_strategy="holdout",
                  ensemble_size=1,
                  ensemble_nbest=1,
                  include_estimators=None,
                  exclude_estimators=None,
                  include_preprocessors=None,
-                 exclude_preprocessors=None):
+                 exclude_preprocessors=None,
+                 resampling_strategy="holdout",
+                 output_folder=None,
+                 tmp_folder=None,
+                 delete_output_folder_after_terminate=False,
+                 delete_tmp_folder_after_terminate=False):
 
         self.X = X
         self.y = y
         self.dataset_name = dataset_name
         self.auto_sklearn_kwargs = \
-            {"output_folder": output_folder,
-             "tmp_folder": tmp_folder,
-             "delete_output_folder_after_terminate":
-                 delete_output_folder_after_terminate,
-             "delete_tmp_folder_after_terminate":
-                 delete_tmp_folder_after_terminate,
-             "time_left_for_this_task": time_left_for_this_task,
+            {"time_left_for_this_task": time_left_for_this_task,
              "per_run_time_limit": per_run_time_limit,
              "ml_memory_limit": ml_memory_limit,
              "resampling_strategy": resampling_strategy,
@@ -74,16 +125,36 @@ class AutoSklearnML:
              "include_estimators": include_estimators,
              "exclude_estimators": exclude_estimators,
              "include_preprocessors": include_preprocessors,
-             "exclude_preprocessors": exclude_preprocessors}
+             "exclude_preprocessors": exclude_preprocessors,
+             "output_folder": output_folder,
+             "tmp_folder": tmp_folder,
+             "delete_output_folder_after_terminate":
+                 delete_output_folder_after_terminate,
+             "delete_tmp_folder_after_terminate":
+                 delete_tmp_folder_after_terminate}
 
         self.X_train, self.X_test, self.y_train, self.y_test = \
             sklearn.model_selection.train_test_split(self.X, self.y,
                                                      random_state=1)
 
-    def auto_classification(self, metric=None):
+    def auto_classification(self, metric="accuracy"):
+        """
+        Perform auto_classification.
+        Args:
+            metric (str): The evaluation metric of classification.
+                 This will be mapped by AutoSklearnML.get_auto_sklearn_metric
+                 to an instance of :class:`autosklearn.metrics.Scorer` as
+                 created by :meth:`autosklearn.metrics.make_scorer`.
+                 Default metric: "accuracy".
+                 Other supported metrics: "balanced_accuracy", "f1",
+                                          "roc_auc", "average_precision",
+                                          "precision", "recall"
+
+        Returns:
+
+        """
         auto_classifier = autosklearn.classification.AutoSklearnClassifier(
             **self.auto_sklearn_kwargs)
-        metric = 'accuracy' if metric is None else metric
         classification_metric = AutoSklearnML.get_auto_sklearn_metric(metric)
         auto_classifier.fit(self.X_train.copy(),
                             self.y_train.copy(),
@@ -98,10 +169,24 @@ class AutoSklearnML:
         print("{} score:".format(metric),
               classification_metric._score_func(self.y_test, prediction))
 
-    def auto_regression(self, metric=None):
+    def auto_regression(self, metric="r2"):
+        """
+        Perform auto_regression.
+        Args:
+            metric (str): The evaluation metric of regression.
+                 This will be mapped by AutoSklearnML.get_auto_sklearn_metric
+                 to an instance of :class:`autosklearn.metrics.Scorer` as
+                 created by :meth:`autosklearn.metrics.make_scorer`.
+                 Default metric: "r2".
+                 Other supported metrics: "mean_squared_error",
+                                          "mean_absolute_error",
+                                          "median_absolute_error"
+
+        Returns:
+
+        """
         auto_regressor = autosklearn.regression.AutoSklearnRegressor(
             **self.auto_sklearn_kwargs)
-        metric = 'r2' if metric is None else metric
         regression_metric = AutoSklearnML.get_auto_sklearn_metric(metric)
         auto_regressor.fit(self.X_train, self.y_train,
                            metric=regression_metric,
@@ -171,9 +256,9 @@ if __name__ == '__main__':
 
     automl = AutoSklearnML(X=df[feature_cols],
                            y=df[target_col],
-                           output_folder="/tmp/matbench_automl_tmp2",
-                           tmp_folder="/tmp/matbench_automl_out2",
-                           dataset_name="glasses_ternary",
+                           output_folder="/tmp/matbench_automl/tmp",
+                           tmp_folder="/tmp/matbench_automl/out",
+                           dataset_name="ternary glass formation",
                            time_left_for_this_task=60,
                            per_run_time_limit=30,
                            )
