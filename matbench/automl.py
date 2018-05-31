@@ -135,7 +135,7 @@ class AutoSklearnML:
             sklearn.model_selection.train_test_split(self.X, self.y,
                                                      random_state=1)
 
-    def auto_classification(self, metric="accuracy"):
+    def classification(self, metric="accuracy"):
         """
         Perform auto_classification.
         Args:
@@ -167,7 +167,7 @@ class AutoSklearnML:
         print("{} score:".format(metric),
               classification_metric._score_func(self.y_test, prediction))
 
-    def auto_regression(self, metric="r2"):
+    def regression(self, metric="r2"):
         """
         Perform auto_regression.
         Args:
@@ -260,4 +260,4 @@ if __name__ == '__main__':
                            time_left_for_this_task=60,
                            per_run_time_limit=30,
                            )
-    automl.auto_classification()
+    automl.classification()
