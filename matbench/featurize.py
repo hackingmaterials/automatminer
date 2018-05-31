@@ -18,8 +18,7 @@ class Featurize(object):
         ignore_cols ([str]): if set, these columns are excluded
     """
     def __init__(self, df, ignore_cols=None):
-        self.df = df.drop(ignore_cols, axis=1)
-
+        self.df = df if ignore_cols is None else df.drop(ignore_cols, axis=1)
 
     def featurize_columns(self, input_cols=None):
         """
@@ -73,10 +72,9 @@ class Featurize(object):
         return df
 
 
-
 if __name__ == "__main__":
     df_init = load_double_perovskites_gap(return_lumo=False)
     prep = Featurize(df_init,
-                       ignore_cols=['a1', 'a2', 'b1', 'b2'])
+                     ignore_cols=['a1', 'a2', 'b1', 'b2'])
     df = prep.featurize_columns()
     print(df.head())
