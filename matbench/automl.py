@@ -83,9 +83,8 @@ class AutoSklearnML:
     def auto_classification(self, metric=None):
         auto_classifier = autosklearn.classification.AutoSklearnClassifier(
             **self.auto_sklearn_kwargs)
-        classification_metric = make_scorer('accuracy',
-                                            sklearn.metrics.accuracy_score) \
-            if metric is None else AutoSklearnML.get_auto_sklearn_metric(metric)
+        metric = 'accuracy' if metric is None else metric
+        classification_metric = AutoSklearnML.get_auto_sklearn_metric(metric)
         auto_classifier.fit(self.X_train.copy(),
                             self.y_train.copy(),
                             metric=classification_metric,
@@ -102,6 +101,7 @@ class AutoSklearnML:
     def auto_regression(self, metric=None):
         auto_regressor = autosklearn.regression.AutoSklearnRegressor(
             **self.auto_sklearn_kwargs)
+        metric = 'r2' if metric is None else metric
         regression_metric = AutoSklearnML.get_auto_sklearn_metric(metric)
         auto_regressor.fit(self.X_train, self.y_train,
                            metric=regression_metric,
