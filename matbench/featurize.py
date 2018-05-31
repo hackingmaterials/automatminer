@@ -75,6 +75,6 @@ class Featurize(object):
 if __name__ == "__main__":
     df_init = load_double_perovskites_gap(return_lumo=False)
     prep = Featurize(df_init,
-                     ignore_cols=['a1', 'a2', 'b1', 'b2'])
+                     ignore_cols=['a_1', 'a_2', 'b_1', 'b_2'])
     df = prep.featurize_columns()
     print(df.head())
