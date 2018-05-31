@@ -139,7 +139,7 @@ class AutoSklearnML:
         Perform auto_classification.
         Args:
             metric (str): The evaluation metric of classification.
-                 This will be mapped by AutoSklearnML.get_auto_sklearn_metric
+                 This will be mapped by AutoSklearnML.get_classification_metric
                  to an instance of :class:`autosklearn.metrics.Scorer` as
                  created by :meth:`autosklearn.metrics.make_scorer`.
                  Default metric: "accuracy".
@@ -171,7 +171,7 @@ class AutoSklearnML:
         Perform auto_regression.
         Args:
             metric (str): The evaluation metric of regression.
-                 This will be mapped by AutoSklearnML.get_auto_sklearn_metric
+                 This will be mapped by AutoSklearnML.get_regression_metric
                  to an instance of :class:`autosklearn.metrics.Scorer` as
                  created by :meth:`autosklearn.metrics.make_scorer`.
                  Default metric: "r2".
