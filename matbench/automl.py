@@ -252,10 +252,9 @@ if __name__ == '__main__':
 
     automl = AutoSklearnML(X=df[feature_cols],
                            y=df[target_col],
-                           output_folder="/tmp/matbench_automl/tmp",
-                           tmp_folder="/tmp/matbench_automl/out",
                            dataset_name="ternary glass formation",
                            time_left_for_this_task=60,
                            per_run_time_limit=30,
-                           )
+                           output_folder="/tmp/matbench_automl/tmp",
+                           tmp_folder="/tmp/matbench_automl/out")
     automl.classification()
