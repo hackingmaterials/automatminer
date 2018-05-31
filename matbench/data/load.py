@@ -109,6 +109,7 @@ def load_double_perovskites_gap(return_lumo=False):
     else:
         return df
 
+
 def load_mp(filename='mp_nostruct.csv'):
     """
     Loads a pregenerated csv file containing properties of ALL materials in MP
@@ -284,11 +285,9 @@ def load_glass_formation(phase="ternary"):
 
     """
     if phase == "ternary":
-        df = pd.read_csv(os.path.join(data_dir, 'glasses_ternary.csv'),
-                         index_col=0)
+        df = pd.read_csv(os.path.join(data_dir, 'glasses_ternary.csv'))
     elif phase == "binary":
-        df = pd.read_csv(os.path.join(data_dir, 'glasses_binary.csv'),
-                         index_col=0)
+        df = pd.read_csv(os.path.join(data_dir, 'glasses_binary.csv'))
     else:
         raise ValueError("Unknown phase designation for glass formation "
                          "dataset: {}".format(phase))
@@ -320,6 +319,7 @@ def load_expt_formation_enthalpy():
     df = pd.read_csv(os.path.join(data_dir, 'formation_enthalpy_expt.csv'))
     return df
 
+
 def load_expt_gap():
     """
     Experimental band gap of inorganic semiconductors.
@@ -334,6 +334,7 @@ def load_expt_gap():
     df = pd.read_csv(os.path.join(data_dir, 'zhuo_gap_expt.csv'))
     df = df.rename(columns={'composition': 'formula', 'Eg (eV)': 'gap expt'})
     return df
+
 
 def load_jdft2d():
     """
@@ -375,6 +376,7 @@ def load_jdft2d():
     df['formula'] = [s.composition.reduced_formula for s in df['structure']]
     return df
 
+
 def load_matminer_dielectric():
     """
     1,056 structures with dielectric properties calculated with DFPT-PBE.
@@ -409,6 +411,7 @@ def load_matminer_dielectric():
             }
     df = df.rename(columns=colmap)
     return df
+
 
 def load_matminer_elastic():
     """
@@ -447,6 +450,7 @@ def load_matminer_elastic():
               }
     df = df.rename(columns=colmap)
     return df
+
 
 def load_matminer_piezoelectric():
     """
