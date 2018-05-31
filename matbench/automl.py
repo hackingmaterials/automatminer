@@ -1,8 +1,6 @@
-import sys
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
-from sklearn.metrics.classification import type_of_target
 
 try:
     import autosklearn.classification
