@@ -5,6 +5,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import TransformerMixin
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.model_selection import KFold, cross_val_score, cross_val_predict
+from pymatgen import Structure
 from matbench.data.load import load_mp
 from matminer.featurizers.base import MultipleFeaturizer
 from matminer.featurizers.composition import ElementProperty
@@ -19,8 +20,11 @@ pd.set_option('display.width', 1000)
 # Try predict ehull from initial structure
 n = 500
 print("Reading csv for {} compounds...".format(n))
-df = load_mp('mp_all10.csv').sample(n=n)
-df['formula'] = [f.composition for f in df['structure']]
+df = load_mp('mp_all.csv').sample(n=n)
+df['composition'] = [f.composition for f in df['structure']]
+
+print("Constructing {} structures from dictionaries...".format(n))
+df['structure'] = [Structure.from_dict(s) for s in df['structure']]
 
 rf = RandomForestRegressor()
 cv = KFold(n_splits=10, shuffle=True)
@@ -39,7 +43,7 @@ fls = []
 
 for cf in composition_featurizers:
     print("Featurizing {}...".format(cf.__class__.__name__))
-    cf.fit_featurize_dataframe(df, 'formula', ignore_errors=True)
+    cf.fit_featurize_dataframe(df, 'composition', ignore_errors=True)
     fls += cf.feature_labels()
 
 for sf in structure_featurizers:
@@ -47,7 +51,7 @@ for sf in structure_featurizers:
     sf.fit_featurize_dataframe(df, 'initial structure', ignore_errors=True)
     fls += sf.feature_labels()
 
-dfo = df[fls + ['e_hull', 'formula']]
+dfo = df[fls + ['e_form', 'composition']]
 dfo = dfo.dropna(axis=1, thresh=0.25).dropna(axis=0)
 remaining_labels = [f for f in fls if f in dfo.columns.values]
 dfx = dfo[remaining_labels]
