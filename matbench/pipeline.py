@@ -81,8 +81,7 @@ pf_rf = PlotlyFig(x_title='DFT Energy Above Hull (eV)',
                   title='Random forest regression',
                   filename="rf_regression.html")
 
-df['reduced_formula'] = [f.reduced_formula for f in df['formula']]
 pf_rf.xy([(y, ypred), ([min(y), max(y)], [min(y), max(y)])],
-         labels=df['reduced_formula'], modes=['markers', 'lines'],
+         labels=df['formula'], modes=['markers', 'lines'],
          lines=[{}, {'color': 'black', 'dash': 'dash'}],
          showlegends=False)
