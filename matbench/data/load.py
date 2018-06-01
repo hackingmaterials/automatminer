@@ -3,7 +3,7 @@ import ast
 import json
 import pandas as pd
 import numpy as np
-from pymatgen import Structure
+from pymatgen import Structure, Composition
 from matminer.datasets.dataframe_loader import load_piezoelectric_tensor, \
     load_dielectric_constant, load_elastic_tensor
 
@@ -54,7 +54,8 @@ def load_castelli_perovskites():
         fermi width (input): fermi bandwidth
         e_form (input): heat of formation (eV)
         gap is direct (input):
-        structure (input): crystal structure as pymatgen Structure object
+        structure (input): crystal structure as dict representing pymatgen
+            Structure
         mu_b (input): magnetic moment in terms of Bohr magneton
 
         gap gllbsc (output): electronic band gap in eV calculated via gllbsc
@@ -67,7 +68,7 @@ def load_castelli_perovskites():
     df['vbm'] = np.where(df['is_direct'], df['VB_dir'], df['VB_ind'])
     df['cbm'] = np.where(df['is_direct'], df['CB_dir'], df['CB_ind'])
     df['gap gllbsc'] = np.where(df['is_direct'], df['gllbsc_dir-gap'], df['gllbsc_ind-gap'])
-    df['structure'] = df['structure'].map(ast.literal_eval).map(Structure.from_dict)
+    df['structure'] = df['structure'].map(ast.literal_eval)
     dropcols = ["filename", "XCFunctional", "anion_idx", "Unnamed: 0", "A", "B",
                 "anion", "gllbsc_ind-gap", "gllbsc_dir-gap", "CB_dir", "CB_ind",
                 "VB_dir", "VB_ind"]
@@ -126,14 +127,16 @@ def load_mp(filename='mp_nostruct.csv'):
     Returns:
         mpid (input): The Materials Project mpid, as a string.
         formula (input):
-        structure (input): The Pymatgen structure object. Only present if the
-            csv file containing structure is generated and loaded.
-        initial structure (input): The Pymatgen structure object before
+        structure (input): The dict of Pymatgen structure object. Only present
+            if the csv file containing structure is generated and loaded.
+        initial structure (input): The dict of Pymatgen structure object before
             relaxation. Only present if the csv file containing initial
             structure is generated and loaded.
 
-        e_hull (output): The calculated energy above the convex hull, in eV.
+        e_hull (output): The calculated energy above the convex hull, in eV per
+            atom
         gap pbe (output): The band gap in eV calculated with PBE-DFT functional
+        e_form (output); Formation energy per atom (eV)
         mu_b (output): The total magnetization of the unit cell.
         bulk modulus (output): in GPa, average of Voight, Reuss, and Hill
         shear modulus (output): in GPa, average of Voight, Reuss, and Hill
@@ -146,10 +149,11 @@ def load_mp(filename='mp_nostruct.csv'):
     """
 
     df = pd.read_csv(os.path.join(data_dir, filename))
-    df = df.drop("mpid", axis=1)
+    dropcols = ["energy", "energy_per_atom"]
+    df = df.drop(dropcols, axis=1)
     for alias in ['structure', 'initial_structure']:
         if alias in df.columns.values:
-            df[alias] = df[alias].map(ast.literal_eval).map(Structure.from_dict)
+            df[alias] = df[alias].map(ast.literal_eval)
     colmap = {'material_id': 'mpid',
               'pretty_formula': 'formula',
               'band_gap': 'gap pbe',
@@ -158,7 +162,8 @@ def load_mp(filename='mp_nostruct.csv'):
               'elasticity.G_VRH': 'shear modulus',
               'elasticity.elastic_anisotropy': 'elastic anisotropy',
               'total_magnetization': 'mu_b',
-              'initial_structure': 'initial structure'}
+              'initial_structure': 'initial structure',
+              'formation_energy_per_atom': 'e_form'}
     return df.rename(columns=colmap)
 
 
@@ -348,8 +353,8 @@ def load_jdft2d():
     Returns:
         formula (input):
         mpid (input): Corresponding mpid string referring to MP bulk material
-        structure (input): Pymatgen structure object
-        stucture initial (input): Pymatgen structure before relaxation
+        structure (input): Dict representation of pymatgen structure object
+        stucture initial (input): Pymatgen structure before relaxation (as dict)
         mu_b (input): Magnetic moment, in terms of bohr magneton
 
         e_form (output): Formation energy in eV
@@ -370,8 +375,8 @@ def load_jdft2d():
                 'jid', 'kpoints', 'incar', 'icsd', 'mbj_gap', 'fin_en']
     df = df.drop(dropcols, axis=1)
     df = df.rename(columns=colmap)
-    df['structure'] = df['structure'].map(Structure.from_dict)
-    df['structure initial'] = df['structure initial'].map(Structure.from_dict)
+    df['structure'] = df['structure']
+    df['structure initial'] = df['structure initial']
     df['formula'] = [s.composition.reduced_formula for s in df['structure']]
     return df
 
@@ -485,4 +490,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
     # print(load_mp('mp_all.csv'))
-    print(load_matminer_piezoelectric())
+    print(load_mp())

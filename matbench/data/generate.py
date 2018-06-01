@@ -22,13 +22,14 @@ def generate_mp(max_nsites=0, initial_structures=True):
     """
     props = ['mpid', 'pretty_formula', 'e_above_hull', 'band_gap',
              'total_magnetization', 'elasticity.elastic_anisotropy',
-             'elasticity.K_VRH', 'elasticity.G_VRH', 'structure']
+             'elasticity.K_VRH', 'elasticity.G_VRH', 'structure', 'energy',
+             'energy_per_atom', 'formation_energy_per_atom']
     mpdr = MPDataRetrieval()
     mpdf = None
     for nsites in list(range(1, 101)) + [{'$gt': 100}]:
         if nsites==max_nsites:
             break
-        print("Processing nsites= {}".format(nsites))
+        print("Processing nsites = {}".format(nsites))
         df = mpdr.get_dataframe(criteria={'nsites': nsites},
                                 properties=props,
                                 index_mpid=True)
