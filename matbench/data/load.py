@@ -391,7 +391,7 @@ def load_matminer_dielectric():
     Returns:
         mpid (input): material id via MP
         formula (input):
-        structure (input):
+        structure (input): dict form of Pymatgen structure
         nsites (input): The number of sites in the structure
 
         gap pbe (output): Band gap in eV
@@ -405,6 +405,7 @@ def load_matminer_dielectric():
     df = load_dielectric_constant()
     dropcols = ['volume', 'space_group', 'e_electronic', 'e_total']
     df = df.drop(dropcols, axis=1)
+    df['structure'] = [s.as_dict() for s in df['structure']]
     colmap={'material_id': 'mpid',
             'band_gap': 'gap pbe',
             'n': 'refractive index',
@@ -426,7 +427,7 @@ def load_matminer_elastic():
     Returns:
         mpid (input): material id via MP
         formula (input):
-        structure (input):
+        structure (input): dict form of Pymatgen structure
         nsites (input): The number of sites in the structure
 
         elastic anisotropy (output): ratio of anisotropy of elastic properties
@@ -444,6 +445,7 @@ def load_matminer_elastic():
                 'K_Voigt', 'compliance_tensor', 'elastic_tensor',
                 'elastic_tensor_original']
     df = df.drop(dropcols, axis=1)
+    df['structure'] = [s.as_dict() for s in df['structure']]
     colmap = {'material_id': 'mpid',
               'elastic_anisotropy': 'elastic anisotropy',
               'G_VRH': 'shear modulus',
@@ -462,9 +464,10 @@ def load_matminer_piezoelectric():
         2) https://www.sciencedirect.com/science/article/pii/S0927025618303252
 
     Returns:
-        mpid (input):
+        mpid (input): material id via MP
         formula (input):
-        structure (input):
+        structure (input): dict form of Pymatgen structure
+        nsites (input): The number of sites in the structure
 
         eij_max (output): Maximum attainable absolute value of the longitudinal
             piezoelectric modulus
@@ -479,6 +482,7 @@ def load_matminer_piezoelectric():
 
     dropcols = ['point_group', 'piezoelectric_tensor', 'volume', 'space_group',
                 'v_max']
+    df['structure'] = [s.as_dict() for s in df['structure']]
     df = df.drop(columns=dropcols, axis=1)
     colmap = {'material_id': 'mpid'}
     df = df.rename(columns=colmap)
@@ -490,4 +494,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
     # print(load_mp('mp_all.csv'))
-    print(load_mp())
+    print(load_matminer_elastic())
