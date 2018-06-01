@@ -3,7 +3,7 @@ import ast
 import json
 import pandas as pd
 import numpy as np
-from pymatgen import Structure, Composition
+from pymatgen import Structure
 from matminer.datasets.dataframe_loader import load_piezoelectric_tensor, \
     load_dielectric_constant, load_elastic_tensor
 
@@ -377,7 +377,8 @@ def load_jdft2d():
     df = df.rename(columns=colmap)
     df['structure'] = df['structure']
     df['structure initial'] = df['structure initial']
-    df['formula'] = [s.composition.reduced_formula for s in df['structure']]
+    df['formula'] = [Structure.from_dict(s).composition.reduced_formula for s
+                     in df['structure']]
     return df
 
 def load_matminer_dielectric():
@@ -494,4 +495,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
     # print(load_mp('mp_all.csv'))
-    print(load_matminer_elastic())
+    print(load_jdft2d())
