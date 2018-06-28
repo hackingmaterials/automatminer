@@ -21,6 +21,7 @@ class Featurize(object):
             df = featurizer.featurize_formula() # all formula-related feature
         or:
             df = featurizer.
+
     Args:
         df (pandas.DataFrame): the input data containing at least one of preset
             inputs (e.g. "formula")
@@ -62,7 +63,7 @@ class Featurize(object):
     def featurize_formula(self, df=None, featurizers="all", col_id="formula",
                           compcol="composition", guess_oxidstate=True):
         """
-        Featurize formula or composition (pymatgen Composition).
+        Featurizes based on formula or composition (pymatgen Composition).
 
         Args:
             df (pandas.DataFrame): input data
@@ -74,7 +75,7 @@ class Featurize(object):
                 set to False if oxidation states already available in composition
 
         Returns (pandas.DataFrame):
-            Dataframe with added features.
+            Dataframe with compositional features added.
         """
         if df is None:
             df = self.df.copy(deep=True)
@@ -93,6 +94,16 @@ class Featurize(object):
 
 
     def featurize_structure(self, df=None, col_id="structure"):
+        """
+        Featurizes based on crystal structure (pymatgen Structure object)
+
+        Args:
+            df (pandas.DataFrame):
+            col_id (str): column name containing pymatgen Structure
+
+        Returns (pandas.DataFrame):
+            Dataframe with structural features added.
+        """
         if df is None:
             df = self.df.copy(deep=True)
 
