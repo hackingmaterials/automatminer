@@ -25,6 +25,9 @@ class Featurize(object):
         df (pandas.DataFrame): the input data containing at least one of preset
             inputs (e.g. "formula")
         ignore_cols ([str]): if set, these columns are excluded
+        preset_name (str): some featurizers (w/ from_preset) take in this arg
+        ignore_errors (bool): whether to ignore exceptions raised when
+            featurize_dataframe is called
     """
     def __init__(self, df, ignore_cols=None, preset_name="matminer",
                  ignore_errors=True):
