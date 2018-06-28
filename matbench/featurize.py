@@ -59,8 +59,23 @@ class Featurize(object):
                 warn('No method available to featurize "{}"'.format(column))
         return df
 
-    def featurize_formula(self, df=None, featurizers='all', col_id="formula",
+    def featurize_formula(self, df=None, featurizers="all", col_id="formula",
                           compcol="composition", guess_oxidstate=True):
+        """
+        Featurize formula or composition (pymatgen Composition).
+
+        Args:
+            df (pandas.DataFrame): input data
+            featurizers ([matminer.featurizer] or "all"):
+            col_id (str): actual column name to be used as composition
+            compcol (str): default or final column name for composition
+            guess_oxidstate (bool): whether to guess elements oxidation states
+                which is required for some featurizers such as CationProperty
+                set to False if oxidation states already available in composition
+
+        Returns (pandas.DataFrame):
+            Dataframe with added features.
+        """
         if df is None:
             df = self.df.copy(deep=True)
         if compcol not in df:
