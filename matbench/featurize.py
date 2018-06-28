@@ -25,8 +25,9 @@ class Featurize(object):
             inputs (e.g. "formula")
         ignore_cols ([str]): if set, these columns are excluded
     """
-    def __init__(self, df, ignore_cols=None):
+    def __init__(self, df, ignore_cols=None, preset_name="matminer"):
         self.df = df if ignore_cols is None else df.drop(ignore_cols, axis=1)
+        self.all_featurizers = AllFeaturizers(preset_name=preset_name)
 
     def featurize_columns(self, df=None, input_cols=None):
         """
@@ -54,17 +55,13 @@ class Featurize(object):
 
     #TODO: -AF see if the only use of featurize_* methods is to be called in featurize_columns, think about defining them outside of the class
     def featurize_formula(self, df=None, featurizers='all', col_id="formula",
-                          preset_name="matminer", compcol="composition",
-                          ignore_errors=True):
+                          compcol="composition", ignore_errors=True):
         if df is None:
             df = self.df.copy(deep=True)
         if compcol not in df:
             df[compcol] = df[col_id].apply(Composition)
         if featurizers=='all':
-            featurizer = MultipleFeaturizer([
-                cf.ElementProperty.from_preset(preset_name=preset_name),
-                cf.IonProperty()
-            ])
+            featurizer = MultipleFeaturizer(self.all_featurizers.composition)
         else:
             featurizer = MultipleFeaturizer(featurizers)
         df = featurizer.featurize_dataframe(df,
@@ -86,6 +83,20 @@ class Featurize(object):
         ])
         df = featurizer.featurize_dataframe(df, col_id=col_id)
         return df
+
+
+class AllFeaturizers(object):
+
+    def __init__(self, preset_name="matminer"):
+        self.preset_name = preset_name
+
+    @property
+    def composition(self, preset_name=None):
+        preset_name = preset_name or self.preset_name
+        return [
+                cf.ElementProperty.from_preset(preset_name=preset_name),
+                cf.IonProperty()
+            ]
 
 
 if __name__ == "__main__":
