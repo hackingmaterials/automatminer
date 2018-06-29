@@ -2,8 +2,9 @@ from matminer.featurizers.base import MultipleFeaturizer
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
 from matminer.utils.conversions import composition_to_oxidcomposition
-from pymatgen import Composition
-from matbench.data.load import load_double_perovskites_gap
+from pymatgen import Composition, Structure
+from matbench.data.load import load_double_perovskites_gap, \
+    load_castelli_perovskites
 from matbench.utils.utils import MatbenchError
 from warnings import warn
 
@@ -61,7 +62,8 @@ class Featurize(object):
         return df
 
     def featurize_formula(self, df=None, featurizers="all", col_id="formula",
-                          compcol="composition", guess_oxidstate=True):
+                          compcol="composition", guess_oxidstate=True,
+                          inplace=True):
         """
         Featurizes based on formula or composition (pymatgen Composition).
 
@@ -80,6 +82,8 @@ class Featurize(object):
         """
         if df is None:
             df = self.df.copy(deep=True)
+        if not inplace:
+            df = df.copy(deep=True)
         if compcol not in df:
             df[compcol] = df[col_id].apply(Composition)
         if guess_oxidstate:
@@ -94,7 +98,7 @@ class Featurize(object):
         return df
 
 
-    def featurize_structure(self, df=None, col_id="structure"):
+    def featurize_structure(self, df=None, col_id="structure", inplace=True):
         """
         Featurizes based on crystal structure (pymatgen Structure object)
 
@@ -107,6 +111,12 @@ class Featurize(object):
         """
         if df is None:
             df = self.df.copy(deep=True)
+        if not inplace:
+            df = df.copy(deep=True)
+        if col_id not in df:
+            raise MatbenchError("'{}' column must be in data!".format(col_id))
+        if isinstance(df[col_id][0], dict):
+            df[col_id] = df[col_id].apply(Structure.from_dict)
 
         featurizer = MultipleFeaturizer(self.all_featurizers.structure)
         df = featurizer.featurize_dataframe(df,
@@ -175,12 +185,7 @@ class AllFeaturizers(object):
         """
         preset_name = preset_name or self.preset_name
         return [
-            sf.SiteStatsFingerprint(
-                site_featurizer=sf.CrystalSiteFingerprint.from_preset(
-                    preset=preset_name),
-                stats=('mean', 'std_dev', 'minimum','maximum')),
             sf.DensityFeatures(),
-            sf.GlobalSymmetryFeatures(),
             # TODO: add more featurizers here
         ]
 
@@ -188,13 +193,10 @@ class AllFeaturizers(object):
 
 
 if __name__ == "__main__":
-    df_init = load_double_perovskites_gap(return_lumo=False)[:10]
-    featurizer = Featurize(df_init,
-                           ignore_cols=['a_1', 'a_2', 'b_1', 'b_2'],
-                           ignore_errors=False)
-    df = featurizer.featurize_columns()
-    # df = featurizer.featurize_formula(df_init, featurizers='all')
+    df_init = load_castelli_perovskites()[:5]
+    featurizer = Featurize(df_init, ignore_errors=False)
+    df = featurizer.featurize_structure(df_init)
+    print(df)
 
-    print(df.head())
     print('The original df')
     print(featurizer.df)
