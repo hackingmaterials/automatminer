@@ -143,6 +143,7 @@ class AllFeaturizers(object):
             cf.ElementProperty.from_preset(preset_name=preset_name),
             cf.CationProperty.from_preset(preset_name='deml'),
             cf.IonProperty(),
+            #TODO: add more featurizers here
         ]
 
     @property
@@ -164,12 +165,14 @@ class AllFeaturizers(object):
                 stats=('mean', 'std_dev', 'minimum','maximum')),
             sf.DensityFeatures(),
             sf.GlobalSymmetryFeatures(),
+            # TODO: add more featurizers here
         ]
 
+    # TODO: add dos, band_structure, etc featurizers
 
 
 if __name__ == "__main__":
-    df_init = load_double_perovskites_gap(return_lumo=False)
+    df_init = load_double_perovskites_gap(return_lumo=False)[:10]
     featurizer = Featurize(df_init,
                            ignore_cols=['a_1', 'a_2', 'b_1', 'b_2'],
                            ignore_errors=False)
