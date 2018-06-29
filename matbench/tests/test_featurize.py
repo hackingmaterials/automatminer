@@ -9,7 +9,7 @@ from matminer.featurizers.composition import ElementProperty, IonProperty
 
 class TestFeaturize(unittest.TestCase):
 
-    def test_featurize(self, limit=10):
+    def test_featurize(self, limit=5):
         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
         ignore_cols = ['a_1', 'a_2', 'b_1', 'b_2']
         featurizer = Featurize(df_init,
@@ -19,7 +19,7 @@ class TestFeaturize(unittest.TestCase):
         df = featurizer.featurize_formula()
         self.assertTrue("composition" in df)
         self.assertTrue(len(df), limit)
-        self.assertGreaterEqual(len(df.columns), 70)
+        self.assertGreaterEqual(len(df.columns), 75)
         self.assertTrue(featurizer.df.equals(df_init.drop(ignore_cols,axis=1)))
 
         self.assertAlmostEqual(
@@ -53,8 +53,8 @@ class TestFeaturize(unittest.TestCase):
         self.assertTrue((df["dist from 1 clusters |APE| < 0.010"] < 0.1).all())
 
         # ElectronegativityDiff:
-        # self.assertAlmostEqual(
-        #     df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
+        self.assertAlmostEqual(
+            df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
 
         # making sure:
             # featurize_formula works with only composition and not formula
@@ -65,7 +65,7 @@ class TestFeaturize(unittest.TestCase):
             ElementProperty.from_preset(preset_name="matminer"),
             IonProperty()
         ])
-        self.assertGreaterEqual(len(df.columns), 70)
+        self.assertGreaterEqual(len(df.columns), 75)
 
 
 
