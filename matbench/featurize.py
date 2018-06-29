@@ -146,6 +146,7 @@ class AllFeaturizers(object):
             cf.AtomicOrbitals(),
             cf.BandCenter(),
             cf.IonProperty(),
+            cf.ElectronegativityDiff(),
             #TODO: add more featurizers here
         ]
 
