@@ -27,10 +27,13 @@ class TestFeaturize(unittest.TestCase):
             df[df["formula"]=="AgNbSnTiO6"]["gap gllbsc"].values[0], 2.881, 3)
         self.assertAlmostEqual(
             df[df["formula"]=="AgNbSnTiO6"]["gap_AO"].values[0], 0.129, 3)
-        self.assertAlmostEqual(
-            df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
         self.assertTrue((df["0-norm"].isin([4, 5])).all()) # all 4- or 5-specie
         self.assertTrue((df["2-norm"] < 1).all())
+        self.assertAlmostEqual(
+            df[df["formula"] == "AgNbLaAlO6"]["frac p valence electrons"].values[0], 0.431, 3)
+        self.assertTrue((df["transition metal fraction"] < 0.45).all())
+        # self.assertAlmostEqual(
+        #     df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
 
         # making sure:
             # featurize_formula works with only composition and not formula
