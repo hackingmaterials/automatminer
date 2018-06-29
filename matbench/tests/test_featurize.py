@@ -22,7 +22,7 @@ class TestFeaturize(unittest.TestCase):
         # sanity checks
         self.assertTrue("composition" in df)
         self.assertTrue(len(df), limit)
-        self.assertGreaterEqual(len(df.columns), 75)
+        self.assertGreaterEqual(len(df.columns), 70)
         self.assertTrue(featurizer.df.equals(df_init.drop(ignore_cols,axis=1)))
         self.assertAlmostEqual(
             df[df["formula"]=="AgNbSnTiO6"]["gap gllbsc"].values[0], 2.881, 3)
@@ -67,7 +67,7 @@ class TestFeaturize(unittest.TestCase):
             ElementProperty.from_preset(preset_name="matminer"),
             IonProperty()
         ])
-        self.assertGreaterEqual(len(df.columns), 75)
+        self.assertGreaterEqual(len(df.columns), 70)
 
 
     def test_featurize_structure(self, limit=5):
@@ -86,8 +86,13 @@ class TestFeaturize(unittest.TestCase):
         self.assertAlmostEqual(
             df[df["formula"]=="RhTeN3"]["density"].values[0], 7.3176, 4)
 
+        # GlobalSymmetryFeatures:
+        self.assertEqual(df[df["formula"] == "HfTeO3"]["spacegroup_num"].values[0], 99)
+        self.assertEqual(df[df["formula"] == "HfTeO3"]["crystal_system"].values[0], "tetragonal")
+        self.assertTrue(not df[df["formula"] == "HfTeO3"]["is_centrosymmetric"].values[0])
 
-
+        # Dimensionality
+        self.assertEqual(df[df["formula"] == "ReAsO2F"]["dimensionality"].values[0], 2)
 
 
 
