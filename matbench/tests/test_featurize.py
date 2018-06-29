@@ -21,17 +21,38 @@ class TestFeaturize(unittest.TestCase):
         self.assertTrue(len(df), limit)
         self.assertGreaterEqual(len(df.columns), 70)
         self.assertTrue(featurizer.df.equals(df_init.drop(ignore_cols,axis=1)))
-        self.assertAlmostEqual(
-            df[df["formula"]=="AgNbSnTiO6"]["band center"].values[0],-2.623, 3)
+
         self.assertAlmostEqual(
             df[df["formula"]=="AgNbSnTiO6"]["gap gllbsc"].values[0], 2.881, 3)
+
+        # BandCenter:
+        self.assertAlmostEqual(
+            df[df["formula"]=="AgNbSnTiO6"]["band center"].values[0],-2.623, 3)
+
+        # AtomicOrbitals:
         self.assertAlmostEqual(
             df[df["formula"]=="AgNbSnTiO6"]["gap_AO"].values[0], 0.129, 3)
+
+        # Stoichiometry:
         self.assertTrue((df["0-norm"].isin([4, 5])).all()) # all 4- or 5-specie
         self.assertTrue((df["2-norm"] < 1).all())
+
+        # ValenceOrbital:
         self.assertAlmostEqual(
-            df[df["formula"] == "AgNbLaAlO6"]["frac p valence electrons"].values[0], 0.431, 3)
+            df[df["formula"]=="AgNbLaAlO6"]["frac p valence electrons"].values[0], 0.431, 3)
+
+        # TMetalFraction:
         self.assertTrue((df["transition metal fraction"] < 0.45).all())
+
+        # YangSolidSolution:
+        self.assertAlmostEqual(
+            df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
+
+        # AtomicPackingEfficiency:
+        self.assertTrue((df["mean abs simul. packing efficiency"] < 0.1).all())
+        self.assertTrue((df["dist from 1 clusters |APE| < 0.010"] < 0.1).all())
+
+        # ElectronegativityDiff:
         # self.assertAlmostEqual(
         #     df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
 
