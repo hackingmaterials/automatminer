@@ -15,6 +15,7 @@ class TestFeaturize(unittest.TestCase):
         featurizer = Featurize(df_init,
                                ignore_cols=ignore_cols,
                                ignore_errors=False)
+
         df = featurizer.featurize_formula()
         self.assertTrue("composition" in df)
         self.assertTrue(len(df), limit)
@@ -22,6 +23,12 @@ class TestFeaturize(unittest.TestCase):
         self.assertTrue(featurizer.df.equals(df_init.drop(ignore_cols,axis=1)))
         self.assertAlmostEqual(
             df[df["formula"]=="AgNbSnTiO6"]["band center"].values[0],-2.623, 3)
+        self.assertAlmostEqual(
+            df[df["formula"]=="AgNbSnTiO6"]["gap gllbsc"].values[0], 2.881, 3)
+        self.assertAlmostEqual(
+            df[df["formula"]=="AgNbSnTiO6"]["gap_AO"].values[0], 0.129, 3)
+        self.assertAlmostEqual(
+            df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
 
         # making sure:
             # featurize_formula works with only composition and not formula
