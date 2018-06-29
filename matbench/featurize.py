@@ -71,8 +71,9 @@ class Featurize(object):
             col_id (str): actual column name to be used as composition
             compcol (str): default or final column name for composition
             guess_oxidstate (bool): whether to guess elements oxidation states
-                which is required for some featurizers such as CationProperty
-                set to False if oxidation states already available in composition
+                which is required for some featurizers such as CationProperty,
+                OxidationStates, ElectronAffinity and ElectronegativityDiff.
+                Set to False if oxidation states already available in composition.
 
         Returns (pandas.DataFrame):
             Dataframe with compositional features added.
@@ -141,14 +142,19 @@ class AllFeaturizers(object):
         preset_name = preset_name or self.preset_name
         return [
             cf.ElementProperty.from_preset(preset_name=preset_name),
-            cf.CationProperty.from_preset(preset_name='deml'),
-            cf.OxidationStates.from_preset(preset_name='deml'),
             cf.AtomicOrbitals(),
             cf.BandCenter(),
             cf.IonProperty(),
+
+            # these need oxidation states present in Composition:
+            cf.CationProperty.from_preset(preset_name='deml'),
+            cf.OxidationStates.from_preset(preset_name='deml'),
+            cf.ElectronAffinity(),
             cf.ElectronegativityDiff(),
+
             #TODO: add more featurizers here
         ]
+
 
     @property
     def structure(self, preset_name="ops"):
