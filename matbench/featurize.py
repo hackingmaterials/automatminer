@@ -186,6 +186,10 @@ class AllFeaturizers(object):
         preset_name = preset_name or self.preset_name
         return [
             sf.DensityFeatures(),
+            sf.GlobalSymmetryFeatures(),
+            sf.Dimensionality()
+
+
             # TODO: add more featurizers here
         ]
 
