@@ -146,12 +146,15 @@ class AllFeaturizers(object):
             cf.BandCenter(),
             cf.IonProperty(),
             cf.Stoichiometry(),
+            cf.ValenceOrbital(),
+            # cf.ElementFraction(), # too many features?
+            cf.TMetalFraction(),
 
             # these need oxidation states present in Composition:
-            cf.CationProperty.from_preset(preset_name='deml'),
-            cf.OxidationStates.from_preset(preset_name='deml'),
-            cf.ElectronAffinity(),
-            cf.ElectronegativityDiff(),
+            # cf.CationProperty.from_preset(preset_name='deml'),
+            # cf.OxidationStates.from_preset(preset_name='deml'),
+            # cf.ElectronAffinity(),
+            # cf.ElectronegativityDiff(),
 
             #TODO: add more featurizers here
         ]
