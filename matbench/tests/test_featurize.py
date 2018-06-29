@@ -2,14 +2,15 @@
 
 import unittest
 
-from matbench.data.load import load_double_perovskites_gap
+from matbench.data.load import load_double_perovskites_gap, \
+    load_castelli_perovskites
 from matbench.featurize import Featurize
 from matminer.featurizers.composition import ElementProperty, IonProperty
 
 
 class TestFeaturize(unittest.TestCase):
 
-    def test_featurize(self, limit=5):
+    def test_featurize_formula(self, limit=5):
         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
         ignore_cols = ['a_1', 'a_2', 'b_1', 'b_2']
         featurizer = Featurize(df_init,
@@ -17,11 +18,12 @@ class TestFeaturize(unittest.TestCase):
                                ignore_errors=False)
 
         df = featurizer.featurize_formula()
+
+        # sanity checks
         self.assertTrue("composition" in df)
         self.assertTrue(len(df), limit)
         self.assertGreaterEqual(len(df.columns), 75)
         self.assertTrue(featurizer.df.equals(df_init.drop(ignore_cols,axis=1)))
-
         self.assertAlmostEqual(
             df[df["formula"]=="AgNbSnTiO6"]["gap gllbsc"].values[0], 2.881, 3)
 
@@ -66,6 +68,26 @@ class TestFeaturize(unittest.TestCase):
             IonProperty()
         ])
         self.assertGreaterEqual(len(df.columns), 75)
+
+
+    def test_featurize_structure(self, limit=5):
+        df_init = load_castelli_perovskites()[:limit]
+        featurizer = Featurize(df_init, ignore_errors=False)
+        df = featurizer.featurize_structure(df_init, inplace=False)
+
+        # sanity checks
+        self.assertTrue("structure" in df)
+        self.assertTrue(len(df), limit)
+        self.assertGreater(len(df.columns), len(df_init.columns))
+        self.assertTrue(featurizer.df.equals(df_init))
+
+        # DensityFeatures:
+        self.assertTrue((df["packing fraction"] < 0.45).all())
+        self.assertAlmostEqual(
+            df[df["formula"]=="RhTeN3"]["density"].values[0], 7.3176, 4)
+
+
+
 
 
 
