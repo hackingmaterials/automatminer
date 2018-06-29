@@ -145,6 +145,7 @@ class AllFeaturizers(object):
             cf.AtomicOrbitals(),
             cf.BandCenter(),
             cf.IonProperty(),
+            cf.Stoichiometry(),
 
             # these need oxidation states present in Composition:
             cf.CationProperty.from_preset(preset_name='deml'),
