@@ -149,14 +149,16 @@ class AllFeaturizers(object):
             cf.ValenceOrbital(),
             # cf.ElementFraction(), # too many features?
             cf.TMetalFraction(),
+            # cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
+            cf.Miedema(), # TODO-Qi: what is the requirement for elements? wasn't clear at the top of class's documentation
+            cf.YangSolidSolution(),
+            cf.AtomicPackingEfficiency(), # much slower than the rest so far
 
             # these need oxidation states present in Composition:
-            # cf.CationProperty.from_preset(preset_name='deml'),
-            # cf.OxidationStates.from_preset(preset_name='deml'),
-            # cf.ElectronAffinity(),
-            # cf.ElectronegativityDiff(),
-
-            #TODO: add more featurizers here
+            cf.CationProperty.from_preset(preset_name='deml'),
+            cf.OxidationStates.from_preset(preset_name='deml'),
+            cf.ElectronAffinity(),
+            cf.ElectronegativityDiff(),
         ]
 
 
