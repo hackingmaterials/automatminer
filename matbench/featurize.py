@@ -142,6 +142,9 @@ class AllFeaturizers(object):
         return [
             cf.ElementProperty.from_preset(preset_name=preset_name),
             cf.CationProperty.from_preset(preset_name='deml'),
+            cf.OxidationStates.from_preset(preset_name='deml'),
+            cf.AtomicOrbitals(),
+            cf.BandCenter(),
             cf.IonProperty(),
             #TODO: add more featurizers here
         ]
