@@ -202,8 +202,8 @@ class AllFeaturizers(object):
 
             # these need oxidation states present in Structure:
             sf.ElectronicRadialDistributionFunction(),
-            # sf.EwaldEnergy(accuracy=12),
-            sf.EwaldEnergy(),
+            sf.EwaldEnergy(accuracy=12),
+            # sf.EwaldEnergy(),
 
             # these require calling fit first:
             # sf.PartialRadialDistributionFunction()
