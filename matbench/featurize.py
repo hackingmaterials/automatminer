@@ -168,7 +168,7 @@ class AllFeaturizers(object):
             # TODO-Qi: what is the requirement for elements? wasn't clear at the top of class's documentation
             # TODO-Qi: test returns this error: File b'/home/circleci/matbench/.tox/py36/lib/python3.6/site-packages/matminer/utils/data_files/MiedemaLiquidDeltaHf.tsv' does not exist
             # cf.Miedema(),
-            cf.YangSolidSolution(),
+            # cf.YangSolidSolution(),
             cf.AtomicPackingEfficiency(), # much slower than the rest so far
 
             # these need oxidation states present in Composition:
