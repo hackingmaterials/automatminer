@@ -101,13 +101,15 @@ class TestFeaturize(unittest.TestCase):
         # CoulombMatrix, SineCoulombMatrix, OrbitalFieldMatrix, MinimumRelativeDistances
 
         # TODO what are the other presets for SiteStatsFingerprint? need implementation and test?
-        # SiteStatsFingerprint with preset==CrystalNNFingerprint_ops
+        # SiteStatsFingerprint with preset==CrystalNNFingerprint_ops:
         self.assertEqual(df[df["formula"] == "RhTeN3"]["mean wt CN_1"].values[0], 0)
         self.assertAlmostEqual(
             df[df["formula"] == "RhTeN3"]["mean wt CN_2"].values[0], 0.412, 3)
 
-
-
+        # EwaldEnergy:
+        self.assertAlmostEqual(
+            df[df["formula"]=="RhTeN3"]["ewald_energy"].values[0], -405.63, 2)
+        self.assertEqual(df[df["formula"]=="HfTeO3"]["ewald_energy"].values[0], 0.0)
 
 
 if __name__ == '__main__':
