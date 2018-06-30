@@ -91,8 +91,22 @@ class TestFeaturize(unittest.TestCase):
         self.assertEqual(df[df["formula"] == "HfTeO3"]["crystal_system"].values[0], "tetragonal")
         self.assertTrue(not df[df["formula"] == "HfTeO3"]["is_centrosymmetric"].values[0])
 
-        # Dimensionality
+        # Dimensionality:
         self.assertEqual(df[df["formula"] == "ReAsO2F"]["dimensionality"].values[0], 2)
+
+        # RadialDistributionFunction:
+        # TODO: add this test after it returns numbers and not dict!
+
+        # TODO: add tests for the following once they return features not matrixes:
+        # CoulombMatrix, SineCoulombMatrix, OrbitalFieldMatrix, MinimumRelativeDistances
+
+        # TODO what are the other presets for SiteStatsFingerprint? need implementation and test?
+        # SiteStatsFingerprint with preset==CrystalNNFingerprint_ops
+        self.assertEqual(df[df["formula"] == "RhTeN3"]["mean wt CN_1"].values[0], 0)
+        self.assertAlmostEqual(
+            df[df["formula"] == "RhTeN3"]["mean wt CN_2"].values[0], 0.412, 3)
+
+
 
 
 
