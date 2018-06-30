@@ -173,7 +173,7 @@ class AllFeaturizers(object):
 
 
     @property
-    def structure(self, preset_name="ops"):
+    def structure(self, preset_name="CrystalNNFingerprint_ops"):
         """
         All structure-based featurizers with default arguments.
 
@@ -187,8 +187,18 @@ class AllFeaturizers(object):
         return [
             sf.DensityFeatures(),
             sf.GlobalSymmetryFeatures(),
-            sf.Dimensionality()
+            sf.Dimensionality(),
+            # sf.RadialDistributionFunction(), # retunrs dict!
+            # sf.ElectronicRadialDistributionFunction(), # returns AttributeError!
+            sf.CoulombMatrix(), # returns a matrix!
+            sf.SineCoulombMatrix(), # returns a matrix!
+            sf.OrbitalFieldMatrix(), # returns a matrix!
+            sf.MinimumRelativeDistances(), # returns a list
+            sf.SiteStatsFingerprint.from_preset(preset=preset_name),
 
+
+            # these require calling fit first:
+            # sf.PartialRadialDistributionFunction()
 
             # TODO: add more featurizers here
         ]
@@ -200,6 +210,7 @@ if __name__ == "__main__":
     df_init = load_castelli_perovskites()[:5]
     featurizer = Featurize(df_init, ignore_errors=False)
     df = featurizer.featurize_structure(df_init)
+    df.to_csv('test.csv')
     print(df)
 
     print('The original df')
