@@ -4,12 +4,9 @@ import matminer.featurizers.structure as sf
 from matminer.utils.conversions import composition_to_oxidcomposition, \
     structure_to_oxidstructure
 from pymatgen import Composition, Structure
-from matbench.data.load import load_double_perovskites_gap, \
-    load_castelli_perovskites
+from matbench.data.load import load_castelli_perovskites
 from matbench.utils.utils import MatbenchError
 from warnings import warn
-
-from pymatgen.analysis.local_env import ValenceIonicRadiusEvaluator
 
 
 class Featurize(object):
