@@ -6,7 +6,7 @@ Functions for generating data to csv form from various resources, if it is not
 already in csv form.
 """
 
-def generate_mp(max_nsites=0, initial_structures=True):
+def generate_mp(max_nsites=0, initial_structures=True, properties=None):
     """
     Grabs all mp materials. This will return two csv files:
         * mp_nostruct.csv: All MP materials, not including structures (.005GB)
@@ -16,14 +16,16 @@ def generate_mp(max_nsites=0, initial_structures=True):
         max_nsites (int): The maximum number of sites to include in the query.
         initial_structures (bool): If true, include the structures before
             relaxation.
+        properties ([str]): list of properties supported by MPDataRetrieval
 
     Returns:
         None
     """
-    props = ['mpid', 'pretty_formula', 'e_above_hull', 'band_gap',
-             'total_magnetization', 'elasticity.elastic_anisotropy',
-             'elasticity.K_VRH', 'elasticity.G_VRH', 'structure', 'energy',
-             'energy_per_atom', 'formation_energy_per_atom']
+    properties = properties or [
+        'mpid', 'pretty_formula', 'e_above_hull', 'band_gap',
+        'total_magnetization', 'elasticity.elastic_anisotropy',
+        'elasticity.K_VRH', 'elasticity.G_VRH', 'structure', 'energy',
+        'energy_per_atom', 'formation_energy_per_atom']
     mpdr = MPDataRetrieval()
     mpdf = None
     for nsites in list(range(1, 101)) + [{'$gt': 100}]:
@@ -31,7 +33,7 @@ def generate_mp(max_nsites=0, initial_structures=True):
             break
         print("Processing nsites = {}".format(nsites))
         df = mpdr.get_dataframe(criteria={'nsites': nsites},
-                                properties=props,
+                                properties=properties,
                                 index_mpid=True)
         if initial_structures:
             # prevent data limit API error using this conditional
