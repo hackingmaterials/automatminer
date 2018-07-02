@@ -210,12 +210,10 @@ class AllFeaturizers(object):
             sf.ChemicalOrdering(),
             sf.XRDPowderPattern(),
 
-            # these require calling fit first:
+            # TODO: integrate the following featurizers that require fit first
             # sf.PartialRadialDistributionFunction()
             # sf.BondFractions(),
             # sf.BagofBonds()
-
-            # TODO: add more featurizers here
         ]
 
     # TODO: add dos, band_structure, etc featurizers
