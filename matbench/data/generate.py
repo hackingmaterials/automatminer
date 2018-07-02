@@ -6,7 +6,8 @@ Functions for generating data to csv form from various resources, if it is not
 already in csv form.
 """
 
-def generate_mp(max_nsites=0, initial_structures=True, properties=None):
+def generate_mp(max_nsites=0, initial_structures=True, properties=None,
+                write_to_csv=True):
     """
     Grabs all mp materials. This will return two csv files:
         * mp_nostruct.csv: All MP materials, not including structures (.005GB)
@@ -17,9 +18,10 @@ def generate_mp(max_nsites=0, initial_structures=True, properties=None):
         initial_structures (bool): If true, include the structures before
             relaxation.
         properties ([str]): list of properties supported by MPDataRetrieval
+        write_to_csv (bool): whether to write resulting dataframe to csv
 
-    Returns:
-        None
+    Returns (pandas.DataFrame):
+        retrieved/generated data
     """
     properties = properties or [
         'mpid', 'pretty_formula', 'e_above_hull', 'band_gap',
@@ -45,9 +47,11 @@ def generate_mp(max_nsites=0, initial_structures=True, properties=None):
             mpdf = df
         else:
             mpdf = pd.concat([mpdf, df])
-    mpdf.to_csv("sources/mp_all.csv")
-    mpdf = mpdf.drop(['structure', 'initial_structure'], axis=1)
-    mpdf.to_csv("sources/mp_nostruct.csv")
+    if write_to_csv:
+        mpdf.to_csv("sources/mp_all.csv")
+        mpdf = mpdf.drop(['structure', 'initial_structure'], axis=1)
+        mpdf.to_csv("sources/mp_nostruct.csv")
+    return mpdf
 
 
 if __name__ == "__main__":
