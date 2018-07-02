@@ -7,7 +7,7 @@ already in csv form.
 """
 
 def generate_mp(max_nsites=0, initial_structures=True, properties=None,
-                write_to_csv=True):
+                write_to_csv=True, limit=None):
     """
     Grabs all mp materials. This will return two csv files:
         * mp_nostruct.csv: All MP materials, not including structures (.005GB)
@@ -19,15 +19,15 @@ def generate_mp(max_nsites=0, initial_structures=True, properties=None,
             relaxation.
         properties ([str]): list of properties supported by MPDataRetrieval
         write_to_csv (bool): whether to write resulting dataframe to csv
+        limit (int): maximum length of the returned data; no limit if None
 
     Returns (pandas.DataFrame):
         retrieved/generated data
     """
     properties = properties or [
-        'mpid', 'pretty_formula', 'e_above_hull', 'band_gap',
-        'total_magnetization', 'elasticity.elastic_anisotropy',
-        'elasticity.K_VRH', 'elasticity.G_VRH', 'structure', 'energy',
-        'energy_per_atom', 'formation_energy_per_atom']
+        'pretty_formula', 'e_above_hull', 'band_gap', 'total_magnetization',
+        'elasticity.elastic_anisotropy', 'elasticity.K_VRH', 'elasticity.G_VRH',
+        'structure', 'energy', 'energy_per_atom', 'formation_energy_per_atom']
     mpdr = MPDataRetrieval()
     mpdf = None
     for nsites in list(range(1, 101)) + [{'$gt': 100}]:
@@ -47,6 +47,9 @@ def generate_mp(max_nsites=0, initial_structures=True, properties=None,
             mpdf = df
         else:
             mpdf = pd.concat([mpdf, df])
+        if limit and len(mpdf) > limit:
+            mpdf = mpdf[:limit]
+            break
     if write_to_csv:
         mpdf.to_csv("sources/mp_all.csv")
         mpdf = mpdf.drop(['structure', 'initial_structure'], axis=1)
