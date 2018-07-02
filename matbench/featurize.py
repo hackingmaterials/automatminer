@@ -166,7 +166,6 @@ class AllFeaturizers(object):
             cf.TMetalFraction(),
             # cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
             # TODO-Qi: what is the requirement for elements? wasn't clear at the top of class's documentation
-            # TODO-Qi: test returns this error: File b'/home/circleci/matbench/.tox/py36/lib/python3.6/site-packages/matminer/utils/data_files/MiedemaLiquidDeltaHf.tsv' does not exist
             # cf.Miedema(),
             # cf.YangSolidSolution(),
             cf.AtomicPackingEfficiency(), # much slower than the rest so far
@@ -206,9 +205,15 @@ class AllFeaturizers(object):
             sf.ElectronicRadialDistributionFunction(),
             sf.EwaldEnergy(accuracy=12),
             # sf.EwaldEnergy(),
+            sf.StructuralHeterogeneity(),
+            sf.MaximumPackingEfficiency(),
+            sf.ChemicalOrdering(),
+            sf.XRDPowderPattern(),
 
             # these require calling fit first:
             # sf.PartialRadialDistributionFunction()
+            # sf.BondFractions(),
+            # sf.BagofBonds()
 
             # TODO: add more featurizers here
         ]
