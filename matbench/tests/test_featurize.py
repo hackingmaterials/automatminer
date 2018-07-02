@@ -111,6 +111,28 @@ class TestFeaturize(unittest.TestCase):
             df[df["formula"]=="RhTeN3"]["ewald_energy"].values[0], -405.63, 2)
         self.assertEqual(df[df["formula"]=="HfTeO3"]["ewald_energy"].values[0], 0.0)
 
+        # StructuralHeterogeneity:
+        self.assertAlmostEqual(
+            df[df["formula"]=="RhTeN3"]["min relative bond length"].values[0],
+            0.7896, 4)
+        self.assertAlmostEqual(
+            df[df["formula"]=="RhTeN3"]["maximum neighbor distance variation"].values[0],
+            0.1224, 4)
+
+        # MaximumPackingEfficiency:
+        self.assertAlmostEqual(
+            df[df["formula"]=="ReAsO2F"]["max packing efficiency"].values[0], 0.295, 3)
+
+        # ChemicalOrdering:
+        self.assertAlmostEqual(
+            df[df["formula"]=="HfTeO3"]["mean ordering parameter shell 1"].values[0], 0.599, 3)
+        # TODO: umm, make a PR for shorter feature_labels for some structure featurizers?
+
+        # XRDPowderPattern:
+        self.assertAlmostEqual(
+            df[df["formula"]=="BiHfO2F"]["xrd_127"].values[0], 0.0011, 4)
+
+
 
 if __name__ == '__main__':
     unittest.main()
