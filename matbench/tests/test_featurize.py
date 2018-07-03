@@ -10,6 +10,7 @@ from matbench.data.load import load_double_perovskites_gap, \
 from matbench.featurize import Featurize
 from matminer.featurizers.composition import ElementProperty, IonProperty
 
+
 test_dir = os.path.dirname(__file__)
 
 class TestFeaturize(unittest.TestCase):
@@ -112,7 +113,7 @@ class TestFeaturize(unittest.TestCase):
 
         # EwaldEnergy:
         self.assertAlmostEqual(
-            df[df["formula"]=="RhTeN3"]["ewald_energy"].values[0], -405.63, 2)
+            df[df["formula"]=="RhTeN3"]["ewald_energy"].values[0], -405.64, 2)
         self.assertEqual(df[df["formula"]=="HfTeO3"]["ewald_energy"].values[0], 0.0)
 
         # StructuralHeterogeneity:
