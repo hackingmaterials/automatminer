@@ -8,6 +8,7 @@ from matbench.data.generate import generate_mp
 from matbench.data.load import load_double_perovskites_gap, \
     load_castelli_perovskites
 from matbench.featurize import Featurize
+from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.featurizers.composition import ElementProperty, IonProperty
 
 
@@ -138,29 +139,31 @@ class TestFeaturize(unittest.TestCase):
             df[df["formula"]=="BiHfO2F"]["xrd_127"].values[0], 0.0011, 4)
 
 
-    def test_featurize_dos(self, refresh_df_init=False, limit=1):
+    def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
         """
+        Tests featurize_dos and featurize_bandstructure.
 
         Args:
             refresh_df_init (bool): for developers, if the test need to be
                 updated set to True. Otherwise set to False to make the final
                 test independent of MPRester and faster.
-            limit (int): the maximum number of entries initially retrieved
-                via generate_mp function.
+            limit (int): the maximum final number of entries.
 
         Returns (None):
         """
         df_bsdos_pickled = "mp_data_with_dos_bandstructure.pickle"
         if refresh_df_init:
-            df_init = generate_mp(max_nsites=2, initial_structures=False,
-                                  properties=["pretty_formula",
-                                              "dos",
-                                              "bandstructure",
-                                              "bandstructure_uniform"],
-                                  write_to_csv=False, limit=limit)
+            mpdr = MPDataRetrieval()
+            df_init = mpdr.get_dataframe(criteria={"material_id": "mp-149"},
+                                         properties=["pretty_formula",
+                                                     "dos",
+                                                     "bandstructure",
+                                                     "bandstructure_uniform"]
+                                         )
             df_init.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
         else:
             df_init = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
+        print(df_init)
         df_init = df_init.dropna(axis=0)
         featurizer = Featurize(df_init, ignore_errors=False)
         df = featurizer.featurize_dos(df_init, inplace=False)
@@ -175,18 +178,24 @@ class TestFeaturize(unittest.TestCase):
         self.assertEqual(df["cbm_character_1"][0], "p")
 
         # DopingFermi:
-        self.assertAlmostEqual(df["fermi_c1e+20T300"][0], -0.0872, 4)
+        self.assertAlmostEqual(df["fermi_c1e+20T300"][0], -0.539, 3)
 
         # BandEdge:
-        self.assertAlmostEqual(df["vbm_sp"][0], 0.829, 3)
-        self.assertAlmostEqual(df["vbm_sd"][0], 0.075, 3)
+        self.assertAlmostEqual(df["vbm_sp"][0], 0.190, 3)
+        self.assertAlmostEqual(df["cbm_s"][0], 0.537, 3)
+        self.assertAlmostEqual(df["cbm_sp"][0], 0.995, 3)
 
 
-        # df = featurizer.featurize_bandstructure(df_init, inplace=False)
-        # # sanity checks
-        # self.assertTrue("bandstructure_uniform" in df)
-        # self.assertGreater(len(df.columns), len(df_init.columns))
-        # self.assertTrue(featurizer.df.equals(df_init))
+        df = featurizer.featurize_bandstructure(df_init,
+                                                inplace=False,
+                                                col_id="bandstructure_uniform")
+        # sanity checks
+        self.assertTrue("bandstructure" in df)
+        self.assertTrue("bandstructure_uniform" in df)
+        self.assertGreater(len(df.columns), len(df_init.columns))
+        self.assertTrue(featurizer.df.equals(df_init))
+
+
 
 if __name__ == '__main__':
     unittest.main()
