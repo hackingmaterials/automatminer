@@ -105,7 +105,7 @@ class Featurize(object):
         if guess_oxidstates:
             df[compcol] = composition_to_oxidcomposition(df[compcol])
         if featurizers=='all':
-            featurizer = MultipleFeaturizer(self.all_featurizers.composition)
+            featurizer = MultipleFeaturizer(self.all_featurizers.composition())
         else:
             featurizer = MultipleFeaturizer(featurizers)
         df = featurizer.featurize_dataframe(df,
@@ -142,7 +142,7 @@ class Featurize(object):
         if guess_oxidstates:
             structure_to_oxidstructure(df[col_id], inplace=True)
         if featurizers == "all":
-            featurizer = MultipleFeaturizer(self.all_featurizers.structure)
+            featurizer = MultipleFeaturizer(self.all_featurizers.structure())
         else:
             featurizer = MultipleFeaturizer(featurizers)
         df = featurizer.featurize_dataframe(df,
@@ -172,7 +172,7 @@ class Featurize(object):
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(CompleteDos.from_dict)
         if featurizers == "all":
-            featurizer = MultipleFeaturizer(self.all_featurizers.dos)
+            featurizer = MultipleFeaturizer(self.all_featurizers.dos())
         else:
             featurizer = MultipleFeaturizer(featurizers)
         df = featurizer.featurize_dataframe(df,
@@ -202,7 +202,7 @@ class Featurize(object):
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(BandStructure.from_dict)
         if featurizers == "all":
-            featurizer = MultipleFeaturizer(self.all_featurizers.bandstructure)
+            featurizer = MultipleFeaturizer(self.all_featurizers.bandstructure())
         else:
             featurizer = MultipleFeaturizer(featurizers)
         df = featurizer.featurize_dataframe(df,
@@ -225,7 +225,6 @@ class AllFeaturizers(object):
     def __init__(self, preset_name="matminer"):
         self.preset_name = preset_name
 
-    @property
     def composition(self, preset_name=None):
         """
         All composition-based featurizers with default arguments.
@@ -250,7 +249,7 @@ class AllFeaturizers(object):
             # TODO-Qi: what is the requirement for elements? wasn't clear at the top of class's documentation
             # cf.Miedema(),
             # cf.YangSolidSolution(),
-            cf.AtomicPackingEfficiency(), # much slower than the rest so far
+            cf.AtomicPackingEfficiency(), # much slower than the rest
 
             # these need oxidation states present in Composition:
             cf.CationProperty.from_preset(preset_name='deml'),
@@ -260,7 +259,6 @@ class AllFeaturizers(object):
         ]
 
 
-    @property
     def structure(self, preset_name="CrystalNNFingerprint_ops"):
         """
         All structure-based featurizers with default arguments.
@@ -297,7 +295,6 @@ class AllFeaturizers(object):
             # sf.BagofBonds()
         ]
 
-    @property
     def dos(self):
         """
         All dos-based featurizers with default arguments.
@@ -311,7 +308,6 @@ class AllFeaturizers(object):
         ]
 
 
-    @property
     def bandstructure(self):
         """
         All bandstructure-based featurizers with default arguments.
