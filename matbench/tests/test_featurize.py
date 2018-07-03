@@ -1,7 +1,9 @@
 # coding: utf-8
 
+import pandas as pd
 import unittest
 
+from matbench.data.generate import generate_mp
 from matbench.data.load import load_double_perovskites_gap, \
     load_castelli_perovskites
 from matbench.featurize import Featurize
@@ -131,6 +133,43 @@ class TestFeaturize(unittest.TestCase):
         # XRDPowderPattern:
         self.assertAlmostEqual(
             df[df["formula"]=="BiHfO2F"]["xrd_127"].values[0], 0.0011, 4)
+
+
+    def test_featurize_dos(self, refresh_df_init=False, limit=1):
+        """
+
+        Args:
+            refresh_df_init (bool): for developers, if the test need to be
+                updated set to True. Otherwise set to False to make the final
+                test independent of MPRester and faster.
+            limit (int): the maximum number of entries initially retrieved
+                via generate_mp function.
+
+        Returns (None):
+        """
+        if refresh_df_init:
+            df_init = generate_mp(max_nsites=2, initial_structures=False,
+                                  properties=["pretty_formula",
+                                              "dos",
+                                              "bandstructure",
+                                              "bandstructure_uniform"],
+                                  write_to_csv=False, limit=limit)
+            df_init.to_pickle("mp_data_with_dos_bandstructure.pickle")
+        else:
+            df_init = pd.read_pickle("mp_data_with_dos_bandstructure.pickle")
+        df_init = df_init.dropna(axis=0)
+        featurizer = Featurize(df_init, ignore_errors=False)
+        df = featurizer.featurize_dos(df_init, inplace=False)
+
+        # sanity checks
+        self.assertTrue("dos" in df)
+        self.assertTrue(len(df), limit)
+        self.assertGreater(len(df.columns), len(df_init.columns))
+        self.assertTrue(featurizer.df.equals(df_init))
+
+        # DOSFeaturizer:
+        self.assertEqual(
+            df[df["pretty_formula"]=="In"]["cbm_character_1"].values[0], "p")
 
 
 
