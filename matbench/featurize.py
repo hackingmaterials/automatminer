@@ -119,9 +119,18 @@ class Featurize(object):
         Args:
             df (pandas.DataFrame):
             col_id (str): column name containing pymatgen Structure
+        Args:
+            df (pandas.DataFrame): input data
+            featurizers ([matminer.featurizer] or "all"):
+            col_id (str): actual column name to be used as structure
+            inplace (bool): whether to modify the input df
+            guess_oxidstates (bool): whether to guess elements oxidation states
+                in the structure which is required for some featurizers such as
+                EwaldEnergy, ElectronicRadialDistributionFunction. Set to
+                False if oxidation states already available in the structure.
 
         Returns (pandas.DataFrame):
-            Dataframe with structural features added.
+            Dataframe with compositional features added.
         """
         df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
         if isinstance(df[col_id][0], dict):
@@ -233,16 +242,15 @@ class AllFeaturizers(object):
             sf.SineCoulombMatrix(), # returns a matrix!
             sf.OrbitalFieldMatrix(), # returns a matrix!
             sf.MinimumRelativeDistances(), # returns a list
-            sf.SiteStatsFingerprint.from_preset(preset=preset_name),
-
-            # these need oxidation states present in Structure:
-            sf.ElectronicRadialDistributionFunction(),
-            sf.EwaldEnergy(accuracy=12),
-            # sf.EwaldEnergy(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
             sf.ChemicalOrdering(),
             sf.XRDPowderPattern(),
+            sf.SiteStatsFingerprint.from_preset(preset=preset_name),
+
+            # these need oxidation states present in Structure:
+            sf.ElectronicRadialDistributionFunction(),
+            sf.EwaldEnergy(),
 
             # TODO: integrate the following featurizers that require fit first
             # sf.PartialRadialDistributionFunction()
