@@ -1,12 +1,16 @@
+from matbench.data.generate import generate_mp
 from matminer.featurizers.base import MultipleFeaturizer
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
+import matminer.featurizers.dos as dosf
 from matminer.utils.conversions import composition_to_oxidcomposition, \
     structure_to_oxidstructure
 from pymatgen import Composition, Structure
 from matbench.data.load import load_castelli_perovskites
 from matbench.utils.utils import MatbenchError
 from warnings import warn
+
+from pymatgen.electronic_structure.dos import CompleteDos
 
 
 class Featurize(object):
@@ -38,6 +42,16 @@ class Featurize(object):
         self.ignore_errors = ignore_errors
 
 
+    def _preprocess_df(self, df, inplace=True, col_id=None):
+        if df is None:
+            df = self.df.copy(deep=True)
+        if not inplace:
+            df = df.copy(deep=True)
+        if col_id and col_id not in df:
+            raise MatbenchError("'{}' column must be in data!".format(col_id))
+        return df
+
+
     def featurize_columns(self, df=None, input_cols=None):
         """
         Featurizes the dataframe based on input_columns.
@@ -49,8 +63,7 @@ class Featurize(object):
         Returns (pandas.DataFrame):
             self.df w/ new features added via featurizering input_cols
         """
-        if df is None:
-            df = self.df.copy(deep=True)
+        df = self._preprocess_df(df)
         input_cols = input_cols or ["formula"]
         for column in input_cols:
             featurizer = getattr(self, "featurize_{}".format(column), None)
@@ -82,10 +95,7 @@ class Featurize(object):
         Returns (pandas.DataFrame):
             Dataframe with compositional features added.
         """
-        if df is None:
-            df = self.df.copy(deep=True)
-        if not inplace:
-            df = df.copy(deep=True)
+        df = self._preprocess_df(df=df, inplace=inplace)
         if compcol not in df:
             df[compcol] = df[col_id].apply(Composition)
         if guess_oxidstates:
@@ -100,7 +110,8 @@ class Featurize(object):
         return df
 
 
-    def featurize_structure(self, df=None, col_id="structure", inplace=True,
+    def featurize_structure(self, df=None, featurizers="all",
+                            col_id="structure", inplace=True,
                             guess_oxidstates=True):
         """
         Featurizes based on crystal structure (pymatgen Structure object)
@@ -112,17 +123,40 @@ class Featurize(object):
         Returns (pandas.DataFrame):
             Dataframe with structural features added.
         """
-        if df is None:
-            df = self.df.copy(deep=True)
-        if not inplace:
-            df = df.copy(deep=True)
-        if col_id not in df:
-            raise MatbenchError("'{}' column must be in data!".format(col_id))
+        df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(Structure.from_dict)
         if guess_oxidstates:
             structure_to_oxidstructure(df[col_id], inplace=True)
-        featurizer = MultipleFeaturizer(self.all_featurizers.structure)
+        if featurizers == "all":
+            featurizer = MultipleFeaturizer(self.all_featurizers.structure)
+        else:
+            featurizer = MultipleFeaturizer(featurizers)
+        df = featurizer.featurize_dataframe(df,
+                                            col_id=col_id,
+                                            ignore_errors=self.ignore_errors)
+        return df
+
+
+    def featurize_dos(self, df=None, featurizers="all", col_id="dos",
+                      inplace=True):
+        """
+
+        Args:
+            df:
+            col_id:
+            inplace:
+
+        Returns:
+
+        """
+        df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
+        if isinstance(df[col_id][0], dict):
+            df[col_id] = df[col_id].apply(CompleteDos.from_dict)
+        if featurizers == "all":
+            featurizer = MultipleFeaturizer(self.all_featurizers.dos)
+        else:
+            featurizer = MultipleFeaturizer(featurizers)
         df = featurizer.featurize_dataframe(df,
                                             col_id=col_id,
                                             ignore_errors=self.ignore_errors)
@@ -216,13 +250,36 @@ class AllFeaturizers(object):
             # sf.BagofBonds()
         ]
 
-    # TODO: add dos, band_structure, etc featurizers
+    @property
+    def dos(self):
+        """
+        All dos-based featurizers with default arguments.
+
+        Returns ([matminer featurizer classes]):
+        """
+        return [
+            dosf.DOSFeaturizer(),
+
+            # TODO: add more dos featurizers here
+        ]
+
+    # TODO: add band_structure, etc featurizers
 
 
 if __name__ == "__main__":
-    df_init = load_castelli_perovskites()[:5]
+    # df_init = load_castelli_perovskites()[:5]
+    # featurizer = Featurize(df_init, ignore_errors=False)
+    # df = featurizer.featurize_structure(df_init)
+
+    df_init = generate_mp(max_nsites=2, initial_structures=False,
+                          properties=["pretty_formula",
+                                      "dos",
+                                      "bandstructre",
+                                      "bandstructure_uniform"],
+                          write_to_csv=False, limit=1)
+    df_init = df_init.dropna(axis=0)
     featurizer = Featurize(df_init, ignore_errors=False)
-    df = featurizer.featurize_structure(df_init)
+    df = featurizer.featurize_dos(df_init)
     df.to_csv('test.csv')
     print(df)
 
