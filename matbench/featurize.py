@@ -1,3 +1,5 @@
+import pandas as pd
+
 from matbench.data.generate import generate_mp
 from matminer.featurizers.base import MultipleFeaturizer
 import matminer.featurizers.composition as cf
@@ -267,6 +269,8 @@ class AllFeaturizers(object):
         """
         return [
             dosf.DOSFeaturizer(),
+            dosf.DopingFermi(),
+            dosf.BandEdge()
 
             # TODO: add more dos featurizers here
         ]
@@ -279,13 +283,14 @@ if __name__ == "__main__":
     # featurizer = Featurize(df_init, ignore_errors=False)
     # df = featurizer.featurize_structure(df_init)
 
-    df_init = generate_mp(max_nsites=2, initial_structures=False,
-                          properties=["pretty_formula",
-                                      "dos",
-                                      "bandstructre",
-                                      "bandstructure_uniform"],
-                          write_to_csv=False, limit=1)
-    df_init = df_init.dropna(axis=0)
+    # df_init = generate_mp(max_nsites=2, initial_structures=False,
+    #                       properties=["pretty_formula",
+    #                                   "dos",
+    #                                   "bandstructre",
+    #                                   "bandstructure_uniform"],
+    #                       write_to_csv=False, limit=1)
+    # df_init = df_init.dropna(axis=0)
+    df_init = pd.read_pickle('tests/mp_data_with_dos_bandstructure.pickle')
     featurizer = Featurize(df_init, ignore_errors=False)
     df = featurizer.featurize_dos(df_init)
     df.to_csv('test.csv')
