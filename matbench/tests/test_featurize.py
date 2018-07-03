@@ -172,10 +172,21 @@ class TestFeaturize(unittest.TestCase):
         self.assertTrue(featurizer.df.equals(df_init))
 
         # DOSFeaturizer:
-        self.assertEqual(
-            df[df["pretty_formula"]=="In"]["cbm_character_1"].values[0], "p")
+        self.assertEqual(df["cbm_character_1"][0], "p")
+
+        # DopingFermi:
+        self.assertAlmostEqual(df["fermi_c1e+20T300"][0], -0.0872, 4)
+
+        # BandEdge:
+        self.assertAlmostEqual(df["vbm_sp"][0], 0.829, 3)
+        self.assertAlmostEqual(df["vbm_sd"][0], 0.075, 3)
 
 
+        # df = featurizer.featurize_bandstructure(df_init, inplace=False)
+        # # sanity checks
+        # self.assertTrue("bandstructure_uniform" in df)
+        # self.assertGreater(len(df.columns), len(df_init.columns))
+        # self.assertTrue(featurizer.df.equals(df_init))
 
 if __name__ == '__main__':
     unittest.main()
