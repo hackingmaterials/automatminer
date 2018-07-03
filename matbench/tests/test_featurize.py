@@ -189,11 +189,19 @@ class TestFeaturize(unittest.TestCase):
         df = featurizer.featurize_bandstructure(df_init,
                                                 inplace=False,
                                                 col_id="bandstructure_uniform")
+        print(df)
         # sanity checks
         self.assertTrue("bandstructure" in df)
         self.assertTrue("bandstructure_uniform" in df)
         self.assertGreater(len(df.columns), len(df_init.columns))
         self.assertTrue(featurizer.df.equals(df_init))
+
+        # BandFeaturizer:
+        self.assertAlmostEqual(df["direct_gap"][0], 2.556, 3)
+        self.assertAlmostEqual(df["n_ex1_norm"][0], 0.6285, 4)
+
+        # BranchPointEnergy:
+        self.assertAlmostEqual(df["branch_point_energy"][0], 5.7677, 4)
 
 
 
