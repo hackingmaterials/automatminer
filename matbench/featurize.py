@@ -320,4 +320,5 @@ class AllFeaturizers(object):
         """
         return [
             bf.BandFeaturizer(),
+            bf.BranchPointEnergy()
         ]
