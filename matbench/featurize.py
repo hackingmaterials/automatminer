@@ -13,6 +13,7 @@ from matbench.data.load import load_castelli_perovskites
 from matbench.utils.utils import MatbenchError
 from warnings import warn
 
+from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
 
 
@@ -180,6 +181,36 @@ class Featurize(object):
         return df
 
 
+    def featurize_bandstructure(self, df=None, featurizers="all",
+                                col_id="bandstructure", inplace=True):
+        """
+        Featurizes based on density of state (pymatgen BandStructure object)
+
+        Args:
+            df (pandas.DataFrame):
+            col_id (str): column name containing pymatgen BandStructure
+        Args:
+            df (pandas.DataFrame): input data
+            featurizers ([matminer.featurizer] or "all"):
+            col_id (str): actual column name to be used as bandstructure
+            inplace (bool): whether to modify the input df
+
+        Returns (pandas.DataFrame):
+            Dataframe with bandstructure features added.
+        """
+        df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
+        if isinstance(df[col_id][0], dict):
+            df[col_id] = df[col_id].apply(BandStructure.from_dict)
+        if featurizers == "all":
+            featurizer = MultipleFeaturizer(self.all_featurizers.bandstructure)
+        else:
+            featurizer = MultipleFeaturizer(featurizers)
+        df = featurizer.featurize_dataframe(df,
+                                            col_id=col_id,
+                                            ignore_errors=self.ignore_errors)
+        return df
+
+
 
 class AllFeaturizers(object):
     """
@@ -280,35 +311,13 @@ class AllFeaturizers(object):
         ]
 
 
-    # @property
-    # def bandstructure(self):
-    #     """
-    #     All bandstructure-based featurizers with default arguments.
-    #
-    #     Returns ([matminer featurizer classes]):
-    #     """
-    #     return [
-    #         bf.BandFeaturizer
-    #     ]
+    @property
+    def bandstructure(self):
+        """
+        All bandstructure-based featurizers with default arguments.
 
-
-if __name__ == "__main__":
-    # df_init = load_castelli_perovskites()[:5]
-    # featurizer = Featurize(df_init, ignore_errors=False)
-    # df = featurizer.featurize_structure(df_init)
-
-    # df_init = generate_mp(max_nsites=2, initial_structures=False,
-    #                       properties=["pretty_formula",
-    #                                   "dos",
-    #                                   "bandstructre",
-    #                                   "bandstructure_uniform"],
-    #                       write_to_csv=False, limit=1)
-    # df_init = df_init.dropna(axis=0)
-    df_init = pd.read_pickle('tests/mp_data_with_dos_bandstructure.pickle')
-    featurizer = Featurize(df_init, ignore_errors=False)
-    df = featurizer.featurize_dos(df_init)
-    df.to_csv('test.csv')
-    print(df)
-
-    print('The original df')
-    print(featurizer.df)
+        Returns ([matminer featurizer classes]):
+        """
+        return [
+            bf.BandFeaturizer(),
+        ]
