@@ -163,7 +163,6 @@ class TestFeaturize(unittest.TestCase):
             df_init.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
         else:
             df_init = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
-        print(df_init)
         df_init = df_init.dropna(axis=0)
         featurizer = Featurize(df_init, ignore_errors=False)
         df = featurizer.featurize_dos(df_init, inplace=False)
@@ -189,7 +188,6 @@ class TestFeaturize(unittest.TestCase):
         df = featurizer.featurize_bandstructure(df_init,
                                                 inplace=False,
                                                 col_id="bandstructure_uniform")
-        print(df)
         # sanity checks
         self.assertTrue("bandstructure" in df)
         self.assertTrue("bandstructure_uniform" in df)
