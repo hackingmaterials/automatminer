@@ -5,6 +5,7 @@ from matminer.featurizers.base import MultipleFeaturizer
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
+import matminer.featurizers.bandstructure as bf
 from matminer.utils.conversions import composition_to_oxidcomposition, \
     structure_to_oxidstructure
 from pymatgen import Composition, Structure
@@ -132,7 +133,7 @@ class Featurize(object):
                 False if oxidation states already available in the structure.
 
         Returns (pandas.DataFrame):
-            Dataframe with compositional features added.
+            Dataframe with structure features added.
         """
         df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
         if isinstance(df[col_id][0], dict):
@@ -152,14 +153,19 @@ class Featurize(object):
     def featurize_dos(self, df=None, featurizers="all", col_id="dos",
                       inplace=True):
         """
+        Featurizes based on density of state (pymatgen CompleteDos object)
 
         Args:
-            df:
-            col_id:
-            inplace:
+            df (pandas.DataFrame):
+            col_id (str): column name containing pymatgen Dos (or CompleteDos)
+        Args:
+            df (pandas.DataFrame): input data
+            featurizers ([matminer.featurizer] or "all"):
+            col_id (str): actual column name to be used as dos
+            inplace (bool): whether to modify the input df
 
-        Returns:
-
+        Returns (pandas.DataFrame):
+            Dataframe with dos features added.
         """
         df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
         if isinstance(df[col_id][0], dict):
@@ -271,11 +277,19 @@ class AllFeaturizers(object):
             dosf.DOSFeaturizer(),
             dosf.DopingFermi(),
             dosf.BandEdge()
-
-            # TODO: add more dos featurizers here
         ]
 
-    # TODO: add band_structure, etc featurizers
+
+    # @property
+    # def bandstructure(self):
+    #     """
+    #     All bandstructure-based featurizers with default arguments.
+    #
+    #     Returns ([matminer featurizer classes]):
+    #     """
+    #     return [
+    #         bf.BandFeaturizer
+    #     ]
 
 
 if __name__ == "__main__":
