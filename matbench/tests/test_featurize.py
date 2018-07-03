@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import os
 import pandas as pd
 import unittest
 
@@ -9,6 +10,7 @@ from matbench.data.load import load_double_perovskites_gap, \
 from matbench.featurize import Featurize
 from matminer.featurizers.composition import ElementProperty, IonProperty
 
+test_dir = os.path.dirname(__file__)
 
 class TestFeaturize(unittest.TestCase):
 
@@ -147,6 +149,7 @@ class TestFeaturize(unittest.TestCase):
 
         Returns (None):
         """
+        df_bsdos_pickled = "mp_data_with_dos_bandstructure.pickle"
         if refresh_df_init:
             df_init = generate_mp(max_nsites=2, initial_structures=False,
                                   properties=["pretty_formula",
@@ -154,9 +157,9 @@ class TestFeaturize(unittest.TestCase):
                                               "bandstructure",
                                               "bandstructure_uniform"],
                                   write_to_csv=False, limit=limit)
-            df_init.to_pickle("mp_data_with_dos_bandstructure.pickle")
+            df_init.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
         else:
-            df_init = pd.read_pickle("mp_data_with_dos_bandstructure.pickle")
+            df_init = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
         df_init = df_init.dropna(axis=0)
         featurizer = Featurize(df_init, ignore_errors=False)
         df = featurizer.featurize_dos(df_init, inplace=False)
