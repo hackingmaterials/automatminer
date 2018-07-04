@@ -8,7 +8,9 @@ from matbench.data.generate import generate_mp
 from matbench.data.load import load_double_perovskites_gap, \
     load_castelli_perovskites
 from matbench.featurize import Featurize
+from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.featurizers.composition import ElementProperty, IonProperty
+
 
 test_dir = os.path.dirname(__file__)
 
@@ -112,7 +114,7 @@ class TestFeaturize(unittest.TestCase):
 
         # EwaldEnergy:
         self.assertAlmostEqual(
-            df[df["formula"]=="RhTeN3"]["ewald_energy"].values[0], -405.63, 2)
+            df[df["formula"]=="RhTeN3"]["ewald_energy"].values[0], -405.64, 2)
         self.assertEqual(df[df["formula"]=="HfTeO3"]["ewald_energy"].values[0], 0.0)
 
         # StructuralHeterogeneity:
@@ -136,27 +138,36 @@ class TestFeaturize(unittest.TestCase):
         self.assertAlmostEqual(
             df[df["formula"]=="BiHfO2F"]["xrd_127"].values[0], 0.0011, 4)
 
+        # BondFractions:
+        self.assertAlmostEqual(
+            df[df["formula"] == "WReO2S"]["S2- - W3+ bond frac."].values[0], 0.1667, 4)
 
-    def test_featurize_dos(self, refresh_df_init=False, limit=1):
+        # BagofBonds:
+        self.assertAlmostEqual(
+            df[df["formula"] == "HfTeO3"]["O - O bond #1"].values[0], 11.1658, 4)
+
+
+    def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
         """
+        Tests featurize_dos and featurize_bandstructure.
 
         Args:
             refresh_df_init (bool): for developers, if the test need to be
                 updated set to True. Otherwise set to False to make the final
                 test independent of MPRester and faster.
-            limit (int): the maximum number of entries initially retrieved
-                via generate_mp function.
+            limit (int): the maximum final number of entries.
 
         Returns (None):
         """
         df_bsdos_pickled = "mp_data_with_dos_bandstructure.pickle"
         if refresh_df_init:
-            df_init = generate_mp(max_nsites=2, initial_structures=False,
-                                  properties=["pretty_formula",
-                                              "dos",
-                                              "bandstructure",
-                                              "bandstructure_uniform"],
-                                  write_to_csv=False, limit=limit)
+            mpdr = MPDataRetrieval()
+            df_init = mpdr.get_dataframe(criteria={"material_id": "mp-149"},
+                                         properties=["pretty_formula",
+                                                     "dos",
+                                                     "bandstructure",
+                                                     "bandstructure_uniform"]
+                                         )
             df_init.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
         else:
             df_init = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
@@ -171,8 +182,32 @@ class TestFeaturize(unittest.TestCase):
         self.assertTrue(featurizer.df.equals(df_init))
 
         # DOSFeaturizer:
-        self.assertEqual(
-            df[df["pretty_formula"]=="In"]["cbm_character_1"].values[0], "p")
+        self.assertEqual(df["cbm_character_1"][0], "p")
+
+        # DopingFermi:
+        self.assertAlmostEqual(df["fermi_c1e+20T300"][0], -0.539, 3)
+
+        # BandEdge:
+        self.assertAlmostEqual(df["vbm_sp"][0], 0.190, 3)
+        self.assertAlmostEqual(df["cbm_s"][0], 0.537, 3)
+        self.assertAlmostEqual(df["cbm_sp"][0], 0.995, 3)
+
+
+        df = featurizer.featurize_bandstructure(df_init,
+                                                inplace=False,
+                                                col_id="bandstructure_uniform")
+        # sanity checks
+        self.assertTrue("bandstructure" in df)
+        self.assertTrue("bandstructure_uniform" in df)
+        self.assertGreater(len(df.columns), len(df_init.columns))
+        self.assertTrue(featurizer.df.equals(df_init))
+
+        # BandFeaturizer:
+        self.assertAlmostEqual(df["direct_gap"][0], 2.556, 3)
+        self.assertAlmostEqual(df["n_ex1_norm"][0], 0.6285, 4)
+
+        # BranchPointEnergy:
+        self.assertAlmostEqual(df["branch_point_energy"][0], 5.7677, 4)
 
 
 

@@ -1,8 +1,11 @@
+import pandas as pd
+
 from matbench.data.generate import generate_mp
 from matminer.featurizers.base import MultipleFeaturizer
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
+import matminer.featurizers.bandstructure as bf
 from matminer.utils.conversions import composition_to_oxidcomposition, \
     structure_to_oxidstructure
 from pymatgen import Composition, Structure
@@ -10,6 +13,7 @@ from matbench.data.load import load_castelli_perovskites
 from matbench.utils.utils import MatbenchError
 from warnings import warn
 
+from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
 
 
@@ -101,27 +105,35 @@ class Featurize(object):
         if guess_oxidstates:
             df[compcol] = composition_to_oxidcomposition(df[compcol])
         if featurizers=='all':
-            featurizer = MultipleFeaturizer(self.all_featurizers.composition)
-        else:
-            featurizer = MultipleFeaturizer(featurizers)
-        df = featurizer.featurize_dataframe(df,
-                                            col_id=compcol,
-                                            ignore_errors=self.ignore_errors)
+            featurizers = self.all_featurizers.composition()
+        df = MultipleFeaturizer(featurizers).featurize_dataframe(
+            df, col_id=compcol, ignore_errors=self.ignore_errors)
         return df
 
 
     def featurize_structure(self, df=None, featurizers="all",
-                            col_id="structure", inplace=True,
-                            guess_oxidstates=True):
+                            fit_featurizers="all", col_id="structure",
+                            inplace=True, guess_oxidstates=True):
         """
         Featurizes based on crystal structure (pymatgen Structure object)
 
         Args:
             df (pandas.DataFrame):
             col_id (str): column name containing pymatgen Structure
+        Args:
+            df (pandas.DataFrame): input data
+            featurizers ([matminer.featurizer] or "all"):
+            fit_featurizers ([matminer.featurizer] or "all"): those featurizers
+                that require the fit method to be called first.
+            col_id (str): actual column name to be used as structure
+            inplace (bool): whether to modify the input df
+            guess_oxidstates (bool): whether to guess elements oxidation states
+                in the structure which is required for some featurizers such as
+                EwaldEnergy, ElectronicRadialDistributionFunction. Set to
+                False if oxidation states already available in the structure.
 
         Returns (pandas.DataFrame):
-            Dataframe with structural features added.
+            Dataframe with structure features added.
         """
         df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
         if isinstance(df[col_id][0], dict):
@@ -129,37 +141,70 @@ class Featurize(object):
         if guess_oxidstates:
             structure_to_oxidstructure(df[col_id], inplace=True)
         if featurizers == "all":
-            featurizer = MultipleFeaturizer(self.all_featurizers.structure)
-        else:
-            featurizer = MultipleFeaturizer(featurizers)
-        df = featurizer.featurize_dataframe(df,
-                                            col_id=col_id,
-                                            ignore_errors=self.ignore_errors)
+            featurizers = self.all_featurizers.structure()
+        df = MultipleFeaturizer(featurizers).featurize_dataframe(
+            df, col_id=col_id, ignore_errors=self.ignore_errors)
+        if fit_featurizers=="all":
+            featurizers = self.all_featurizers.fit_structure()
+        for featzer in featurizers:
+            featzer.fit(df[col_id])
+            df = featzer.featurize_dataframe(df,
+                                             col_id=col_id,
+                                             ignore_errors=self.ignore_errors)
         return df
 
 
     def featurize_dos(self, df=None, featurizers="all", col_id="dos",
                       inplace=True):
         """
+        Featurizes based on density of state (pymatgen CompleteDos object)
 
         Args:
-            df:
-            col_id:
-            inplace:
+            df (pandas.DataFrame):
+            col_id (str): column name containing pymatgen Dos (or CompleteDos)
+        Args:
+            df (pandas.DataFrame): input data
+            featurizers ([matminer.featurizer] or "all"):
+            col_id (str): actual column name to be used as dos
+            inplace (bool): whether to modify the input df
 
-        Returns:
-
+        Returns (pandas.DataFrame):
+            Dataframe with dos features added.
         """
         df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(CompleteDos.from_dict)
         if featurizers == "all":
-            featurizer = MultipleFeaturizer(self.all_featurizers.dos)
-        else:
-            featurizer = MultipleFeaturizer(featurizers)
-        df = featurizer.featurize_dataframe(df,
-                                            col_id=col_id,
-                                            ignore_errors=self.ignore_errors)
+            featurizers = self.all_featurizers.dos()
+        df = MultipleFeaturizer(featurizers).featurize_dataframe(
+            df, col_id=col_id, ignore_errors=self.ignore_errors)
+        return df
+
+
+    def featurize_bandstructure(self, df=None, featurizers="all",
+                                col_id="bandstructure", inplace=True):
+        """
+        Featurizes based on density of state (pymatgen BandStructure object)
+
+        Args:
+            df (pandas.DataFrame):
+            col_id (str): column name containing pymatgen BandStructure
+        Args:
+            df (pandas.DataFrame): input data
+            featurizers ([matminer.featurizer] or "all"):
+            col_id (str): actual column name to be used as bandstructure
+            inplace (bool): whether to modify the input df
+
+        Returns (pandas.DataFrame):
+            Dataframe with bandstructure features added.
+        """
+        df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
+        if isinstance(df[col_id][0], dict):
+            df[col_id] = df[col_id].apply(BandStructure.from_dict)
+        if featurizers == "all":
+            featurizers = self.all_featurizers.bandstructure()
+        df = MultipleFeaturizer(featurizers).featurize_dataframe(
+            df, col_id=col_id, ignore_errors=self.ignore_errors)
         return df
 
 
@@ -177,7 +222,6 @@ class AllFeaturizers(object):
     def __init__(self, preset_name="matminer"):
         self.preset_name = preset_name
 
-    @property
     def composition(self, preset_name=None):
         """
         All composition-based featurizers with default arguments.
@@ -202,7 +246,7 @@ class AllFeaturizers(object):
             # TODO-Qi: what is the requirement for elements? wasn't clear at the top of class's documentation
             # cf.Miedema(),
             # cf.YangSolidSolution(),
-            cf.AtomicPackingEfficiency(), # much slower than the rest so far
+            cf.AtomicPackingEfficiency(), # much slower than the rest
 
             # these need oxidation states present in Composition:
             cf.CationProperty.from_preset(preset_name='deml'),
@@ -212,16 +256,15 @@ class AllFeaturizers(object):
         ]
 
 
-    @property
     def structure(self, preset_name="CrystalNNFingerprint_ops"):
         """
-        All structure-based featurizers with default arguments.
+        All structure-based featurizers with default arguments that don't
+        require the fit method to be called first.
 
         Args:
             preset_name (str): some featurizers take in this argument
 
         Returns ([matminer featurizer classes]):
-
         """
         preset_name = preset_name or self.preset_name
         return [
@@ -233,24 +276,32 @@ class AllFeaturizers(object):
             sf.SineCoulombMatrix(), # returns a matrix!
             sf.OrbitalFieldMatrix(), # returns a matrix!
             sf.MinimumRelativeDistances(), # returns a list
-            sf.SiteStatsFingerprint.from_preset(preset=preset_name),
-
-            # these need oxidation states present in Structure:
-            sf.ElectronicRadialDistributionFunction(),
-            sf.EwaldEnergy(accuracy=12),
-            # sf.EwaldEnergy(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
             sf.ChemicalOrdering(),
             sf.XRDPowderPattern(),
+            sf.SiteStatsFingerprint.from_preset(preset=preset_name),
 
-            # TODO: integrate the following featurizers that require fit first
-            # sf.PartialRadialDistributionFunction()
-            # sf.BondFractions(),
-            # sf.BagofBonds()
+            # these need oxidation states present in Structure:
+            sf.ElectronicRadialDistributionFunction(),
+            sf.EwaldEnergy(accuracy=4), #TODO: remove this accuracy=4 when new version of matminer is released
         ]
 
-    @property
+
+    def fit_structure(self):
+        """
+        Structure-based featurizers with default arguments that require the
+        fit method to be called first.
+
+        Returns ([matminer featurizer classes]):
+        """
+        return [
+            # sf.PartialRadialDistributionFunction(), # got the error AssertionError: 13200 columns passed, passed data had 13260 columns
+            sf.BondFractions(),
+            sf.BagofBonds()
+        ]
+
+
     def dos(self):
         """
         All dos-based featurizers with default arguments.
@@ -259,29 +310,18 @@ class AllFeaturizers(object):
         """
         return [
             dosf.DOSFeaturizer(),
-
-            # TODO: add more dos featurizers here
+            dosf.DopingFermi(),
+            dosf.BandEdge()
         ]
 
-    # TODO: add band_structure, etc featurizers
 
+    def bandstructure(self):
+        """
+        All bandstructure-based featurizers with default arguments.
 
-if __name__ == "__main__":
-    # df_init = load_castelli_perovskites()[:5]
-    # featurizer = Featurize(df_init, ignore_errors=False)
-    # df = featurizer.featurize_structure(df_init)
-
-    df_init = generate_mp(max_nsites=2, initial_structures=False,
-                          properties=["pretty_formula",
-                                      "dos",
-                                      "bandstructre",
-                                      "bandstructure_uniform"],
-                          write_to_csv=False, limit=1)
-    df_init = df_init.dropna(axis=0)
-    featurizer = Featurize(df_init, ignore_errors=False)
-    df = featurizer.featurize_dos(df_init)
-    df.to_csv('test.csv')
-    print(df)
-
-    print('The original df')
-    print(featurizer.df)
+        Returns ([matminer featurizer classes]):
+        """
+        return [
+            bf.BandFeaturizer(),
+            bf.BranchPointEnergy()
+        ]
