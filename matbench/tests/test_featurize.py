@@ -138,6 +138,14 @@ class TestFeaturize(unittest.TestCase):
         self.assertAlmostEqual(
             df[df["formula"]=="BiHfO2F"]["xrd_127"].values[0], 0.0011, 4)
 
+        # BondFractions:
+        self.assertAlmostEqual(
+            df[df["formula"] == "WReO2S"]["S2- - W3+ bond frac."].values[0], 0.1667, 4)
+
+        # BagofBonds:
+        self.assertAlmostEqual(
+            df[df["formula"] == "HfTeO3"]["O - O bond #1"].values[0], 11.1658, 4)
+
 
     def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
         """
