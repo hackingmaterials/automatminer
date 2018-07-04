@@ -284,7 +284,7 @@ class AllFeaturizers(object):
 
             # these need oxidation states present in Structure:
             sf.ElectronicRadialDistributionFunction(),
-            sf.EwaldEnergy(),
+            sf.EwaldEnergy(accuracy=4), #TODO: remove this accuracy=4 when new version of matminer is released
         ]
 
 
