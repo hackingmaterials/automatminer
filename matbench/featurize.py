@@ -115,8 +115,8 @@ class Featurize(object):
 
 
     def featurize_structure(self, df=None, featurizers="all",
-                            col_id="structure", inplace=True,
-                            guess_oxidstates=True):
+                            fit_featurizers="all", col_id="structure",
+                            inplace=True, guess_oxidstates=True):
         """
         Featurizes based on crystal structure (pymatgen Structure object)
 
@@ -126,6 +126,8 @@ class Featurize(object):
         Args:
             df (pandas.DataFrame): input data
             featurizers ([matminer.featurizer] or "all"):
+            fit_featurizers ([matminer.featurizer] or "all"): those featurizers
+                that require the fit method to be called first.
             col_id (str): actual column name to be used as structure
             inplace (bool): whether to modify the input df
             guess_oxidstates (bool): whether to guess elements oxidation states
@@ -148,6 +150,13 @@ class Featurize(object):
         df = featurizer.featurize_dataframe(df,
                                             col_id=col_id,
                                             ignore_errors=self.ignore_errors)
+        if fit_featurizers=="all":
+            featurizers = self.all_featurizers.fit_structure()
+        for featzer in featurizers:
+            featzer.fit(df[col_id])
+            df = featzer.featurize_dataframe(df,
+                                             col_id=col_id,
+                                             ignore_errors=self.ignore_errors)
         return df
 
 
@@ -261,13 +270,13 @@ class AllFeaturizers(object):
 
     def structure(self, preset_name="CrystalNNFingerprint_ops"):
         """
-        All structure-based featurizers with default arguments.
+        All structure-based featurizers with default arguments that don't
+        require the fit method to be called first.
 
         Args:
             preset_name (str): some featurizers take in this argument
 
         Returns ([matminer featurizer classes]):
-
         """
         preset_name = preset_name or self.preset_name
         return [
@@ -288,12 +297,22 @@ class AllFeaturizers(object):
             # these need oxidation states present in Structure:
             sf.ElectronicRadialDistributionFunction(),
             sf.EwaldEnergy(),
-
-            # TODO: integrate the following featurizers that require fit first
-            # sf.PartialRadialDistributionFunction()
-            # sf.BondFractions(),
-            # sf.BagofBonds()
         ]
+
+
+    def fit_structure(self):
+        """
+        Structure-based featurizers with default arguments that require the
+        fit method to be called first.
+
+        Returns ([matminer featurizer classes]):
+        """
+        return [
+            # sf.PartialRadialDistributionFunction(), # got the error AssertionError: 13200 columns passed, passed data had 13260 columns
+            sf.BondFractions(),
+            sf.BagofBonds()
+        ]
+
 
     def dos(self):
         """
