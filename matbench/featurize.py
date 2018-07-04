@@ -105,12 +105,9 @@ class Featurize(object):
         if guess_oxidstates:
             df[compcol] = composition_to_oxidcomposition(df[compcol])
         if featurizers=='all':
-            featurizer = MultipleFeaturizer(self.all_featurizers.composition())
-        else:
-            featurizer = MultipleFeaturizer(featurizers)
-        df = featurizer.featurize_dataframe(df,
-                                            col_id=compcol,
-                                            ignore_errors=self.ignore_errors)
+            featurizers = self.all_featurizers.composition()
+        df = MultipleFeaturizer(featurizers).featurize_dataframe(
+            df, col_id=compcol, ignore_errors=self.ignore_errors)
         return df
 
 
@@ -144,12 +141,9 @@ class Featurize(object):
         if guess_oxidstates:
             structure_to_oxidstructure(df[col_id], inplace=True)
         if featurizers == "all":
-            featurizer = MultipleFeaturizer(self.all_featurizers.structure())
-        else:
-            featurizer = MultipleFeaturizer(featurizers)
-        df = featurizer.featurize_dataframe(df,
-                                            col_id=col_id,
-                                            ignore_errors=self.ignore_errors)
+            featurizers = self.all_featurizers.structure()
+        df = MultipleFeaturizer(featurizers).featurize_dataframe(
+            df, col_id=col_id, ignore_errors=self.ignore_errors)
         if fit_featurizers=="all":
             featurizers = self.all_featurizers.fit_structure()
         for featzer in featurizers:
@@ -181,12 +175,9 @@ class Featurize(object):
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(CompleteDos.from_dict)
         if featurizers == "all":
-            featurizer = MultipleFeaturizer(self.all_featurizers.dos())
-        else:
-            featurizer = MultipleFeaturizer(featurizers)
-        df = featurizer.featurize_dataframe(df,
-                                            col_id=col_id,
-                                            ignore_errors=self.ignore_errors)
+            featurizers = self.all_featurizers.dos()
+        df = MultipleFeaturizer(featurizers).featurize_dataframe(
+            df, col_id=col_id, ignore_errors=self.ignore_errors)
         return df
 
 
@@ -211,12 +202,9 @@ class Featurize(object):
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(BandStructure.from_dict)
         if featurizers == "all":
-            featurizer = MultipleFeaturizer(self.all_featurizers.bandstructure())
-        else:
-            featurizer = MultipleFeaturizer(featurizers)
-        df = featurizer.featurize_dataframe(df,
-                                            col_id=col_id,
-                                            ignore_errors=self.ignore_errors)
+            featurizers = self.all_featurizers.bandstructure()
+        df = MultipleFeaturizer(featurizers).featurize_dataframe(
+            df, col_id=col_id, ignore_errors=self.ignore_errors)
         return df
 
 
