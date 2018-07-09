@@ -9,6 +9,9 @@ from matbench.data.load import load_double_perovskites_gap, \
 from matbench.featurize import Featurize, AllFeaturizers
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 import matminer.featurizers.composition as cf
+import matminer.featurizers.structure as sf
+import matminer.featurizers.dos as dosf
+import matminer.featurizers.bandstructure as bf
 
 test_dir = os.path.dirname(__file__)
 
@@ -217,7 +220,25 @@ class TestAllFeaturizers(unittest.TestCase):
     AllFeaturizers (e.g. by mistake).
     """
     def setUp(self):
-        self.all_featurizers = AllFeaturizers()
+        self.allfs = AllFeaturizers()
+
+
+    def get_true_featurizers(self, module, non_featurizers):
+        """
+        Returns list of all featurizer names given a python module and a list
+        of class names that are not expected to be featurizers.
+        Args:
+            module (module):
+            non_featurizers ([str]):
+
+        Returns ([str]):
+            List of all featurizer (class) names
+        """
+        classes = inspect.getmembers(module, inspect.isclass)
+        class_names = [c[0] for c in classes]
+        featurizer_names = [c for c in class_names if c not in non_featurizers]
+        return featurizer_names
+
 
     def test_composition_featurizers(self):
         cf_non_featurizers = [
@@ -235,17 +256,19 @@ class TestAllFeaturizers(unittest.TestCase):
             "PymatgenData"
         ]
         # get all current featurizers
-        classes = inspect.getmembers(cf, inspect.isclass)
-        class_names = [c[0] for c in classes]
-        true_compfs = [c for c in class_names if c not in cf_non_featurizers]
+        true_compfs = self.get_true_featurizers(cf, cf_non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_cf_classes = self.all_featurizers.composition()
+        test_cf_classes = \
+            self.allfs.composition() + self.allfs.composition_specific()
         test_compfs = [c.__class__.__name__ for c in test_cf_classes]
         # featurizers must match exactly
         self.assertEqual(len(test_compfs), len(true_compfs))
         for featurizer_name in true_compfs:
             self.assertTrue(featurizer_name in test_compfs)
 
+
+    def test_structure_featurizers(self):
+        pass
 
 
 if __name__ == '__main__':
