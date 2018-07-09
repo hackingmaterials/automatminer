@@ -1,16 +1,14 @@
 # coding: utf-8
-
+import inspect
 import os
 import pandas as pd
 import unittest
 
-from matbench.data.generate import generate_mp
 from matbench.data.load import load_double_perovskites_gap, \
     load_castelli_perovskites
-from matbench.featurize import Featurize
+from matbench.featurize import Featurize, AllFeaturizers
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
-from matminer.featurizers.composition import ElementProperty, IonProperty
-
+import matminer.featurizers.composition as cf
 
 test_dir = os.path.dirname(__file__)
 
@@ -53,8 +51,8 @@ class TestFeaturize(unittest.TestCase):
         self.assertTrue((df["transition metal fraction"] < 0.45).all())
 
         # YangSolidSolution:
-        # self.assertAlmostEqual(
-        #     df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
+        self.assertAlmostEqual(
+            df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
 
         # AtomicPackingEfficiency:
         self.assertTrue((df["mean abs simul. packing efficiency"] < 0.1).all())
@@ -70,8 +68,8 @@ class TestFeaturize(unittest.TestCase):
         df_init = df_init.drop('formula', axis=1)
         df_init["composition"] = df["composition"]
         df = featurizer.featurize_formula(df_init, featurizers=[
-            ElementProperty.from_preset(preset_name="matminer"),
-            IonProperty()
+            cf.ElementProperty.from_preset(preset_name="matminer"),
+            cf.IonProperty()
         ])
         self.assertGreaterEqual(len(df.columns), 70)
 
@@ -208,6 +206,45 @@ class TestFeaturize(unittest.TestCase):
 
         # BranchPointEnergy:
         self.assertAlmostEqual(df["branch_point_energy"][0], 5.7677, 4)
+
+
+
+class TestAllFeaturizers(unittest.TestCase):
+    """
+    Class to ensure the featurizers available in featurizer files in matminer
+    match exactly to those defined to AllFeaturizers class. This test is meant
+    to catch events when a new featurizer is defined but not listed inside
+    AllFeaturizers (e.g. by mistake).
+    """
+    def setUp(self):
+        self.all_featurizers = AllFeaturizers()
+
+    def test_composition_featurizers(self):
+        cf_non_featurizers = [
+            "BaseFeaturizer",
+            "CohesiveEnergyData",
+            "Composition",
+            "Element",
+            "DemlData",
+            "MPRester",
+            "MagpieData",
+            "MixingEnthalpy",
+            "MolecularOrbitals",
+            "NearestNeighbors",
+            "PropertyStats",
+            "PymatgenData"
+        ]
+        # get all current featurizers
+        classes = inspect.getmembers(cf, inspect.isclass)
+        class_names = [c[0] for c in classes]
+        true_compfs = [c for c in class_names if c not in cf_non_featurizers]
+        # get all featurizers that are defined in AllFeaturizers class
+        test_cf_classes = self.all_featurizers.composition()
+        test_compfs = [c.__class__.__name__ for c in test_cf_classes]
+        # featurizers must match exactly
+        self.assertEqual(len(test_compfs), len(true_compfs))
+        for featurizer_name in true_compfs:
+            self.assertTrue(featurizer_name in test_compfs)
 
 
 
