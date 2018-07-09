@@ -1,18 +1,14 @@
-import pandas as pd
+from warnings import warn
 
-from matbench.data.generate import generate_mp
-from matminer.featurizers.base import MultipleFeaturizer
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
 import matminer.featurizers.bandstructure as bf
+from matminer.featurizers.base import MultipleFeaturizer
 from matminer.utils.conversions import composition_to_oxidcomposition, \
     structure_to_oxidstructure
-from pymatgen import Composition, Structure
-from matbench.data.load import load_castelli_perovskites
 from matbench.utils.utils import MatbenchError
-from warnings import warn
-
+from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
 
