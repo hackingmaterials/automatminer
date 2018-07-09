@@ -145,7 +145,7 @@ class Featurize(object):
         df = MultipleFeaturizer(featurizers).featurize_dataframe(
             df, col_id=col_id, ignore_errors=self.ignore_errors)
         if fit_featurizers=="all":
-            featurizers = self.all_featurizers.fit_structure()
+            featurizers = self.all_featurizers.structure_fit()
         for featzer in featurizers:
             featzer.fit(df[col_id])
             df = featzer.featurize_dataframe(df,
@@ -222,6 +222,7 @@ class AllFeaturizers(object):
     def __init__(self, preset_name="matminer"):
         self.preset_name = preset_name
 
+
     def composition(self, preset_name=None):
         """
         All composition-based featurizers with default arguments.
@@ -230,7 +231,6 @@ class AllFeaturizers(object):
             preset_name (str): some featurizers take in this argument
 
         Returns ([matminer featurizer classes]):
-
         """
         preset_name = preset_name or self.preset_name
         return [
@@ -240,12 +240,7 @@ class AllFeaturizers(object):
             cf.IonProperty(),
             cf.Stoichiometry(),
             cf.ValenceOrbital(),
-            # cf.ElementFraction(), # too many features?
             cf.TMetalFraction(),
-            # cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
-            # TODO-Qi: what is the requirement for elements? wasn't clear at the top of class's documentation
-            # cf.Miedema(),
-            # cf.YangSolidSolution(),
             cf.AtomicPackingEfficiency(), # much slower than the rest
 
             # these need oxidation states present in Composition:
@@ -253,6 +248,24 @@ class AllFeaturizers(object):
             cf.OxidationStates.from_preset(preset_name='deml'),
             cf.ElectronAffinity(),
             cf.ElectronegativityDiff(),
+            cf.YangSolidSolution(),
+            cf.ElementFraction(),  # too many features?
+        ]
+
+
+    def composition_specific(self):
+        """
+        All composition-based featurizers that are more specific to a group of
+        compositions; otherwise, they return error or NaN. For example,
+        CohesiveEnergy needs compositions with at least a single structure in
+        The Materials Project.
+
+        Returns ([matminer featurizer classes]):
+        """
+        return [
+            cf.CohesiveEnergy(),  # an entry must be found in materialsproject.org
+            # TODO-Qi: what is the requirement for elements? wasn't clear at the top of class's documentation
+            cf.Miedema(),
         ]
 
 
@@ -284,11 +297,11 @@ class AllFeaturizers(object):
 
             # these need oxidation states present in Structure:
             sf.ElectronicRadialDistributionFunction(),
-            sf.EwaldEnergy(accuracy=4), #TODO: remove this accuracy=4 when new version of matminer is released
+            sf.EwaldEnergy()
         ]
 
 
-    def fit_structure(self):
+    def structure_fit(self):
         """
         Structure-based featurizers with default arguments that require the
         fit method to be called first.
