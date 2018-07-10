@@ -299,6 +299,29 @@ class TestAllFeaturizers(unittest.TestCase):
             self.assertTrue(featurizer_name in test_feats)
 
 
+    def test_dos_featurizers(self):
+        pass
+
+
+    def test_bandstructure_featurizers(self):
+        non_featurizers = self.base_non_featurizers + [
+            "BandStructure",
+            "BandStructureSymmLine",
+            "CompleteDos", #TODO: remove this when this PR is merged and matminer version updated: https://github.com/hackingmaterials/matminer/pull/268
+            "SpacegroupAnalyzer",
+            "Spin"
+        ]
+        # get all current featurizers
+        true_feats = self.get_true_featurizers(bf, non_featurizers)
+        # get all featurizers that are defined in AllFeaturizers class
+        test_feats = self.allfs.bandstructure()
+        test_feats = [c.__class__.__name__ for c in test_feats]
+        # featurizers must match exactly
+        self.assertEqual(len(test_feats), len(true_feats))
+        for featurizer_name in true_feats:
+            self.assertTrue(featurizer_name in test_feats)
+
+
 
 if __name__ == '__main__':
     unittest.main()
