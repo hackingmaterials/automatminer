@@ -221,7 +221,14 @@ class TestAllFeaturizers(unittest.TestCase):
     """
     def setUp(self):
         self.allfs = AllFeaturizers()
-
+        self.base_non_featurizers = [
+            "BaseFeaturizer",
+            "Element",
+            "Specie",
+            "OrderedDict",
+            "NotFittedError",
+            "PropertyStats",
+        ]
 
     def get_true_featurizers(self, module, non_featurizers):
         """
@@ -241,34 +248,56 @@ class TestAllFeaturizers(unittest.TestCase):
 
 
     def test_composition_featurizers(self):
-        cf_non_featurizers = [
-            "BaseFeaturizer",
-            "CohesiveEnergyData",
+        non_featurizers = self.base_non_featurizers + [
             "Composition",
-            "Element",
+            "CohesiveEnergyData",
             "DemlData",
             "MPRester",
             "MagpieData",
             "MixingEnthalpy",
             "MolecularOrbitals",
             "NearestNeighbors",
-            "PropertyStats",
             "PymatgenData"
         ]
         # get all current featurizers
-        true_compfs = self.get_true_featurizers(cf, cf_non_featurizers)
+        true_feats = self.get_true_featurizers(cf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_cf_classes = \
-            self.allfs.composition() + self.allfs.composition_specific()
-        test_compfs = [c.__class__.__name__ for c in test_cf_classes]
+        test_feats = self.allfs.composition()+self.allfs.composition_specific()
+        test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
-        self.assertEqual(len(test_compfs), len(true_compfs))
-        for featurizer_name in true_compfs:
-            self.assertTrue(featurizer_name in test_compfs)
+        self.assertEqual(len(test_feats), len(true_feats))
+        for featurizer_name in true_feats:
+            self.assertTrue(featurizer_name in test_feats)
 
 
     def test_structure_featurizers(self):
-        pass
+        non_featurizers = self.base_non_featurizers + [
+            "Structure",
+            "StructureComposition",
+            "CoordinationNumber",
+            "CrystalNNFingerprint",
+            "OPSiteFingerprint",
+            "ValenceIonicRadiusEvaluator",
+            "EwaldSummation",
+            "LocalPropertyDifference",
+            "NotFittedError",
+            "SpacegroupAnalyzer",
+            "VoronoiNN",
+            "XRDCalculator",
+            "gaussian_kde",
+            "itemgetter",
+            "PartialRadialDistributionFunction" #TODO: remove this when this PR is merged and matminer version updated: https://github.com/hackingmaterials/matminer/pull/268
+        ]
+        # get all current featurizers
+        true_feats = self.get_true_featurizers(sf, non_featurizers)
+        # get all featurizers that are defined in AllFeaturizers class
+        test_feats = self.allfs.structure() + self.allfs.structure_fit()
+        test_feats = [c.__class__.__name__ for c in test_feats]
+        # featurizers must match exactly
+        self.assertEqual(len(test_feats), len(true_feats))
+        for featurizer_name in true_feats:
+            self.assertTrue(featurizer_name in test_feats)
+
 
 
 if __name__ == '__main__':
