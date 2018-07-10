@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: ~/matbench
     docker:
-      - image: circleci/python:3.6.1
+      - image: circleci/python:3.6.2
     steps:
       - checkout
       - run:
