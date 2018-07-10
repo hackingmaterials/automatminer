@@ -305,7 +305,7 @@ class AllFeaturizers(object):
         Returns ([matminer featurizer classes]):
         """
         return [
-            # sf.PartialRadialDistributionFunction(), # got the error AssertionError: 13200 columns passed, passed data had 13260 columns
+            # sf.PartialRadialDistributionFunction(), #TODO: uncomment this when this PR is merged and matminer version updated: https://github.com/hackingmaterials/matminer/pull/268
             sf.BondFractions(),
             sf.BagofBonds()
         ]
