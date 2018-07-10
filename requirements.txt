@@ -1,4 +1,3 @@
 pymatgen
 matminer
 xlrd
-sympy==1.1.1
