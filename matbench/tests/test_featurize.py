@@ -300,7 +300,21 @@ class TestAllFeaturizers(unittest.TestCase):
 
 
     def test_dos_featurizers(self):
-        pass
+        non_featurizers = self.base_non_featurizers + [
+            "CompleteDos",
+            "FermiDos",
+            "BandCenter",
+            "Spin"
+        ]
+        # get all current featurizers
+        true_feats = self.get_true_featurizers(dosf, non_featurizers)
+        # get all featurizers that are defined in AllFeaturizers class
+        test_feats = self.allfs.dos()
+        test_feats = [c.__class__.__name__ for c in test_feats]
+        # featurizers must match exactly
+        self.assertEqual(len(test_feats), len(true_feats))
+        for featurizer_name in true_feats:
+            self.assertTrue(featurizer_name in test_feats)
 
 
     def test_bandstructure_featurizers(self):
