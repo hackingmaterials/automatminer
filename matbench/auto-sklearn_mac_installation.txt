@@ -1,0 +1,27 @@
+installation guide for auto-sklearn on Mac (note that you might not have to go through these steps exactly):
+
+need swig, to install see:
+https://www.audiokinetic.com/en/library/2015.1.9_5624/?source=Unity&id=pg__compileswig.html
+
+download swig’s source code:
+https://sourceforge.net/projects/pcre/?source=typ_redirect
+
+go to folder and then
+./configure
+make
+make install
+
+done!
+
+try:
+pip install auto-sklearn
+
+if didn’t succeed it may be due to generic Mac c-compiler not supporting random, etc c++ packages
+
+try:
+(in your conda environment)
+conda install gcc
+pip install auto-sklearn
+
+to see if you have it installed, open python in your conda env and then:
+import autosklearn
