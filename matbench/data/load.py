@@ -375,6 +375,7 @@ def load_jdft2d():
     dropcols = ['epsx', 'epsy', 'epsz', 'mepsx', 'mepsy', 'mepsz', 'kv', 'gv',
                 'jid', 'kpoints', 'incar', 'icsd', 'mbj_gap', 'fin_en']
     df = df.drop(dropcols, axis=1)
+    df = df.replace('na', np.nan)
     df = df.rename(columns=colmap)
     df['structure'] = df['structure']
     df['structure initial'] = df['structure initial']
