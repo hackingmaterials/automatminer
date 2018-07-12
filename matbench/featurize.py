@@ -222,18 +222,19 @@ class AllFeaturizers(object):
     def __init__(self, preset_name="matminer"):
         self.preset_name = preset_name
 
-    def composition(self, preset_name=None):
+    def composition(self, preset_name=None, extras=False):
         """
         All composition-based featurizers with default arguments.
 
         Args:
             preset_name (str): some featurizers take in this argument
+            extras (bool): Include "niche" composition featurizers
 
         Returns ([matminer featurizer classes]):
 
         """
         preset_name = preset_name or self.preset_name
-        return [
+        featzers =  [
             cf.ElementProperty.from_preset(preset_name=preset_name),
             cf.AtomicOrbitals(),
             cf.BandCenter(),
@@ -254,6 +255,11 @@ class AllFeaturizers(object):
             cf.ElectronAffinity(),
             cf.ElectronegativityDiff(),
         ]
+
+        if extras:
+            featzers.append([cf.ElementFraction(), cf.Miedema(), cf.YangSolidSolution()])
+
+        return featzers
 
 
     def structure(self, preset_name="CrystalNNFingerprint_ops"):
