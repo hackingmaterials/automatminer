@@ -218,7 +218,8 @@ def load_wolverton_oxides():
               "gamma [deg]": "gamma",
               "Lowest distortion": "lowest distortion"}
     df = df.rename(columns=colmap)
-    df['e_form'] = pd.to_numeric(df['e_form'], errors='coerce')
+    for k in ['e_form', 'gap pbe', 'e_hull', 'vpa', 'e_form oxygen']:
+        df[k] = pd.to_numeric(df[k], errors='coerce')
     return df.dropna()
 
 
@@ -503,4 +504,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
     # print(load_mp('mp_all.csv'))
-    print(load_glass_formation("ternary"))
+    print(load_wolverton_oxides())
