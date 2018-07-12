@@ -285,8 +285,8 @@ def load_glass_formation(phase="ternary"):
                         "QC": quasi-crystalline phase
         gfa (output): glass forming ability, i.e. whether the composition can
                       form monolithic glass or not,
-                      1: glass forming
-                      0: non-glass forming
+                      True: glass forming
+                      False: non-glass forming
 
     """
     if phase == "ternary":
@@ -296,6 +296,9 @@ def load_glass_formation(phase="ternary"):
     else:
         raise ValueError("Unknown phase designation for glass formation "
                          "dataset: {}".format(phase))
+
+    df = df.applymap(lambda x: True if x == 1 else x)
+    df = df.applymap(lambda x: False if x == 0 else x)
     return df
 
 
@@ -500,4 +503,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
     # print(load_mp('mp_all.csv'))
-    print(load_jdft2d())
+    print(load_glass_formation("ternary"))
