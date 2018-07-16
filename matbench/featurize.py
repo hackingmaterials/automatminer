@@ -243,28 +243,11 @@ class AllFeaturizers(object):
             cf.YangSolidSolution(),
             cf.ElementFraction(),  # too many features?
         ]
-
-
-    def composition_specific(self):
-        """
-        All composition-based featurizers that are more specific to a group of
-        compositions; otherwise, they return error or NaN. For example,
-        CohesiveEnergy needs compositions with at least a single structure in
-        The Materials Project.
-
-        Returns ([matminer featurizer classes]):
-        """
-        return [
-            cf.CohesiveEnergy(),  # an entry must be found in materialsproject.org
-            # TODO-Qi: what is the requirement for elements? wasn't clear at the top of class's documentation
-            cf.Miedema(),
-        ]
-
         if extras:
             featzers += [cf.ElementFraction(), cf.Miedema(),
                          cf.YangSolidSolution()]
-
         return featzers
+
 
     def structure(self, preset_name="CrystalNNFingerprint_ops"):
         """
