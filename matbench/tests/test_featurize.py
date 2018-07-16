@@ -320,7 +320,6 @@ class TestAllFeaturizers(unittest.TestCase):
         non_featurizers = self.base_non_featurizers + [
             "BandStructure",
             "BandStructureSymmLine",
-            "CompleteDos", #TODO: remove this when this PR is merged and matminer version updated: https://github.com/hackingmaterials/matminer/pull/268
             "SpacegroupAnalyzer",
             "Spin"
         ]
