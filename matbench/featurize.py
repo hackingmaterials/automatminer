@@ -290,7 +290,7 @@ class AllFeaturizers(object):
         Returns ([matminer featurizer classes]):
         """
         return [
-            # sf.PartialRadialDistributionFunction(), #TODO: uncomment this when this PR is merged and matminer version updated: https://github.com/hackingmaterials/matminer/pull/268
+            sf.PartialRadialDistributionFunction(),
             sf.BondFractions(),
             sf.BagofBonds()
         ]

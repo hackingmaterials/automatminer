@@ -286,7 +286,6 @@ class TestAllFeaturizers(unittest.TestCase):
             "XRDCalculator",
             "gaussian_kde",
             "itemgetter",
-            "PartialRadialDistributionFunction" #TODO: remove this when this PR is merged and matminer version updated: https://github.com/hackingmaterials/matminer/pull/268
         ]
         # get all current featurizers
         true_feats = self.get_true_featurizers(sf, non_featurizers)
