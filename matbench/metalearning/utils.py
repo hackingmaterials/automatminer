@@ -190,3 +190,32 @@ class FormulaStats:
             return 10
         else:
             return 11
+
+
+class StructureStats:
+    def __init__(self, structures):
+        self.structures = structures
+
+    def structure_stats(self):
+        if isinstance(self.structures, Structure):
+            self.structures = [self.structures]
+        stats = OrderedDict()
+        for i, structure in enumerate(self.structures):
+            stats[i] = StructureStats.structure_category(structure)
+        return stats
+
+    @staticmethod
+    def structure_category(structure):
+        """
+        Extract messages from the structure.
+        Args:
+            structure:
+        Returns:
+            dict of the following messages
+            nsites (int): number of sites in the structure.
+            is_ordered (bool): whether the structure is ordered or not.
+            ...to be continued
+
+        """
+        return {"n_sites": len(structure),
+                "is_ordered": structure.is_ordered}
