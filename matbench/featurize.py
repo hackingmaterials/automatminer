@@ -233,7 +233,7 @@ class AllFeaturizers(object):
             cf.Stoichiometry(),
             cf.ValenceOrbital(),
             cf.TMetalFraction(),
-            cf.AtomicPackingEfficiency(), # much slower than the rest
+            cf.AtomicPackingEfficiency(),  # much slower than the rest
 
             # these need oxidation states present in Composition:
             cf.CationProperty.from_preset(preset_name='deml'),
@@ -241,11 +241,13 @@ class AllFeaturizers(object):
             cf.ElectronAffinity(),
             cf.ElectronegativityDiff(),
             cf.YangSolidSolution(),
-            cf.ElementFraction(),  # too many features?
         ]
+
         if extras:
-            featzers += [cf.ElementFraction(), cf.Miedema(),
-                         cf.YangSolidSolution()]
+            featzers += [cf.ElementFraction(),
+                         cf.Miedema(),
+                         cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
+                         ]
         return featzers
 
 
