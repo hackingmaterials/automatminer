@@ -9,6 +9,7 @@ for matbench.
     pros:
         + easy to install
         + easy to get it to work and print some results
+        + already have an internal implementation of feature importance.
     cons:
         - lack of documentation and organization
         - results are printed or to ".dill" file. Difficult to handle the results
