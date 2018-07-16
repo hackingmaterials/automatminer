@@ -1,3 +1,2 @@
-pymatgen
 matminer
 xlrd
