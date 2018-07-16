@@ -33,7 +33,7 @@ class FormulaStats:
         Args:
             formula (str): a given formula.
         Returns:
-            dict of the following messages
+            dict of the following messages:
             major_category (int):
                 all_metal: 1
                 metal_nonmetal: 2
@@ -146,7 +146,7 @@ class FormulaStats:
         """
         Define the category of a given element.
         Args:
-            element: Pymatgen Element object
+            element: an element symbol or a Pymatgen Element object
         Returns:
             metallic:
                 is_transitional_metal(except for rare_earth_metal/actinoid): 1
@@ -166,6 +166,9 @@ class FormulaStats:
                 other: 11 (only a few elements are not covered by the
                            above categories)
         """
+        if not isinstance(element, Element) and isinstance(element,
+                                                           six.string_types):
+            element = Element(element)
         if element.is_transition_metal:
             if element.is_lanthanoid or element.symbol in ("Y", "Sc"):
                 return 2
