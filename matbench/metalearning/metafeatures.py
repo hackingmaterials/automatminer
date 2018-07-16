@@ -131,7 +131,7 @@ class PercentOfAllNonmetal(MetaFeature):
 class NumberOfDifferentElements(MetaFeature):
     def _calculate(self, X, y, categorical):
         stats = helper_functions.get_value("FormulaStats")
-        elements = set([])
+        elements = set()
         for x in stats.values():
             elements = elements.union(set(x["elements"]))
         return len(elements)
@@ -228,10 +228,9 @@ class NumberOfInstancesWithMissingValues(MetaFeature):
     def _calculate_sparse(self, X, y, categorical):
         missing = helper_functions.get_value("MissingValues")
         new_missing = missing.tocsr()
-        num_missing = [
-            np.sum(new_missing.data[new_missing.indptr[i]:new_missing.indptr[i + 1]])
-                                for i in range(new_missing.shape[0])]
-
+        num_missing = [np.sum(
+            new_missing.data[new_missing.indptr[i]:new_missing.indptr[i + 1]])
+            for i in range(new_missing.shape[0])]
         return sum([1 if num > 0 else 0 for num in num_missing])
 
 
@@ -239,20 +238,19 @@ class NumberOfInstancesWithMissingValues(MetaFeature):
                      dependency="NumberOfInstancesWithMissingValues")
 class PercentageOfInstancesWithMissingValues(MetaFeature):
     def _calculate(self, X, y, categorical):
-        return float(metafeatures.get_value("NumberOfInstancesWithMissingValues")
-               / float(metafeatures["NumberOfInstances"](X, y).value))
+        return metafeatures.get_value("NumberOfInstancesWithMissingValues") \
+               / metafeatures["NumberOfInstances"](X, y).value
 
 
 @metafeatures.define("NumberOfMissingValues", dependency="MissingValues")
 class NumberOfMissingValues(MetaFeature):
     def _calculate(self, X, y, categorical):
-        return float(helper_functions.get_value("MissingValues").sum())
+        return helper_functions.get_value("MissingValues").sum()
 
 
 @metafeatures.define("PercentOfMissingValues",
                      dependency="NumberOfMissingValues")
 class PercentageOfMissingValues(MetaFeature):
     def _calculate(self, X, y, categorical):
-        return float(metafeatures.get_value("NumberOfMissingValues")) / \
-               float(X.shape[0]*X.shape[1])
-
+        return metafeatures.get_value("NumberOfMissingValues") \
+               / (X.shape[0] * X.shape[1])
