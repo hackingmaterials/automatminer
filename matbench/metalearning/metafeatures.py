@@ -87,7 +87,7 @@ helper_functions = HelperFunctions()
 # composition-related metafeatures
 ##################################
 @helper_functions.define("FormulaStats")
-class MissingValues(HelperFunction):
+class FormulaStats(HelperFunction):
     def _calculate(self, X, y, categorical):
         stats = FormulaStats.formula_stats(X["formula"])
         return stats
@@ -138,7 +138,7 @@ class NumberOfDifferentElements(MetaFeature):
 
 
 @metafeatures.define("AvgNumberOfElements", dependency="FormulaStats")
-class PercentOfOrderedStructure(MetaFeature):
+class AvgNumberOfElements(MetaFeature):
     def _calculate(self, X, y, categorical):
         stats = helper_functions.get_value("FormulaStats")
         nelements_sum = sum([x["n_elements"] for x in stats.values()])
@@ -146,7 +146,7 @@ class PercentOfOrderedStructure(MetaFeature):
 
 
 @metafeatures.define("MaxNumberOfElements", dependency="FormulaStats")
-class PercentOfOrderedStructure(MetaFeature):
+class MaxNumberOfElements(MetaFeature):
     def _calculate(self, X, y, categorical):
         stats = helper_functions.get_value("FormulaStats")
         nelements_max = max([x["n_elements"] for x in stats.values()])
@@ -154,7 +154,7 @@ class PercentOfOrderedStructure(MetaFeature):
 
 
 @metafeatures.define("MinNumberOfElements", dependency="FormulaStats")
-class PercentOfOrderedStructure(MetaFeature):
+class MinNumberOfElements(MetaFeature):
     def _calculate(self, X, y, categorical):
         stats = helper_functions.get_value("FormulaStats")
         nelements_min = min([x["n_elements"] for x in stats.values()])
@@ -177,8 +177,8 @@ class NumberOfStructures(MetaFeature):
         return len(X["structure"])
 
 
-@metafeatures.define("PercentOfOrderedStructure", dependency="StructureStats")
-class PercentOfOrderedStructure(MetaFeature):
+@metafeatures.define("PercentOfOrderedStructures", dependency="StructureStats")
+class PercentOfOrderedStructures(MetaFeature):
     def _calculate(self, X, y, categorical):
         stats = helper_functions.get_value("StructureStats")
         num = sum([1 if x["is_ordered"] else 0 for x in stats.values()])
@@ -186,7 +186,7 @@ class PercentOfOrderedStructure(MetaFeature):
 
 
 @metafeatures.define("AverageNumberOfSites", dependency="StructureStats")
-class PercentOfOrderedStructure(MetaFeature):
+class AverageNumberOfSites(MetaFeature):
     def _calculate(self, X, y, categorical):
         stats = helper_functions.get_value("StructureStats")
         nsites_sum = sum([x["n_sites"] for x in stats.values()])
@@ -194,7 +194,7 @@ class PercentOfOrderedStructure(MetaFeature):
 
 
 @metafeatures.define("MaxNumberOfSites", dependency="StructureStats")
-class PercentOfOrderedStructure(MetaFeature):
+class MaxNumberOfSites(MetaFeature):
     def _calculate(self, X, y, categorical):
         stats = helper_functions.get_value("StructureStats")
         nsites_max = max([x["n_sites"] for x in stats.values()])
