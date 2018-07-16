@@ -5,18 +5,19 @@ from pymatgen.core import Composition, Element, Structure
 
 
 class FormulaStats:
+    """
+    Get statistics of formulas. This is a helper function to the design
+    of composition-related metafeatures.
+    Args:
+        formulas: a formula (str) or an iterable of formulas (list,
+                  tuple, numpy.array or pandas.Series).
+    """
     def __init__(self, formulas):
         self.formulas = formulas
 
     def formula_stats(self):
         """
-        Get categorical stats of a list.
-        Args:
-            formulas: list of formula
-
-        Returns:
-            (dict)
-
+        Get categorical statistics of formulas.
         """
         if isinstance(self.formulas, six.string_types):
             self.formulas = [self.formulas]
@@ -30,7 +31,7 @@ class FormulaStats:
         """
         Extract some categorical messages from the formula.
         Args:
-            formula:
+            formula (str): a given formula.
         Returns:
             dict of the following messages
             major_category (int):
@@ -122,7 +123,7 @@ class FormulaStats:
         """
         Guess the phase prototype from the integer anonymized_formula.
         Args:
-            formula:
+            formula (str): a given formula.
         Returns:
             prototype:
                 double_perovskites: 1
@@ -145,7 +146,7 @@ class FormulaStats:
         """
         Define the category of a given element.
         Args:
-            element: pymatgen Element object
+            element: Pymatgen Element object
         Returns:
             metallic:
                 is_transitional_metal(except for rare_earth_metal/actinoid): 1
@@ -193,6 +194,14 @@ class FormulaStats:
 
 
 class StructureStats:
+    """
+    Get statistics of structures. This is a helper function to the design
+    of strcture-related metafeatures.
+    Args:
+        structures: a Pymatgen Structure object or an iterable of Pymatgen
+                    Structure objects (list, tuple, numpy.array or
+                    pandas.Series).
+    """
     def __init__(self, structures):
         self.structures = structures
 
@@ -209,9 +218,9 @@ class StructureStats:
         """
         Extract messages from the structure.
         Args:
-            structure:
+            structure: a Pymatgen Structure object
         Returns:
-            dict of the following messages
+            dict of the following messages:
             nsites (int): number of sites in the structure.
             is_ordered (bool): whether the structure is ordered or not.
             ...to be continued
