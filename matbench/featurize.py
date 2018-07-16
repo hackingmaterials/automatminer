@@ -1,18 +1,14 @@
-import pandas as pd
+from warnings import warn
 
-from matbench.data.generate import generate_mp
-from matminer.featurizers.base import MultipleFeaturizer
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
 import matminer.featurizers.bandstructure as bf
+from matminer.featurizers.base import MultipleFeaturizer
 from matminer.utils.conversions import composition_to_oxidcomposition, \
     structure_to_oxidstructure
-from pymatgen import Composition, Structure
-from matbench.data.load import load_castelli_perovskites
 from matbench.utils.utils import MatbenchError
-from warnings import warn
-
+from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
 
@@ -217,6 +213,7 @@ class AllFeaturizers(object):
     def __init__(self, preset_name="matminer"):
         self.preset_name = preset_name
 
+
     def composition(self, preset_name=None, extras=False):
         """
         All composition-based featurizers with default arguments.
@@ -226,7 +223,6 @@ class AllFeaturizers(object):
             extras (bool): Include "niche" composition featurizers
 
         Returns ([matminer featurizer classes]):
-
         """
         preset_name = preset_name or self.preset_name
         featzers = [
@@ -236,12 +232,7 @@ class AllFeaturizers(object):
             cf.IonProperty(),
             cf.Stoichiometry(),
             cf.ValenceOrbital(),
-            # cf.ElementFraction(), # too many features?
             cf.TMetalFraction(),
-            # cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
-            # TODO-Qi: what is the requirement for elements? wasn't clear at the top of class's documentation
-            # cf.Miedema(),
-            # cf.YangSolidSolution(),
             cf.AtomicPackingEfficiency(),  # much slower than the rest
 
             # these need oxidation states present in Composition:
@@ -249,13 +240,16 @@ class AllFeaturizers(object):
             cf.OxidationStates.from_preset(preset_name='deml'),
             cf.ElectronAffinity(),
             cf.ElectronegativityDiff(),
+            cf.YangSolidSolution(),
         ]
 
         if extras:
-            featzers += [cf.ElementFraction(), cf.Miedema(),
-                         cf.YangSolidSolution()]
-
+            featzers += [cf.ElementFraction(),
+                         cf.Miedema(),
+                         cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
+                         ]
         return featzers
+
 
     def structure(self, preset_name="CrystalNNFingerprint_ops"):
         """
@@ -285,8 +279,7 @@ class AllFeaturizers(object):
 
             # these need oxidation states present in Structure:
             sf.ElectronicRadialDistributionFunction(),
-            sf.EwaldEnergy(accuracy=4),
-            # TODO: remove this accuracy=4 when new version of matminer is released
+            sf.EwaldEnergy()
         ]
 
     def fit_structure(self):
@@ -297,7 +290,7 @@ class AllFeaturizers(object):
         Returns ([matminer featurizer classes]):
         """
         return [
-            # sf.PartialRadialDistributionFunction(), # got the error AssertionError: 13200 columns passed, passed data had 13260 columns
+            # sf.PartialRadialDistributionFunction(), #TODO: uncomment this when this PR is merged and matminer version updated: https://github.com/hackingmaterials/matminer/pull/268
             sf.BondFractions(),
             sf.BagofBonds()
         ]

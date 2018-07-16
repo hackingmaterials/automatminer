@@ -1,16 +1,17 @@
 # coding: utf-8
-
+import inspect
 import os
 import pandas as pd
 import unittest
 
-from matbench.data.generate import generate_mp
 from matbench.data.load import load_double_perovskites_gap, \
     load_castelli_perovskites
-from matbench.featurize import Featurize
+from matbench.featurize import Featurize, AllFeaturizers
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
-from matminer.featurizers.composition import ElementProperty, IonProperty
-
+import matminer.featurizers.composition as cf
+import matminer.featurizers.structure as sf
+import matminer.featurizers.dos as dosf
+import matminer.featurizers.bandstructure as bf
 
 test_dir = os.path.dirname(__file__)
 
@@ -53,8 +54,8 @@ class TestFeaturize(unittest.TestCase):
         self.assertTrue((df["transition metal fraction"] < 0.45).all())
 
         # YangSolidSolution:
-        # self.assertAlmostEqual(
-        #     df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
+        self.assertAlmostEqual(
+            df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
 
         # AtomicPackingEfficiency:
         self.assertTrue((df["mean abs simul. packing efficiency"] < 0.1).all())
@@ -70,8 +71,8 @@ class TestFeaturize(unittest.TestCase):
         df_init = df_init.drop('formula', axis=1)
         df_init["composition"] = df["composition"]
         df = featurizer.featurize_formula(df_init, featurizers=[
-            ElementProperty.from_preset(preset_name="matminer"),
-            IonProperty()
+            cf.ElementProperty.from_preset(preset_name="matminer"),
+            cf.IonProperty()
         ])
         self.assertGreaterEqual(len(df.columns), 70)
 
@@ -208,6 +209,131 @@ class TestFeaturize(unittest.TestCase):
 
         # BranchPointEnergy:
         self.assertAlmostEqual(df["branch_point_energy"][0], 5.7677, 4)
+
+
+
+class TestAllFeaturizers(unittest.TestCase):
+    """
+    Class to ensure the featurizers available in featurizer files in matminer
+    match exactly to those defined to AllFeaturizers class. This test is meant
+    to catch events when a new featurizer is defined but not listed inside
+    AllFeaturizers (e.g. by mistake).
+    """
+    def setUp(self):
+        self.allfs = AllFeaturizers()
+        self.base_non_featurizers = [
+            "BaseFeaturizer",
+            "Element",
+            "Specie",
+            "OrderedDict",
+            "NotFittedError",
+            "PropertyStats",
+        ]
+
+    def get_true_featurizers(self, module, non_featurizers):
+        """
+        Returns list of all featurizer names given a python module and a list
+        of class names that are not expected to be featurizers.
+        Args:
+            module (module):
+            non_featurizers ([str]):
+
+        Returns ([str]):
+            List of all featurizer (class) names
+        """
+        classes = inspect.getmembers(module, inspect.isclass)
+        class_names = [c[0] for c in classes]
+        featurizer_names = [c for c in class_names if c not in non_featurizers]
+        return featurizer_names
+
+
+    def test_composition_featurizers(self):
+        non_featurizers = self.base_non_featurizers + [
+            "Composition",
+            "CohesiveEnergyData",
+            "DemlData",
+            "MPRester",
+            "MagpieData",
+            "MixingEnthalpy",
+            "MolecularOrbitals",
+            "NearestNeighbors",
+            "PymatgenData"
+        ]
+        # get all current featurizers
+        true_feats = self.get_true_featurizers(cf, non_featurizers)
+        # get all featurizers that are defined in AllFeaturizers class
+        test_feats = self.allfs.composition(extras=True)
+        test_feats = [c.__class__.__name__ for c in test_feats]
+        # featurizers must match exactly
+        self.assertEqual(len(test_feats), len(true_feats))
+        for featurizer_name in true_feats:
+            self.assertTrue(featurizer_name in test_feats)
+
+
+    def test_structure_featurizers(self):
+        non_featurizers = self.base_non_featurizers + [
+            "Structure",
+            "StructureComposition",
+            "CoordinationNumber",
+            "CrystalNNFingerprint",
+            "OPSiteFingerprint",
+            "ValenceIonicRadiusEvaluator",
+            "EwaldSummation",
+            "LocalPropertyDifference",
+            "NotFittedError",
+            "SpacegroupAnalyzer",
+            "VoronoiNN",
+            "XRDCalculator",
+            "gaussian_kde",
+            "itemgetter",
+            "PartialRadialDistributionFunction" #TODO: remove this when this PR is merged and matminer version updated: https://github.com/hackingmaterials/matminer/pull/268
+        ]
+        # get all current featurizers
+        true_feats = self.get_true_featurizers(sf, non_featurizers)
+        # get all featurizers that are defined in AllFeaturizers class
+        test_feats = self.allfs.structure() + self.allfs.fit_structure()
+        test_feats = [c.__class__.__name__ for c in test_feats]
+        # featurizers must match exactly
+        self.assertEqual(len(test_feats), len(true_feats))
+        for featurizer_name in true_feats:
+            self.assertTrue(featurizer_name in test_feats)
+
+
+    def test_dos_featurizers(self):
+        non_featurizers = self.base_non_featurizers + [
+            "CompleteDos",
+            "FermiDos",
+            "BandCenter",
+            "Spin"
+        ]
+        # get all current featurizers
+        true_feats = self.get_true_featurizers(dosf, non_featurizers)
+        # get all featurizers that are defined in AllFeaturizers class
+        test_feats = self.allfs.dos()
+        test_feats = [c.__class__.__name__ for c in test_feats]
+        # featurizers must match exactly
+        self.assertEqual(len(test_feats), len(true_feats))
+        for featurizer_name in true_feats:
+            self.assertTrue(featurizer_name in test_feats)
+
+
+    def test_bandstructure_featurizers(self):
+        non_featurizers = self.base_non_featurizers + [
+            "BandStructure",
+            "BandStructureSymmLine",
+            "CompleteDos", #TODO: remove this when this PR is merged and matminer version updated: https://github.com/hackingmaterials/matminer/pull/268
+            "SpacegroupAnalyzer",
+            "Spin"
+        ]
+        # get all current featurizers
+        true_feats = self.get_true_featurizers(bf, non_featurizers)
+        # get all featurizers that are defined in AllFeaturizers class
+        test_feats = self.allfs.bandstructure()
+        test_feats = [c.__class__.__name__ for c in test_feats]
+        # featurizers must match exactly
+        self.assertEqual(len(test_feats), len(true_feats))
+        for featurizer_name in true_feats:
+            self.assertTrue(featurizer_name in test_feats)
 
 
 
