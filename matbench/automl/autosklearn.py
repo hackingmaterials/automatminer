@@ -4,8 +4,8 @@ import sklearn.datasets
 import sklearn.metrics
 
 try:
-    import autosklearn.classification
-    import autosklearn.regression
+    from autosklearn.estimators import AutoSklearnClassifier, \
+        AutoSklearnRegressor
     from autosklearn.metrics import make_scorer
     from autosklearn.metrics import classification_metrics
 except ImportError:
@@ -150,8 +150,7 @@ class AutoSklearnML:
         Returns:
 
         """
-        auto_classifier = autosklearn.classification.AutoSklearnClassifier(
-            **self.auto_sklearn_kwargs)
+        auto_classifier = AutoSklearnClassifier(**self.auto_sklearn_kwargs)
         classification_metric = AutoSklearnML.get_classification_metric(metric)
         auto_classifier.fit(self.X_train.copy(),
                             self.y_train.copy(),
@@ -182,8 +181,7 @@ class AutoSklearnML:
         Returns:
 
         """
-        auto_regressor = autosklearn.regression.AutoSklearnRegressor(
-            **self.auto_sklearn_kwargs)
+        auto_regressor = AutoSklearnRegressor(**self.auto_sklearn_kwargs)
         regression_metric = AutoSklearnML.get_regression_metric(metric)
         auto_regressor.fit(self.X_train, self.y_train,
                            metric=regression_metric,
