@@ -278,7 +278,7 @@ class AllFeaturizers(object):
             sf.SiteStatsFingerprint.from_preset(preset=preset_name),
 
             # these need oxidation states present in Structure:
-            sf.ElectronicRadialDistributionFunction(),
+            sf.ElectronicRadialDistributionFunction(),  # returns dict!
             sf.EwaldEnergy()
         ]
 
