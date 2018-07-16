@@ -35,12 +35,12 @@ class Featurize(object):
         ignore_errors (bool): whether to ignore exceptions raised when
             featurize_dataframe is called
     """
+
     def __init__(self, df, ignore_cols=None, preset_name="matminer",
                  ignore_errors=True):
         self.df = df if ignore_cols is None else df.drop(ignore_cols, axis=1)
         self.all_featurizers = AllFeaturizers(preset_name=preset_name)
         self.ignore_errors = ignore_errors
-
 
     def _preprocess_df(self, df, inplace=True, col_id=None):
         if df is None:
@@ -50,7 +50,6 @@ class Featurize(object):
         if col_id and col_id not in df:
             raise MatbenchError("'{}' column must be in data!".format(col_id))
         return df
-
 
     def featurize_columns(self, df=None, input_cols=None):
         """
@@ -74,7 +73,6 @@ class Featurize(object):
             else:
                 warn('No method available to featurize "{}"'.format(column))
         return df
-
 
     def featurize_formula(self, df=None, featurizers="all", col_id="formula",
                           compcol="composition", guess_oxidstates=True,
@@ -100,12 +98,11 @@ class Featurize(object):
             df[compcol] = df[col_id].apply(Composition)
         if guess_oxidstates:
             df[compcol] = composition_to_oxidcomposition(df[compcol])
-        if featurizers=='all':
+        if featurizers == 'all':
             featurizers = self.all_featurizers.composition()
         df = MultipleFeaturizer(featurizers).featurize_dataframe(
             df, col_id=compcol, ignore_errors=self.ignore_errors)
         return df
-
 
     def featurize_structure(self, df=None, featurizers="all",
                             fit_featurizers="all", col_id="structure",
@@ -140,15 +137,14 @@ class Featurize(object):
             featurizers = self.all_featurizers.structure()
         df = MultipleFeaturizer(featurizers).featurize_dataframe(
             df, col_id=col_id, ignore_errors=self.ignore_errors)
-        if fit_featurizers=="all":
-            featurizers = self.all_featurizers.structure_fit()
+        if fit_featurizers == "all":
+            featurizers = self.all_featurizers.fit_structure()
         for featzer in featurizers:
             featzer.fit(df[col_id])
             df = featzer.featurize_dataframe(df,
                                              col_id=col_id,
                                              ignore_errors=self.ignore_errors)
         return df
-
 
     def featurize_dos(self, df=None, featurizers="all", col_id="dos",
                       inplace=True):
@@ -175,7 +171,6 @@ class Featurize(object):
         df = MultipleFeaturizer(featurizers).featurize_dataframe(
             df, col_id=col_id, ignore_errors=self.ignore_errors)
         return df
-
 
     def featurize_bandstructure(self, df=None, featurizers="all",
                                 col_id="bandstructure", inplace=True):
@@ -204,7 +199,6 @@ class Featurize(object):
         return df
 
 
-
 class AllFeaturizers(object):
     """
     Contains all available featurizers that take various types of inputs such
@@ -215,21 +209,23 @@ class AllFeaturizers(object):
     Args:
         preset_name (str): some featurizers take in this argument
     """
+
     def __init__(self, preset_name="matminer"):
         self.preset_name = preset_name
 
 
-    def composition(self, preset_name=None):
+    def composition(self, preset_name=None, extras=False):
         """
         All composition-based featurizers with default arguments.
 
         Args:
             preset_name (str): some featurizers take in this argument
+            extras (bool): Include "niche" composition featurizers
 
         Returns ([matminer featurizer classes]):
         """
         preset_name = preset_name or self.preset_name
-        return [
+        featzers = [
             cf.ElementProperty.from_preset(preset_name=preset_name),
             cf.AtomicOrbitals(),
             cf.BandCenter(),
@@ -264,6 +260,11 @@ class AllFeaturizers(object):
             cf.Miedema(),
         ]
 
+        if extras:
+            featzers += [cf.ElementFraction(), cf.Miedema(),
+                         cf.YangSolidSolution()]
+
+        return featzers
 
     def structure(self, preset_name="CrystalNNFingerprint_ops"):
         """
@@ -280,11 +281,11 @@ class AllFeaturizers(object):
             sf.DensityFeatures(),
             sf.GlobalSymmetryFeatures(),
             sf.Dimensionality(),
-            sf.RadialDistributionFunction(), # returns dict!
-            sf.CoulombMatrix(), # returns a matrix!
-            sf.SineCoulombMatrix(), # returns a matrix!
-            sf.OrbitalFieldMatrix(), # returns a matrix!
-            sf.MinimumRelativeDistances(), # returns a list
+            sf.RadialDistributionFunction(),  # returns dict!
+            sf.CoulombMatrix(),  # returns a matrix!
+            sf.SineCoulombMatrix(),  # returns a matrix!
+            sf.OrbitalFieldMatrix(),  # returns a matrix!
+            sf.MinimumRelativeDistances(),  # returns a list
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
             sf.ChemicalOrdering(),
@@ -296,8 +297,7 @@ class AllFeaturizers(object):
             sf.EwaldEnergy()
         ]
 
-
-    def structure_fit(self):
+    def fit_structure(self):
         """
         Structure-based featurizers with default arguments that require the
         fit method to be called first.
@@ -310,7 +310,6 @@ class AllFeaturizers(object):
             sf.BagofBonds()
         ]
 
-
     def dos(self):
         """
         All dos-based featurizers with default arguments.
@@ -322,7 +321,6 @@ class AllFeaturizers(object):
             dosf.DopingFermi(),
             dosf.BandEdge()
         ]
-
 
     def bandstructure(self):
         """

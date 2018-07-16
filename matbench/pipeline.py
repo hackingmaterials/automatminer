@@ -56,7 +56,6 @@ for sf in structure_featurizers:
 dfo = df[fls + ['e_form', 'composition']]
 dfo = dfo.dropna(axis=1, thresh=0.25).dropna(axis=0)
 remaining_labels = [f for f in fls if f in dfo.columns.values]
-dfx = dfo[remaining_labels]
 X = dfx.values
 y = dfo['e_form']
 

@@ -218,7 +218,8 @@ def load_wolverton_oxides():
               "gamma [deg]": "gamma",
               "Lowest distortion": "lowest distortion"}
     df = df.rename(columns=colmap)
-    df['e_form'] = pd.to_numeric(df['e_form'], errors='coerce')
+    for k in ['e_form', 'gap pbe', 'e_hull', 'vpa', 'e_form oxygen']:
+        df[k] = pd.to_numeric(df[k], errors='coerce')
     return df.dropna()
 
 
@@ -285,8 +286,8 @@ def load_glass_formation(phase="ternary"):
                         "QC": quasi-crystalline phase
         gfa (output): glass forming ability, i.e. whether the composition can
                       form monolithic glass or not,
-                      1: glass forming
-                      0: non-glass forming
+                      True: glass forming
+                      False: non-glass forming
 
     """
     if phase == "ternary":
@@ -296,6 +297,9 @@ def load_glass_formation(phase="ternary"):
     else:
         raise ValueError("Unknown phase designation for glass formation "
                          "dataset: {}".format(phase))
+
+    df = df.applymap(lambda x: True if x == 1 else x)
+    df = df.applymap(lambda x: False if x == 0 else x)
     return df
 
 
@@ -375,6 +379,7 @@ def load_jdft2d():
     dropcols = ['epsx', 'epsy', 'epsz', 'mepsx', 'mepsy', 'mepsz', 'kv', 'gv',
                 'jid', 'kpoints', 'incar', 'icsd', 'mbj_gap', 'fin_en']
     df = df.drop(dropcols, axis=1)
+    df = df.replace('na', np.nan)
     df = df.rename(columns=colmap)
     df['structure'] = df['structure']
     df['structure initial'] = df['structure initial']
@@ -499,4 +504,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
     # print(load_mp('mp_all.csv'))
-    print(load_jdft2d())
+    print(load_wolverton_oxides())
