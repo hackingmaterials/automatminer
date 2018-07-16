@@ -10,7 +10,7 @@ matbench though there doesn't seem to be an explicit support for feature importa
 It uses a combination of GP and genetic algorithm to find the estimator with the
 set of parameters that returns the best scoring (supports many scoring metrics)
     pros:
-        + easy install and written in python
+        + easy install: "pip install tpot"; written in python
         + easily accessible history of models tried and their accuracy in evaluated_individuals_
         + automatic global optimization already implemented
         + seems more organized than automl
