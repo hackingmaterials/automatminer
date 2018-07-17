@@ -42,11 +42,6 @@ df_feats = featzer.featurize_formula(featurizers=[
 prep = PreProcess(df_feats, target_col=target_col)
 df = prep.preprocess()
 
-# these should be done inside preprocess!:
-df.to_csv('test.csv')
-print(df)
-
-
 X_train, X_test, y_train, y_test = train_test_split(df.drop(target_col, axis=1).as_matrix(),
     df[target_col], train_size=0.75, test_size=0.25)
 
