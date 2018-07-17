@@ -34,15 +34,18 @@ class Featurize(object):
         preset_name (str): some featurizers (w/ from_preset) take in this arg
         ignore_errors (bool): whether to ignore exceptions raised when
             featurize_dataframe is called
+        drop_featurized_col (bool): whether to drop the featurized column after
+            the corresponding featurize_* method is called
     """
 
     def __init__(self, df, ignore_cols=None, preset_name="matminer",
-                 ignore_errors=True):
+                 ignore_errors=True, drop_featurized_col=True):
         self.df = df if ignore_cols is None else df.drop(ignore_cols, axis=1)
         self.all_featurizers = AllFeaturizers(preset_name=preset_name)
         self.ignore_errors = ignore_errors
+        self.drop_featurized_col = drop_featurized_col
 
-    def _preprocess_df(self, df, inplace=True, col_id=None):
+    def _prescreen_df(self, df, inplace=True, col_id=None):
         if df is None:
             df = self.df.copy(deep=True)
         if not inplace:
@@ -62,7 +65,7 @@ class Featurize(object):
         Returns (pandas.DataFrame):
             self.df w/ new features added via featurizering input_cols
         """
-        df = self._preprocess_df(df)
+        df = self._prescreen_df(df)
         input_cols = input_cols or ["formula"]
         for column in input_cols:
             featurizer = getattr(self, "featurize_{}".format(column), None)
@@ -76,7 +79,7 @@ class Featurize(object):
 
     def featurize_formula(self, df=None, featurizers="all", col_id="formula",
                           compcol="composition", guess_oxidstates=True,
-                          inplace=True):
+                          inplace=True, asindex=True):
         """
         Featurizes based on formula or composition (pymatgen Composition).
 
@@ -89,11 +92,12 @@ class Featurize(object):
                 which is required for some featurizers such as CationProperty,
                 OxidationStates, ElectronAffinity and ElectronegativityDiff.
                 Set to False if oxidation states already available in composition.
+            asindex (bool): whether to set formula col_id as df index
 
         Returns (pandas.DataFrame):
             Dataframe with compositional features added.
         """
-        df = self._preprocess_df(df=df, inplace=inplace)
+        df = self._prescreen_df(df=df, inplace=inplace)
         if compcol not in df:
             df[compcol] = df[col_id].apply(Composition)
         if guess_oxidstates:
@@ -102,7 +106,12 @@ class Featurize(object):
             featurizers = self.all_featurizers.composition()
         df = MultipleFeaturizer(featurizers).featurize_dataframe(
             df, col_id=compcol, ignore_errors=self.ignore_errors)
-        return df
+        if asindex:
+            df = df.set_index(col_id)
+        if self.drop_featurized_col:
+            return df.drop(compcol, axis=1)
+        else:
+            return df
 
     def featurize_structure(self, df=None, featurizers="all",
                             fit_featurizers="all", col_id="structure",
@@ -128,7 +137,7 @@ class Featurize(object):
         Returns (pandas.DataFrame):
             Dataframe with structure features added.
         """
-        df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
+        df = self._prescreen_df(df=df, inplace=inplace, col_id=col_id)
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(Structure.from_dict)
         if guess_oxidstates:
@@ -144,7 +153,10 @@ class Featurize(object):
             df = featzer.featurize_dataframe(df,
                                              col_id=col_id,
                                              ignore_errors=self.ignore_errors)
-        return df
+        if self.drop_featurized_col:
+            return df.drop(col_id, axis=1)
+        else:
+            return df
 
     def featurize_dos(self, df=None, featurizers="all", col_id="dos",
                       inplace=True):
@@ -163,14 +175,17 @@ class Featurize(object):
         Returns (pandas.DataFrame):
             Dataframe with dos features added.
         """
-        df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
+        df = self._prescreen_df(df=df, inplace=inplace, col_id=col_id)
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(CompleteDos.from_dict)
         if featurizers == "all":
             featurizers = self.all_featurizers.dos()
         df = MultipleFeaturizer(featurizers).featurize_dataframe(
             df, col_id=col_id, ignore_errors=self.ignore_errors)
-        return df
+        if self.drop_featurized_col:
+            return df.drop(col_id, axis=1)
+        else:
+            return df
 
     def featurize_bandstructure(self, df=None, featurizers="all",
                                 col_id="bandstructure", inplace=True):
@@ -189,14 +204,17 @@ class Featurize(object):
         Returns (pandas.DataFrame):
             Dataframe with bandstructure features added.
         """
-        df = self._preprocess_df(df=df, inplace=inplace, col_id=col_id)
+        df = self._prescreen_df(df=df, inplace=inplace, col_id=col_id)
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(BandStructure.from_dict)
         if featurizers == "all":
             featurizers = self.all_featurizers.bandstructure()
         df = MultipleFeaturizer(featurizers).featurize_dataframe(
             df, col_id=col_id, ignore_errors=self.ignore_errors)
-        return df
+        if self.drop_featurized_col:
+            return df.drop(col_id, axis=1)
+        else:
+            return df
 
 
 class AllFeaturizers(object):
