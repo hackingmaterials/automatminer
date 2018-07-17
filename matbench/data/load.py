@@ -1,6 +1,8 @@
 import os
 import ast
 import json
+import warnings
+
 import pandas as pd
 import numpy as np
 from pymatgen import Structure
@@ -192,7 +194,7 @@ def load_boltztrap_mp():
 
     Note:
         * To avoid data leakage, one may only set the target to one of the output
-        columns listed. For example, high S_n is strongly correlated with PF_n
+        columns listed. For example, S_n is strongly correlated with PF_n
         and usually when one is available the other one is available too.
         * It is recommended that dos and bandstructure objects are retrieved
         from Materials Porject and then dos, bandstructure and composition
@@ -201,6 +203,10 @@ def load_boltztrap_mp():
     df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'))
     df = df.rename(columns={'S_n': 's_n', 'S_p': 's_p',
                             'PF_n': 'pf_n', 'PF_p': 'pf_p'})
+    warnings.warn('When training a model on the load_boltztrap_mp data, to'
+        ' avoid data leakage, one may only set the target to one of the output'
+        ' columns listed. For example, s_n is strongly correlated with pf_n'
+        ' and usually when one is available the other one is available too.')
     return df
 
 
