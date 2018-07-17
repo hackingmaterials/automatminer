@@ -24,10 +24,9 @@ class TestFeaturize(unittest.TestCase):
                                ignore_cols=ignore_cols,
                                ignore_errors=False)
 
-        df = featurizer.featurize_formula()
+        df = featurizer.featurize_formula(asindex=False)
 
         # sanity checks
-        self.assertTrue("composition" in df)
         self.assertTrue(len(df), limit)
         self.assertGreaterEqual(len(df.columns), 70)
         self.assertTrue(featurizer.df.equals(df_init.drop(ignore_cols,axis=1)))
@@ -68,8 +67,6 @@ class TestFeaturize(unittest.TestCase):
         # making sure:
             # featurize_formula works with only composition and not formula
             # eaturize_formula works with a given list of featurizers
-        df_init = df_init.drop('formula', axis=1)
-        df_init["composition"] = df["composition"]
         df = featurizer.featurize_formula(df_init, featurizers=[
             cf.ElementProperty.from_preset(preset_name="matminer"),
             cf.IonProperty()
@@ -83,7 +80,6 @@ class TestFeaturize(unittest.TestCase):
         df = featurizer.featurize_structure(df_init, inplace=False)
 
         # sanity checks
-        self.assertTrue("structure" in df)
         self.assertTrue(len(df), limit)
         self.assertGreater(len(df.columns), len(df_init.columns))
         self.assertTrue(featurizer.df.equals(df_init))
@@ -177,7 +173,6 @@ class TestFeaturize(unittest.TestCase):
         df = featurizer.featurize_dos(df_init, inplace=False)
 
         # sanity checks
-        self.assertTrue("dos" in df)
         self.assertTrue(len(df), limit)
         self.assertGreater(len(df.columns), len(df_init.columns))
         self.assertTrue(featurizer.df.equals(df_init))
@@ -199,7 +194,6 @@ class TestFeaturize(unittest.TestCase):
                                                 col_id="bandstructure_uniform")
         # sanity checks
         self.assertTrue("bandstructure" in df)
-        self.assertTrue("bandstructure_uniform" in df)
         self.assertGreater(len(df.columns), len(df_init.columns))
         self.assertTrue(featurizer.df.equals(df_init))
 
