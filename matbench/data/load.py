@@ -191,9 +191,12 @@ def load_boltztrap_mp():
         pf_p (output): p-type power factor in uW/cm2.K
 
     Note:
-        To avoid data leakage, one may only set the target to one of the output
+        * To avoid data leakage, one may only set the target to one of the output
         columns listed. For example, high S_n is strongly correlated with PF_n
         and usually when one is available the other one is available too.
+        * It is recommended that dos and bandstructure objects are retrieved
+        from Materials Porject and then dos, bandstructure and composition
+        featurizers are used to generate input features.
     """
     df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'))
     df = df.rename(columns={'S_n': 's_n', 'S_p': 's_p',
