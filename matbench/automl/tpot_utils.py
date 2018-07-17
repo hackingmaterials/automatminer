@@ -1,3 +1,7 @@
+from matbench.data.load import load_double_perovskites_gap
+from matbench.featurize import Featurize
+from matbench.preprocess import PreProcess
+from matminer.featurizers.composition import ElementProperty, TMetalFraction
 from tpot import TPOTClassifier
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
@@ -32,3 +36,17 @@ tpot.export('tpot_iris_pipeline.py')
 
 # very good method for us; keeps track of the score of different algorithms:
 print(tpot.evaluated_individuals_)
+
+
+# limit = 200
+# df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
+#
+# featzer = Featurize(df_init, ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
+# df_feats = featzer.featurize_formula(featurizers=[
+#     ElementProperty.from_preset(preset_name='matminer'), TMetalFraction()])
+#
+# prep = PreProcess(df_feats, target_col='gap gllbsc')
+# df = prep.preprocess()
+#
+#
+# print(df)
