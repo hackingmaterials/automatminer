@@ -9,7 +9,12 @@ for matbench.
     pros:
         + easy to install
         + easy to get it to work and print some results
-        + already have an internal implementation of feature importance.
+        + already have an internal implementation of feature importance.:
+            - actually the "Importance" part comes from sklearn feature_importance_
+            when available. However, they do have this other analysis where they
+            go through each feature and see how their variance affect the variance
+            of the predictions that could potentially used to define a custom
+            "importance" or sensitivity.
     cons:
         - lack of documentation and organization
         - results are printed or to ".dill" file. Difficult to handle the results
