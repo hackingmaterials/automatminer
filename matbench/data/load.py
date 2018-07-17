@@ -1,6 +1,8 @@
 import os
 import ast
 import json
+import warnings
+
 import pandas as pd
 import numpy as np
 from pymatgen import Structure
@@ -150,7 +152,7 @@ def load_mp(filename='mp_nostruct.csv'):
     """
 
     df = pd.read_csv(os.path.join(data_dir, filename))
-    dropcols = ["energy", "energy_per_atom"]
+    dropcols = ['energy', 'energy_per_atom']
     df = df.drop(dropcols, axis=1)
     for alias in ['structure', 'initial_structure']:
         if alias in df.columns.values:
@@ -166,6 +168,46 @@ def load_mp(filename='mp_nostruct.csv'):
               'initial_structure': 'initial structure',
               'formation_energy_per_atom': 'e_form'}
     return df.rename(columns=colmap)
+
+
+def load_boltztrap_mp():
+    """
+    Effective mass and thermoelectric properties of 9036 compounds in The
+    Materials Project database that are calculated by the BoltzTraP software
+    package run on the GGA-PBE or GGA+U density functional theory calculation
+    results.
+
+    References:
+        https://www.nature.com/articles/sdata201785
+
+    Returns:
+        mpid (input): The Materials Project mpid, as a string.
+        formula (input):
+        m_n (output): n-type/conduction band effective mass. Units: m_e where
+            m_e is the mass of an electron; i.e. m_n is a unitless ratio
+        m_p (output): p-type/valence band effective mass.
+        s_n (output): n-type Seebeck coefficient in micro Volts per Kelvin
+        s_p (output): p-type Seebeck coefficient in micro Volts per Kelvin
+        pf_n (output): n-type thermoelectric power factor in uW/cm2.K where
+            uW is microwatts and a constant relaxation time of 1e-14 assumed.
+        pf_p (output): p-type power factor in uW/cm2.K
+
+    Note:
+        * To avoid data leakage, one may only set the target to one of the output
+        columns listed. For example, S_n is strongly correlated with PF_n
+        and usually when one is available the other one is available too.
+        * It is recommended that dos and bandstructure objects are retrieved
+        from Materials Porject and then dos, bandstructure and composition
+        featurizers are used to generate input features.
+    """
+    df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'))
+    df = df.rename(columns={'S_n': 's_n', 'S_p': 's_p',
+                            'PF_n': 'pf_n', 'PF_p': 'pf_p'})
+    warnings.warn('When training a model on the load_boltztrap_mp data, to'
+        ' avoid data leakage, one may only set the target to one of the output'
+        ' columns listed. For example, s_n is strongly correlated with pf_n'
+        ' and usually when one is available the other one is available too.')
+    return df
 
 
 def load_wolverton_oxides():
