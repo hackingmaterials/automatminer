@@ -22,7 +22,7 @@ class MatbenchTestData(unittest.TestCase):
             df = loader_func()
             loader_func_doc = loader_func.__doc__
             self.assertTrue(isinstance(df, pd.DataFrame))
-            for field in ['References:', 'Returns:', '(output):', '(input):']:
+            for field in ['References:', 'Returns:', '(target):', '(input):']:
                 self.assertTrue(field in loader_func_doc)
             for col in df:
                 self.assertEqual(col, col.lower())

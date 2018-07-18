@@ -60,10 +60,10 @@ def load_castelli_perovskites():
             Structure
         mu_b (input): magnetic moment in terms of Bohr magneton
 
-        gap gllbsc (output): electronic band gap in eV calculated via gllbsc
+        gap gllbsc (target): electronic band gap in eV calculated via gllbsc
             functional
-        vbm (output): absolute value of valence band edge calculated via gllbsc
-        cbm (output): similar to vbm but for conduction band
+        vbm (target): absolute value of valence band edge calculated via gllbsc
+        cbm (target): similar to vbm but for conduction band
     """
     df = pd.read_csv(os.path.join(data_dir, "castelli_perovskites.csv"))
     df["formula"] = df["A"] + df["B"] + df["anion"]
@@ -99,7 +99,7 @@ def load_double_perovskites_gap(return_lumo=False):
         formula (input): chemical formula w/ sites in the a_1+b_1+a_2+b_2+O6
             order; e.g. in KTaGaTaO6, a_1=="K", b_1=="Ta", a_2=="Ga", b_2=="Ta"
         a1/b1/a2/b2 (input): species occupying the corresponding sites.
-        gap gllbsc (output): electronic band gap (in eV) calculated via gllbsc
+        gap gllbsc (target): electronic band gap (in eV) calculated via gllbsc
     """
     df = pd.read_excel(os.path.join(data_dir, 'double_perovskites.xlsx'),
                        sheet_name='bandgap')
@@ -136,14 +136,14 @@ def load_mp(filename='mp_nostruct.csv'):
             relaxation. Only present if the csv file containing initial
             structure is generated and loaded.
 
-        e_hull (output): The calculated energy above the convex hull, in eV per
+        e_hull (target): The calculated energy above the convex hull, in eV per
             atom
-        gap pbe (output): The band gap in eV calculated with PBE-DFT functional
-        e_form (output); Formation energy per atom (eV)
-        mu_b (output): The total magnetization of the unit cell.
-        bulk modulus (output): in GPa, average of Voight, Reuss, and Hill
-        shear modulus (output): in GPa, average of Voight, Reuss, and Hill
-        elastic anisotropy (output): The ratio of elastic anisotropy.
+        gap pbe (target): The band gap in eV calculated with PBE-DFT functional
+        e_form (target); Formation energy per atom (eV)
+        mu_b (target): The total magnetization of the unit cell.
+        bulk modulus (target): in GPa, average of Voight, Reuss, and Hill
+        shear modulus (target): in GPa, average of Voight, Reuss, and Hill
+        elastic anisotropy (target): The ratio of elastic anisotropy.
 
     Notes:
         If loading the csv with structures, loading will typically take ~10 min
@@ -183,14 +183,14 @@ def load_boltztrap_mp():
     Returns:
         mpid (input): The Materials Project mpid, as a string.
         formula (input):
-        m_n (output): n-type/conduction band effective mass. Units: m_e where
+        m_n (target): n-type/conduction band effective mass. Units: m_e where
             m_e is the mass of an electron; i.e. m_n is a unitless ratio
-        m_p (output): p-type/valence band effective mass.
-        s_n (output): n-type Seebeck coefficient in micro Volts per Kelvin
-        s_p (output): p-type Seebeck coefficient in micro Volts per Kelvin
-        pf_n (output): n-type thermoelectric power factor in uW/cm2.K where
+        m_p (target): p-type/valence band effective mass.
+        s_n (target): n-type Seebeck coefficient in micro Volts per Kelvin
+        s_p (target): p-type Seebeck coefficient in micro Volts per Kelvin
+        pf_n (target): n-type thermoelectric power factor in uW/cm2.K where
             uW is microwatts and a constant relaxation time of 1e-14 assumed.
-        pf_p (output): p-type power factor in uW/cm2.K
+        pf_p (target): p-type power factor in uW/cm2.K
 
     Note:
         * To avoid data leakage, one may only set the target to one of the output
@@ -230,14 +230,14 @@ def load_wolverton_oxides():
         beta (input): Lattice angle beta, in degrees
         gamma (input): Lattice angle gamma, in degrees
 
-        lowest distortion (output): Local distortion crystal structure with
+        lowest distortion (target): Local distortion crystal structure with
             lowest energy among all considered distortions.
-        e_form (output): Formation energy in eV
-        gap pbe (output): Bandgap in eV from PBE calculations
-        mu_b (output): Magnetic moment
-        e_form oxygen (output): Formation energy of oxygen vacancy (eV)
-        e_hull (output): Energy above convex hull, wrt. OQMD db (eV)
-        vpa (output): Volume per atom (A^3/atom)
+        e_form (target): Formation energy in eV
+        gap pbe (target): Bandgap in eV from PBE calculations
+        mu_b (target): Magnetic moment
+        e_form oxygen (target): Formation energy of oxygen vacancy (eV)
+        e_hull (target): Energy above convex hull, wrt. OQMD db (eV)
+        vpa (target): Volume per atom (A^3/atom)
     """
     df = pd.read_csv(os.path.join(data_dir, "wolverton_oxides.csv"))
     dropcols = ['In literature', 'Valence A', 'Valence B', 'Radius A [ang]',
@@ -281,11 +281,11 @@ def load_m2ax():
         d_mx (input): Distance from the M atom to the X atom
         d_ma (input): Distance from the M atom to the A atom
 
-        c11/c12/c13/c33/c44 (output): Elastic constants of the M2AX material.
+        c11/c12/c13/c33/c44 (target): Elastic constants of the M2AX material.
             These are specific to hexagonal materials.
-        bulk modulus (output): in GPa
-        shear modulus (output): in GPa
-        elastic modulus (output): in GPa
+        bulk modulus (target): in GPa
+        shear modulus (target): in GPa
+        elastic modulus (target): in GPa
     """
     df = pd.read_csv(os.path.join(data_dir, "m2ax_elastic.csv"))
     colmap = {"M2AXphase": "formula",
@@ -320,13 +320,13 @@ def load_glass_formation(phase="ternary"):
 
     Returns:
         formula (input): chemical formula
-        phase (output): only in the "ternary" dataset, designating the phase
+        phase (target): only in the "ternary" dataset, designating the phase
                         obtained in glass producing experiments,
                         "AM": amorphous phase
                         "CR": crystalline phase
                         "AC": amorphous-crystalline composite phase
                         "QC": quasi-crystalline phase
-        gfa (output): glass forming ability, i.e. whether the composition can
+        gfa (target): glass forming ability, i.e. whether the composition can
                       form monolithic glass or not,
                       True: glass forming
                       False: non-glass forming
@@ -362,10 +362,10 @@ def load_expt_formation_enthalpy():
         space group (input): space group of the structure
         mpid (input): Materials project id (if any)
         oqmdid (input): OQMD id (if any)
-        e_form expt (output): experimental formation enthaply (in eV/atom)
-        e_form mp (output): formation enthalpy from Materials Project
+        e_form expt (target): experimental formation enthaply (in eV/atom)
+        e_form mp (target): formation enthalpy from Materials Project
                             (in eV/atom)
-        e_form oqmd (output): formation enthalpy from OQMD (in eV/atom)
+        e_form oqmd (target): formation enthalpy from OQMD (in eV/atom)
     """
     df = pd.read_csv(os.path.join(data_dir, 'formation_enthalpy_expt.csv'))
     return df
@@ -380,7 +380,7 @@ def load_expt_gap():
 
     Returns:
         formula (input):
-        gap expt (output): band gap (in eV) measured experimentally.
+        gap expt (target): band gap (in eV) measured experimentally.
     """
     df = pd.read_csv(os.path.join(data_dir, 'zhuo_gap_expt.csv'))
     df = df.rename(columns={'composition': 'formula', 'Eg (eV)': 'gap expt'})
@@ -404,9 +404,9 @@ def load_jdft2d():
         stucture initial (input): Pymatgen structure before relaxation (as dict)
         mu_b (input): Magnetic moment, in terms of bohr magneton
 
-        e_form (output): Formation energy in eV
-        gap optb88 (output): Band gap in eV using functional optB88-VDW
-        e_exfol (output): Exfoliation energy (monolayer formation E) in eV
+        e_form (target): Formation energy in eV
+        gap optb88 (target): Band gap in eV using functional optB88-VDW
+        e_exfol (target): Exfoliation energy (monolayer formation E) in eV
     """
     with open(os.path.join(data_dir, "jdft_2d.json")) as f:
         x = json.load(f)
@@ -444,12 +444,12 @@ def load_matminer_dielectric():
         structure (input): dict form of Pymatgen structure
         nsites (input): The number of sites in the structure
 
-        gap pbe (output): Band gap in eV
-        refractive index (output): Estimated refractive index
-        ep_e poly (output): Polycrystalline electronic contribution to
+        gap pbe (target): Band gap in eV
+        refractive index (target): Estimated refractive index
+        ep_e poly (target): Polycrystalline electronic contribution to
             dielectric constant (estimate/avg)
-        ep poly (output): Polycrystalline dielectric constant (estimate/avg)
-        pot. ferroelectic (output): If imaginary optical phonon modes present at
+        ep poly (target): Polycrystalline dielectric constant (estimate/avg)
+        pot. ferroelectic (target): If imaginary optical phonon modes present at
             the Gamma point, the material is potentially ferroelectric
     """
     df = load_dielectric_constant()
@@ -481,10 +481,10 @@ def load_matminer_elastic():
         structure (input): dict form of Pymatgen structure
         nsites (input): The number of sites in the structure
 
-        elastic anisotropy (output): ratio of anisotropy of elastic properties
-        shear modulus (output): in GPa
-        bulk modulus (output): in GPa
-        poisson ratio (output):
+        elastic anisotropy (target): ratio of anisotropy of elastic properties
+        shear modulus (target): in GPa
+        bulk modulus (target): in GPa
+        poisson ratio (target):
 
     Notes:
         This function may return a subset of information which is present in
@@ -521,9 +521,9 @@ def load_matminer_piezoelectric():
         structure (input): dict form of Pymatgen structure
         nsites (input): The number of sites in the structure
 
-        eij_max (output): Maximum attainable absolute value of the longitudinal
+        eij_max (target): Maximum attainable absolute value of the longitudinal
             piezoelectric modulus
-        vmax_x/y/z (output): vmax = [vmax_x, vmax_y, vmax_z]. vmax is the
+        vmax_x/y/z (target): vmax = [vmax_x, vmax_y, vmax_z]. vmax is the
             direction of eij_max (or family of directions, e.g., <111>)
     """
     df = load_piezoelectric_tensor()
