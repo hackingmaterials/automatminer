@@ -229,8 +229,10 @@ def load_phonon_dielectric_mp():
             longitudinal optical phonon frequency, a descriptor.
 
     Notes:
-        Only one of these three targets must be used in a training to prevent
+        * Only one of these three targets must be used in a training to prevent
         data leakage.
+        * For training, retrieval of formulas and structures via mpids hence
+            the usage of composition and structure featurizers is recommended.
     """
     df = pd.read_csv(os.path.join(data_dir, 'phonon_dielectric_mp.csv'))
     df = df[df['asr_breaking'] < 30].drop('asr_breaking', axis=1)
