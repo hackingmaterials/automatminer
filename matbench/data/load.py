@@ -540,6 +540,42 @@ def load_matminer_piezoelectric():
     df = df.rename(columns=colmap)
     return df
 
+
+def load_steel_strength():
+    """
+    312 steels with experimental yield strength and ultimate tensile strength,
+    extracted and cleaned (including de-duplicating) from Citrine.
+
+    References:
+        https://citrination.com/datasets/153092/
+
+    Returns:
+        formula (input): chemical formula
+        c (input): weight percent of C
+        mn (input): weight percent of Mn
+        si (input): weight percent of Si
+        cr (input): weight percent of Cr
+        ni (input): weight percent of Ni
+        mo (input): weight percent of Mo
+        v (input): weight percent of V
+        n (input): weight percent of N
+        nb (input): weight percent of Nb
+        co (input): weight percent of Co
+        w (input): weight percent of W
+        al (input): weight percent of Al
+        ti (input): weight percent of Ti
+        -These weight percent values of alloying elements are suggested as
+         features by a related paper.
+
+        yield_strength (output): yield strength in GPa
+        tensile_strength (output): ultimate tensile strength in GPa
+        elongation (output): elongation in %
+
+    """
+    df = pd.read_csv(os.path.join(data_dir, 'steel_strength.csv'))
+    return df
+
+
 if __name__ == "__main__":
     pd.set_option('display.height', 1000)
     pd.set_option('display.max_rows', 500)
