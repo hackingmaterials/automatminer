@@ -33,7 +33,6 @@ Naming convention guidelines:
     - roughly use a 15-character limit for column names
 
 Possible other datasets to consider:
-    https://www.nature.com/articles/sdata201865 (Shyam phonon) - AF
     OQMD? - AF
 """
 
@@ -207,6 +206,34 @@ def load_boltztrap_mp():
         ' avoid data leakage, one may only set the target to one of the output'
         ' columns listed. For example, s_n is strongly correlated with pf_n'
         ' and usually when one is available the other one is available too.')
+    return df
+
+
+def load_phonon_dielectric_mp():
+    """
+    Phonon (lattice/atoms vibrations) and dielectric properties of 1439
+    compounds computed via ABINIT software package in the harmonic
+    approximation based on density functional perturbation theory.
+
+    References:
+        https://www.nature.com/articles/sdata201865
+
+    Returns:
+        mpid (input): The Materials Project mpid, as a string.
+        eps_total (target): total calculated dielectric constant. Unitless:
+            it is a ratio over the dielectric constant at vacuum.
+        eps_electronic (target): electronic contribution to the calculated
+            dielectric constant; unitless.
+        last phdos peak (target): the frequency of the last calculated phonon
+            density of states in 1/cm; may be used as an estimation of dominant
+            longitudinal optical phonon frequency, a descriptor.
+
+    Notes:
+        Only one of these three targets must be used in a training to prevent
+        data leakage.
+    """
+    df = pd.read_csv(os.path.join(data_dir, 'phonon_dielectric_mp.csv'))
+    df = df[df['asr_breaking'] < 30].drop('asr_breaking', axis=1)
     return df
 
 
