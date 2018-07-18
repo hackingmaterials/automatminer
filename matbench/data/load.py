@@ -541,6 +541,40 @@ def load_matminer_piezoelectric():
     return df
 
 
+def load_heusler_magnetic():
+    """
+    1153 Heusler alloys with DFT-calculated magnetic and electronic properties.
+    The 1153 alloys include 576 full, 449 half and 128 inverse Heusler alloys.
+    The data are extracted and cleaned (including de-duplicating) from Citrine.
+
+    References:
+        https://citrination.com/datasets/150561/
+
+    Returns:
+        formula (input): chemical formula
+        heusler type (input): Full, Half or Inverse Heusler
+        num_electron: No. of electrons per formula unit
+        struct type (input): Structure type
+        latt const (input): Lattice constant
+        tetragonality (input): Tetragonality, i.e. c/a
+
+        e form (target): Formation energy in eV/atom
+        pol fermi (target?): Polarization at Fermi level in %
+        mu_b (target): Magnetic moment
+        mu_b saturation (target?) Saturation magnetization in emu/cc
+
+        other columns dropped for now:
+        gap width: No gap or the gap width value
+        stability: True or False, can be inferred from e_form:
+                   True if e_form<0, False if e_form>0
+
+    """
+    df = pd.read_csv(os.path.join(data_dir, 'heusler_magnetic.csv'))
+    dropcols = ['gap width', 'stability']
+    df = df.drop(dropcols, axis=1)
+    return df
+
+
 def load_steel_strength():
     """
     312 steels with experimental yield strength and ultimate tensile strength,
@@ -567,9 +601,9 @@ def load_steel_strength():
         -These weight percent values of alloying elements are suggested as
          features by a related paper.
 
-        yield_strength (output): yield strength in GPa
-        tensile_strength (output): ultimate tensile strength in GPa
-        elongation (output): elongation in %
+        yield_strength (target): yield strength in GPa
+        tensile_strength (target): ultimate tensile strength in GPa
+        elongation (target): elongation in %
 
     """
     df = pd.read_csv(os.path.join(data_dir, 'steel_strength.csv'))
