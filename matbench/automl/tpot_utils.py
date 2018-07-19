@@ -102,9 +102,11 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
                     sorted(top_models.items(),
                            key=lambda x:x[1]['internal_cv_score'],
                            reverse=self.greater_score_is_better))
-                for model in self.top_models:
-                    self.top_models_scores[model] = \
-                        self.top_models[model]['internal_cv_score']
+                scores = {model: self.top_models[model]['internal_cv_score']\
+                          for model in self.top_models}
+                self.top_models_scores = OrderedDict(sorted(
+                    scores.items(), key=lambda x: x[1],
+                    reverse=self.greater_score_is_better))
             if return_scores:
                 return self.top_models_scores
             else:
