@@ -16,7 +16,7 @@ class PreProcess(object):
         max_colnull (float): after generating features, drop the columns that
             have null/na rows with more than this ratio.
     """
-    def __init__(self, df, target_col=None, max_colnull=0.1):
+    def __init__(self, df=None, target_col=None, max_colnull=0.1):
         self.df = df
         self.target_col = target_col
         self.max_colnull = max_colnull
