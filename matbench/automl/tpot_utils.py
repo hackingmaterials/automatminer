@@ -1,6 +1,7 @@
 from matbench.data.load import load_double_perovskites_gap
 from matbench.featurize import Featurize
 from matbench.preprocess import PreProcess
+from matbench.utils.utils import MatbenchError, is_greater_better
 from matminer.featurizers.composition import ElementProperty, TMetalFraction
 from tpot import TPOTClassifier, TPOTRegressor
 from sklearn.model_selection import train_test_split
@@ -67,11 +68,7 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
             super(tpot_class, self).__init__(**kwargs)
 
         def get_selected_models(self):
-            if self.scoring_function in ['r2', 'accuracy']:
-                self.greater_is_better = True
-            else:
-                self.greater_is_better = False
-            return self.greater_is_better
+            self.greater_score_is_better = is_greater_better(self.scoring_function)
 
     return TpotWrapper(**kwargs)
 

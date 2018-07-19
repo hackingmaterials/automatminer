@@ -12,7 +12,7 @@ class MatbenchError(Exception):
         return "AmsetError : " + self.msg
 
 
-def is_greated_scoring_function_better(scoring_function):
+def is_greater_better(scoring_function):
     """
     Determines whether scoring_function being greater is more favorable/better.
 
