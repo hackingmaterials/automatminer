@@ -630,8 +630,8 @@ def load_steel_strength():
         -These weight percent values of alloying elements are suggested as
          features by a related paper.
 
-        yield_strength (target): yield strength in GPa
-        tensile_strength (target): ultimate tensile strength in GPa
+        yield strength (target): yield strength in GPa
+        tensile strength (target): ultimate tensile strength in GPa
         elongation (target): elongation in %
 
     """
