@@ -1,13 +1,6 @@
 from collections import OrderedDict
-
-from matbench.data.load import load_double_perovskites_gap
-from matbench.featurize import Featurize
-from matbench.preprocess import PreProcess
 from matbench.utils.utils import MatbenchError, is_greater_better
-from matminer.featurizers.composition import ElementProperty, TMetalFraction
 from tpot import TPOTClassifier, TPOTRegressor
-from sklearn.model_selection import train_test_split
-
 
 """
 -AF: 
