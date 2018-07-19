@@ -73,30 +73,32 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
     return TpotWrapper(**kwargs)
 
 
-# matbench-type example
-limit = 200
-target_col = 'gap gllbsc'
-df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
+if __name__ == '__main__':
+    # matbench-type example
+    limit = 200
+    target_col = 'gap gllbsc'
+    df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
 
-featzer = Featurize(df_init, ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
-df_feats = featzer.featurize_formula(featurizers=[
-    ElementProperty.from_preset(preset_name='matminer'), TMetalFraction()])
+    featzer = Featurize(df_init, ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
+    df_feats = featzer.featurize_formula(featurizers=[
+        ElementProperty.from_preset(preset_name='matminer'), TMetalFraction()])
 
-prep = PreProcess(df_feats, target_col=target_col)
-df = prep.preprocess()
+    prep = PreProcess(max_colnull=0.1)
+    df = prep.handle_nulls(df_feats)
 
-X_train, X_test, y_train, y_test = train_test_split(df.drop(target_col, axis=1).as_matrix(),
-    df[target_col], train_size=0.75, test_size=0.25)
+    X_train, X_test, y_train, y_test = train_test_split(df.drop(target_col, axis=1).as_matrix(),
+        df[target_col], train_size=0.75, test_size=0.25)
 
 
-tpot = TpotAutoml(model_type='regressor', generations=2, population_size=50, verbosity=2, scoring='r2')
-print(tpot.scoring_function)
-print(tpot.foo)
-print(tpot.get_selected_models())
+    tpot = TpotAutoml(model_type='regressor', generations=1, population_size=25,
+                      verbosity=0, scoring='r2', random_state=23)
+    print(tpot.scoring_function)
+    print(tpot.foo)
+    print(tpot.get_selected_models())
 
-tpot.fit(X_train, y_train)
-print(tpot.score(X_test, y_test))
-tpot.export('tpot_iris_pipeline.py')
+    tpot.fit(X_train, y_train)
+    print(tpot.score(X_test, y_test))
+    tpot.export('tpot_iris_pipeline.py')
 
-# very good method for us; keeps track of the score of different algorithms:
-print(tpot.evaluated_individuals_)
+    # very good method for us; keeps track of the score of different algorithms:
+    print(tpot.evaluated_individuals_)
