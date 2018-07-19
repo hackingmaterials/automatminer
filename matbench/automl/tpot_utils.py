@@ -3,9 +3,8 @@ from matbench.featurize import Featurize
 from matbench.preprocess import PreProcess
 from matminer.featurizers.composition import ElementProperty, TMetalFraction
 from tpot import TPOTClassifier, TPOTRegressor
-from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
-import numpy as np
+
 
 """
 -AF: 
@@ -24,11 +23,46 @@ set of parameters that returns the best scoring (supports many scoring metrics)
         - I have had some difficulties using it in Pycharm as opposed to Terminal and Jupyter notebooks
 """
 
-# irist simple example
-# iris = load_iris()
-# X_train, X_test, y_train, y_test = train_test_split(iris.data.astype(np.float64),
-#     iris.target.astype(np.float64), train_size=0.75, test_size=0.25)
-# tpot = TPOTClassifier(generations=2, population_size=50, verbosity=2)
+def TpotAutoml(model_type, **kwargs):
+    """
+    Returns a class wrapped on TPOTClassifier or TPOTRegressor (differentiated
+    via model_type argument) but with additional visualization and
+    post-processing methods for easier analysis.
+
+    Args:
+        model_type (str): determines TPOTClassifier or TPOTRegressor to be used
+            For example "Classification" or "regressor" are valid options.
+        **kwargs: keyword arguments accepted by TPOTClassifier or TPOTRegressor
+            For example: scoring='r2'; see TPOT documentation for more detail.
+
+    Returns (instantiated TpotWrapper class):
+        TpotWrapper that has all methods of TPOTClassifier and TPOTRegressor as
+        well as additional analysis methods.
+    """
+    if model_type.lower() in ['classifier', 'classification', 'classify']:
+        return _tpot_class_wrapper(TPOTClassifier, **kwargs)
+    elif model_type.lower() in ['regressor', 'regression', 'regress']:
+        return _tpot_class_wrapper(TPOTRegressor, **kwargs)
+    else:
+        raise ValueError('Unsupported model_type: "{}"'.format(model_type))
+
+
+def _tpot_class_wrapper(tpot_class, **kwargs):
+
+    class TpotWrapper(tpot_class):
+        def __init__(self, **kwargs):
+            self.foo  = 'bar'
+            super(tpot_class, self).__init__(**kwargs)
+
+        def get_selected_models(self):
+            if self.scoring_function in ['r2', 'accuracy']:
+                self.greater_is_better = True
+            else:
+                self.greater_is_better = False
+            return self.greater_is_better
+
+    return TpotWrapper(**kwargs)
+
 
 # matbench-type example
 limit = 200
@@ -46,7 +80,11 @@ X_train, X_test, y_train, y_test = train_test_split(df.drop(target_col, axis=1).
     df[target_col], train_size=0.75, test_size=0.25)
 
 
-tpot = TPOTRegressor(generations=2, population_size=50, verbosity=2)
+tpot = TpotAutoml(model_type='regressor', generations=2, population_size=50, verbosity=2, scoring='r2')
+print(tpot.scoring_function)
+print(tpot.foo)
+print(tpot.get_selected_models())
+
 tpot.fit(X_train, y_train)
 print(tpot.score(X_test, y_test))
 tpot.export('tpot_iris_pipeline.py')
