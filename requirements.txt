@@ -1,3 +1,4 @@
+pymatgen==2018.6.11
 matminer
 xlrd
 tpot
