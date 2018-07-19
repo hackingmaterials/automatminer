@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from matbench.data.load import load_double_perovskites_gap
 from matbench.featurize import Featurize
 from matbench.preprocess import PreProcess
@@ -65,6 +67,8 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
     class TpotWrapper(tpot_class):
         def __init__(self, **kwargs):
             self.models  = None
+            self.top_models = OrderedDict()
+            self.top_models_scores = OrderedDict()
             kwargs['cv'] = kwargs.get('cv', 5)
             super(tpot_class, self).__init__(**kwargs)
 
@@ -85,7 +89,7 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
             self.greater_score_is_better = is_greater_better(self.scoring_function)
             model_names = list(set([key.split('(')[0] for key in
                                           self.evaluated_individuals_.keys()]))
-            models = {model: [] for model in model_names}
+            models = OrderedDict({model: [] for model in model_names})
             for k in self.evaluated_individuals_:
                 models[k.split('(')[0]].append(self.evaluated_individuals_[k])
             for model_name in model_names:
@@ -93,9 +97,14 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
                                           key=lambda x: x['internal_cv_score'],
                                           reverse=self.greater_score_is_better)
                 self.models = models
-                self.top_models = {model: models[model][0] for model in models}
-                self.top_models_scores = {model: self.top_models[
-                    model]['internal_cv_score'] for model in self.top_models}
+                top_models = {model: models[model][0] for model in models}
+                self.top_models = OrderedDict(
+                    sorted(top_models.items(),
+                           key=lambda x:x[1]['internal_cv_score'],
+                           reverse=self.greater_score_is_better))
+                for model in self.top_models:
+                    self.top_models_scores[model] = \
+                        self.top_models[model]['internal_cv_score']
             if return_scores:
                 return self.top_models_scores
             else:
