@@ -65,6 +65,7 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
     class TpotWrapper(tpot_class):
         def __init__(self, **kwargs):
             self.models  = None
+            kwargs['cv'] = kwargs.get('cv', 5)
             super(tpot_class, self).__init__(**kwargs)
 
         def get_top_models(self, return_scores=True):
