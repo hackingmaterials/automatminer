@@ -110,33 +110,4 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
             else:
                 return self.top_models
 
-
     return TpotWrapper(**kwargs)
-
-
-if __name__ == '__main__':
-    # matbench-type example
-    limit = 200
-    target_col = 'gap gllbsc'
-    df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
-
-    featzer = Featurize(df_init, ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
-    df_feats = featzer.featurize_formula(featurizers=[
-        ElementProperty.from_preset(preset_name='matminer'), TMetalFraction()])
-
-    prep = PreProcess(max_colnull=0.1)
-    df = prep.handle_nulls(df_feats)
-
-    X_train, X_test, y_train, y_test = train_test_split(df.drop(target_col, axis=1).as_matrix(),
-        df[target_col], train_size=0.75, test_size=0.25)
-
-
-    tpot = TpotAutoml(model_type='regressor', generations=1, population_size=25,
-                      verbosity=0, scoring='r2', random_state=23)
-    print(tpot.scoring_function)
-
-    tpot.fit(X_train, y_train)
-    print(tpot.get_top_models())
-    print(tpot.score(X_test, y_test))
-    tpot.export('tpot_iris_pipeline.py')
-
