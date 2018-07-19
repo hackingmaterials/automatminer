@@ -64,11 +64,42 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
     """
     class TpotWrapper(tpot_class):
         def __init__(self, **kwargs):
-            self.foo  = 'bar'
+            self.models  = None
             super(tpot_class, self).__init__(**kwargs)
 
-        def get_selected_models(self):
+        def get_top_models(self, return_scores=True):
+            """
+            Get a dictionary of top performing run for each sklearn model that
+            was tried in TPOT. Must be called after the fit method. It also
+            populates the instance variable "models" to a dictionary of all
+            models tried and all their run history.
+
+            Args:
+                return_scores (bool): whether to return the score of the top
+                    (selected) models (True) or their full parameters.
+
+            Returns (dict):
+                Top performing run for each sklearn model
+            """
             self.greater_score_is_better = is_greater_better(self.scoring_function)
+            model_names = list(set([key.split('(')[0] for key in
+                                          self.evaluated_individuals_.keys()]))
+            models = {model: [] for model in model_names}
+            for k in self.evaluated_individuals_:
+                models[k.split('(')[0]].append(self.evaluated_individuals_[k])
+            for model_name in model_names:
+                models[model_name]=sorted(models[model_name],
+                                          key=lambda x: x['internal_cv_score'],
+                                          reverse=self.greater_score_is_better)
+                self.models = models
+                self.top_models = {model: models[model][0] for model in models}
+                self.top_models_scores = {model: self.top_models[
+                    model]['internal_cv_score'] for model in self.top_models}
+            if return_scores:
+                return self.top_models_scores
+            else:
+                return self.top_models
+
 
     return TpotWrapper(**kwargs)
 
@@ -93,12 +124,9 @@ if __name__ == '__main__':
     tpot = TpotAutoml(model_type='regressor', generations=1, population_size=25,
                       verbosity=0, scoring='r2', random_state=23)
     print(tpot.scoring_function)
-    print(tpot.foo)
-    print(tpot.get_selected_models())
 
     tpot.fit(X_train, y_train)
+    print(tpot.get_top_models())
     print(tpot.score(X_test, y_test))
     tpot.export('tpot_iris_pipeline.py')
 
-    # very good method for us; keeps track of the score of different algorithms:
-    print(tpot.evaluated_individuals_)
