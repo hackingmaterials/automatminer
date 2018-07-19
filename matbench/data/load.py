@@ -639,6 +639,32 @@ def load_steel_strength():
     return df
 
 
+def load_citrine_thermal_conductivity(room_temperature=True):
+    """
+    Thermal conductivity of 872 compounds measured experimentally and retrieved
+    from Citrine database from various references. The reported values are
+    measured at various temperatures of which 295 are at room temperature. The
+    latter subset is return by default.
+
+    References:
+        https://citrineinformatics.github.io/python-citrination-client/
+
+    Returns:
+        formula (input): chemical formula of compounds
+        k_expt (target): the experimentally measured thermal conductivity in SI
+            units of W/m.K
+    """
+    df = pd.read_csv(os.path.join(data_dir, 'citrine_thermal_conductivity.csv'))
+
+    df = df[df['k-units'].isin(
+        ['W/m.K', 'W/m$\\cdot$K', 'W/mK', 'W\\m K' ,'Wm$^{-1}$K$^{-1}$'])]
+    if room_temperature:
+        df = df[df['k_condition'].isin(['room temperature', 'Room temperature',
+                                        'Standard', '298', '300'])]
+    df = df.drop(['k-units', 'k_condition', 'k_condition_units'], axis=1)
+    return df
+
+
 if __name__ == "__main__":
     pd.set_option('display.height', 1000)
     pd.set_option('display.max_rows', 500)
