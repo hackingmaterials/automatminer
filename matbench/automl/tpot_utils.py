@@ -32,8 +32,10 @@ def TpotAutoml(model_type, **kwargs):
     Args:
         model_type (str): determines TPOTClassifier or TPOTRegressor to be used
             For example "Classification" or "regressor" are valid options.
-        **kwargs: keyword arguments accepted by TPOTClassifier or TPOTRegressor
-            For example: scoring='r2'; see TPOT documentation for more detail.
+        **kwargs: keyword arguments accepted by TpotWrapper which have a few
+            more arguments in addition to TPOTClassifier or TPOTRegressor
+            For example: scoring='r2'; see TpotWrapper and TPOT documentation
+            for more details.
 
     Returns (instantiated TpotWrapper class):
         TpotWrapper that has all methods of TPOTClassifier and TPOTRegressor as
@@ -48,7 +50,17 @@ def TpotAutoml(model_type, **kwargs):
 
 
 def _tpot_class_wrapper(tpot_class, **kwargs):
+    """
+    Internal function to instantiate and return the child of the right class
+    inherited from the two choices that TPOT package provides: TPOTClassifier
+    and TPOTRegressor. The difference is that this new class has additional
+    analyis and visualization methods.
+    Args:
+        tpot_class (class object): TPOTClassifier or TPOTRegressor
+        **kwargs: keyword arguments related to TPOTClassifier or TPOTRegressor
 
+    Returns (class instance): instantiated TpotWrapper
+    """
     class TpotWrapper(tpot_class):
         def __init__(self, **kwargs):
             self.foo  = 'bar'
