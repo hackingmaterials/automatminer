@@ -82,16 +82,16 @@ class TestTpotAutoml(unittest.TestCase):
         tpot.fit(X_train, y_train)
 
         top_scores = tpot.get_top_models(return_scores=True)
-        self.assertAlmostEqual(top_scores['DecisionTreeClassifier'], 0.91, 2)
-        self.assertAlmostEqual(top_scores['RandomForestClassifier'], 0.89, 2)
-        self.assertAlmostEqual(top_scores['GradientBoostingClassifier'], 0.88, 2)
-        self.assertAlmostEqual(top_scores['XGBClassifier'], 0.87, 2)
-        self.assertAlmostEqual(top_scores['ExtraTreesClassifier'], 0.86, 2)
-        self.assertAlmostEqual(top_scores['BernoulliNB'], 0.84, 2)
-        self.assertAlmostEqual(top_scores['KNeighborsClassifier'], 0.84, 2)
-        self.assertAlmostEqual(top_scores['LogisticRegression'], 0.84, 2)
-        self.assertAlmostEqual(top_scores['LinearSVC'], 0.84, 2)
-        self.assertAlmostEqual(top_scores['GaussianNB'], 0.66, 2)
+        self.assertAlmostEqual(top_scores['DecisionTreeClassifier'], 0.91, 1)
+        self.assertAlmostEqual(top_scores['RandomForestClassifier'], 0.89, 1)
+        self.assertAlmostEqual(top_scores['GradientBoostingClassifier'], 0.88, 1)
+        self.assertAlmostEqual(top_scores['XGBClassifier'], 0.87, 1)
+        self.assertAlmostEqual(top_scores['ExtraTreesClassifier'], 0.86, 1)
+        self.assertAlmostEqual(top_scores['BernoulliNB'], 0.84, 1)
+        self.assertAlmostEqual(top_scores['KNeighborsClassifier'], 0.84, 1)
+        self.assertAlmostEqual(top_scores['LogisticRegression'], 0.84, 1)
+        self.assertAlmostEqual(top_scores['LinearSVC'], 0.84, 1)
+        self.assertAlmostEqual(top_scores['GaussianNB'], 0.66, 1)
 
 
 if __name__ == '__main__':
