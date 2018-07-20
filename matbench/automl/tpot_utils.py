@@ -21,7 +21,7 @@ returns the best score (supports many scoring metrics)
         - I have had some difficulties using it in Pycharm as opposed to Terminal and Jupyter notebooks
 """
 
-def TpotAutoml(model_type, **kwargs):
+def TpotAutoml(model_type, feature_names=None, **kwargs):
     """
     Returns a class wrapped on TPOTClassifier or TPOTRegressor (differentiated
     via model_type argument) but with additional visualization and
@@ -30,6 +30,8 @@ def TpotAutoml(model_type, **kwargs):
     Args:
         model_type (str): determines TPOTClassifier or TPOTRegressor to be used
             For example "Classification" or "regressor" are valid options.
+        feature_names ([str]): list of feature/column names that is optionally
+            passed for post-training analyses.
         **kwargs: keyword arguments accepted by TpotWrapper which have a few
             more arguments in addition to TPOTClassifier or TPOTRegressor
             For example: scoring='r2'; see TpotWrapper and TPOT documentation
@@ -39,6 +41,7 @@ def TpotAutoml(model_type, **kwargs):
         TpotWrapper that has all methods of TPOTClassifier and TPOTRegressor as
         well as additional analysis methods.
     """
+    kwargs['feature_names'] = feature_names
     if model_type.lower() in ['classifier', 'classification', 'classify']:
         return _tpot_class_wrapper(TPOTClassifier, **kwargs)
     elif model_type.lower() in ['regressor', 'regression', 'regress']:
@@ -60,13 +63,16 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
     Returns (class instance): instantiated TpotWrapper
     """
     class TpotWrapper(tpot_class):
+
         def __init__(self, **kwargs):
             self.models  = None
             self.top_models = OrderedDict()
             self.top_models_scores = OrderedDict()
+            self.feature_names = kwargs.pop('feature_names', None)
             kwargs['cv'] = kwargs.get('cv', 5)
             kwargs['n_jobs'] = kwargs.get('n_jobs', -1)
             super(tpot_class, self).__init__(**kwargs)
+
 
         def get_top_models(self, return_scores=True):
             """
@@ -109,5 +115,16 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
                 return self.top_models
 
 
+        def get_bad_predictions(self, nmax=100):
+            """
+
+            Args:
+                nmax (int): maximum number of bad predictions returned
+
+            Returns (pandas.DataFrame):
+                a dataframe containing the points
+
+            """
 
     return TpotWrapper(**kwargs)
+
