@@ -63,6 +63,7 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
             self.top_models = OrderedDict()
             self.top_models_scores = OrderedDict()
             kwargs['cv'] = kwargs.get('cv', 5)
+            kwargs['n_jobs'] = kwargs.get('n_jobs', -1)
             super(tpot_class, self).__init__(**kwargs)
 
         def get_top_models(self, return_scores=True):
@@ -104,5 +105,7 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
                 return self.top_models_scores
             else:
                 return self.top_models
+
+
 
     return TpotWrapper(**kwargs)
