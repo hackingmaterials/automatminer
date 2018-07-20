@@ -2,12 +2,14 @@ from collections import OrderedDict
 from matbench.utils.utils import MatbenchError, is_greater_better
 from tpot import TPOTClassifier, TPOTRegressor
 
+__author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>'
+
 """
 -AF: 
     TPOT is an academic open-sourced package that seems to be suitable overall to
 matbench though there doesn't seem to be an explicit support for feature importance.
-It uses a combination of GP and genetic algorithm to find the estimator with the
-set of parameters that returns the best scoring (supports many scoring metrics)
+It uses genetic algorithm to find the estimator with the set of parameters that 
+returns the best score (supports many scoring metrics)
     pros:
         + easy install: "pip install tpot"; written in python
         + easily accessible history of models tried and their accuracy in evaluated_individuals_

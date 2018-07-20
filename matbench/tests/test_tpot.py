@@ -9,6 +9,8 @@ from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
     Stoichiometry
 from sklearn.model_selection import train_test_split
 
+__author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>'
+
 class TestTpotAutoml(unittest.TestCase):
 
     def setUp(self):
