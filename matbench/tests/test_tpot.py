@@ -80,8 +80,12 @@ class TestTpotAutoml(unittest.TestCase):
                           random_state=self.RS)
         self.assertTrue(tpot.scoring_function=='f1_weighted')
         tpot.fit(X_train, y_train)
-
         top_scores = tpot.get_top_models(return_scores=True)
+
+        # print(tpot.fitted_pipeline_)
+        # print(top_scores)
+        # print(tpot.get_data_for_error_analysis(X_test, y_test, nmax=100))
+
         self.assertAlmostEqual(top_scores['DecisionTreeClassifier'], 0.91, 1)
         self.assertAlmostEqual(top_scores['RandomForestClassifier'], 0.89, 1)
         self.assertAlmostEqual(top_scores['GradientBoostingClassifier'], 0.88, 1)

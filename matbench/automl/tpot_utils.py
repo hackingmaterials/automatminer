@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 from collections import OrderedDict
 from matbench.utils.utils import MatbenchError, is_greater_better
 from tpot import TPOTClassifier, TPOTRegressor
@@ -132,7 +134,7 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
             super(tpot_class, self).fit(features, target, **kwargs)
 
 
-        def get_data_for_error_analysis(self, nmax=100):
+        def get_data_for_error_analysis(self, X_test, y_test, nmax=100):
             """
             Returns points with the wrong labels in case of a classification
             problem or high error in case of a regression problem. This can be
@@ -141,11 +143,21 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
             * Note that this method must be called after the fit.
 
             Args:
+                X_test (nxm numpy matrix where n is numer of samples and m is
+                    the number of features)
+                y_test (nx1 numpy array): target labels/values
                 nmax (int): maximum number of bad predictions returned
 
             Returns (pandas.DataFrame):
             """
-
+            if isinstance(X_test, pd.DataFrame):
+                X_test = X_test.as_matrix()
+            if X_test.shape[1] != np.array(self.features).shape[1]:
+                raise MatbenchError('The number of columns/features of X_test '
+                                    'do NOT match with the original features')
+            predictions = self.predict(X_test)
+            print(predictions)
+            print(y_test)
 
 
     return TpotWrapper(**kwargs)
