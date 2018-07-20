@@ -13,8 +13,8 @@ from matminer.datasets.dataframe_loader import load_piezoelectric_tensor, \
 All load* methods return the data in pandas.DataFrame. In each method a raw
 data file is loaded, some preliminary transformation/renaming/cleaning done and
 the result df is returned. For specific columns returned refer to the 
-documentation of each function. All columns come with a ML input/output
-suggestion, although some columns may be used as either input or output.
+documentation of each function. All columns come with a ML input/target
+suggestion, although some columns may be used as either input or target.
 
 If you plan to add a new dataset please follow the guidelines and refer to 
 documentation in load_castelli_perovskites for consistent docs. Generally, using
@@ -192,7 +192,7 @@ def load_boltztrap_mp():
         pf_p (target): p-type power factor in uW/cm2.K
 
     Note:
-        * To avoid data leakage, one may only set the target to one of the output
+        * To avoid data leakage, one may only set the target to one of the target
         columns listed. For example, S_n is strongly correlated with PF_n
         and usually when one is available the other one is available too.
         * It is recommended that dos and bandstructure objects are retrieved
@@ -203,7 +203,7 @@ def load_boltztrap_mp():
     df = df.rename(columns={'S_n': 's_n', 'S_p': 's_p',
                             'PF_n': 'pf_n', 'PF_p': 'pf_p'})
     warnings.warn('When training a model on the load_boltztrap_mp data, to'
-        ' avoid data leakage, one may only set the target to one of the output'
+        ' avoid data leakage, one may only set the target to one of the target'
         ' columns listed. For example, s_n is strongly correlated with pf_n'
         ' and usually when one is available the other one is available too.')
     return df
@@ -587,7 +587,7 @@ def load_heusler_magnetic():
         latt const (input): Lattice constant
         tetragonality (input): Tetragonality, i.e. c/a
 
-        e form (target): Formation energy in eV/atom
+        e_form (target): Formation energy in eV/atom
         pol fermi (target?): Polarization at Fermi level in %
         mu_b (target): Magnetic moment
         mu_b saturation (target?) Saturation magnetization in emu/cc
@@ -671,4 +671,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
     # print(load_mp('mp_all.csv'))
-    print(load_wolverton_oxides())
+    print(load_heusler_magnetic())
