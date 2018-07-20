@@ -115,16 +115,38 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
                 return self.top_models
 
 
-        def get_bad_predictions(self, nmax=100):
+        def fit(self, features, target, **kwargs):
             """
+            Wrapper function that is identical to the fit method of
+            TPOTClassifier or TPOTRegressor. The purpose is to store the
+            feature and target and use it in other methods of TpotAutoml
+
+            Args:
+                please see the documentation of TPOT for a full description.
+
+            Returns:
+                please see the documentation of TPOT for a full description.
+            """
+            self.features = features
+            self.target = target
+            super(tpot_class, self).fit(features, target, **kwargs)
+
+
+        def get_data_for_error_analysis(self, nmax=100):
+            """
+            Returns points with the wrong labels in case of a classification
+            problem or high error in case of a regression problem. This can be
+            used for further manual error analysis.
+
+            * Note that this method must be called after the fit.
 
             Args:
                 nmax (int): maximum number of bad predictions returned
 
             Returns (pandas.DataFrame):
-                a dataframe containing the points
-
             """
+
+
 
     return TpotWrapper(**kwargs)
 
