@@ -1,6 +1,6 @@
 import unittest
 
-from matbench.automl.tpot_utils import TpotAutoml
+from matbench.automl.tpot_utils import TpotAutoml, ErrorAnalysis
 from matbench.data.load import load_double_perovskites_gap, \
     load_glass_formation
 from matbench.featurize import Featurize
@@ -32,16 +32,15 @@ class TestTpotAutoml(unittest.TestCase):
             train_test_split(df.drop(target_col, axis=1).as_matrix(),
             df[target_col], train_size=0.75, test_size=0.25, random_state=self.RS)
 
-        tpot = TpotAutoml(model_type='regressor',
+        tpot = TpotAutoml(mode='regressor',
                           generations=1,
                           population_size=25,
                           scoring='r2',
-                          random_state=self.RS)
+                          random_state=self.RS,
+                          feature_names=df.drop(target_col, axis=1).columns)
         self.assertTrue(tpot.scoring_function=='r2')
         tpot.fit(X_train, y_train)
-
         top_scores = tpot.get_top_models(return_scores=True)
-        print(top_scores)
         self.assertTrue(tpot.greater_score_is_better)
         self.assertAlmostEqual(top_scores['XGBRegressor'], 0.8622, 1)
         self.assertAlmostEqual(top_scores['ExtraTreesRegressor'], 0.7933, 1)
@@ -55,12 +54,20 @@ class TestTpotAutoml(unittest.TestCase):
         test_score = tpot.score(X_test, y_test)
         self.assertAlmostEqual(test_score, 0.8707, places=1)
 
+        # test error analysis:
+        ea = ErrorAnalysis(tpot, X_train, y_train, X_test, y_test,
+                           mode='regression', target=target_col,
+                           features=df.drop(target_col, axis=1).columns,
+                           test_samples_index=y_test.index, random_state=self.RS)
+        df_errors = ea.get_data_for_error_analysis()
+        self.assertTrue((df_errors['{}_true'.format(target_col)]!=\
+                         df_errors['{}_predicted'.format(target_col)]).all())
+
 
     def test_tpot_classification(self, limit=500):
         target_col = 'gfa'
         # load and featurize:
         df_init = load_glass_formation(phase='binary')[:limit]
-        print(sum(df_init[target_col])/float(len(df_init)))
         featzer = Featurize(df_init)
         df_feats = featzer.featurize_formula(featurizers=[
             ElementProperty.from_preset(preset_name='matminer'),
@@ -73,18 +80,15 @@ class TestTpotAutoml(unittest.TestCase):
             train_test_split(df.drop(target_col, axis=1).as_matrix(),
             df[target_col], train_size=0.75, test_size=0.25, random_state=self.RS)
 
-        tpot = TpotAutoml(model_type='classify',
+        tpot = TpotAutoml(mode='classify',
                           generations=1,
                           population_size=25,
                           scoring='f1_weighted',
-                          random_state=self.RS)
+                          random_state=self.RS,
+                          feature_names=df.drop(target_col, axis=1).columns)
         self.assertTrue(tpot.scoring_function=='f1_weighted')
         tpot.fit(X_train, y_train)
         top_scores = tpot.get_top_models(return_scores=True)
-
-        # print(tpot.fitted_pipeline_)
-        # print(top_scores)
-        # print(tpot.get_data_for_error_analysis(X_test, y_test, nmax=100))
 
         self.assertAlmostEqual(top_scores['DecisionTreeClassifier'], 0.91, 1)
         self.assertAlmostEqual(top_scores['RandomForestClassifier'], 0.89, 1)
@@ -96,6 +100,15 @@ class TestTpotAutoml(unittest.TestCase):
         self.assertAlmostEqual(top_scores['LogisticRegression'], 0.84, 1)
         self.assertAlmostEqual(top_scores['LinearSVC'], 0.84, 1)
         self.assertAlmostEqual(top_scores['GaussianNB'], 0.66, 1)
+
+        # test error analysis:
+        ea = ErrorAnalysis(tpot, X_train, y_train, X_test, y_test,
+                           mode='classification', target=target_col,
+                           features=df.drop(target_col, axis=1).columns,
+                           test_samples_index=y_test.index, random_state=self.RS)
+        df_errors = ea.get_data_for_error_analysis()
+        self.assertTrue((df_errors['{}_true'.format(target_col)] !=\
+                         df_errors['{}_predicted'.format(target_col)]).all())
 
 
 if __name__ == '__main__':
