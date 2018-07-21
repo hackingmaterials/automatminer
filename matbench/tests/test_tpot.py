@@ -29,7 +29,7 @@ class TestTpotAutoml(unittest.TestCase):
         df = prep.handle_nulls(df_feats)
         # train/test split (development is within tpot crossvalidation)
         X_train, X_test, y_train, y_test = \
-            train_test_split(df.drop(target_col, axis=1).as_matrix(),
+            train_test_split(df.drop(target_col, axis=1).values,
             df[target_col], train_size=0.75, test_size=0.25, random_state=self.RS)
 
         tpot = TpotAutoml(mode='regressor',
@@ -77,7 +77,7 @@ class TestTpotAutoml(unittest.TestCase):
         df = prep.handle_nulls(df_feats)
         # train/test split (development is within tpot crossvalidation)
         X_train, X_test, y_train, y_test = \
-            train_test_split(df.drop(target_col, axis=1).as_matrix(),
+            train_test_split(df.drop(target_col, axis=1).values,
             df[target_col], train_size=0.75, test_size=0.25, random_state=self.RS)
 
         tpot = TpotAutoml(mode='classify',

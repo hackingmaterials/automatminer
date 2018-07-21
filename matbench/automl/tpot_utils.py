@@ -191,7 +191,7 @@ class ErrorAnalysis(object):
 
         """
         y = np.array(df[target])
-        X = df.drop(target, axis=1).as_matrix()
+        X = df.drop(target, axis=1).values
 
         X_train, X_test, y_train, y_test = \
             train_test_split(X, y,
@@ -225,7 +225,7 @@ class ErrorAnalysis(object):
         if y_test is None:
             y_test = self.y_test
         if isinstance(X_test, pd.DataFrame):
-            X_test = X_test.as_matrix()
+            X_test = X_test.values
         if X_test.shape[1] != len(list(self.features)):
             raise MatbenchError('The number of columns/features of X_test '
                                 'do NOT match with the original features')
