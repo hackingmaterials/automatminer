@@ -37,7 +37,8 @@ class TestTpotAutoml(unittest.TestCase):
                           population_size=25,
                           scoring='r2',
                           random_state=self.RS,
-                          feature_names=df.drop(target_col, axis=1).columns)
+                          feature_names=df.drop(target_col, axis=1).columns,
+                          n_jobs=1)
         self.assertTrue(tpot.scoring_function=='r2')
         tpot.fit(X_train, y_train)
         top_scores = tpot.get_top_models(return_scores=True)
@@ -85,7 +86,8 @@ class TestTpotAutoml(unittest.TestCase):
                           population_size=25,
                           scoring='f1_weighted',
                           random_state=self.RS,
-                          feature_names=df.drop(target_col, axis=1).columns)
+                          feature_names=df.drop(target_col, axis=1).columns,
+                          n_jobs=1)
         self.assertTrue(tpot.scoring_function=='f1_weighted')
         tpot.fit(X_train, y_train)
         top_scores = tpot.get_top_models(return_scores=True)
