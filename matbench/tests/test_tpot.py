@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 
 from matbench.automl.tpot_utils import TpotAutoml, ErrorAnalysis
 from matbench.data.load import load_double_perovskites_gap, \
@@ -63,6 +64,14 @@ class TestTpotAutoml(unittest.TestCase):
         df_errors = ea.get_data_for_error_analysis()
         self.assertTrue((df_errors['{}_true'.format(target_col)]!=\
                          df_errors['{}_predicted'.format(target_col)]).all())
+        rmse = np.sqrt(np.mean((tpot.predict(X_test) - y_test) ** 2))
+        self.assertTrue((
+            ea.false_positives['{}_predicted'.format(target_col)]>= \
+            ea.false_positives['{}_true'.format(target_col)] + rmse).all())
+
+        self.assertTrue((
+            ea.false_negatives['{}_predicted'.format(target_col)]<= \
+            ea.false_negatives['{}_true'.format(target_col)] - rmse).all())
 
 
     def test_tpot_classification(self, limit=500):
@@ -111,6 +120,10 @@ class TestTpotAutoml(unittest.TestCase):
         df_errors = ea.get_data_for_error_analysis()
         self.assertTrue((df_errors['{}_true'.format(target_col)] !=\
                          df_errors['{}_predicted'.format(target_col)]).all())
+        self.assertTrue(len(ea.false_negatives)==0)
+        self.assertTrue(ea.false_positives['gfa_predicted'].all() and \
+                        not ea.false_positives['gfa_true'].all())
+
 
 
 if __name__ == '__main__':
