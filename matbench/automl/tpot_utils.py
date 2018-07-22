@@ -166,6 +166,8 @@ class ErrorAnalysis(object):
         self.features= features
         self.test_samples_index = test_samples_index
         self.random_state = random_state
+        self.false_positives = None
+        self.false_negatives = None
 
 
     def from_dataframe_iid(self, df, target, mode,
@@ -210,7 +212,10 @@ class ErrorAnalysis(object):
         problem or high error in case of a regression problem. This can be
         used for further manual error analysis.
 
-        * Note that this method must be called after the fit.
+        Notes:
+        * this method must be called after the fit.
+        * upon calling this method false_positives and false_negatives
+            attributes are also populated.
 
         Args:
             X_test (nxm numpy matrix where n is numer of samples and m is
@@ -232,20 +237,27 @@ class ErrorAnalysis(object):
         predictions = self.model.predict(X_test)
         if self.mode == 'regression':
             rmse = np.sqrt(np.mean((predictions - y_test) ** 2))
-        wrong_pred_idx = []
+        false_positives = []
+        false_negatives = []
         for idx, pred in enumerate(predictions):
             if pred != y_test[idx]:
                 if self.mode == 'classification':
-                    wrong_pred_idx.append(idx)
+                    if y_test[idx] > 0:
+                        false_negatives.append(idx)
+                    else:
+                        false_positives.append(idx)
                 elif self.mode == 'regression':
                     if abs(pred - y_test[idx]) >= rmse:
-                        wrong_pred_idx.append(idx)
+                        if pred < y_test[idx]:
+                            false_negatives.append(idx)
+                        else:
+                            false_positives.append(idx)
+        wrong_pred_idx = false_positives + false_negatives
         if len(wrong_pred_idx) > nmax:
             wrong_pred_idx = np.random.choice(wrong_pred_idx, nmax,
                                               replace=False)
         df = pd.DataFrame(X_test, columns=self.features,
                           index=self.test_samples_index)
-
         if isinstance(y_test, pd.Series):
             y_name = y_test.name
             y_test = np.array(y_test)
@@ -253,5 +265,7 @@ class ErrorAnalysis(object):
             y_name = 'target'
         df['{}_true'.format(y_name)] = y_test
         df['{}_predicted'.format(y_name)] = predictions
+        self.false_negatives = df.iloc[false_negatives]
+        self.false_positives = df.iloc[false_positives]
         df = df.iloc[wrong_pred_idx]
         return df
