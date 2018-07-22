@@ -5,6 +5,7 @@ import unittest
 
 import matbench.data.load as loaders_source
 import matminer.datasets.dataframe_loader as blacklist_source
+from pymatgen import Composition
 
 
 class MatbenchTestData(unittest.TestCase):
@@ -27,6 +28,9 @@ class MatbenchTestData(unittest.TestCase):
             for col in df:
                 self.assertEqual(col, col.lower())
                 self.assertLessEqual(len(col), 20)
+            # test that all formulas can be transformed to Composition:
+            if 'formula' in df:
+                df['formula'].dropna().apply(Composition)
 
 
 if __name__ == '__main__':

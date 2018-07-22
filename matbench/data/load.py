@@ -402,7 +402,7 @@ def load_expt_formation_enthalpy():
 
 def load_expt_gap():
     """
-    Experimental band gap of inorganic semiconductors.
+    Experimental band gap of 6031 inorganic semiconductors.
 
     References:
         https://pubs.acs.org/doi/suppl/10.1021/acs.jpclett.8b00124
@@ -413,6 +413,10 @@ def load_expt_gap():
     """
     df = pd.read_csv(os.path.join(data_dir, 'zhuo_gap_expt.csv'))
     df = df.rename(columns={'composition': 'formula', 'Eg (eV)': 'gap expt'})
+    # note sure how to interpret the formulas such as 'AgCNO,65' or 'Sr2MgReO6,225'
+    # in the dataset. It seems like they are the space group number
+    # TODO-AF: contact the authors to confirm this
+    df = df[df['formula'].apply(lambda x: ',' not in x)]
     return df
 
 
@@ -670,5 +674,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    # print(load_mp('mp_all.csv'))
     print(load_wolverton_oxides())

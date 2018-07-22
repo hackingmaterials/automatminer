@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 
 from matbench.automl.tpot_utils import TpotAutoml, ErrorAnalysis
 from matbench.data.load import load_double_perovskites_gap, \
@@ -29,7 +30,7 @@ class TestTpotAutoml(unittest.TestCase):
         df = prep.handle_nulls(df_feats)
         # train/test split (development is within tpot crossvalidation)
         X_train, X_test, y_train, y_test = \
-            train_test_split(df.drop(target_col, axis=1).as_matrix(),
+            train_test_split(df.drop(target_col, axis=1).values,
             df[target_col], train_size=0.75, test_size=0.25, random_state=self.RS)
 
         tpot = TpotAutoml(mode='regressor',
@@ -37,7 +38,8 @@ class TestTpotAutoml(unittest.TestCase):
                           population_size=25,
                           scoring='r2',
                           random_state=self.RS,
-                          feature_names=df.drop(target_col, axis=1).columns)
+                          feature_names=df.drop(target_col, axis=1).columns,
+                          n_jobs=1)
         self.assertTrue(tpot.scoring_function=='r2')
         tpot.fit(X_train, y_train)
         top_scores = tpot.get_top_models(return_scores=True)
@@ -62,6 +64,14 @@ class TestTpotAutoml(unittest.TestCase):
         df_errors = ea.get_data_for_error_analysis()
         self.assertTrue((df_errors['{}_true'.format(target_col)]!=\
                          df_errors['{}_predicted'.format(target_col)]).all())
+        rmse = np.sqrt(np.mean((tpot.predict(X_test) - y_test) ** 2))
+        self.assertTrue((
+            ea.false_positives['{}_predicted'.format(target_col)]>= \
+            ea.false_positives['{}_true'.format(target_col)] + rmse).all())
+
+        self.assertTrue((
+            ea.false_negatives['{}_predicted'.format(target_col)]<= \
+            ea.false_negatives['{}_true'.format(target_col)] - rmse).all())
 
 
     def test_tpot_classification(self, limit=500):
@@ -77,7 +87,7 @@ class TestTpotAutoml(unittest.TestCase):
         df = prep.handle_nulls(df_feats)
         # train/test split (development is within tpot crossvalidation)
         X_train, X_test, y_train, y_test = \
-            train_test_split(df.drop(target_col, axis=1).as_matrix(),
+            train_test_split(df.drop(target_col, axis=1).values,
             df[target_col], train_size=0.75, test_size=0.25, random_state=self.RS)
 
         tpot = TpotAutoml(mode='classify',
@@ -85,7 +95,8 @@ class TestTpotAutoml(unittest.TestCase):
                           population_size=25,
                           scoring='f1_weighted',
                           random_state=self.RS,
-                          feature_names=df.drop(target_col, axis=1).columns)
+                          feature_names=df.drop(target_col, axis=1).columns,
+                          n_jobs=1)
         self.assertTrue(tpot.scoring_function=='f1_weighted')
         tpot.fit(X_train, y_train)
         top_scores = tpot.get_top_models(return_scores=True)
@@ -109,6 +120,10 @@ class TestTpotAutoml(unittest.TestCase):
         df_errors = ea.get_data_for_error_analysis()
         self.assertTrue((df_errors['{}_true'.format(target_col)] !=\
                          df_errors['{}_predicted'.format(target_col)]).all())
+        self.assertTrue(len(ea.false_negatives)==0)
+        self.assertTrue(ea.false_positives['gfa_predicted'].all() and \
+                        not ea.false_positives['gfa_true'].all())
+
 
 
 if __name__ == '__main__':

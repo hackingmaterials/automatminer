@@ -28,11 +28,13 @@ def is_greater_better(scoring_function):
         'f1_weighted', 'precision', 'precision_macro', 'precision_micro',
         'precision_samples','precision_weighted', 'recall',
         'recall_macro', 'recall_micro','recall_samples',
-        'recall_weighted', 'roc_auc'] + ['r2']:
+        'recall_weighted', 'roc_auc'] + \
+            ['r2', 'neg_median_absolute_error', 'neg_mean_absolute_error',
+            'neg_mean_squared_error']:
         return True
-    elif scoring_function in ['neg_median_absolute_error',
-                                   'neg_mean_absolute_error',
-                                   'neg_mean_squared_error']:
+    elif scoring_function in ['median_absolute_error',
+                              'mean_absolute_error',
+                              'mean_squared_error']:
         return False
     else:
         raise MatbenchError('Unsupported scoring_function: "{}"'.format(
