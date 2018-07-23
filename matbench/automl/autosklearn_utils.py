@@ -107,7 +107,8 @@ class AutoSklearnML:
                  output_folder=None,
                  tmp_folder=None,
                  delete_output_folder_after_terminate=False,
-                 delete_tmp_folder_after_terminate=False):
+                 delete_tmp_folder_after_terminate=False,
+                 **train_test_split_options):
 
         self.X = X
         self.y = y
@@ -132,7 +133,7 @@ class AutoSklearnML:
 
         self.X_train, self.X_test, self.y_train, self.y_test = \
             sklearn.model_selection.train_test_split(self.X, self.y,
-                                                     random_state=1)
+                                                     **train_test_split_options)
 
     def classification(self, metric="accuracy"):
         """
