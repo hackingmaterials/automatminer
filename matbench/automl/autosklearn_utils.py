@@ -104,6 +104,7 @@ class AutoSklearnML:
                  include_preprocessors=None,
                  exclude_preprocessors=None,
                  resampling_strategy="holdout",
+                 resampling_strategy_arguments=None,
                  output_folder=None,
                  tmp_folder=None,
                  delete_output_folder_after_terminate=False,
@@ -118,6 +119,7 @@ class AutoSklearnML:
              "per_run_time_limit": per_run_time_limit,
              "ml_memory_limit": ml_memory_limit,
              "resampling_strategy": resampling_strategy,
+             "resampling_strategy_arguments": resampling_strategy_arguments,
              "ensemble_size": ensemble_size,
              "ensemble_nbest": ensemble_nbest,
              "include_estimators": include_estimators,
@@ -161,6 +163,9 @@ class AutoSklearnML:
         # auto_classifier.refit(self.X_train.copy(), self.y_train.copy())
         print(auto_classifier.show_models())
 
+        if self.auto_sklearn_kwargs["resampling_strategy"] == "cv":
+            auto_classifier.refit(self.X_train.copy(), self.y_train.copy())
+
         prediction = auto_classifier.predict(self.X_test)
 
         print("{} score:".format(metric),
@@ -188,6 +193,9 @@ class AutoSklearnML:
                            metric=regression_metric,
                            dataset_name=self.dataset_name)
         print(auto_regressor.show_models())
+
+        if self.auto_sklearn_kwargs["resampling_strategy"] == "cv":
+            auto_regressor.refit(self.X_train.copy(), self.y_train.copy())
 
         prediction = auto_regressor.predict(self.X_test)
         print("{} score:".format(metric),
