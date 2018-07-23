@@ -21,7 +21,7 @@ df_feats = featzer.featurize_formula(featurizers='all')
 # preprocessing of the data
 prep = PreProcess(max_colnull=0.1)
 df = prep.preprocess(df_feats)
-df.to_csv('test.csv')
+df.to_csv('{}_tpot_trained_data.csv'.format(target_col))
 print(df.shape)
 print(df.head())
 assert df.isnull().sum().sum() == 0
