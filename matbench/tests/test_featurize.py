@@ -53,16 +53,16 @@ class TestFeaturize(unittest.TestCase):
         self.assertTrue((df["transition metal fraction"] < 0.45).all())
 
         # YangSolidSolution:
-        self.assertAlmostEqual(
-            df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
+        # self.assertAlmostEqual(
+        #     df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
 
         # ElectronegativityDiff:
-        self.assertAlmostEqual(
-            df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
+        # self.assertAlmostEqual(
+        #     df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
 
         # making sure:
             # featurize_formula works with only composition and not formula
-            # eaturize_formula works with a given list of featurizers
+            # featurize_formula works with a given list of featurizers
         df = featurizer.featurize_formula(df_init, featurizers=[
             cf.ElementProperty.from_preset(preset_name="matminer"),
             cf.IonProperty()
@@ -252,7 +252,9 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(cf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.composition(extras=True, slow_ones=True)
+        test_feats = self.allfs.composition(need_oxidstates=True,
+                                            extras=True,
+                                            slow_ones=True)
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
         self.assertEqual(len(test_feats), len(true_feats))

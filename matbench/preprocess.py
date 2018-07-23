@@ -2,7 +2,7 @@ from matbench.utils.utils import MatbenchError
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 from pandas.api.types import is_numeric_dtype
-
+import pandas as pd
 
 class PreProcess(object):
     """
@@ -48,6 +48,12 @@ class PreProcess(object):
             if not is_numeric_dtype(df[self.target_col]):
                 raise MatbenchError('Target column "{}" must be numeric'.format(
                     self.target_col))
+
+        # TODO: remove/modify the following once preprocessing methods for str/objects are implemented:
+        df = df.drop(list(df.columns[df.dtypes == object]), axis=1)
+        for col in list(df.columns[df.dtypes == bool]):
+            df[col] = df[col].apply(int)
+        df = df.apply(pd.to_numeric)
         return df
 
 
