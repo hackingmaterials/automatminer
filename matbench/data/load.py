@@ -31,9 +31,6 @@ Naming convention guidelines:
         e.g. "gap pbe" means band gap calculated via DFT using PBE functional
     - avoid including units in the column name, instead explain in the docs
     - roughly use a 15-character limit for column names
-
-Possible other datasets to consider:
-    OQMD? - AF
 """
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
@@ -402,7 +399,7 @@ def load_expt_formation_enthalpy():
 
 def load_expt_gap():
     """
-    Experimental band gap of 6031 inorganic semiconductors.
+    Experimental band gap of 6354 inorganic semiconductors.
 
     References:
         https://pubs.acs.org/doi/suppl/10.1021/acs.jpclett.8b00124
@@ -413,10 +410,9 @@ def load_expt_gap():
     """
     df = pd.read_csv(os.path.join(data_dir, 'zhuo_gap_expt.csv'))
     df = df.rename(columns={'composition': 'formula', 'Eg (eV)': 'gap expt'})
-    # note sure how to interpret the formulas such as 'AgCNO,65' or 'Sr2MgReO6,225'
-    # in the dataset. It seems like they are the space group number
-    # TODO-AF: contact the authors to confirm this
-    df = df[df['formula'].apply(lambda x: ',' not in x)]
+    # The numbers in 323 formulas such as 'AgCNO,65' or 'Sr2MgReO6,225' are
+    # space group numbers confirmed by Jakoah Brgoch the corresponding author
+    df['formula'] = df['formula'].apply(lambda x: x.split(',')[0])
     return df
 
 
