@@ -232,13 +232,16 @@ class AllFeaturizers(object):
         self.preset_name = preset_name
 
 
-    def composition(self, preset_name=None, extras=False):
+    def composition(self, preset_name=None, extras=False, slow_ones=False):
         """
         All composition-based featurizers with default arguments.
 
         Args:
             preset_name (str): some featurizers take in this argument
             extras (bool): Include "niche" composition featurizers
+            slow_ones (bool): Whether to include relatively slow featurizers.
+                We have not found evidence that these featurizers improve the
+                prediction scores of the current datasets.
 
         Returns ([matminer featurizer classes]):
         """
@@ -251,7 +254,6 @@ class AllFeaturizers(object):
             cf.Stoichiometry(),
             cf.ValenceOrbital(),
             cf.TMetalFraction(),
-            cf.AtomicPackingEfficiency(),  # much slower than the rest
 
             # these need oxidation states present in Composition:
             cf.CationProperty.from_preset(preset_name='deml'),
@@ -264,8 +266,12 @@ class AllFeaturizers(object):
         if extras:
             featzers += [cf.ElementFraction(),
                          cf.Miedema(),
-                         cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
                          ]
+        if slow_ones:
+            featzers += [
+                cf.AtomicPackingEfficiency(),  # much slower than the rest
+                cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
+            ]
         return featzers
 
 
