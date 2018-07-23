@@ -56,10 +56,6 @@ class TestFeaturize(unittest.TestCase):
         self.assertAlmostEqual(
             df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
 
-        # AtomicPackingEfficiency:
-        self.assertTrue((df["mean abs simul. packing efficiency"] < 0.1).all())
-        self.assertTrue((df["dist from 1 clusters |APE| < 0.010"] < 0.1).all())
-
         # ElectronegativityDiff:
         self.assertAlmostEqual(
             df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
@@ -256,7 +252,7 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(cf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.composition(extras=True)
+        test_feats = self.allfs.composition(extras=True, slow_ones=True)
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
         self.assertEqual(len(test_feats), len(true_feats))
