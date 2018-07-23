@@ -39,7 +39,8 @@ tpot = TpotAutoml(mode=model_type,
                   scoring=scoring,
                   random_state=RS,
                   feature_names=df.drop(target_col, axis=1).columns,
-                  n_jobs=1)
+                  n_jobs=1,
+                  verbosity=2)
 tpot.fit(X_train, y_train)
 print('total fitting time: {} s'.format(time() - start_time))
 
