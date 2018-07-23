@@ -8,7 +8,8 @@ from time import time
 # user inputs
 target_col = 'gfa'
 RS = 29
-timelimitmins = 120
+timelimitmins = None
+print('timelimitmins = ', timelimitmins)
 model_type = 'classification'
 scoring = 'f1'
 
