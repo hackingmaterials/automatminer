@@ -78,8 +78,8 @@ class Featurize(object):
         return df
 
     def featurize_formula(self, df=None, featurizers="all", col_id="formula",
-                          compcol="composition", guess_oxidstates=True,
-                          inplace=True, asindex=True):
+                          compcol="composition", guess_oxidstates=False,
+                          inplace=True, asindex=True, **kwargs):
         """
         Featurizes based on formula or composition (pymatgen Composition).
 
@@ -93,6 +93,7 @@ class Featurize(object):
                 OxidationStates, ElectronAffinity and ElectronegativityDiff.
                 Set to False if oxidation states already available in composition.
             asindex (bool): whether to set formula col_id as df index
+            **kwargs: keywords arguments accepted by AllFeaturizers.composition
 
         Returns (pandas.DataFrame):
             Dataframe with compositional features added.
@@ -103,7 +104,7 @@ class Featurize(object):
         if guess_oxidstates:
             df[compcol] = composition_to_oxidcomposition(df[compcol])
         if featurizers == 'all':
-            featurizers = self.all_featurizers.composition()
+            featurizers = self.all_featurizers.composition(**kwargs)
         df = MultipleFeaturizer(featurizers).featurize_dataframe(
             df, col_id=compcol, ignore_errors=self.ignore_errors)
         if asindex:
@@ -232,13 +233,16 @@ class AllFeaturizers(object):
         self.preset_name = preset_name
 
 
-    def composition(self, preset_name=None, extras=False, slow_ones=False):
+    def composition(self, preset_name=None, need_oxidstates=False,
+                    extras=False, slow_ones=False):
         """
         All composition-based featurizers with default arguments.
 
         Args:
             preset_name (str): some featurizers take in this argument
             extras (bool): Include "niche" composition featurizers
+            need_oxidstates (bool): whether to return those featurizers that
+                require oxidation states decorated Composition
             slow_ones (bool): Whether to include relatively slow featurizers.
                 We have not found evidence that these featurizers improve the
                 prediction scores of the current datasets.
@@ -254,15 +258,15 @@ class AllFeaturizers(object):
             cf.Stoichiometry(),
             cf.ValenceOrbital(),
             cf.TMetalFraction(),
-
-            # these need oxidation states present in Composition:
-            cf.CationProperty.from_preset(preset_name='deml'),
-            cf.OxidationStates.from_preset(preset_name='deml'),
-            cf.ElectronAffinity(),
-            cf.ElectronegativityDiff(),
-            cf.YangSolidSolution(),
         ]
-
+        if need_oxidstates:
+            featzers += [
+                cf.CationProperty.from_preset(preset_name='deml'),
+                cf.OxidationStates.from_preset(preset_name='deml'),
+                cf.ElectronAffinity(),
+                cf.ElectronegativityDiff(),
+                cf.YangSolidSolution(),
+            ]
         if extras:
             featzers += [cf.ElementFraction(),
                          cf.Miedema(),
