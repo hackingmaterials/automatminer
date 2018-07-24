@@ -31,9 +31,6 @@ Naming convention guidelines:
         e.g. "gap pbe" means band gap calculated via DFT using PBE functional
     - avoid including units in the column name, instead explain in the docs
     - roughly use a 15-character limit for column names
-
-Possible other datasets to consider:
-    OQMD? - AF
 """
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
@@ -182,6 +179,8 @@ def load_boltztrap_mp():
     Returns:
         mpid (input): The Materials Project mpid, as a string.
         formula (input):
+        structure (input):
+
         m_n (target): n-type/conduction band effective mass. Units: m_e where
             m_e is the mass of an electron; i.e. m_n is a unitless ratio
         m_p (target): p-type/valence band effective mass.
@@ -202,11 +201,12 @@ def load_boltztrap_mp():
     df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'))
     df = df.rename(columns={'S_n': 's_n', 'S_p': 's_p',
                             'PF_n': 'pf_n', 'PF_p': 'pf_p'})
+    df = df[~df['structure'].isna()]
     warnings.warn('When training a model on the load_boltztrap_mp data, to'
         ' avoid data leakage, one may only set the target to one of the target'
         ' columns listed. For example, s_n is strongly correlated with pf_n'
         ' and usually when one is available the other one is available too.')
-    return df
+    return df.dropna()
 
 
 def load_phonon_dielectric_mp():
@@ -220,6 +220,9 @@ def load_phonon_dielectric_mp():
 
     Returns:
         mpid (input): The Materials Project mpid, as a string.
+        formula (input):
+        structure (input):
+
         eps_total (target): total calculated dielectric constant. Unitless:
             it is a ratio over the dielectric constant at vacuum.
         eps_electronic (target): electronic contribution to the calculated
@@ -236,7 +239,9 @@ def load_phonon_dielectric_mp():
     """
     df = pd.read_csv(os.path.join(data_dir, 'phonon_dielectric_mp.csv'))
     df = df[df['asr_breaking'] < 30].drop('asr_breaking', axis=1)
-    return df
+    # remove entries not having structure, formula, or a target
+    df = df.dropna()
+    return df.reset_index(drop=True)
 
 
 def load_wolverton_oxides():
@@ -670,5 +675,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    # print(load_mp('mp_all.csv'))
-    print(load_heusler_magnetic())
+    print(load_phonon_dielectric_mp())
