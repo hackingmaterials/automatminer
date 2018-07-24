@@ -1,4 +1,5 @@
 import os
+import pickle
 import warnings
 import sklearn.model_selection
 import sklearn.datasets
@@ -189,6 +190,12 @@ class AutoSklearnML:
                 metric, classification_metric._score_func(self._y_test,
                                                           prediction_test)))
 
+        dump_file = os.path.join(self.auto_sklearn_kwargs['output_folder'],
+                                 'automl_classification.dump.pkl')
+
+        with open(dump_file, 'wb') as f:
+            pickle.dump(auto_classifier, f)
+
     def regression(self, metric="r2"):
         """
         Perform auto_regression.
@@ -234,6 +241,12 @@ class AutoSklearnML:
             wf.write("test set {} score: {}".format(
                 metric, regression_metric._score_func(self._y_test,
                                                       prediction_test)))
+
+        dump_file = os.path.join(self.auto_sklearn_kwargs['output_folder'],
+                                 'automl_regressor.dump.pkl')
+
+        with open(dump_file, 'wb') as f:
+            pickle.dump(auto_regressor, f)
 
 
     @staticmethod
@@ -312,7 +325,7 @@ class AutoSklearnML:
 if __name__ == '__main__':
     from matbench.data.load import load_glass_formation
     from pymatgen.core import Composition
-    from matminer.featurizers.compositionimport ElementProperty
+    from matminer.featurizers.compositionimport import ElementProperty
 
     df = load_glass_formation()
     df['composition'] = df["formula"].apply(lambda x: Composition(x))
