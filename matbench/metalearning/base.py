@@ -2,12 +2,8 @@ from abc import ABCMeta, abstractmethod
 import time
 from collections import OrderedDict
 
-import scipy.sparse
-
-from autosklearn.util.logging_ import get_logger
-
 """
-Thanks to autosklearn for the design of these classes.
+Thanks to autosklearn for the initial design of the base classes.
 """
 
 
@@ -121,7 +117,7 @@ class AbstractMetaFeature(object):
 
     @abstractmethod
     def __init__(self):
-        self.logger = get_logger(__name__)
+        pass
 
     @abstractmethod
     def _calculate(cls, x, y):
@@ -152,6 +148,7 @@ class HelperFunction(AbstractMetaFeature):
     def __init__(self):
         super(HelperFunction, self).__init__()
         self.type_ = "HELPERFUNCTION"
+
 
 class MetaFeatureValue(object):
     def __init__(self, name, type_, fold, repeat, value, time, comment=""):
