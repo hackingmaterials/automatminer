@@ -1,0 +1,89 @@
+import os
+import pstats
+from time import time
+from cProfile import Profile
+
+import pandas as pd
+from matbench.automl.autosklearn_utils import AutoSklearnML
+from matbench.data.load import load_castelli_perovskites
+from matbench.featurize import Featurize
+from matbench.preprocess import PreProcess
+
+data_name = "castelli"
+target_col = "gap gllbsc"
+timelimit_secs = 7200
+rs = 29
+
+feature_output_path = "example_data/matbench_data/featurized_data/"
+model_tmp_path = r'example_data/matbench_data/autosklearn_output/tmp/'
+model_output_path = r'example_data/matbench_data/autosklearn_output/output/'
+
+feature_output_file = \
+    os.path.join(feature_output_path,
+                 "{}_all_featurized_data.csv".format(data_name))
+
+if os.path.exists(feature_output_file):
+    df = pd.read_csv(feature_output_file, index_col=0)
+else:
+    df_init = load_castelli_perovskites()[["formula", target_col]]
+
+    prof = Profile()
+    prof.enable()
+
+    featzer = Featurize(df_init)
+    df_feats = featzer.featurize_formula(featurizers="all")
+    prep = PreProcess(max_colnull=0.1)
+    df = prep.preprocess(df_feats)
+
+    prof.create_stats()
+    print("featurize time:\n")
+    pstats.Stats(prof).strip_dirs().sort_stats("time").print_stats(5)
+
+    if os.path.exists(feature_output_path):
+        print("output path: {} exists!".format(feature_output_path))
+    else:
+        os.makedirs(feature_output_path)
+        print("create output path: {} successful!".format(feature_output_path))
+
+    prof.dump_stats(
+        os.path.join(feature_output_path,
+                     "cProfile_for_featurize_{}.log".format(data_name)))
+
+    df.to_csv(feature_output_file)
+
+X = df.drop(target_col, axis=1).values
+y = df[target_col]
+
+output_folder = os.path.join(model_output_path, data_name, target_col)
+tmp_folder = os.path.join(model_tmp_path, data_name, target_col)
+autosklearnml = AutoSklearnML(X, y,
+                              dataset_name="{}_{}".format(data_name,
+                                                          target_col),
+                              time_left_for_this_task=timelimit_secs,
+                              per_run_time_limit=int(timelimit_secs/10),
+                              ml_memory_limit=2048,
+                              exclude_estimators=["random_forest"],
+                              include_preprocessors=["no_preprocessing", ],
+                              resampling_strategy='cv',
+                              resampling_strategy_arguments={'folds': 5},
+                              output_folder=output_folder,
+                              tmp_folder=tmp_folder,
+                              random_state=rs)
+
+prof = Profile()
+prof.enable()
+start_time = time()
+
+auto_regressor = autosklearnml.regression()
+
+prof.create_stats()
+print("featurize time:\n")
+pstats.Stats(prof).strip_dirs().sort_stats("time").print_stats(5)
+
+prof.dump_stats(
+    os.path.join(output_folder,
+                 "cProfile_for_autosklearn_{}.log".format(data_name)))
+
+print(auto_regressor.get_models_with_weights())
+print(auto_regressor.sprint_statistics())
+print('total fitting time: {} s'.format(time() - start_time))
