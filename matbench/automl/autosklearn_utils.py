@@ -162,7 +162,6 @@ class AutoSklearnML:
                             metric=classification_metric,
                             dataset_name=self.dataset_name)
 
-        # auto_classifier.refit(self.X_train.copy(), self.y_train.copy())
         print(auto_classifier.show_models())
 
         if self.auto_sklearn_kwargs["resampling_strategy"] == "cv":
@@ -195,6 +194,8 @@ class AutoSklearnML:
 
         with open(dump_file, 'wb') as f:
             pickle.dump(auto_classifier, f)
+
+        return auto_classifier
 
     def regression(self, metric="r2"):
         """
@@ -247,6 +248,8 @@ class AutoSklearnML:
 
         with open(dump_file, 'wb') as f:
             pickle.dump(auto_regressor, f)
+
+        return auto_regressor
 
 
     @staticmethod
