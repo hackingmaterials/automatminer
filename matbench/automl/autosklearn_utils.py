@@ -328,7 +328,7 @@ class AutoSklearnML:
 if __name__ == '__main__':
     from matbench.data.load import load_glass_formation
     from pymatgen.core import Composition
-    from matminer.featurizers.compositionimport import ElementProperty
+    from matminer.featurizers.composition import ElementProperty
 
     df = load_glass_formation()
     df['composition'] = df["formula"].apply(lambda x: Composition(x))
