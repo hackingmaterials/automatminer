@@ -1,7 +1,4 @@
-import inspect
 import os
-import ast
-import pandas as pd
 import unittest
 from pymatgen.core import Structure
 
@@ -9,8 +6,6 @@ from matbench.metalearning.base import MetaFeatureValue
 from matbench.metalearning import metafeatures
 from matbench.data.load import load_castelli_perovskites, load_jdft2d, \
     load_glass_formation, load_mp
-from matbench.metalearning.metafeatures import FormulaStats, StructureStats
-from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 
 
 test_dir = os.path.dirname(__file__)
