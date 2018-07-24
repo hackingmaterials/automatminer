@@ -22,9 +22,12 @@ class TestFeaturize(unittest.TestCase):
         ignore_cols = ['a_1', 'a_2', 'b_1', 'b_2']
         featurizer = Featurize(df_init,
                                ignore_cols=ignore_cols,
-                               ignore_errors=False)
+                               ignore_errors=False,
+                               exclude=['CohesiveEnergy'])
 
-        df = featurizer.featurize_formula(asindex=False)
+        df = featurizer.featurize_formula(asindex=False,
+                                          guess_oxidstates=True,
+                                          need_oxidstates=True)
 
         # sanity checks
         self.assertTrue(len(df), limit)
@@ -53,12 +56,12 @@ class TestFeaturize(unittest.TestCase):
         self.assertTrue((df["transition metal fraction"] < 0.45).all())
 
         # YangSolidSolution:
-        # self.assertAlmostEqual(
-        #     df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
+        self.assertAlmostEqual(
+            df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
 
         # ElectronegativityDiff:
-        # self.assertAlmostEqual(
-        #     df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
+        self.assertAlmostEqual(
+            df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
 
         # making sure:
             # featurize_formula works with only composition and not formula

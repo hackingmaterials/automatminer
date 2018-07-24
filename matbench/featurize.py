@@ -25,7 +25,7 @@ class Featurize(object):
         or:
             df = featurizer.featurize_formula() # all formula-related feature
         or:
-            df = featurizer.
+            df = featurizer.featurize_dos(featurizers=[BandEdge()])
 
     Args:
         df (pandas.DataFrame): the input data containing at least one of preset
@@ -36,12 +36,15 @@ class Featurize(object):
             featurize_dataframe is called
         drop_featurized_col (bool): whether to drop the featurized column after
             the corresponding featurize_* method is called
+        exclude ([str]): list of the featurizer names to be excluded. Note
+            that these names are str (e.g. "ElementProperty") and not the class
     """
 
     def __init__(self, df, ignore_cols=None, preset_name="matminer",
-                 ignore_errors=True, drop_featurized_col=True):
+                 ignore_errors=True, drop_featurized_col=True, exclude=None):
         self.df = df if ignore_cols is None else df.drop(ignore_cols, axis=1)
-        self.all_featurizers = AllFeaturizers(preset_name=preset_name)
+        self.all_featurizers = AllFeaturizers(preset_name=preset_name,
+                                              exclude=exclude)
         self.ignore_errors = ignore_errors
         self.drop_featurized_col = drop_featurized_col
 
@@ -227,11 +230,12 @@ class AllFeaturizers(object):
 
     Args:
         preset_name (str): some featurizers take in this argument
+        exclude ([str]): list of the featurizer names to be excluded. Note
+            that these names are str (e.g. "ElementProperty") and not the class
     """
-
-    def __init__(self, preset_name="matminer"):
+    def __init__(self, preset_name="matminer", exclude=None):
         self.preset_name = preset_name
-
+        self.exclude = exclude or []
 
     def composition(self, preset_name=None, need_oxidstates=False,
                     extras=False, slow_ones=False):
@@ -276,8 +280,8 @@ class AllFeaturizers(object):
                 cf.AtomicPackingEfficiency(),  # much slower than the rest
                 cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
             ]
-        return featzers
-
+        names = [c.__class__.__name__ for c in featzers]
+        return [f for i,f in enumerate(featzers) if names[i] not in self.exclude]
 
     def structure(self, preset_name="CrystalNNFingerprint_ops"):
         """
@@ -290,7 +294,7 @@ class AllFeaturizers(object):
         Returns ([matminer featurizer classes]):
         """
         preset_name = preset_name or self.preset_name
-        return [
+        featzers = [
             sf.DensityFeatures(),
             sf.GlobalSymmetryFeatures(),
             sf.Dimensionality(),
@@ -309,6 +313,8 @@ class AllFeaturizers(object):
             sf.ElectronicRadialDistributionFunction(),  # returns dict!
             sf.EwaldEnergy()
         ]
+        names = [c.__class__.__name__ for c in featzers]
+        return [f for i, f in enumerate(featzers) if names[i] not in self.exclude]
 
     def fit_structure(self):
         """
@@ -317,11 +323,13 @@ class AllFeaturizers(object):
 
         Returns ([matminer featurizer classes]):
         """
-        return [
+        featzers = [
             sf.PartialRadialDistributionFunction(),
             sf.BondFractions(),
             sf.BagofBonds()
         ]
+        names = [c.__class__.__name__ for c in featzers]
+        return [f for i, f in enumerate(featzers) if names[i] not in self.exclude]
 
     def dos(self):
         """
@@ -329,11 +337,13 @@ class AllFeaturizers(object):
 
         Returns ([matminer featurizer classes]):
         """
-        return [
+        featzers = [
             dosf.DOSFeaturizer(),
             dosf.DopingFermi(),
             dosf.BandEdge()
         ]
+        names = [c.__class__.__name__ for c in featzers]
+        return [f for i,f in enumerate(featzers) if names[i] not in self.exclude]
 
     def bandstructure(self):
         """
@@ -341,7 +351,9 @@ class AllFeaturizers(object):
 
         Returns ([matminer featurizer classes]):
         """
-        return [
+        featzers = [
             bf.BandFeaturizer(),
             bf.BranchPointEnergy()
         ]
+        names = [c.__class__.__name__ for c in featzers]
+        return [f for i,f in enumerate(featzers) if names[i] not in self.exclude]
