@@ -2,12 +2,8 @@ from abc import ABCMeta, abstractmethod
 import time
 from collections import OrderedDict
 
-import scipy.sparse
-
-from autosklearn.util.logging_ import get_logger
-
 """
-Thanks to autosklearn for the design of these classes.
+Thanks to autosklearn for the initial design of the base classes.
 """
 
 
@@ -121,24 +117,19 @@ class AbstractMetaFeature(object):
 
     @abstractmethod
     def __init__(self):
-        self.logger = get_logger(__name__)
-
-    @abstractmethod
-    def _calculate(cls, X, y, categorical):
         pass
 
-    def __call__(self, X, y, categorical=None):
-        if categorical is None:
-            categorical = [False for i in range(X.shape[1])]
+    @abstractmethod
+    def _calculate(cls, x, y):
+        pass
+
+    def __call__(self, x, y):
         starttime = time.time()
 
         try:
-            if scipy.sparse.issparse(X) and hasattr(self, "_calculate_sparse"):
-                value = self._calculate_sparse(X, y, categorical)
-            else:
-                value = self._calculate(X, y, categorical)
+            value = self._calculate(x, y)
             comment = ""
-        except MemoryError as e:
+        except MemoryError:
             value = None
             comment = "Memory Error"
 
@@ -157,6 +148,7 @@ class HelperFunction(AbstractMetaFeature):
     def __init__(self):
         super(HelperFunction, self).__init__()
         self.type_ = "HELPERFUNCTION"
+
 
 class MetaFeatureValue(object):
     def __init__(self, name, type_, fold, repeat, value, time, comment=""):
