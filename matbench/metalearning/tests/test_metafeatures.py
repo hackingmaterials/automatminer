@@ -44,19 +44,34 @@ class TestMetafeatures(unittest.TestCase):
         self.assertIsInstance(nf, MetaFeatureValue)
 
     def test_PercentOfAllMetal(self):
-        pass
+        pm = self.metafeatures_glass["PercentOfAllMetal"]\
+            (self.df_glass["formula"], self.df_glass["gfa"])
+        self.assertEqual(pm.value, 0.3944599195295574)
+        self.assertIsInstance(pm, MetaFeatureValue)
 
     def test_PercentOfMetalNonmetalCompounds(self):
-        pass
+        pmnc = self.metafeatures_glass["PercentOfMetalNonmetalCompounds"]\
+              (self.df_glass["formula"], self.df_glass["gfa"])
+        self.assertEqual(pmnc.value, 0.6046115753636645)
+        self.assertIsInstance(pmnc, MetaFeatureValue)
 
     def test_PercentOfAllNonmetal(self):
-        pass
+        pan = self.metafeatures_glass["PercentOfAllNonmetal"]\
+              (self.df_glass["formula"], self.df_glass["gfa"])
+        self.assertEqual(pan.value, 0.0007737542556484061)
+        self.assertIsInstance(pan, MetaFeatureValue)
 
     def test_NumberOfDifferentElements(self):
-        pass
+        nde = self.metafeatures_glass["NumberOfDifferentElements"]\
+              (self.df_glass["formula"], self.df_glass["gfa"])
+        self.assertEqual(nde.value, 57)
+        self.assertIsInstance(nde, MetaFeatureValue)
 
     def test_AvgNumberOfElements(self):
-        pass
+        ane = self.metafeatures_glass["AvgNumberOfElements"]\
+              (self.df_glass["formula"], self.df_glass["gfa"])
+        self.assertEqual(ane.value, 2.8404518724852985)
+        self.assertIsInstance(ane, MetaFeatureValue)
 
 if __name__ == "__main__":
     unittest.main()
