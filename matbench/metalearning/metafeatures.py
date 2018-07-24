@@ -80,13 +80,13 @@ To do:
 """
 
 metafeatures = MetafeatureFunctions()
-helper_functions = HelperFunctions()
+helpers = HelperFunctions()
 
 
 ##################################
 # composition-related metafeatures
 ##################################
-@helper_functions.define("FormulaStats")
+@helpers.define("FormulaStats")
 class FormulaStats(HelperFunction):
     def _calculate(self, X, y, categorical):
         stats = FormulaStats.formula_stats(X["formula"])
@@ -99,10 +99,11 @@ class NumberOfFormulas(MetaFeature):
         return len(X["formula"])
 
 
-@metafeatures.define("PercentOfAllMetal", dependency="FormulaStats")
+@metafeatures.define("PercentOfAllMetal",
+                     dependency="FormulaStats")
 class PercentOfAllMetal(MetaFeature):
     def _calculate(self, X, y, categorical):
-        stats = helper_functions.get_value("FormulaStats")
+        stats = helpers.get_value("FormulaStats")
         num = sum([1 if x["major_formula_category"] == 1 else 0
                   for x in stats.values()])
         return num / len(stats)
@@ -112,51 +113,56 @@ class PercentOfAllMetal(MetaFeature):
                      dependency="FormulaStats")
 class PercentOfMetalNonmetalCompounds(MetaFeature):
     def _calculate(self, X, y, categorical):
-        stats = helper_functions.get_value("FormulaStats")
+        stats = helpers.get_value("FormulaStats")
         num = sum([1 if x["major_formula_category"] == 2 else 0
                   for x in stats.values()])
         return num / len(stats)
 
 
-@metafeatures.define("PercentOfAllNonmetal", dependency="FormulaStats")
+@metafeatures.define("PercentOfAllNonmetal",
+                     dependency="FormulaStats")
 class PercentOfAllNonmetal(MetaFeature):
     def _calculate(self, X, y, categorical):
-        stats = helper_functions.get_value("FormulaStats")
+        stats = helpers.get_value("FormulaStats")
         num = sum([1 if x["major_formula_category"] == 3 else 0
                   for x in stats.values()])
         return num / len(stats)
 
 
-@metafeatures.define("NumberOfDifferentElements", dependency="FormulaStats")
+@metafeatures.define("NumberOfDifferentElements",
+                     dependency="FormulaStats")
 class NumberOfDifferentElements(MetaFeature):
     def _calculate(self, X, y, categorical):
-        stats = helper_functions.get_value("FormulaStats")
+        stats = helpers.get_value("FormulaStats")
         elements = set()
         for x in stats.values():
             elements = elements.union(set(x["elements"]))
         return len(elements)
 
 
-@metafeatures.define("AvgNumberOfElements", dependency="FormulaStats")
+@metafeatures.define("AvgNumberOfElements",
+                     dependency="FormulaStats")
 class AvgNumberOfElements(MetaFeature):
     def _calculate(self, X, y, categorical):
-        stats = helper_functions.get_value("FormulaStats")
+        stats = helpers.get_value("FormulaStats")
         nelements_sum = sum([x["n_elements"] for x in stats.values()])
         return nelements_sum / len(stats)
 
 
-@metafeatures.define("MaxNumberOfElements", dependency="FormulaStats")
+@metafeatures.define("MaxNumberOfElements",
+                     dependency="FormulaStats")
 class MaxNumberOfElements(MetaFeature):
     def _calculate(self, X, y, categorical):
-        stats = helper_functions.get_value("FormulaStats")
+        stats = helpers.get_value("FormulaStats")
         nelements_max = max([x["n_elements"] for x in stats.values()])
         return nelements_max
 
 
-@metafeatures.define("MinNumberOfElements", dependency="FormulaStats")
+@metafeatures.define("MinNumberOfElements",
+                     dependency="FormulaStats")
 class MinNumberOfElements(MetaFeature):
     def _calculate(self, X, y, categorical):
-        stats = helper_functions.get_value("FormulaStats")
+        stats = helpers.get_value("FormulaStats")
         nelements_min = min([x["n_elements"] for x in stats.values()])
         return nelements_min
 
@@ -164,7 +170,7 @@ class MinNumberOfElements(MetaFeature):
 ################################
 # structure-related metafeatures
 ################################
-@helper_functions.define("StructureStats")
+@helpers.define("StructureStats")
 class StructureStats(HelperFunction):
     def _calculate(self, X, y, categorical):
         stats = StructureStats.structure_stats(X["structure"])
@@ -177,26 +183,29 @@ class NumberOfStructures(MetaFeature):
         return len(X["structure"])
 
 
-@metafeatures.define("PercentOfOrderedStructures", dependency="StructureStats")
+@metafeatures.define("PercentOfOrderedStructures",
+                     dependency="StructureStats")
 class PercentOfOrderedStructures(MetaFeature):
     def _calculate(self, X, y, categorical):
-        stats = helper_functions.get_value("StructureStats")
+        stats = helpers.get_value("StructureStats")
         num = sum([1 if x["is_ordered"] else 0 for x in stats.values()])
         return num/len(stats)
 
 
-@metafeatures.define("AverageNumberOfSites", dependency="StructureStats")
+@metafeatures.define("AverageNumberOfSites",
+                     dependency="StructureStats")
 class AverageNumberOfSites(MetaFeature):
     def _calculate(self, X, y, categorical):
-        stats = helper_functions.get_value("StructureStats")
+        stats = helpers.get_value("StructureStats")
         nsites_sum = sum([x["n_sites"] for x in stats.values()])
         return nsites_sum / len(stats)
 
 
-@metafeatures.define("MaxNumberOfSites", dependency="StructureStats")
+@metafeatures.define("MaxNumberOfSites",
+                     dependency="StructureStats")
 class MaxNumberOfSites(MetaFeature):
     def _calculate(self, X, y, categorical):
-        stats = helper_functions.get_value("StructureStats")
+        stats = helpers.get_value("StructureStats")
         nsites_max = max([x["n_sites"] for x in stats.values()])
         return nsites_max
 
@@ -204,7 +213,7 @@ class MaxNumberOfSites(MetaFeature):
 ####################################
 # missing_value related metafeatures
 ####################################
-@helper_functions.define("MissingValues")
+@helpers.define("MissingValues")
 class MissingValues(HelperFunction):
     def _calculate(self, X, y, categorical):
         missing = ~np.isfinite(X)
@@ -221,12 +230,12 @@ class MissingValues(HelperFunction):
                      dependency="MissingValues")
 class NumberOfInstancesWithMissingValues(MetaFeature):
     def _calculate(self, X, y, categorical):
-        missing = helper_functions.get_value("MissingValues")
+        missing = helpers.get_value("MissingValues")
         num_missing = missing.sum(axis=1)
         return sum([1 if num > 0 else 0 for num in num_missing])
 
     def _calculate_sparse(self, X, y, categorical):
-        missing = helper_functions.get_value("MissingValues")
+        missing = helpers.get_value("MissingValues")
         new_missing = missing.tocsr()
         num_missing = [np.sum(
             new_missing.data[new_missing.indptr[i]:new_missing.indptr[i + 1]])
@@ -242,10 +251,11 @@ class PercentageOfInstancesWithMissingValues(MetaFeature):
                / metafeatures["NumberOfInstances"](X, y).value
 
 
-@metafeatures.define("NumberOfMissingValues", dependency="MissingValues")
+@metafeatures.define("NumberOfMissingValues",
+                     dependency="MissingValues")
 class NumberOfMissingValues(MetaFeature):
     def _calculate(self, X, y, categorical):
-        return helper_functions.get_value("MissingValues").sum()
+        return helpers.get_value("MissingValues").sum()
 
 
 @metafeatures.define("PercentOfMissingValues",
