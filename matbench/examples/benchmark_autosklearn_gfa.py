@@ -5,12 +5,12 @@ from cProfile import Profile
 
 import pandas as pd
 from matbench.automl.autosklearn_utils import AutoSklearnML
-from matbench.data.load import load_steel_strength
+from matbench.data.load import load_glass_formation
 from matbench.featurize import Featurize
 from matbench.preprocess import PreProcess
 
-data_name = "steel"
-target_col = "yield strength"
+data_name = "glass_formation"
+target_col = "gfa"
 timelimit_secs = 7200
 rs = 29
 
@@ -25,7 +25,7 @@ feature_output_file = \
 if os.path.exists(feature_output_file):
     df = pd.read_csv(feature_output_file, index_col=0)
 else:
-    df_init = load_steel_strength()[['formula', target_col]]
+    df_init = load_glass_formation(phase='ternary')
 
     prof = Profile()
     prof.enable()
@@ -74,7 +74,7 @@ prof = Profile()
 prof.enable()
 start_time = time()
 
-auto_regressor = autosklearnml.regression()
+auto_classifier = autosklearnml.classification()
 
 prof.create_stats()
 print("featurize time:\n")
@@ -84,7 +84,7 @@ prof.dump_stats(
     os.path.join(output_folder,
                  "cProfile_for_autosklearn_{}.log".format(data_name)))
 
-print(auto_regressor.get_models_with_weights())
-print(auto_regressor.sprint_statistics())
+print(auto_classifier.get_models_with_weights())
+print(auto_classifier.sprint_statistics())
 print('total fitting time: {} s'.format(time() - start_time))
 
