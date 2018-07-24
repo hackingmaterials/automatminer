@@ -1,3 +1,4 @@
+import os
 import warnings
 import sklearn.model_selection
 import sklearn.datasets
@@ -166,10 +167,27 @@ class AutoSklearnML:
         if self.auto_sklearn_kwargs["resampling_strategy"] == "cv":
             auto_classifier.refit(self._X_train.copy(), self._y_train.copy())
 
-        prediction = auto_classifier.predict(self._X_test)
+        prediction_train = auto_classifier.predict(self._X_train)
+        print("training set {} score: {}".format(
+            metric, classification_metric._score_func(self._y_train,
+                                                      prediction_train)))
 
-        print("{} score:".format(metric),
-              classification_metric._score_func(self._y_test, prediction))
+        prediction_test = auto_classifier.predict(self._X_test)
+        print("test set {} score: {}".format(
+            metric, classification_metric._score_func(self._y_test,
+                                                      prediction_test)))
+
+        with open(os.path.join(self.auto_sklearn_kwargs['output_folder'],
+                               'best_auto_sklearn_output.log'), 'a+') as wf:
+            wf.write('The best model is : \n')
+            wf.write(auto_classifier.show_models())
+            wf.write("\ntraining set {} score: {}\n".format(
+                metric, classification_metric._score_func(self._y_train,
+                                                          prediction_train)))
+            wf.write('\n')
+            wf.write("test set {} score: {}".format(
+                metric, classification_metric._score_func(self._y_test,
+                                                          prediction_test)))
 
     def regression(self, metric="r2"):
         """
@@ -197,9 +215,26 @@ class AutoSklearnML:
         if self.auto_sklearn_kwargs["resampling_strategy"] == "cv":
             auto_regressor.refit(self._X_train.copy(), self._y_train.copy())
 
-        prediction = auto_regressor.predict(self._X_test)
-        print("{} score:".format(metric),
-              regression_metric._score_func(self._y_test, prediction))
+        prediction_train = auto_regressor.predict(self._X_train)
+        print("training set {} score: {}".format(metric,
+              regression_metric._score_func(self._y_train, prediction_train)))
+
+        prediction_test = auto_regressor.predict(self._X_test)
+        print("test set {} score: {}".format(metric,
+              regression_metric._score_func(self._y_test, prediction_test)))
+
+        with open(os.path.join(self.auto_sklearn_kwargs['output_folder'],
+                               'best_auto_sklearn_output.log'), 'a+') as wf:
+            wf.write('The best model is : \n')
+            wf.write(auto_regressor.show_models())
+            wf.write("\ntraining set {} score: {}\n".format(
+                metric, regression_metric._score_func(self._y_train,
+                                                      prediction_train)))
+            wf.write('\n')
+            wf.write("test set {} score: {}".format(
+                metric, regression_metric._score_func(self._y_test,
+                                                      prediction_test)))
+
 
     @staticmethod
     def get_classification_metric(metric):
@@ -277,7 +312,7 @@ class AutoSklearnML:
 if __name__ == '__main__':
     from matbench.data.load import load_glass_formation
     from pymatgen.core import Composition
-    from matminer.featurizers.composition import ElementProperty
+    from matminer.featurizers.compositionimport ElementProperty
 
     df = load_glass_formation()
     df['composition'] = df["formula"].apply(lambda x: Composition(x))
