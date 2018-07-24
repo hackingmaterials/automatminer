@@ -89,14 +89,14 @@ helpers = HelperFunctions()
 @helpers.define("FormulaStats")
 class FormulaStats(HelperFunction):
     def _calculate(self, x, y):
-        stats = FormulaStatistics.calc(x)
+        stats = FormulaStatistics(x).calc()
         return stats
 
 
 @metafeatures.define("NumberOfFormulas")
 class NumberOfFormulas(MetaFeature):
     def _calculate(self, x, y):
-        return len(x["formula"])
+        return len(x)
 
 
 @metafeatures.define("PercentOfAllMetal",
@@ -180,7 +180,7 @@ class StructureStats(HelperFunction):
 @metafeatures.define("NumberOfStructures")
 class NumberOfStructures(MetaFeature):
     def _calculate(self, x, y):
-        return len(x["structure"])
+        return len(x)
 
 
 @metafeatures.define("PercentOfOrderedStructures",
