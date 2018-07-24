@@ -1,4 +1,5 @@
 import numpy as np
+from pymatgen.core import Composition
 from .base import MetafeatureFunctions, MetaFeature
 from .base import HelperFunctions, HelperFunction
 from .utils import FormulaStatistics, StructureStatistics
@@ -208,6 +209,17 @@ class MaxNumberOfSites(MetaFeature):
         stats = helpers.get_value("StructureStats")
         nsites_max = max([stat["n_sites"] for stat in stats.values()])
         return nsites_max
+
+
+@metafeatures.define("NumberOfDifferentElementsInStructure")
+class NumberOfDifferentElementsInStructure(MetaFeature):
+    def _calculate(self, x, y):
+        elements = set()
+        for struct in x:
+            c = Composition(struct.formula)
+            els = [x.symbol for x in c.elements]
+            elements = elements.union(set(els))
+        return len(elements)
 
 
 ####################################
