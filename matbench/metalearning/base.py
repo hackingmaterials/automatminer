@@ -124,21 +124,16 @@ class AbstractMetaFeature(object):
         self.logger = get_logger(__name__)
 
     @abstractmethod
-    def _calculate(cls, X, y, categorical):
+    def _calculate(cls, x, y):
         pass
 
-    def __call__(self, X, y, categorical=None):
-        if categorical is None:
-            categorical = [False for i in range(X.shape[1])]
+    def __call__(self, x, y):
         starttime = time.time()
 
         try:
-            if scipy.sparse.issparse(X) and hasattr(self, "_calculate_sparse"):
-                value = self._calculate_sparse(X, y, categorical)
-            else:
-                value = self._calculate(X, y, categorical)
+            value = self._calculate(x, y)
             comment = ""
-        except MemoryError as e:
+        except MemoryError:
             value = None
             comment = "Memory Error"
 
