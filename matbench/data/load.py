@@ -407,7 +407,7 @@ def load_expt_formation_enthalpy():
 
 def load_expt_gap():
     """
-    Experimental band gap of inorganic semiconductors.
+    Experimental band gap of 6354 inorganic semiconductors.
 
     References:
         https://pubs.acs.org/doi/suppl/10.1021/acs.jpclett.8b00124
