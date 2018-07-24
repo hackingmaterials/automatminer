@@ -483,7 +483,7 @@ def load_matminer_dielectric():
         ep_e poly (target): Polycrystalline electronic contribution to
             dielectric constant (estimate/avg)
         ep poly (target): Polycrystalline dielectric constant (estimate/avg)
-        pot. ferroelectic (target): If imaginary optical phonon modes present at
+        pot. ferroelectric (target): If imaginary optical phonon modes present at
             the Gamma point, the material is potentially ferroelectric
     """
     df = load_dielectric_constant()
