@@ -94,13 +94,14 @@ class TestStructureMetafeatures(unittest.TestCase):
 
     def test_MaxNumberOfSites(self):
         mns = self.metafeatures_castelli["MaxNumberOfSites"](
-             self.df_castelli["structure"], self.df_castelli["e_form"])
+            self.df_castelli["structure"], self.df_castelli["e_form"])
         self.assertEqual(mns.value, 5.0)
         self.assertIsInstance(mns, MetaFeatureValue)
 
     def test_NumberOfDifferentElementsInStructure(self):
-        mns = self.metafeatures_castelli["NumberOfDifferentElementsInStructure"](
-             self.df_castelli["structure"], self.df_castelli["e_form"])
+        mns = self.metafeatures_castelli[
+            "NumberOfDifferentElementsInStructure"](
+            self.df_castelli["structure"], self.df_castelli["e_form"])
         self.assertEqual(mns.value, 56)
         self.assertIsInstance(mns, MetaFeatureValue)
 
