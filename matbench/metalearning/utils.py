@@ -4,7 +4,7 @@ from collections import OrderedDict
 from pymatgen.core import Composition, Element, Structure
 
 
-class FormulaStats:
+class FormulaStatistics:
     """
     Get statistics of formulas. This is a helper function to the design
     of composition-related metafeatures.
@@ -15,7 +15,7 @@ class FormulaStats:
     def __init__(self, formulas):
         self.formulas = formulas
 
-    def formula_stats(self):
+    def calc(self):
         """
         Get categorical statistics of formulas.
         """
@@ -23,7 +23,7 @@ class FormulaStats:
             self.formulas = [self.formulas]
         stats = OrderedDict()
         for formula in self.formulas:
-            stats[formula] = FormulaStats.formula_category(formula)
+            stats[formula] = FormulaStatistics.formula_category(formula)
         return stats
 
     @staticmethod
@@ -84,7 +84,7 @@ class FormulaStats:
         c = Composition(formula)
         elements = [x.symbol for x in c.elements]
         n_elements = len(c.elements)
-        el_types = sorted([FormulaStats.element_category(x)
+        el_types = sorted([FormulaStatistics.element_category(x)
                            for x in c.elements])
         n_types = len(el_types)
         el_types_reduced = list(set(el_types))
@@ -107,7 +107,7 @@ class FormulaStats:
         elif all([7 <= el_type < 11 for el_type in el_types_reduced]):
             major_category = 3
 
-        prototype = FormulaStats.formula_prototype(formula)
+        prototype = FormulaStatistics.formula_prototype(formula)
 
         return {"major_formula_category": major_category,
                 "minor_formula_category": minor_category,
@@ -196,7 +196,7 @@ class FormulaStats:
             return 11
 
 
-class StructureStats:
+class StructureStatistics:
     """
     Get statistics of structures. This is a helper function to the design
     of strcture-related metafeatures.
@@ -208,12 +208,12 @@ class StructureStats:
     def __init__(self, structures):
         self.structures = structures
 
-    def structure_stats(self):
+    def calc(self):
         if isinstance(self.structures, Structure):
             self.structures = [self.structures]
         stats = OrderedDict()
         for i, structure in enumerate(self.structures):
-            stats[i] = StructureStats.structure_category(structure)
+            stats[i] = StructureStatistics.structure_category(structure)
         return stats
 
     @staticmethod
