@@ -1,3 +1,5 @@
+import os
+import pickle
 import warnings
 import sklearn.model_selection
 import sklearn.datasets
@@ -104,10 +106,12 @@ class AutoSklearnML:
                  include_preprocessors=None,
                  exclude_preprocessors=None,
                  resampling_strategy="holdout",
+                 resampling_strategy_arguments=None,
                  output_folder=None,
                  tmp_folder=None,
                  delete_output_folder_after_terminate=False,
-                 delete_tmp_folder_after_terminate=False):
+                 delete_tmp_folder_after_terminate=False,
+                 **train_test_split_options):
 
         self.X = X
         self.y = y
@@ -117,6 +121,7 @@ class AutoSklearnML:
              "per_run_time_limit": per_run_time_limit,
              "ml_memory_limit": ml_memory_limit,
              "resampling_strategy": resampling_strategy,
+             "resampling_strategy_arguments": resampling_strategy_arguments,
              "ensemble_size": ensemble_size,
              "ensemble_nbest": ensemble_nbest,
              "include_estimators": include_estimators,
@@ -130,9 +135,9 @@ class AutoSklearnML:
              "delete_tmp_folder_after_terminate":
                  delete_tmp_folder_after_terminate}
 
-        self.X_train, self.X_test, self.y_train, self.y_test = \
+        self._X_train, self._X_test, self._y_train, self._y_test = \
             sklearn.model_selection.train_test_split(self.X, self.y,
-                                                     random_state=1)
+                                                     **train_test_split_options)
 
     def classification(self, metric="accuracy"):
         """
@@ -152,18 +157,45 @@ class AutoSklearnML:
         """
         auto_classifier = AutoSklearnClassifier(**self.auto_sklearn_kwargs)
         classification_metric = AutoSklearnML.get_classification_metric(metric)
-        auto_classifier.fit(self.X_train.copy(),
-                            self.y_train.copy(),
+        auto_classifier.fit(self._X_train.copy(),
+                            self._y_train.copy(),
                             metric=classification_metric,
                             dataset_name=self.dataset_name)
 
-        # auto_classifier.refit(self.X_train.copy(), self.y_train.copy())
         print(auto_classifier.show_models())
 
-        prediction = auto_classifier.predict(self.X_test)
+        if self.auto_sklearn_kwargs["resampling_strategy"] == "cv":
+            auto_classifier.refit(self._X_train.copy(), self._y_train.copy())
 
-        print("{} score:".format(metric),
-              classification_metric._score_func(self.y_test, prediction))
+        prediction_train = auto_classifier.predict(self._X_train)
+        print("training set {} score: {}".format(
+            metric, classification_metric._score_func(self._y_train,
+                                                      prediction_train)))
+
+        prediction_test = auto_classifier.predict(self._X_test)
+        print("test set {} score: {}".format(
+            metric, classification_metric._score_func(self._y_test,
+                                                      prediction_test)))
+
+        with open(os.path.join(self.auto_sklearn_kwargs['output_folder'],
+                               'best_auto_sklearn_output.log'), 'a+') as wf:
+            wf.write('The best model is : \n')
+            wf.write(auto_classifier.show_models())
+            wf.write("\ntraining set {} score: {}\n".format(
+                metric, classification_metric._score_func(self._y_train,
+                                                          prediction_train)))
+            wf.write('\n')
+            wf.write("test set {} score: {}".format(
+                metric, classification_metric._score_func(self._y_test,
+                                                          prediction_test)))
+
+        dump_file = os.path.join(self.auto_sklearn_kwargs['output_folder'],
+                                 'automl_classification.dump.pkl')
+
+        with open(dump_file, 'wb') as f:
+            pickle.dump(auto_classifier, f)
+
+        return auto_classifier
 
     def regression(self, metric="r2"):
         """
@@ -183,14 +215,42 @@ class AutoSklearnML:
         """
         auto_regressor = AutoSklearnRegressor(**self.auto_sklearn_kwargs)
         regression_metric = AutoSklearnML.get_regression_metric(metric)
-        auto_regressor.fit(self.X_train, self.y_train,
+        auto_regressor.fit(self._X_train, self._y_train,
                            metric=regression_metric,
                            dataset_name=self.dataset_name)
         print(auto_regressor.show_models())
 
-        prediction = auto_regressor.predict(self.X_test)
-        print("{} score:".format(metric),
-              regression_metric._score_func(self.y_test, prediction))
+        if self.auto_sklearn_kwargs["resampling_strategy"] == "cv":
+            auto_regressor.refit(self._X_train.copy(), self._y_train.copy())
+
+        prediction_train = auto_regressor.predict(self._X_train)
+        print("training set {} score: {}".format(metric,
+              regression_metric._score_func(self._y_train, prediction_train)))
+
+        prediction_test = auto_regressor.predict(self._X_test)
+        print("test set {} score: {}".format(metric,
+              regression_metric._score_func(self._y_test, prediction_test)))
+
+        with open(os.path.join(self.auto_sklearn_kwargs['output_folder'],
+                               'best_auto_sklearn_output.log'), 'a+') as wf:
+            wf.write('The best model is : \n')
+            wf.write(auto_regressor.show_models())
+            wf.write("\ntraining set {} score: {}\n".format(
+                metric, regression_metric._score_func(self._y_train,
+                                                      prediction_train)))
+            wf.write('\n')
+            wf.write("test set {} score: {}".format(
+                metric, regression_metric._score_func(self._y_test,
+                                                      prediction_test)))
+
+        dump_file = os.path.join(self.auto_sklearn_kwargs['output_folder'],
+                                 'automl_regressor.dump.pkl')
+
+        with open(dump_file, 'wb') as f:
+            pickle.dump(auto_regressor, f)
+
+        return auto_regressor
+
 
     @staticmethod
     def get_classification_metric(metric):
@@ -249,11 +309,26 @@ class AutoSklearnML:
             regression_metric = standard_regression_metrics.get("r2")
         return regression_metric
 
+    @property
+    def X_test(self):
+        return self._X_test
+
+    @property
+    def y_test(self):
+        return self._y_test
+
+    @property
+    def X_train(self):
+        return self._X_train
+
+    @property
+    def y_train(self):
+        return self._y_train
 
 if __name__ == '__main__':
     from matbench.data.load import load_glass_formation
     from pymatgen.core import Composition
-    from matminer.featurizers.composition import ElementProperty
+    from matminer.featurizers.compositionimport import ElementProperty
 
     df = load_glass_formation()
     df['composition'] = df["formula"].apply(lambda x: Composition(x))
