@@ -202,7 +202,7 @@ def load_boltztrap_mp():
     df = df.rename(columns={'S_n': 's_n', 'S_p': 's_p',
                             'PF_n': 'pf_n', 'PF_p': 'pf_p'})
     df = df.dropna()
-    df['structure'].map(ast.literal_eval)
+    df = df['structure'].map(ast.literal_eval)
     warnings.warn('When training a model on the load_boltztrap_mp data, to'
         ' avoid data leakage, one may only set the target to one of the target'
         ' columns listed. For example, s_n is strongly correlated with pf_n'
