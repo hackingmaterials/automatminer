@@ -418,6 +418,9 @@ def load_expt_gap():
     """
     df = pd.read_csv(os.path.join(data_dir, 'zhuo_gap_expt.csv'))
     df = df.rename(columns={'composition': 'formula', 'Eg (eV)': 'gap expt'})
+    # The numbers in 323 formulas such as 'AgCNO,65' or 'Sr2MgReO6,225' are
+    # space group numbers confirmed by Jakoah Brgoch the corresponding author
+    df['formula'] = df['formula'].apply(lambda x: x.split(',')[0])
     return df
 
 
