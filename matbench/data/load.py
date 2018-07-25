@@ -13,8 +13,8 @@ from matminer.datasets.dataframe_loader import load_piezoelectric_tensor, \
 All load* methods return the data in pandas.DataFrame. In each method a raw
 data file is loaded, some preliminary transformation/renaming/cleaning done and
 the result df is returned. For specific columns returned refer to the 
-documentation of each function. All columns come with a ML input/output
-suggestion, although some columns may be used as either input or output.
+documentation of each function. All columns come with a ML input/target
+suggestion, although some columns may be used as either input or target.
 
 If you plan to add a new dataset please follow the guidelines and refer to 
 documentation in load_castelli_perovskites for consistent docs. Generally, using
@@ -31,6 +31,13 @@ Naming convention guidelines:
         e.g. "gap pbe" means band gap calculated via DFT using PBE functional
     - avoid including units in the column name, instead explain in the docs
     - roughly use a 15-character limit for column names
+    
+Data convention guidelines
+    - If structures are present, the dataframe should have them contained in a
+        column where each entry is a dictionary
+    - The structures should NOT be strings (MP queries can return strings via 
+        REST, so be cautious)
+    - To convert strings to dictionary, use ast.literal_eval
 """
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
@@ -179,6 +186,8 @@ def load_boltztrap_mp():
     Returns:
         mpid (input): The Materials Project mpid, as a string.
         formula (input):
+        structure (input):
+
         m_n (target): n-type/conduction band effective mass. Units: m_e where
             m_e is the mass of an electron; i.e. m_n is a unitless ratio
         m_p (target): p-type/valence band effective mass.
@@ -189,18 +198,20 @@ def load_boltztrap_mp():
         pf_p (target): p-type power factor in uW/cm2.K
 
     Note:
-        * To avoid data leakage, one may only set the target to one of the output
+        * To avoid data leakage, one may only set the target to one of the target
         columns listed. For example, S_n is strongly correlated with PF_n
         and usually when one is available the other one is available too.
         * It is recommended that dos and bandstructure objects are retrieved
         from Materials Porject and then dos, bandstructure and composition
         featurizers are used to generate input features.
     """
-    df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'))
+    df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'), index_col=False)
     df = df.rename(columns={'S_n': 's_n', 'S_p': 's_p',
                             'PF_n': 'pf_n', 'PF_p': 'pf_p'})
+    df = df.dropna()
+    df['structure'] = df['structure'].map(ast.literal_eval)
     warnings.warn('When training a model on the load_boltztrap_mp data, to'
-        ' avoid data leakage, one may only set the target to one of the output'
+        ' avoid data leakage, one may only set the target to one of the target'
         ' columns listed. For example, s_n is strongly correlated with pf_n'
         ' and usually when one is available the other one is available too.')
     return df
@@ -217,6 +228,9 @@ def load_phonon_dielectric_mp():
 
     Returns:
         mpid (input): The Materials Project mpid, as a string.
+        formula (input):
+        structure (input):
+
         eps_total (target): total calculated dielectric constant. Unitless:
             it is a ratio over the dielectric constant at vacuum.
         eps_electronic (target): electronic contribution to the calculated
@@ -233,7 +247,10 @@ def load_phonon_dielectric_mp():
     """
     df = pd.read_csv(os.path.join(data_dir, 'phonon_dielectric_mp.csv'))
     df = df[df['asr_breaking'] < 30].drop('asr_breaking', axis=1)
-    return df
+    # remove entries not having structure, formula, or a target
+    df = df.dropna()
+    df['structure'] = df['structure'].map(ast.literal_eval)
+    return df.reset_index(drop=True)
 
 
 def load_wolverton_oxides():
@@ -587,7 +604,7 @@ def load_heusler_magnetic():
         latt const (input): Lattice constant
         tetragonality (input): Tetragonality, i.e. c/a
 
-        e form (target): Formation energy in eV/atom
+        e_form (target): Formation energy in eV/atom
         pol fermi (target?): Polarization at Fermi level in %
         mu_b (target): Magnetic moment
         mu_b saturation (target?) Saturation magnetization in emu/cc
@@ -670,4 +687,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    print(load_wolverton_oxides())
+    print(load_boltztrap_mp())
