@@ -31,6 +31,13 @@ Naming convention guidelines:
         e.g. "gap pbe" means band gap calculated via DFT using PBE functional
     - avoid including units in the column name, instead explain in the docs
     - roughly use a 15-character limit for column names
+    
+Data convention guidelines
+    - If structures are present, the dataframe should have them contained in a
+        column where each entry is a dictionary
+    - The structures should NOT be strings (MP queries can return strings via 
+        REST, so be cautious)
+    - To convert strings to dictionary, use ast.literal_eval
 """
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
@@ -198,16 +205,16 @@ def load_boltztrap_mp():
         from Materials Porject and then dos, bandstructure and composition
         featurizers are used to generate input features.
     """
-    df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'))
+    df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'), index_col=False)
     df = df.rename(columns={'S_n': 's_n', 'S_p': 's_p',
                             'PF_n': 'pf_n', 'PF_p': 'pf_p'})
     df = df.dropna()
-    df = df['structure'].map(ast.literal_eval)
+    df['structure'] = df['structure'].map(ast.literal_eval)
     warnings.warn('When training a model on the load_boltztrap_mp data, to'
         ' avoid data leakage, one may only set the target to one of the target'
         ' columns listed. For example, s_n is strongly correlated with pf_n'
         ' and usually when one is available the other one is available too.')
-    return df.reset_index()
+    return df
 
 
 def load_phonon_dielectric_mp():
