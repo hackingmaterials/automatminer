@@ -201,6 +201,7 @@ def load_boltztrap_mp():
     df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'))
     df = df.rename(columns={'S_n': 's_n', 'S_p': 's_p',
                             'PF_n': 'pf_n', 'PF_p': 'pf_p'})
+    df['structure'].map(ast.literal_eval)
     df = df.dropna()
     warnings.warn('When training a model on the load_boltztrap_mp data, to'
         ' avoid data leakage, one may only set the target to one of the target'
@@ -241,6 +242,7 @@ def load_phonon_dielectric_mp():
     df = df[df['asr_breaking'] < 30].drop('asr_breaking', axis=1)
     # remove entries not having structure, formula, or a target
     df = df.dropna()
+    df['structure'] = df['structure'].map(ast.literal_eval)
     return df.reset_index(drop=True)
 
 
@@ -678,4 +680,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    print(load_boltztrap_mp())
+    print(load_phonon_dielectric_mp())
