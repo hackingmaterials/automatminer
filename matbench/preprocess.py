@@ -50,9 +50,10 @@ class PreProcess(object):
                     self.target_col))
 
         # TODO: remove/modify the following once preprocessing methods for str/objects are implemented:
-        df = df.drop(list(df.columns[df.dtypes == object]), axis=1)
+        # df = df.drop(list(df.columns[df.dtypes == object]), axis=1)
         for col in list(df.columns[df.dtypes == bool]):
             df[col] = df[col].apply(int)
+        df = pd.get_dummies(df)
         df = df.apply(pd.to_numeric)
         return df
 
