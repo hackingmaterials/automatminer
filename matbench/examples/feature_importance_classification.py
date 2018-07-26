@@ -51,9 +51,9 @@ print('correlation, r={}'.format(lr.rvalue))
 print('p-value, p={}'.format(lr.pvalue))
 
 pf = PlotlyFig(
-    title='Comparison of feature importances in predicting expt. gap',
+    title='Comparison of feature importances in predicting glass formation',
     x_title='Analysis.feature_importance (Variance Sensitivity Analysis)',
-    y_title='RandomForestRegressor.feature_importances_')
+    y_title='RandomForestClassifier.feature_importances_')
 pf.xy([(x, y), (xreg, yreg)],
       labels=analysis.features,
       modes=['markers', 'line'],
