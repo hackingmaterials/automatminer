@@ -256,7 +256,6 @@ class TestAllFeaturizers(unittest.TestCase):
         true_feats = self.get_true_featurizers(cf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
         test_feats = self.allfs.composition(need_oxidstates=True,
-                                            extras=True,
                                             slow_ones=True)
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
