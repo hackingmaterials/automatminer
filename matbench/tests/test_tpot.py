@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from matbench.automl.tpot_utils import TpotAutoml, ErrorAnalysis
+from matbench.automl.tpot_utils import TpotAutoml, Analysis
 from matbench.data.load import load_double_perovskites_gap, \
     load_glass_formation
 from matbench.featurize import Featurize
@@ -57,7 +57,7 @@ class TestTpotAutoml(unittest.TestCase):
         self.assertAlmostEqual(test_score, 0.8707, places=1)
 
         # test error analysis:
-        ea = ErrorAnalysis(tpot, X_train, y_train, X_test, y_test,
+        ea = Analysis(tpot, X_train, y_train, X_test, y_test,
                            mode='regression', target=target_col,
                            features=df.drop(target_col, axis=1).columns,
                            test_samples_index=y_test.index, random_state=self.RS)
@@ -112,8 +112,8 @@ class TestTpotAutoml(unittest.TestCase):
         self.assertAlmostEqual(top_scores['LinearSVC'], 0.84, 1)
         self.assertAlmostEqual(top_scores['GaussianNB'], 0.66, 1)
 
-        # test error analysis:
-        ea = ErrorAnalysis(tpot, X_train, y_train, X_test, y_test,
+        # test analysis:
+        ea = Analysis(tpot, X_train, y_train, X_test, y_test,
                            mode='classification', target=target_col,
                            features=df.drop(target_col, axis=1).columns,
                            test_samples_index=y_test.index, random_state=self.RS)
@@ -124,6 +124,13 @@ class TestTpotAutoml(unittest.TestCase):
         self.assertTrue(ea.false_positives['gfa_predicted'].all() and \
                         not ea.false_positives['gfa_true'].all())
 
+        # test feature importance
+        ea.get_feature_importance(sort=True)
+        feature_importance = list(ea.feature_importance.items())
+        self.assertEqual(feature_importance[0][0], 'mean atomic_mass')
+        self.assertAlmostEqual(feature_importance[0][1], 0.55, 2)
+        self.assertEqual(feature_importance[1][0], 'mean thermal_conductivity')
+        self.assertAlmostEqual(feature_importance[1][1], 0.45, 2)
 
 
 if __name__ == '__main__':
