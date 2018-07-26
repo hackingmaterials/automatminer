@@ -238,13 +238,12 @@ class AllFeaturizers(object):
         self.exclude = exclude or []
 
     def composition(self, preset_name=None, need_oxidstates=False,
-                    extras=False, slow_ones=False):
+                    slow_ones=False):
         """
         All composition-based featurizers with default arguments.
 
         Args:
             preset_name (str): some featurizers take in this argument
-            extras (bool): Include "niche" composition featurizers
             need_oxidstates (bool): whether to return those featurizers that
                 require oxidation states decorated Composition
             slow_ones (bool): Whether to include relatively slow featurizers.
@@ -258,10 +257,10 @@ class AllFeaturizers(object):
             cf.ElementProperty.from_preset(preset_name=preset_name),
             cf.AtomicOrbitals(),
             cf.BandCenter(),
-            cf.IonProperty(),
             cf.Stoichiometry(),
             cf.ValenceOrbital(),
             cf.TMetalFraction(),
+            cf.ElementFraction(),
         ]
         if need_oxidstates:
             featzers += [
@@ -271,12 +270,10 @@ class AllFeaturizers(object):
                 cf.ElectronegativityDiff(),
                 cf.YangSolidSolution(),
             ]
-        if extras:
-            featzers += [cf.ElementFraction(),
-                         cf.Miedema(),
-                         ]
         if slow_ones:
             featzers += [
+                cf.IonProperty(),
+                cf.Miedema(),
                 cf.AtomicPackingEfficiency(),  # much slower than the rest
                 cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
             ]
