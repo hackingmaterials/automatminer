@@ -14,9 +14,11 @@ class PreProcess(object):
         target_col (str): if set, the target column may be examined (e.g. to be
             numeric)
         max_colnull (float): after generating features, drop the columns that
-            have null/na rows with more than this ratio.
+            have null/na rows with more than this ratio. Note that there is an
+            important trade-off here. this ratio is high, one may lose more
+            features and if it is low one may lose more samples.
     """
-    def __init__(self, df=None, target_col=None, max_colnull=0.1):
+    def __init__(self, df=None, target_col=None, max_colnull=0.05):
         self.df = df
         self.target_col = target_col
         self.max_colnull = max_colnull
