@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from pymatgen import Structure
 from matminer.datasets.dataframe_loader import load_piezoelectric_tensor, \
-    load_dielectric_constant, load_elastic_tensor
+    load_dielectric_constant, load_elastic_tensor, load_flla
 
 """
 All load* methods return the data in pandas.DataFrame. In each method a raw
@@ -72,7 +72,8 @@ def load_castelli_perovskites():
     df["formula"] = df["A"] + df["B"] + df["anion"]
     df['vbm'] = np.where(df['is_direct'], df['VB_dir'], df['VB_ind'])
     df['cbm'] = np.where(df['is_direct'], df['CB_dir'], df['CB_ind'])
-    df['gap gllbsc'] = np.where(df['is_direct'], df['gllbsc_dir-gap'], df['gllbsc_ind-gap'])
+    df['gap gllbsc'] = np.where(df['is_direct'], df['gllbsc_dir-gap'],
+                                df['gllbsc_ind-gap'])
     df['structure'] = df['structure'].map(ast.literal_eval)
     dropcols = ["filename", "XCFunctional", "anion_idx", "Unnamed: 0", "A", "B",
                 "anion", "gllbsc_ind-gap", "gllbsc_dir-gap", "CB_dir", "CB_ind",
@@ -205,15 +206,16 @@ def load_boltztrap_mp():
         from Materials Porject and then dos, bandstructure and composition
         featurizers are used to generate input features.
     """
-    df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'), index_col=False)
+    df = pd.read_csv(os.path.join(data_dir, 'boltztrap_mp.csv'),
+                     index_col=False)
     df = df.rename(columns={'S_n': 's_n', 'S_p': 's_p',
                             'PF_n': 'pf_n', 'PF_p': 'pf_p'})
     df = df.dropna()
     df['structure'] = df['structure'].map(ast.literal_eval)
     warnings.warn('When training a model on the load_boltztrap_mp data, to'
-        ' avoid data leakage, one may only set the target to one of the target'
-        ' columns listed. For example, s_n is strongly correlated with pf_n'
-        ' and usually when one is available the other one is available too.')
+                  ' avoid data leakage, one may only set the target to one of the target'
+                  ' columns listed. For example, s_n is strongly correlated with pf_n'
+                  ' and usually when one is available the other one is available too.')
     return df
 
 
@@ -457,13 +459,13 @@ def load_jdft2d():
     with open(os.path.join(data_dir, "jdft_2d.json")) as f:
         x = json.load(f)
     df = pd.DataFrame(x)
-    colmap={'exfoliation_en': 'e_exfol',
-            'final_str': 'structure',
-            'initial_str': 'structure initial',
-            'form_enp': 'e_form',
-            'magmom': 'mu_b',
-            'op_gap': 'gap optb88',
-            }
+    colmap = {'exfoliation_en': 'e_exfol',
+              'final_str': 'structure',
+              'initial_str': 'structure initial',
+              'form_enp': 'e_form',
+              'magmom': 'mu_b',
+              'op_gap': 'gap optb88',
+              }
     dropcols = ['epsx', 'epsy', 'epsz', 'mepsx', 'mepsy', 'mepsz', 'kv', 'gv',
                 'jid', 'kpoints', 'incar', 'icsd', 'mbj_gap', 'fin_en']
     df = df.drop(dropcols, axis=1)
@@ -502,13 +504,13 @@ def load_matminer_dielectric():
     dropcols = ['volume', 'space_group', 'e_electronic', 'e_total']
     df = df.drop(dropcols, axis=1)
     df['structure'] = [s.as_dict() for s in df['structure']]
-    colmap={'material_id': 'mpid',
-            'band_gap': 'gap pbe',
-            'n': 'refractive index',
-            'poly_electronic': 'ep_e poly',
-            'poly_total': 'ep poly',
-            'pot_ferroelectric': 'pot. ferroelectric'
-            }
+    colmap = {'material_id': 'mpid',
+              'band_gap': 'gap pbe',
+              'n': 'refractive index',
+              'poly_electronic': 'ep_e poly',
+              'poly_total': 'ep poly',
+              'pot_ferroelectric': 'pot. ferroelectric'
+              }
     df = df.rename(columns=colmap)
     return df
 
@@ -563,7 +565,7 @@ def load_matminer_piezoelectric():
 
     Returns:
         mpid (input): material id via MP
-        formula (input):
+        formula (input): string formula
         structure (input): dict form of Pymatgen structure
         nsites (input): The number of sites in the structure
 
@@ -584,6 +586,33 @@ def load_matminer_piezoelectric():
     df = df.drop(columns=dropcols, axis=1)
     colmap = {'material_id': 'mpid'}
     df = df.rename(columns=colmap)
+    return df
+
+
+def load_matminer_flla():
+    """
+    3938 structures and formation energies from "Crystal Structure
+    Representations for Machine Learning Models of Formation Energies."
+
+    Referenes:
+        1) https://arxiv.org/abs/1503.07406
+        2) https://aip.scitation.org/doi/full/10.1063/1.4812323
+
+    Returns:
+        mpid (input): material id via MP
+        formula (input): string formula
+        structure (input): dict form of Pymatgen structure
+
+        e_form (target): Formation energy in eV/atom
+        e_hull (target): Energy above hull, in form
+    """
+    df = load_flla()
+    df = df.drop(["formula", "formation_energy", "nsites"], axis=1)
+    df["formula"] = [s.composition.reduced_formula for s in df['structure']]
+    df["structure"] = [s.as_dict() for s in df['structure']]
+    df = df.rename(
+        {"formation_energy_per_atom": "e_form", "e_above_hull": "e_hull",
+         "material_id": "mpid"}, axis=1)
     return df
 
 
@@ -674,7 +703,7 @@ def load_citrine_thermal_conductivity(room_temperature=True):
     df = pd.read_csv(os.path.join(data_dir, 'citrine_thermal_conductivity.csv'))
 
     df = df[df['k-units'].isin(
-        ['W/m.K', 'W/m$\\cdot$K', 'W/mK', 'W\\m K' ,'Wm$^{-1}$K$^{-1}$'])]
+        ['W/m.K', 'W/m$\\cdot$K', 'W/mK', 'W\\m K', 'Wm$^{-1}$K$^{-1}$'])]
     if room_temperature:
         df = df[df['k_condition'].isin(['room temperature', 'Room temperature',
                                         'Standard', '298', '300'])]
@@ -687,4 +716,4 @@ if __name__ == "__main__":
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    print(load_boltztrap_mp())
+    print(load_expt_formation_enthalpy())
