@@ -594,7 +594,7 @@ def load_matminer_flla():
     3938 structures and formation energies from "Crystal Structure
     Representations for Machine Learning Models of Formation Energies."
 
-    Referenes:
+    References:
         1) https://arxiv.org/abs/1503.07406
         2) https://aip.scitation.org/doi/full/10.1063/1.4812323
 
