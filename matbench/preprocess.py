@@ -68,7 +68,10 @@ class PreProcess(object):
 
     def handle_nulls(self, df=None, max_colnull=None, na_method='drop'):
         """
-
+        First pass for handling cells wtihout values (null or nan). Additional
+            preprocessing may be necessary as one column may be filled with
+            median while the other with mean or mode, etc.
+            
         Args:
             max_colnull ([str]): after generating features, drop the columns
                 that have null/na rows with more than this ratio.
