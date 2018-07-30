@@ -1,4 +1,6 @@
-
+import logging
+import os
+import sys
 
 class MatbenchError(Exception):
     """
@@ -10,6 +12,34 @@ class MatbenchError(Exception):
 
     def __str__(self):
         return "AmsetError : " + self.msg
+
+def setup_custom_logger(name='matbench_logger', filepath='.',
+                        filename='matbench.log', level=None):
+    """
+    Custom logger with both screen and file handlers. This is particularly
+    useful if there are other programs that call on logging
+    in which case the log results and their levels are distict and clear.
+
+    Args:
+        name (str): logger name to distinguish between different codes.
+        filepath (str): path to the folder where the logfile is meant to be
+        filename (str): log file filename
+        level (int): log level in logging package; example: logging.DEBUG
+
+    Returns: a logging instance with customized formatter and handlers
+    """
+    level = level or logging.DEBUG
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    handler = logging.FileHandler(os.path.join(filepath, filename), mode='w')
+    handler.setFormatter(formatter)
+    screen_handler = logging.StreamHandler(stream=sys.stdout)
+    screen_handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(screen_handler)
+    logger.addHandler(handler)
+    return logger
 
 
 def is_greater_better(scoring_function):
