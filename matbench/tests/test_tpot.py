@@ -1,7 +1,8 @@
 import unittest
 import numpy as np
 
-from matbench.automl.tpot_utils import TpotAutoml, Analysis
+from matbench.automl.tpot_utils import TpotAutoml
+from matbench.analysis import Analysis
 from matbench.data.load import load_double_perovskites_gap, \
     load_glass_formation
 from matbench.featurize import Featurize
