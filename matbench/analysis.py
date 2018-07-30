@@ -1,14 +1,15 @@
 import numpy as np
 import pandas as pd
+from collections import OrderedDict
 from matbench.utils.utils import MatbenchError
 from sklearn.model_selection import train_test_split
 
 
 class Analysis(object):
     """
-    Evaluating the importance of features, errors and uncertainty of a given
+    Evaluates the importance of features, errors and uncertainty of a given
     machine learning model, bias, variance and tools assisting in manual
-    inspection of errors and areas of improvements with that maximize impact.
+    inspection of errors and areas of improvements with maximized impact.
     We also take advantage of methods already available in lime ml evaluation
     package: https://github.com/marcotcr/lime
 
