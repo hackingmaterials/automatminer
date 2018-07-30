@@ -68,6 +68,22 @@ class PreProcess(object):
         return df
 
 
+    def prune_highly_correlated_features(self, df=None, target_col=None,
+                                         threshold=0.9):
+        """
+        Goes over the features and remove those that are cross correlated by
+        more than threshold. Target_col must be specified!
+
+        Args:
+            target_col (str): the name of the target column/feature
+            threshold (0<float<=1): if R is greater than this value, the
+                feature that has lower correlation with the target is removed.
+
+        Returns (pandas.DataFrame):
+            the dataframe with the highly cross-correlated features removed.
+        """
+
+
     def _prescreen_df(self, df):
         if df is None:
             df = self.df.copy(deep=True)
