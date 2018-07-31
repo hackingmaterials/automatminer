@@ -136,9 +136,9 @@ class TestTpotAutoml(unittest.TestCase):
         ea.get_feature_importance(sort=True)
         feature_importance = list(ea.feature_importance.items())
         self.assertTrue('mendeleev_no' in feature_importance[0][0])
-        self.assertAlmostEqual(feature_importance[0][1], 0.06, 2)
+        self.assertAlmostEqual(feature_importance[0][1], 0.1, 1)
         self.assertTrue('mendeleev_no' in feature_importance[1][0])
-        self.assertAlmostEqual(feature_importance[1][1], 0.06, 2)
+        self.assertAlmostEqual(feature_importance[1][1], 0.1, 1)
 
 
 if __name__ == '__main__':
