@@ -64,24 +64,41 @@ class Featurize(object):
             raise MatbenchError("'{}' column must be in data!".format(col_id))
         return df
 
-    def featurize_columns(self, df=None, input_cols=None):
+    def _pre_screen_col(self, col_id, prefix='Input Data', multiindex=None):
+        multiindex = multiindex or self.multiindex
+        if multiindex:
+            return (prefix, col_id)
+        else:
+            return col_id
+
+    def featurize_columns(self, df=None, input_cols=None, **kwargs):
         """
         Featurizes the dataframe based on input_columns.
 
+        **Note: use only if you want call featurize_* methods with the default
+        arguments or when **kwargs are shared between these methods.
+
         Args:
+            df (pandas.DataFrame):
             input_cols ([str]): columns used for featurization (e.g. "structure"),
                 set to None to try all preset columns.
+            kwargs: other keywords arguments related to featurize_* methods
 
         Returns (pandas.DataFrame):
             self.df w/ new features added via featurizering input_cols
         """
         df = self._prescreen_df(df)
         input_cols = input_cols or ["formula", "structure"]
-        for column in input_cols:
+        for idx, column in enumerate(input_cols):
             featurizer = getattr(self, "featurize_{}".format(column), None)
             if featurizer is not None:
-                df = featurizer(df)
+                if idx > 0:
+                    col_id = self._pre_screen_col(column)
+                else:
+                    col_id = column
+                df = featurizer(df, col_id=col_id, **kwargs)
             elif column not in df:
+                print(column)
                 raise MatbenchError('no "{}" in the data!')
             else:
                 warn('No method available to featurize "{}"'.format(column))
@@ -118,15 +135,9 @@ class Featurize(object):
         df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
             df, compcol, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if asindex:
-            if self.multiindex:
-                df = df.set_index(('Input Data', col_id))
-            else:
-                df = df.set_index(col_id)
+            df = df.set_index(self._pre_screen_col(col_id))
         if self.drop_featurized_col:
-            if self.multiindex:
-                return df.drop(('Input Data', compcol), axis=1)
-            else:
-                return df.drop(compcol, axis=1)
+            return df.drop(self._pre_screen_col(compcol), axis=1)
         else:
             return df
 
@@ -161,10 +172,7 @@ class Featurize(object):
         df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
             df, col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if self.drop_featurized_col:
-            if self.multiindex:
-                return df.drop(('Input Data', col_id), axis=1)
-            else:
-                return df.drop(col_id, axis=1)
+            return df.drop(self._pre_screen_col(col_id), axis=1)
         else:
             return df
 
@@ -193,10 +201,7 @@ class Featurize(object):
         df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
             df, col_id=col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if self.drop_featurized_col:
-            if self.multiindex:
-                return df.drop(('Input Data', col_id), axis=1)
-            else:
-                return df.drop(col_id, axis=1)
+            return df.drop(self._pre_screen_col(col_id), axis=1)
         else:
             return df
 
@@ -225,10 +230,7 @@ class Featurize(object):
         df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
             df, col_id=col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if self.drop_featurized_col:
-            if self.multiindex:
-                return df.drop(('Input Data', col_id), axis=1)
-            else:
-                return df.drop(col_id, axis=1)
+            return df.drop(self._pre_screen_col(col_id), axis=1)
         else:
             return df
 
