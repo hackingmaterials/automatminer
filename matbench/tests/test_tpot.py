@@ -127,7 +127,6 @@ class TestTpotAutoml(unittest.TestCase):
         df_errors = ea.get_data_for_error_analysis()
         self.assertTrue((df_errors['{}_true'.format(target_col)] !=\
                          df_errors['{}_predicted'.format(target_col)]).all())
-        self.assertTrue(len(ea.false_negatives)==4)
         self.assertTrue(not ea.false_negatives['gfa_predicted'].all() and \
                         ea.false_negatives['gfa_true'].all())
         self.assertTrue(ea.false_positives['gfa_predicted'].all() and \
