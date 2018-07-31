@@ -182,10 +182,10 @@ class TestFeaturize(unittest.TestCase):
         # DopingFermi:
         self.assertAlmostEqual(df["fermi_c1e+20T300"][0], -0.539, 3)
 
-        # BandEdge:
-        self.assertAlmostEqual(df["vbm_sp"][0], 0.190, 3)
-        self.assertAlmostEqual(df["cbm_s"][0], 0.537, 3)
-        self.assertAlmostEqual(df["cbm_sp"][0], 0.995, 3)
+        # Hybridization:
+        self.assertAlmostEqual(df["vbm_sp"][0], 0.181, 3)
+        self.assertAlmostEqual(df["cbm_s"][0], 0.4416, 3)
+        self.assertAlmostEqual(df["cbm_sp"][0], 0.9864, 3)
 
 
         df = featurizer.featurize_bandstructure(df_init,

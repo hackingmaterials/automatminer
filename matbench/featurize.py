@@ -25,7 +25,7 @@ class Featurize(object):
         or:
             df = featurizer.featurize_formula() # all formula-related feature
         or:
-            df = featurizer.featurize_dos(featurizers=[BandEdge()])
+            df = featurizer.featurize_dos(featurizers=[Hybridization()])
 
     Args:
         df (pandas.DataFrame): the input data containing at least one of preset
@@ -337,7 +337,7 @@ class AllFeaturizers(object):
         featzers = [
             dosf.DOSFeaturizer(),
             dosf.DopingFermi(),
-            dosf.BandEdge()
+            dosf.Hybridization()
         ]
         names = [c.__class__.__name__ for c in featzers]
         return [f for i,f in enumerate(featzers) if names[i] not in self.exclude]
