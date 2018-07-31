@@ -1,4 +1,4 @@
-matminer==0.3.8
+matminer==0.3.9
 xlrd==1.1.0
 xgboost==0.72.1
 tpot==2018.1.18
