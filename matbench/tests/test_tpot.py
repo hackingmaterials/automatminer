@@ -29,6 +29,11 @@ class TestTpotAutoml(unittest.TestCase):
         # preprocessing of the data
         prep = PreProcess(max_colnull=0.1)
         df = prep.handle_nulls(df_feats)
+        feats0 = set(df.columns)
+        df = prep.prune_cross_correlated_features(df,
+                                                  target_col=target_col,
+                                                  R_max=0.95)
+        self.assertEqual(len(feats0 - set(df.columns)), 17)
         # train/test split (train/dev splot done within tpot crossvalidation)
         X_train, X_test, y_train, y_test = \
             train_test_split(df.drop(target_col, axis=1).values,
@@ -53,7 +58,7 @@ class TestTpotAutoml(unittest.TestCase):
         self.assertAlmostEqual(top_scores['GradientBoostingRegressor'], 0.7352, 1)
         self.assertAlmostEqual(top_scores['ElasticNetCV'], 0.7124, 1)
         self.assertAlmostEqual(top_scores['KNeighborsRegressor'], 0.4808, 1)
-        self.assertAlmostEqual(top_scores['LinearSVR'], 0.5, 1)
+        self.assertAlmostEqual(top_scores['LinearSVR'], 0.442, 1)
         test_score = tpot.score(X_test, y_test)
         self.assertAlmostEqual(test_score, 0.8707, places=1)
 
@@ -86,6 +91,11 @@ class TestTpotAutoml(unittest.TestCase):
         # preprocessing of the data
         prep = PreProcess(max_colnull=0.1)
         df = prep.handle_nulls(df_feats)
+        feats0 = set(df.columns)
+        df = prep.prune_cross_correlated_features(df,
+                                                  target_col=target_col,
+                                                  R_max=0.95)
+        self.assertEqual(len(feats0 - set(df.columns)), 49)
         # train/test split (development is within tpot crossvalidation)
         X_train, X_test, y_train, y_test = \
             train_test_split(df.drop(target_col, axis=1).values,
@@ -111,7 +121,7 @@ class TestTpotAutoml(unittest.TestCase):
         self.assertAlmostEqual(top_scores['KNeighborsClassifier'], 0.84, 1)
         self.assertAlmostEqual(top_scores['LogisticRegression'], 0.84, 1)
         self.assertAlmostEqual(top_scores['LinearSVC'], 0.84, 1)
-        self.assertAlmostEqual(top_scores['GaussianNB'], 0.66, 1)
+        self.assertAlmostEqual(top_scores['GaussianNB'], 0.78, 1)
 
         # test analysis:
         ea = Analysis(tpot, X_train, y_train, X_test, y_test,
@@ -121,17 +131,19 @@ class TestTpotAutoml(unittest.TestCase):
         df_errors = ea.get_data_for_error_analysis()
         self.assertTrue((df_errors['{}_true'.format(target_col)] !=\
                          df_errors['{}_predicted'.format(target_col)]).all())
-        self.assertTrue(len(ea.false_negatives)==0)
+        self.assertTrue(len(ea.false_negatives)==4)
+        self.assertTrue(not ea.false_negatives['gfa_predicted'].all() and \
+                        ea.false_negatives['gfa_true'].all())
         self.assertTrue(ea.false_positives['gfa_predicted'].all() and \
                         not ea.false_positives['gfa_true'].all())
 
         # test feature importance
         ea.get_feature_importance(sort=True)
         feature_importance = list(ea.feature_importance.items())
-        self.assertEqual(feature_importance[0][0], 'mean atomic_mass')
-        self.assertAlmostEqual(feature_importance[0][1], 0.55, 2)
-        self.assertEqual(feature_importance[1][0], 'mean thermal_conductivity')
-        self.assertAlmostEqual(feature_importance[1][1], 0.45, 2)
+        self.assertEqual(feature_importance[0][0], 'minimum mendeleev_no')
+        self.assertAlmostEqual(feature_importance[0][1], 0.063, 2)
+        self.assertEqual(feature_importance[1][0], 'range mendeleev_no')
+        self.assertAlmostEqual(feature_importance[1][1], 0.064, 2)
 
 
 if __name__ == '__main__':
