@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 
+
 class MatbenchError(Exception):
     """
     Exception specific to matbench methods.
@@ -11,7 +12,7 @@ class MatbenchError(Exception):
         self.msg = msg
 
     def __str__(self):
-        return "AmsetError : " + self.msg
+        return "MatbenchError : " + self.msg
 
 def setup_custom_logger(name='matbench_logger', filepath='.',
                         filename='matbench.log', level=None):
