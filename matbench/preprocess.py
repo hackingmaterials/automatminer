@@ -1,10 +1,12 @@
 import logging
+import numpy as np
+import pandas as pd
 
 from matbench.utils.utils import MatbenchError, setup_custom_logger
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 from pandas.api.types import is_numeric_dtype
-import pandas as pd
+
 
 class PreProcess(object):
     """
@@ -68,20 +70,54 @@ class PreProcess(object):
         return df
 
 
-    def prune_highly_correlated_features(self, df=None, target_col=None,
-                                         threshold=0.9):
+    def prune_cross_correlated_features(self, df=None, target_col=None,
+                                        R_max=0.95):
         """
         Goes over the features and remove those that are cross correlated by
         more than threshold. Target_col must be specified!
 
         Args:
             target_col (str): the name of the target column/feature
-            threshold (0<float<=1): if R is greater than this value, the
+            R_max (0<float<=1): if R is greater than this value, the
                 feature that has lower correlation with the target is removed.
 
         Returns (pandas.DataFrame):
             the dataframe with the highly cross-correlated features removed.
         """
+        df = self._prescreen_df(df)
+        target_col = target_col or self.target_col
+        if target_col is None:
+            raise MatbenchError('"target_col" must be set!')
+        corr = abs(df.corr())
+        corr = corr.sort_values(by=target_col)
+        rm_feats = []
+        for feature in corr.columns:
+            if feature == target_col:
+                continue
+            for idx, corval in zip(corr.index, corr[feature]):
+                if np.isnan(corval):
+                    break
+                if idx == feature or idx in rm_feats:
+                    continue
+                else:
+                    if corval >= R_max:
+                        if corr.loc[idx, target_col] > corr.loc[feature, target_col]:
+                            removed_feat = feature
+                        else:
+                            removed_feat = idx
+                        if removed_feat not in rm_feats:
+                            rm_feats.append(removed_feat)
+                            self.logger.debug('"{}" correlates strongly with '
+                                             '"{}"'.format(feature, idx))
+                            self.logger.debug('removing "{}"...'.format(removed_feat))
+                        if removed_feat == feature:
+                            break
+        if len(rm_feats) > 0:
+            df = df.drop(rm_feats, axis=1)
+            self.logger.info('\nThese {} features were removed due to cross '
+                             'correlation with the current features more than '
+                             '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
+        return df
 
 
     def _prescreen_df(self, df):
