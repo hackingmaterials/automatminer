@@ -20,7 +20,7 @@ df = featzer.featurize_formula(df_init,
                                featurizers='all',
                                guess_oxidstates=False)
 
-prep = PreProcess()
+prep = PreProcess(target=target)
 df = prep.preprocess(df)
 
 X_train, X_test, y_train, y_test = train_test_split(
