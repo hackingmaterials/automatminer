@@ -12,11 +12,15 @@ from sklearn.model_selection import train_test_split
 target = 'gfa'
 RS = 24
 mode = 'classification'
+MULTIINDEX = True
+if MULTIINDEX:
+    target = ('Input Data', target)
 
 df_init = load_glass_formation(phase="ternary").drop('phase', axis=1)
 featzer = Featurize(df_init,
                     preset_name='deml',
-                    exclude=['CohesiveEnergy', 'AtomicPackingEfficiency'])
+                    exclude=['CohesiveEnergy', 'AtomicPackingEfficiency'],
+                    multiindex=MULTIINDEX)
 df = featzer.featurize_formula(df_init,
                                featurizers='all',
                                guess_oxidstates=False)

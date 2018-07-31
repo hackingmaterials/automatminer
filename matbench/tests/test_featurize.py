@@ -23,7 +23,8 @@ class TestFeaturize(unittest.TestCase):
         featurizer = Featurize(df_init,
                                ignore_cols=ignore_cols,
                                ignore_errors=False,
-                               exclude=['CohesiveEnergy'])
+                               exclude=['CohesiveEnergy'],
+                               multiindex=False)
 
         df = featurizer.featurize_formula(asindex=False,
                                           guess_oxidstates=True,
@@ -75,7 +76,7 @@ class TestFeaturize(unittest.TestCase):
 
     def test_featurize_structure(self, limit=5):
         df_init = load_castelli_perovskites()[:limit]
-        featurizer = Featurize(df_init, ignore_errors=False)
+        featurizer = Featurize(df_init, ignore_errors=False, multiindex=False)
         df = featurizer.featurize_structure(df_init, inplace=False)
 
         # sanity checks
@@ -168,7 +169,7 @@ class TestFeaturize(unittest.TestCase):
         else:
             df_init = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
         df_init = df_init.dropna(axis=0)
-        featurizer = Featurize(df_init, ignore_errors=False)
+        featurizer = Featurize(df_init, ignore_errors=False, multiindex=False)
         df = featurizer.featurize_dos(df_init, inplace=False)
 
         # sanity checks
@@ -284,7 +285,7 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(sf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.structure() + self.allfs.fit_structure()
+        test_feats = self.allfs.structure()
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
         self.assertEqual(len(test_feats), len(true_feats))
