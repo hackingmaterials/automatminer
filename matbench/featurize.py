@@ -130,8 +130,7 @@ class Featurize(object):
         else:
             return df
 
-    def featurize_structure(self, df=None, featurizers="all",
-                            fit_featurizers="all", col_id="structure",
+    def featurize_structure(self, df=None, featurizers="all", col_id="structure",
                             inplace=True, guess_oxidstates=True):
         """
         Featurizes based on crystal structure (pymatgen Structure object)
@@ -142,8 +141,6 @@ class Featurize(object):
         Args:
             df (pandas.DataFrame): input data
             featurizers ([matminer.featurizer] or "all"):
-            fit_featurizers ([matminer.featurizer] or "all"): those featurizers
-                that require the fit method to be called first.
             col_id (str): actual column name to be used as structure
             inplace (bool): whether to modify the input df
             guess_oxidstates (bool): whether to guess elements oxidation states
@@ -193,10 +190,13 @@ class Featurize(object):
             df[col_id] = df[col_id].apply(CompleteDos.from_dict)
         if featurizers == "all":
             featurizers = self.all_featurizers.dos()
-        df = MultipleFeaturizer(featurizers).featurize_dataframe(
-            df, col_id=col_id, ignore_errors=self.ignore_errors)
+        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
+            df, col_id=col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if self.drop_featurized_col:
-            return df.drop(col_id, axis=1)
+            if self.multiindex:
+                return df.drop(('Input Data', col_id), axis=1)
+            else:
+                return df.drop(col_id, axis=1)
         else:
             return df
 
@@ -222,10 +222,13 @@ class Featurize(object):
             df[col_id] = df[col_id].apply(BandStructure.from_dict)
         if featurizers == "all":
             featurizers = self.all_featurizers.bandstructure()
-        df = MultipleFeaturizer(featurizers).featurize_dataframe(
-            df, col_id=col_id, ignore_errors=self.ignore_errors)
+        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
+            df, col_id=col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if self.drop_featurized_col:
-            return df.drop(col_id, axis=1)
+            if self.multiindex:
+                return df.drop(('Input Data', col_id), axis=1)
+            else:
+                return df.drop(col_id, axis=1)
         else:
             return df
 
