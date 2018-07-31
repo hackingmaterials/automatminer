@@ -114,7 +114,7 @@ class PreProcess(object):
                             break
         if len(rm_feats) > 0:
             df = df.drop(rm_feats, axis=1)
-            self.logger.info('\nThese {} features were removed due to cross '
+            self.logger.info('These {} features were removed due to cross '
                              'correlation with the current features more than '
                              '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
         return df
@@ -146,7 +146,7 @@ class PreProcess(object):
         df = df.dropna(axis=1, thresh=int((1-max_colnull)*len(df)))
         if len(df.columns) < len(feats0):
             feats = set(df.columns)
-            self.logger.info('The following {} features were removed as they '
+            self.logger.info('These {} features were removed as they '
                              'had more than {}% missing values:\n{}'.format(
                 len(feats0)-len(feats), max_colnull*100, feats0-feats))
         if na_method == "drop": # drop all rows that contain any null
