@@ -19,7 +19,7 @@ class TestTpotAutoml(unittest.TestCase):
         self.RS = 27
 
     def test_tpot_regression(self, limit=500):
-        target_col = 'gap gllbsc'
+        target = 'gap gllbsc'
         # load and featurize:
         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
         featzer = Featurize(df_init, ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
@@ -30,19 +30,19 @@ class TestTpotAutoml(unittest.TestCase):
         prep = PreProcess(max_colnull=0.1)
         df = prep.handle_nulls(df_feats)
         feats0 = set(df.columns)
-        df = prep.prune_correlated_features(df, target_col, R_max=0.95)
+        df = prep.prune_correlated_features(df, target, R_max=0.95)
         self.assertEqual(len(feats0 - set(df.columns)), 17)
         # train/test split (train/dev splot done within tpot crossvalidation)
         X_train, X_test, y_train, y_test = \
-            train_test_split(df.drop(target_col, axis=1).values,
-            df[target_col], train_size=0.75, test_size=0.25, random_state=self.RS)
+            train_test_split(df.drop(target, axis=1).values,
+            df[target], train_size=0.75, test_size=0.25, random_state=self.RS)
 
         tpot = TpotAutoml(mode='regressor',
                           generations=1,
                           population_size=25,
                           scoring='r2',
                           random_state=self.RS,
-                          feature_names=df.drop(target_col, axis=1).columns,
+                          feature_names=df.drop(target, axis=1).columns,
                           n_jobs=1)
         self.assertTrue(tpot.scoring_function=='r2')
         tpot.fit(X_train, y_train)
@@ -62,24 +62,24 @@ class TestTpotAutoml(unittest.TestCase):
 
         # test error analysis:
         ea = Analysis(tpot, X_train, y_train, X_test, y_test,
-                           mode='regression', target=target_col,
-                           features=df.drop(target_col, axis=1).columns,
+                           mode='regression', target=target,
+                           features=df.drop(target, axis=1).columns,
                            test_samples_index=y_test.index, random_state=self.RS)
         df_errors = ea.get_data_for_error_analysis()
-        self.assertTrue((df_errors['{}_true'.format(target_col)]!=\
-                         df_errors['{}_predicted'.format(target_col)]).all())
+        self.assertTrue((df_errors['{}_true'.format(target)]!=\
+                         df_errors['{}_predicted'.format(target)]).all())
         rmse = np.sqrt(np.mean((tpot.predict(X_test) - y_test) ** 2))
         self.assertTrue((
-            ea.false_positives['{}_predicted'.format(target_col)]>= \
-            ea.false_positives['{}_true'.format(target_col)] + rmse).all())
+            ea.false_positives['{}_predicted'.format(target)]>= \
+            ea.false_positives['{}_true'.format(target)] + rmse).all())
 
         self.assertTrue((
-            ea.false_negatives['{}_predicted'.format(target_col)]<= \
-            ea.false_negatives['{}_true'.format(target_col)] - rmse).all())
+            ea.false_negatives['{}_predicted'.format(target)]<= \
+            ea.false_negatives['{}_true'.format(target)] - rmse).all())
 
 
     def test_tpot_classification(self, limit=500):
-        target_col = 'gfa'
+        target = 'gfa'
         # load and featurize:
         df_init = load_glass_formation(phase='binary')[:limit]
         featzer = Featurize(df_init)
@@ -90,19 +90,19 @@ class TestTpotAutoml(unittest.TestCase):
         prep = PreProcess(max_colnull=0.1)
         df = prep.handle_nulls(df_feats)
         feats0 = set(df.columns)
-        df = prep.prune_correlated_features(df, target_col, R_max=0.95)
+        df = prep.prune_correlated_features(df, target, R_max=0.95)
         self.assertEqual(len(feats0 - set(df.columns)), 49)
         # train/test split (development is within tpot crossvalidation)
         X_train, X_test, y_train, y_test = \
-            train_test_split(df.drop(target_col, axis=1).values,
-            df[target_col], train_size=0.75, test_size=0.25, random_state=self.RS)
+            train_test_split(df.drop(target, axis=1).values,
+            df[target], train_size=0.75, test_size=0.25, random_state=self.RS)
 
         tpot = TpotAutoml(mode='classify',
                           generations=1,
                           population_size=25,
                           scoring='f1_weighted',
                           random_state=self.RS,
-                          feature_names=df.drop(target_col, axis=1).columns,
+                          feature_names=df.drop(target, axis=1).columns,
                           n_jobs=1)
         self.assertTrue(tpot.scoring_function=='f1_weighted')
         tpot.fit(X_train, y_train)
@@ -121,12 +121,12 @@ class TestTpotAutoml(unittest.TestCase):
 
         # test analysis:
         ea = Analysis(tpot, X_train, y_train, X_test, y_test,
-                           mode='classification', target=target_col,
-                           features=df.drop(target_col, axis=1).columns,
+                           mode='classification', target=target,
+                           features=df.drop(target, axis=1).columns,
                            test_samples_index=y_test.index, random_state=self.RS)
         df_errors = ea.get_data_for_error_analysis()
-        self.assertTrue((df_errors['{}_true'.format(target_col)] !=\
-                         df_errors['{}_predicted'.format(target_col)]).all())
+        self.assertTrue((df_errors['{}_true'.format(target)] !=\
+                         df_errors['{}_predicted'.format(target)]).all())
         self.assertTrue(not ea.false_negatives['gfa_predicted'].all() and \
                         ea.false_negatives['gfa_true'].all())
         self.assertTrue(ea.false_positives['gfa_predicted'].all() and \

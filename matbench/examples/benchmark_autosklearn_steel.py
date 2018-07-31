@@ -10,7 +10,7 @@ from matbench.featurize import Featurize
 from matbench.preprocess import PreProcess
 
 data_name = "steel"
-target_col = "yield strength"
+target = "yield strength"
 timelimit_secs = 7200
 rs = 29
 
@@ -25,7 +25,7 @@ feature_output_file = \
 if os.path.exists(feature_output_file):
     df = pd.read_csv(feature_output_file, index_col=0)
 else:
-    df_init = load_steel_strength()[['formula', target_col]]
+    df_init = load_steel_strength()[['formula', target]]
 
     prof = Profile()
     prof.enable()
@@ -51,14 +51,14 @@ else:
 
     df.to_csv(feature_output_file)
 
-X = df.drop(target_col, axis=1).values
-y = df[target_col]
+X = df.drop(target, axis=1).values
+y = df[target]
 
-output_folder = os.path.join(model_output_path, data_name, target_col)
-tmp_folder = os.path.join(model_tmp_path, data_name, target_col)
+output_folder = os.path.join(model_output_path, data_name, target)
+tmp_folder = os.path.join(model_tmp_path, data_name, target)
 autosklearnml = AutoSklearnML(X, y,
                               dataset_name="{}_{}".format(data_name,
-                                                          target_col),
+                                                          target),
                               time_left_for_this_task=timelimit_secs,
                               per_run_time_limit=int(timelimit_secs/10),
                               ml_memory_limit=2048,
