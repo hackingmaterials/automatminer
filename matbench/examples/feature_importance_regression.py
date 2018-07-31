@@ -12,16 +12,24 @@ from sklearn.model_selection import train_test_split
 target = 'gap expt'
 RS = 24
 mode = 'regression'
+MULTIINDEX = True
+if MULTIINDEX:
+    target = ('Input Data', target)
 
 df_init = load_expt_gap()
 featzer = Featurize(df_init,
-                    exclude=['CohesiveEnergy', 'AtomicPackingEfficiency'])
+                    exclude=['CohesiveEnergy', 'AtomicPackingEfficiency'],
+                    multiindex=MULTIINDEX)
+
 df = featzer.featurize_formula(df_init,
                                featurizers='all',
                                guess_oxidstates=False)
 
 prep = PreProcess(target=target)
 df = prep.preprocess(df)
+
+print(df.head())
+df.to_csv('test.csv')
 
 X_train, X_test, y_train, y_test = train_test_split(
     df.drop(target, axis=1), df[target])
@@ -35,8 +43,6 @@ model = RandomForestRegressor(n_estimators=100,
 
 
 model.fit(X_train.values, y_train.values)
-print('test score:')
-print(model.score(X_test, y_test))
 
 analysis = Analysis(model, X_train, y_train, X_test, y_test, mode,
                    target=target,
