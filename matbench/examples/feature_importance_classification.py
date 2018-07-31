@@ -1,5 +1,5 @@
 import numpy as np
-from matbench.automl.tpot_utils import Analysis
+from matbench.analysis import Analysis
 from matbench.data.load import load_glass_formation
 from matbench.featurize import Featurize
 from matbench.preprocess import PreProcess
@@ -9,7 +9,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
 # inputs
-target_col = 'gfa'
+target = 'gfa'
 RS = 24
 mode = 'classification'
 
@@ -21,11 +21,11 @@ df = featzer.featurize_formula(df_init,
                                featurizers='all',
                                guess_oxidstates=False)
 
-prep = PreProcess()
+prep = PreProcess(target=target)
 df = prep.preprocess(df)
 
 X_train, X_test, y_train, y_test = train_test_split(
-    df.drop(target_col, axis=1), df[target_col])
+    df.drop(target, axis=1), df[target])
 
 model = RandomForestClassifier(n_estimators=100,
                               random_state=RS)
@@ -36,8 +36,8 @@ print('test score:')
 print(model.score(X_test, y_test))
 
 analysis = Analysis(model, X_train, y_train, X_test, y_test, mode,
-                   target=target_col,
-                   features=df.drop(target_col, axis=1).columns,
+                   target=target,
+                   features=df.drop(target, axis=1).columns,
                    test_samples_index=X_test.index,
                    random_state=RS)
 

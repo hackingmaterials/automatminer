@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-
+import warnings
 
 class MatbenchError(Exception):
     """
@@ -68,5 +68,6 @@ def is_greater_better(scoring_function):
                               'mean_squared_error']:
         return False
     else:
-        raise MatbenchError('Unsupported scoring_function: "{}"'.format(
-            scoring_function))
+        warnings.warn('The scoring_function: "{}" not found; continuing assuming'
+                      ' greater score is better'.format(scoring_function))
+        return True

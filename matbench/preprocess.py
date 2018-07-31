@@ -15,7 +15,7 @@ class PreProcess(object):
 
     Args:
         df (pandas.DataFrame): input data
-        target_col (str): if set, the target column may be examined (e.g. to be
+        target (str): if set, the target column may be examined (e.g. to be
             numeric)
         max_colnull (float): after generating features, drop the columns that
             have null/na rows with more than this ratio. Note that there is an
@@ -24,10 +24,10 @@ class PreProcess(object):
         loglevel (int): the level of output; e.g. logging.DEBUG
         logpath (str): the path to the logfile dir, current folder by default.
     """
-    def __init__(self, df=None, target_col=None, max_colnull=0.05,
+    def __init__(self, df=None, target=None, max_colnull=0.05,
                  loglevel=logging.INFO, logpath='.'):
         self.df = df
-        self.target_col = target_col
+        self.target = target
         self.max_colnull = max_colnull
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
         self.scaler = None
@@ -50,16 +50,21 @@ class PreProcess(object):
         """
         df = self._prescreen_df(df)
         df = self.handle_nulls(df, na_method=kwargs.pop('na_method', 'drop'))
+        if self.target:
+            df = self.prune_correlated_features(df)
+        else:
+            self.logger.warning('prune_correlated_features skipped as the '
+                                'target is not set...')
         if scale:
             self.scaler = MinMaxScaler()
             df = self.scaler.fit_transform(df)
         if pca:
             self.pca = PCA(n_components=kwargs.pop('n_components', None))
             df = self.pca.fit_transform(df)
-        if self.target_col:
-            if not is_numeric_dtype(df[self.target_col]):
+        if self.target:
+            if not is_numeric_dtype(df[self.target]):
                 raise MatbenchError('Target column "{}" must be numeric'.format(
-                    self.target_col))
+                    self.target))
 
         # TODO: remove/modify the following once preprocessing methods for str/objects are implemented:
         # df = df.drop(list(df.columns[df.dtypes == object]), axis=1)
@@ -70,13 +75,13 @@ class PreProcess(object):
         return df
 
 
-    def prune_correlated_features(self, df=None, target_col=None, R_max=0.95):
+    def prune_correlated_features(self, df=None, target=None, R_max=0.95):
         """
         Goes over the features and remove those that are cross correlated by
-        more than threshold. Target_col must be specified!
+        more than threshold. target must be specified!
 
         Args:
-            target_col (str): the name of the target column/feature
+            target (str): the name of the target column/feature
             R_max (0<float<=1): if R is greater than this value, the
                 feature that has lower correlation with the target is removed.
 
@@ -84,14 +89,14 @@ class PreProcess(object):
             the dataframe with the highly cross-correlated features removed.
         """
         df = self._prescreen_df(df)
-        target_col = target_col or self.target_col
-        if target_col is None:
-            raise MatbenchError('"target_col" must be set!')
+        target = target or self.target
+        if target is None:
+            raise MatbenchError('"target" must be set!')
         corr = abs(df.corr())
-        corr = corr.sort_values(by=target_col)
+        corr = corr.sort_values(by=target)
         rm_feats = []
         for feature in corr.columns:
-            if feature == target_col:
+            if feature == target:
                 continue
             for idx, corval in zip(corr.index, corr[feature]):
                 if np.isnan(corval):
@@ -100,7 +105,7 @@ class PreProcess(object):
                     continue
                 else:
                     if corval >= R_max:
-                        if corr.loc[idx, target_col] > corr.loc[feature, target_col]:
+                        if corr.loc[idx, target] > corr.loc[feature, target]:
                             removed_feat = feature
                         else:
                             removed_feat = idx

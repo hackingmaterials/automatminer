@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from time import time
 
 # user inputs
-target_col = 'gap gllbsc'
+target = 'gap gllbsc'
 RS = 29
 timelimitmins = 120
 print('timelimitmins = ', timelimitmins)
@@ -14,7 +14,7 @@ model_type = 'regression'
 scoring = 'r2'
 
 # load and featurize:
-df_init = load_castelli_perovskites()[['formula', target_col]]
+df_init = load_castelli_perovskites()[['formula', target]]
 featzer = Featurize(df_init)
 
 df_feats = featzer.featurize_formula(featurizers='all')
@@ -22,14 +22,14 @@ df_feats = featzer.featurize_formula(featurizers='all')
 # preprocessing of the data
 prep = PreProcess(max_colnull=0.1)
 df = prep.preprocess(df_feats)
-df.to_csv('{}_tpot_trained_data.csv'.format(target_col))
+df.to_csv('{}_tpot_trained_data.csv'.format(target))
 print(df.shape)
 print(df.head())
 assert df.isnull().sum().sum() == 0
 # train/test split (development is within tpot crossvalidation)
 X_train, X_test, y_train, y_test = \
-    train_test_split(df.drop(target_col, axis=1).values,
-                     df[target_col], train_size=0.75, test_size=0.25,
+    train_test_split(df.drop(target, axis=1).values,
+                     df[target], train_size=0.75, test_size=0.25,
                      random_state=RS)
 
 print('start timing...')
@@ -38,7 +38,7 @@ tpot = TpotAutoml(mode=model_type,
                   max_time_mins=timelimitmins,
                   scoring=scoring,
                   random_state=RS,
-                  feature_names=df.drop(target_col, axis=1).columns,
+                  feature_names=df.drop(target, axis=1).columns,
                   n_jobs=1,
                   verbosity=2)
 tpot.fit(X_train, y_train)

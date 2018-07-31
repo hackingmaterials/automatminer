@@ -337,10 +337,10 @@ if __name__ == '__main__':
     df = elemprop.featurize_dataframe(df, col_id="composition")
 
     feature_cols = elemprop.feature_labels()
-    target_col = "gfa"
+    target = "gfa"
 
     automl = AutoSklearnML(X=df[feature_cols],
-                           y=df[target_col],
+                           y=df[target],
                            dataset_name="ternary glass formation",
                            time_left_for_this_task=60,
                            per_run_time_limit=30,
