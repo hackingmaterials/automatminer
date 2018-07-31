@@ -38,15 +38,22 @@ class Featurize(object):
             the corresponding featurize_* method is called
         exclude ([str]): list of the featurizer names to be excluded. Note
             that these names are str (e.g. "ElementProperty") and not the class
+        multiindex (bool): a matminer featurizer argument that transforms
+            feature label to tuples that makes it easier to track them back to
+            which featurizer they come from.
+            * Note: if you set to True and your target is "gap", you need to
+            pass target = ("Input Data", "gap") in classes such as PreProcess.
     """
 
     def __init__(self, df, ignore_cols=None, preset_name="matminer",
-                 ignore_errors=True, drop_featurized_col=True, exclude=None):
+                 ignore_errors=True, drop_featurized_col=True, exclude=None,
+                 multiindex=False):
         self.df = df if ignore_cols is None else df.drop(ignore_cols, axis=1)
         self.all_featurizers = AllFeaturizers(preset_name=preset_name,
                                               exclude=exclude)
         self.ignore_errors = ignore_errors
         self.drop_featurized_col = drop_featurized_col
+        self.multiindex = multiindex
 
     def _prescreen_df(self, df, inplace=True, col_id=None):
         if df is None:
@@ -69,7 +76,7 @@ class Featurize(object):
             self.df w/ new features added via featurizering input_cols
         """
         df = self._prescreen_df(df)
-        input_cols = input_cols or ["formula"]
+        input_cols = input_cols or ["formula", "structure"]
         for column in input_cols:
             featurizer = getattr(self, "featurize_{}".format(column), None)
             if featurizer is not None:
@@ -108,12 +115,18 @@ class Featurize(object):
             df[compcol] = composition_to_oxidcomposition(df[compcol])
         if featurizers == 'all':
             featurizers = self.all_featurizers.composition(**kwargs)
-        df = MultipleFeaturizer(featurizers).featurize_dataframe(
-            df, col_id=compcol, ignore_errors=self.ignore_errors)
+        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
+            df, compcol, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if asindex:
-            df = df.set_index(col_id)
+            if self.multiindex:
+                df = df.set_index(('Input Data', col_id))
+            else:
+                df = df.set_index(col_id)
         if self.drop_featurized_col:
-            return df.drop(compcol, axis=1)
+            if self.multiindex:
+                return df.drop(('Input Data', compcol), axis=1)
+            else:
+                return df.drop(compcol, axis=1)
         else:
             return df
 
@@ -148,17 +161,13 @@ class Featurize(object):
             structure_to_oxidstructure(df[col_id], inplace=True)
         if featurizers == "all":
             featurizers = self.all_featurizers.structure()
-        df = MultipleFeaturizer(featurizers).featurize_dataframe(
-            df, col_id=col_id, ignore_errors=self.ignore_errors)
-        if fit_featurizers == "all":
-            featurizers = self.all_featurizers.fit_structure()
-        for featzer in featurizers:
-            featzer.fit(df[col_id])
-            df = featzer.featurize_dataframe(df,
-                                             col_id=col_id,
-                                             ignore_errors=self.ignore_errors)
+        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
+            df, col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if self.drop_featurized_col:
-            return df.drop(col_id, axis=1)
+            if self.multiindex:
+                return df.drop(('Input Data', col_id), axis=1)
+            else:
+                return df.drop(col_id, axis=1)
         else:
             return df
 
@@ -280,13 +289,15 @@ class AllFeaturizers(object):
         names = [c.__class__.__name__ for c in featzers]
         return [f for i,f in enumerate(featzers) if names[i] not in self.exclude]
 
-    def structure(self, preset_name="CrystalNNFingerprint_ops"):
+    def structure(self, preset_name="CrystalNNFingerprint_ops", need_fit=True):
         """
         All structure-based featurizers with default arguments that don't
         require the fit method to be called first.
 
         Args:
             preset_name (str): some featurizers take in this argument
+            need_fit (bool): whether to include structure featurizers that
+                require the calling of fit method first
 
         Returns ([matminer featurizer classes]):
         """
@@ -310,17 +321,8 @@ class AllFeaturizers(object):
             sf.ElectronicRadialDistributionFunction(),  # returns dict!
             sf.EwaldEnergy()
         ]
-        names = [c.__class__.__name__ for c in featzers]
-        return [f for i, f in enumerate(featzers) if names[i] not in self.exclude]
-
-    def fit_structure(self):
-        """
-        Structure-based featurizers with default arguments that require the
-        fit method to be called first.
-
-        Returns ([matminer featurizer classes]):
-        """
-        featzers = [
+        if need_fit:
+            featzers += [
             sf.PartialRadialDistributionFunction(),
             sf.BondFractions(),
             sf.BagofBonds()
