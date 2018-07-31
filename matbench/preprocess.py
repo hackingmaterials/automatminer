@@ -70,8 +70,7 @@ class PreProcess(object):
         return df
 
 
-    def prune_cross_correlated_features(self, df=None, target_col=None,
-                                        R_max=0.95):
+    def prune_correlated_features(self, df=None, target_col=None, R_max=0.95):
         """
         Goes over the features and remove those that are cross correlated by
         more than threshold. Target_col must be specified!

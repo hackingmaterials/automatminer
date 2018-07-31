@@ -30,9 +30,7 @@ class TestTpotAutoml(unittest.TestCase):
         prep = PreProcess(max_colnull=0.1)
         df = prep.handle_nulls(df_feats)
         feats0 = set(df.columns)
-        df = prep.prune_cross_correlated_features(df,
-                                                  target_col=target_col,
-                                                  R_max=0.95)
+        df = prep.prune_correlated_features(df, target_col, R_max=0.95)
         self.assertEqual(len(feats0 - set(df.columns)), 17)
         # train/test split (train/dev splot done within tpot crossvalidation)
         X_train, X_test, y_train, y_test = \
@@ -92,9 +90,7 @@ class TestTpotAutoml(unittest.TestCase):
         prep = PreProcess(max_colnull=0.1)
         df = prep.handle_nulls(df_feats)
         feats0 = set(df.columns)
-        df = prep.prune_cross_correlated_features(df,
-                                                  target_col=target_col,
-                                                  R_max=0.95)
+        df = prep.prune_correlated_features(df, target_col, R_max=0.95)
         self.assertEqual(len(feats0 - set(df.columns)), 49)
         # train/test split (development is within tpot crossvalidation)
         X_train, X_test, y_train, y_test = \
