@@ -24,6 +24,7 @@ class PreProcess(object):
         loglevel (int): the level of output; e.g. logging.DEBUG
         logpath (str): the path to the logfile dir, current folder by default.
     """
+
     def __init__(self, df=None, target=None, max_colnull=0.05,
                  loglevel=logging.INFO, logpath='.'):
         self.df = df
@@ -32,7 +33,6 @@ class PreProcess(object):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
         self.scaler = None
         self.pca = None
-
 
     def preprocess(self, df=None, scale=False, pca=False, **kwargs):
         """
@@ -74,7 +74,6 @@ class PreProcess(object):
         df = df.apply(pd.to_numeric)
         return df
 
-
     def prune_correlated_features(self, df=None, target=None, R_max=0.95):
         """
         Goes over the features and remove those that are cross correlated by
@@ -112,8 +111,9 @@ class PreProcess(object):
                         if removed_feat not in rm_feats:
                             rm_feats.append(removed_feat)
                             self.logger.debug('"{}" correlates strongly with '
-                                             '"{}"'.format(feature, idx))
-                            self.logger.debug('removing "{}"...'.format(removed_feat))
+                                              '"{}"'.format(feature, idx))
+                            self.logger.debug(
+                                'removing "{}"...'.format(removed_feat))
                         if removed_feat == feature:
                             break
         if len(rm_feats) > 0:
@@ -123,12 +123,10 @@ class PreProcess(object):
                              '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
         return df
 
-
     def _prescreen_df(self, df):
         if df is None:
             df = self.df.copy(deep=True)
         return df
-
 
     def handle_nulls(self, df=None, max_colnull=None, na_method='drop'):
         """
@@ -147,13 +145,13 @@ class PreProcess(object):
         df = self._prescreen_df(df)
         max_colnull = max_colnull or self.max_colnull
         feats0 = set(df.columns)
-        df = df.dropna(axis=1, thresh=int((1-max_colnull)*len(df)))
+        df = df.dropna(axis=1, thresh=int((1 - max_colnull) * len(df)))
         if len(df.columns) < len(feats0):
             feats = set(df.columns)
             self.logger.info('These {} features were removed as they '
                              'had more than {}% missing values:\n{}'.format(
-                len(feats0)-len(feats), max_colnull*100, feats0-feats))
-        if na_method == "drop": # drop all rows that contain any null
+                len(feats0) - len(feats), max_colnull * 100, feats0 - feats))
+        if na_method == "drop":  # drop all rows that contain any null
             df = df.dropna(axis=0)
         else:
             df = df.fillna(method=na_method)
