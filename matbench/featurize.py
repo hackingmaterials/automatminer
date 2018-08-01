@@ -20,16 +20,14 @@ class Featurize(object):
     the featurize_columns method to featurize via all available featurizers
     with default setting or selectively call featurizer methods.
     Usage examples:
-        featurizer = Featurize(df)
-            df = featurizer.featurize_columns() # all features of all types
+        featurizer = Featurize()
+            df = featurizer.featurize_columns(df) # all features of all types
         or:
-            df = featurizer.featurize_formula() # all formula-related feature
+            df = featurizer.featurize_formula(df) # all formula-related feature
         or:
-            df = featurizer.featurize_dos(featurizers=[Hybridization()])
+            df = featurizer.featurize_dos(df, featurizers=[Hybridization()])
 
     Args:
-        df (pandas.DataFrame): the input data containing at least one of preset
-            inputs (e.g. "formula")
         ignore_cols ([str]): if set, these columns are excluded
         preset_name (str): some featurizers (w/ from_preset) take in this arg
         ignore_errors (bool): whether to ignore exceptions raised when
@@ -45,10 +43,10 @@ class Featurize(object):
             pass target = ("Input Data", "gap") in classes such as PreProcess.
     """
 
-    def __init__(self, df, ignore_cols=None, preset_name="matminer",
+    def __init__(self, ignore_cols=None, preset_name="matminer",
                  ignore_errors=True, drop_featurized_col=True, exclude=None,
                  multiindex=False):
-        self.df = df if ignore_cols is None else df.drop(ignore_cols, axis=1)
+        self.ignore_cols = ignore_cols or []
         self.all_featurizers = AllFeaturizers(preset_name=preset_name,
                                               exclude=exclude)
         self.ignore_errors = ignore_errors
@@ -56,17 +54,19 @@ class Featurize(object):
         self.multiindex = multiindex
 
     def _prescreen_df(self, df, inplace=True, col_id=None):
-        if df is None:
-            df = self.df.copy(deep=True)
         if not inplace:
             df = df.copy(deep=True)
         if col_id and col_id not in df:
             raise MatbenchError("'{}' column must be in data!".format(col_id))
+        if self.ignore_errors is not None:
+            for col in self.ignore_cols:
+                if col in df:
+                    df = df.drop([col], axis=1)
         return df
 
     def _pre_screen_col(self, col_id, prefix='Input Data', multiindex=None):
         multiindex = multiindex or self.multiindex
-        if multiindex:
+        if multiindex and isinstance(col_id, str):
             return (prefix, col_id)
         else:
             return col_id
@@ -98,7 +98,6 @@ class Featurize(object):
                     col_id = column
                 df = featurizer(df, col_id=col_id, **kwargs)
             elif column not in df:
-                print(column)
                 raise MatbenchError('no "{}" in the data!')
             else:
                 warn('No method available to featurize "{}"'.format(column))
@@ -137,7 +136,7 @@ class Featurize(object):
         if asindex:
             df = df.set_index(self._pre_screen_col(col_id))
         if self.drop_featurized_col:
-            return df.drop(self._pre_screen_col(compcol), axis=1)
+            return df.drop([self._pre_screen_col(compcol)], axis=1)
         else:
             return df
 
@@ -172,7 +171,7 @@ class Featurize(object):
         df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
             df, col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if self.drop_featurized_col:
-            return df.drop(self._pre_screen_col(col_id), axis=1)
+            return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
             return df
 
@@ -201,7 +200,7 @@ class Featurize(object):
         df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
             df, col_id=col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if self.drop_featurized_col:
-            return df.drop(self._pre_screen_col(col_id), axis=1)
+            return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
             return df
 
@@ -230,7 +229,7 @@ class Featurize(object):
         df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
             df, col_id=col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if self.drop_featurized_col:
-            return df.drop(self._pre_screen_col(col_id), axis=1)
+            return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
             return df
 
