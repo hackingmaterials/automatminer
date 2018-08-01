@@ -22,8 +22,8 @@ class TestTpotAutoml(unittest.TestCase):
         target = 'gap gllbsc'
         # load and featurize:
         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
-        featzer = Featurize(df_init, ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
-        df_feats = featzer.featurize_formula(featurizers=[
+        featzer = Featurize(ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
+        df_feats = featzer.featurize_formula(df_init, featurizers=[
             ElementProperty.from_preset(preset_name='matminer'),
             TMetalFraction()])
         # preprocessing of the data
@@ -82,8 +82,8 @@ class TestTpotAutoml(unittest.TestCase):
         target = 'gfa'
         # load and featurize:
         df_init = load_glass_formation(phase='binary')[:limit]
-        featzer = Featurize(df_init)
-        df_feats = featzer.featurize_formula(featurizers=[
+        featzer = Featurize()
+        df_feats = featzer.featurize_formula(df_init, featurizers=[
             ElementProperty.from_preset(preset_name='matminer'),
             Stoichiometry()])
         # preprocessing of the data
@@ -135,8 +135,8 @@ class TestTpotAutoml(unittest.TestCase):
         # test feature importance
         ea.get_feature_importance(sort=True)
         feature_importance = list(ea.feature_importance.items())
-        self.assertTrue('mendeleev_no' in feature_importance[0][0])
-        self.assertAlmostEqual(feature_importance[0][1], 0.1, 1)
+        self.assertEqual('mean block',  feature_importance[0][0])
+        self.assertAlmostEqual(feature_importance[0][1], 0.6, 1)
 
 
 if __name__ == '__main__':
