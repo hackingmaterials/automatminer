@@ -8,16 +8,15 @@ from sklearn.model_selection import train_test_split
 
 # inputs
 loader_func = loader.load_castelli_perovskites
-LIMIT = 20
+LIMIT = 500
 IGNORE_THESE_COLUMNS = ['cbm', 'vbm']
 TARGET = 'gap gllbsc'
 MODE = 'regression'
 TIMEOUT_MINS = None
 GENERATIONS = 2
-POPULATION_SIZE = 20
+POPULATION_SIZE = 10
 SCORING = 'r2'
-RS = 24
-MODE = 'regression'
+RS = 13
 EXCLUDED_FEATURIZERS = ['CohesiveEnergy', 'AtomicPackingEfficiency',
                         'PartialRadialDistributionFunction',
                         'RadialDistributionFunction',
