@@ -250,7 +250,7 @@ class AllFeaturizers(object):
         self.exclude = exclude or []
 
     def composition(self, preset_name=None, need_oxidstates=False,
-                    slow_ones=False):
+                    include_slow=False):
         """
         All composition-based featurizers with default arguments.
 
@@ -258,7 +258,7 @@ class AllFeaturizers(object):
             preset_name (str): some featurizers take in this argument
             need_oxidstates (bool): whether to return those featurizers that
                 require oxidation states decorated Composition
-            slow_ones (bool): Whether to include relatively slow featurizers.
+            include_slow (bool): Whether to include relatively slow featurizers.
                 We have not found evidence that these featurizers improve the
                 prediction scores of the current datasets.
 
@@ -282,7 +282,7 @@ class AllFeaturizers(object):
                 cf.ElectronegativityDiff(),
                 cf.YangSolidSolution(),
             ]
-        if slow_ones:
+        if include_slow:
             featzers += [
                 cf.IonProperty(),
                 cf.Miedema(),
