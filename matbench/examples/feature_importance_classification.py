@@ -17,8 +17,7 @@ if MULTIINDEX:
     target = ('Input Data', target)
 
 df_init = load_glass_formation(phase="ternary").drop('phase', axis=1)
-featzer = Featurize(df_init,
-                    preset_name='deml',
+featzer = Featurize(preset_name='deml',
                     exclude=['CohesiveEnergy', 'AtomicPackingEfficiency'],
                     multiindex=MULTIINDEX)
 df = featzer.featurize_formula(df_init,

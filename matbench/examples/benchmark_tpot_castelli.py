@@ -15,9 +15,9 @@ scoring = 'r2'
 
 # load and featurize:
 df_init = load_castelli_perovskites()[['formula', target]]
-featzer = Featurize(df_init)
+featzer = Featurize()
 
-df_feats = featzer.featurize_formula(featurizers='all')
+df_feats = featzer.featurize_formula(df_init, featurizers='all')
 
 # preprocessing of the data
 prep = PreProcess(max_colnull=0.1)

@@ -30,8 +30,8 @@ else:
     prof = Profile()
     prof.enable()
 
-    featzer = Featurize(df_init)
-    df_feats = featzer.featurize_formula(featurizers="all")
+    featzer = Featurize()
+    df_feats = featzer.featurize_formula(df_init, featurizers="all")
     prep = PreProcess(max_colnull=0.1)
     df = prep.preprocess(df_feats)
 
