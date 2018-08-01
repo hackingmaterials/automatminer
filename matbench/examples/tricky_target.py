@@ -1,22 +1,31 @@
-import numpy as np
-from matbench.analysis import Analysis
 import matbench.data.load as loader
+from time import time
+from matbench.analysis import Analysis
+from matbench.automl.tpot_utils import TpotAutoml
 from matbench.featurize import Featurize
 from matbench.preprocess import PreProcess
-from matminer import PlotlyFig
-from scipy.stats import linregress
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 
 # inputs
-loader_func = loader.load_boltztrap_mp
-LIMIT = 5
-IGNORE_THESE_COLUMNS = []
+loader_func = loader.load_castelli_perovskites
+LIMIT = 20
+IGNORE_THESE_COLUMNS = ['cbm', 'vbm']
 TARGET = 'gap gllbsc'
+MODE = 'regression'
+TIMEOUT_MINS = None
+GENERATIONS = 2
+POPULATION_SIZE = 20
+SCORING = 'r2'
 RS = 24
 MODE = 'regression'
 EXCLUDED_FEATURIZERS = ['CohesiveEnergy', 'AtomicPackingEfficiency',
-                        'PartialRadialDistributionFunction']
+                        'PartialRadialDistributionFunction',
+                        'RadialDistributionFunction',
+                        'CoulombMatrix',
+                        'SineCoulombMatrix',
+                        'OrbitalFieldMatrix',
+                        'MinimumRelativeDistances',
+                        'ElectronicRadialDistributionFunction']
 FEATUREIZE_THESE_COLUMNS = ["formula", "structure"]
 MULTIINDEX = True
 if MULTIINDEX:
@@ -25,58 +34,53 @@ if MULTIINDEX:
 
 # actual pipeline:
 df_init = loader_func()[:LIMIT]
-featzer = Featurize(df_init,
-                    ignore_cols=IGNORE_THESE_COLUMNS,
+featzer = Featurize(ignore_cols=IGNORE_THESE_COLUMNS,
                     exclude=EXCLUDED_FEATURIZERS,
-                    multiindex=MULTIINDEX)
+                    multiindex=MULTIINDEX,
+                    drop_featurized_col=True)
 
-df_init.to_csv('test.csv')
+print(df_init.columns)
 df = featzer.featurize_columns(df_init,
                                input_cols=FEATUREIZE_THESE_COLUMNS,
                                guess_oxidstates=True)
 
-
-##****** It works up to this point I get this error at preprocess at pruning: KeyError: ('Input Data', 'gap gllbsc')
-
 prep = PreProcess(target=TARGET)
 df = prep.preprocess(df)
 
-print(df.head())
-df.to_csv('test.csv')
 
 X_train, X_test, y_train, y_test = train_test_split(
     df.drop(TARGET, axis=1), df[TARGET])
 
-model = RandomForestRegressor(n_estimators=100,
-                              bootstrap=False,
-                              max_features=0.8,
-                              min_samples_leaf=1,
-                              min_samples_split=4,
-                              random_state=RS)
+print('start timing...')
+start_time = time()
+tpot = TpotAutoml(mode=MODE,
+                  max_time_mins=TIMEOUT_MINS,
+                  generations=GENERATIONS,
+                  population_size=POPULATION_SIZE,
+                  scoring=SCORING,
+                  random_state=RS,
+                  feature_names=df.drop(TARGET, axis=1).columns,
+                  n_jobs=-1,
+                  verbosity=2)
+tpot.fit(X_train, y_train)
+print('total fitting time: {} s'.format(time() - start_time))
+
+top_scores = tpot.get_top_models(return_scores=True)
+print('top cv scores:')
+print(top_scores)
+print('top models')
+print(tpot.top_models)
+test_score = tpot.score(X_test, y_test)
+print('the best test score:')
+print(test_score)
 
 
-model.fit(X_train.values, y_train.values)
-
-analysis = Analysis(model, X_train, y_train, X_test, y_test, MODE,
+analysis = Analysis(tpot, X_train, y_train, X_test, y_test, MODE,
                    target=TARGET,
                    features=df.drop(TARGET, axis=1).columns,
                    test_samples_index=X_test.index,
                    random_state=RS)
 
-x = list(analysis.get_feature_importance(sort=False).values())
-y = model.feature_importances_
-lr = linregress(x, y)
-xreg = np.linspace(0.0, round(max(x),2), num=2)
-yreg = lr.intercept + xreg * lr.slope
-
-print('correlation, r={}'.format(lr.rvalue))
-print('p-value, p={}'.format(lr.pvalue))
-
-pf = PlotlyFig(
-    title='Comparison of feature importances in predicting expt. gap',
-    x_title='Analysis.feature_importance (Variance Sensitivity Analysis)',
-    y_title='RandomForestRegressor.feature_importances_')
-pf.xy([(x, y), (xreg, yreg)],
-      labels=analysis.features,
-      modes=['markers', 'line'],
-      showlegends=False)
+feature_importance = list(analysis.get_feature_importance(sort=True).values())
+print('feature importance')
+print(feature_importance)
