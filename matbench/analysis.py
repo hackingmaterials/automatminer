@@ -152,7 +152,7 @@ class Analysis(object):
         for feat in dfX:
             for sgn in [-1.0, +1.0]:
                 dfX_perturbed = dfX.copy()
-                dfX_perturbed[feat] = dfX_perturbed + sgn*dfX[feat].std()
+                dfX_perturbed[feat] = dfX_perturbed[feat] + sgn*dfX[feat].std()
                 pred = (self.model.predict(dfX_perturbed.values)).astype(float)
                 rmse = np.sqrt(np.mean((pred - pred0) ** 2))
                 featance[feat] += rmse
