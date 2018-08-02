@@ -1,4 +1,5 @@
 import matbench.data.load as loader
+import numpy as np
 from time import time
 from matbench.analysis import Analysis
 from matbench.automl.tpot_utils import TpotAutoml
@@ -32,13 +33,15 @@ if MULTIINDEX:
 
 
 # actual pipeline:
-df_init = loader_func()[:LIMIT]
+df_init = loader_func()
+if LIMIT and LIMIT<len(df_init):
+    df_init = df_init.iloc[np.random.choice(len(df_init), LIMIT, replace=False)]
+
 featzer = Featurize(ignore_cols=IGNORE_THESE_COLUMNS,
                     exclude=EXCLUDED_FEATURIZERS,
                     multiindex=MULTIINDEX,
                     drop_featurized_col=True)
 
-print(df_init.columns)
 df = featzer.featurize_columns(df_init,
                                input_cols=FEATUREIZE_THESE_COLUMNS,
                                guess_oxidstates=True)
