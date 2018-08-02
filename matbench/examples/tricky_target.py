@@ -8,13 +8,13 @@ from sklearn.model_selection import train_test_split
 
 # inputs
 loader_func = loader.load_castelli_perovskites
-LIMIT = 500
+LIMIT = 1000
 IGNORE_THESE_COLUMNS = ['cbm', 'vbm']
 TARGET = 'gap gllbsc'
 MODE = 'regression'
 TIMEOUT_MINS = None
-GENERATIONS = 2
-POPULATION_SIZE = 10
+GENERATIONS = 3
+POPULATION_SIZE = 40
 SCORING = 'r2'
 RS = 13
 EXCLUDED_FEATURIZERS = ['CohesiveEnergy', 'AtomicPackingEfficiency',
@@ -59,7 +59,7 @@ tpot = TpotAutoml(mode=MODE,
                   scoring=SCORING,
                   random_state=RS,
                   feature_names=df.drop(TARGET, axis=1).columns,
-                  n_jobs=-1,
+                  n_jobs=1,
                   verbosity=2)
 tpot.fit(X_train, y_train)
 print('total fitting time: {} s'.format(time() - start_time))
@@ -80,6 +80,6 @@ analysis = Analysis(tpot, X_train, y_train, X_test, y_test, MODE,
                    test_samples_index=X_test.index,
                    random_state=RS)
 
-feature_importance = list(analysis.get_feature_importance(sort=True).values())
+feature_importance = analysis.get_feature_importance(sort=True)
 print('feature importance')
 print(feature_importance)
