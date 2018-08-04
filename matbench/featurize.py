@@ -119,7 +119,8 @@ class Featurize(object):
                 OxidationStates, ElectronAffinity and ElectronegativityDiff.
                 Set to False if oxidation states already available in composition.
             asindex (bool): whether to set formula col_id as df index
-            **kwargs: keywords arguments accepted by AllFeaturizers.composition
+            kwargs: keyword args that are accepted by AllFeaturizers.composition
+                may be accepted by other featurize_* methods
 
         Returns (pandas.DataFrame):
             Dataframe with compositional features added.
@@ -141,7 +142,7 @@ class Featurize(object):
             return df
 
     def featurize_structure(self, df=None, featurizers="all", col_id="structure",
-                            inplace=True, guess_oxidstates=True):
+                            inplace=True, guess_oxidstates=True, **kwargs):
         """
         Featurizes based on crystal structure (pymatgen Structure object)
 
@@ -157,6 +158,8 @@ class Featurize(object):
                 in the structure which is required for some featurizers such as
                 EwaldEnergy, ElectronicRadialDistributionFunction. Set to
                 False if oxidation states already available in the structure.
+            kwargs: keyword args that are accepted by AllFeaturizers.structure
+                may be accepted by other featurize_* methods
 
         Returns (pandas.DataFrame):
             Dataframe with structure features added.
@@ -167,7 +170,7 @@ class Featurize(object):
         if guess_oxidstates:
             structure_to_oxidstructure(df[col_id], inplace=True)
         if featurizers == "all":
-            featurizers = self.all_featurizers.structure()
+            featurizers = self.all_featurizers.structure(**kwargs)
         df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
             df, col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
         if self.drop_featurized_col:
@@ -176,7 +179,7 @@ class Featurize(object):
             return df
 
     def featurize_dos(self, df=None, featurizers="all", col_id="dos",
-                      inplace=True):
+                      inplace=True, **kwargs):
         """
         Featurizes based on density of state (pymatgen CompleteDos object)
 
@@ -188,6 +191,8 @@ class Featurize(object):
             featurizers ([matminer.featurizer] or "all"):
             col_id (str): actual column name to be used as dos
             inplace (bool): whether to modify the input df
+            kwargs: keyword arguments that may be accepted by other featurize_*
+                methods passed through featurize_columns
 
         Returns (pandas.DataFrame):
             Dataframe with dos features added.
@@ -205,18 +210,17 @@ class Featurize(object):
             return df
 
     def featurize_bandstructure(self, df=None, featurizers="all",
-                                col_id="bandstructure", inplace=True):
+                                col_id="bandstructure", inplace=True, **kwargs):
         """
         Featurizes based on density of state (pymatgen BandStructure object)
 
         Args:
-            df (pandas.DataFrame):
-            col_id (str): column name containing pymatgen BandStructure
-        Args:
             df (pandas.DataFrame): input data
             featurizers ([matminer.featurizer] or "all"):
-            col_id (str): actual column name to be used as bandstructure
+            col_id (str): actual column name containing the bandstructure data
             inplace (bool): whether to modify the input df
+            kwargs: keyword arguments that may be accepted by other featurize_*
+                methods passed through featurize_columns
 
         Returns (pandas.DataFrame):
             Dataframe with bandstructure features added.
