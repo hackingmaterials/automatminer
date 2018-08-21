@@ -24,7 +24,6 @@ GENERATIONS = 2
 POPULATION_SIZE = 10
 SCORING = 'r2'
 SEED = 13
-np.random.seed(SEED)
 FEAT_FROM_FILE = False
 TPOT_FROM_FILE = False
 EXCLUDED_FEATURIZERS = ['CohesiveEnergy', 'AtomicPackingEfficiency',
@@ -42,6 +41,8 @@ if MULTIINDEX:
 
 
 # actual pipeline:
+fname_base = loader_func.__name__[5:] # loader_func names LIKE load_%
+np.random.seed(SEED)
 df_init = loader_func()
 if LIMIT and LIMIT<len(df_init):
     df_init = df_init.iloc[np.random.choice(len(df_init), LIMIT, replace=False)]
@@ -55,9 +56,9 @@ if not FEAT_FROM_FILE:
     df = featzer.featurize_columns(df_init,
                                    input_cols=FEATUREIZE_THESE_COLUMNS,
                                    guess_oxidstates=False)
-    df.to_pickle(os.path.join(CALC_DIR, '{}_data.pickle'.format(loader_func.__name__)))
+    df.to_pickle(os.path.join(CALC_DIR, '{}_data.pickle'.format(fname_base)))
 else:
-    df = pd.read_pickle(os.path.join(CALC_DIR, '{}_data.pickle'.format(loader_func.__name__)))
+    df = pd.read_pickle(os.path.join(CALC_DIR, '{}_data.pickle'.format(fname_base)))
 
 
 prep = PreProcess(target=TARGET)
@@ -82,16 +83,16 @@ if not TPOT_FROM_FILE:
     tpot.fit(X_train, y_train)
     print('total fitting time: {} s'.format(time() - start_time))
 
-    with open(os.path.join(CALC_DIR, '{}.pickle'.format(loader_func.__name__)), 'wb') as fm:
+    with open(os.path.join(CALC_DIR, '{}.pickle'.format(fname_base)), 'wb') as fm:
         pickle.dump(tpot.fitted_pipeline_, fm)
-    with open(os.path.join(CALC_DIR, '{}_models.json'.format(loader_func.__name__)), 'w') as fj:
+    with open(os.path.join(CALC_DIR, '{}_models.json'.format(fname_base)), 'w') as fj:
         json.dump(tpot.evaluated_individuals_, fj)
 else:
-    with open(os.path.join(CALC_DIR, '{}.pickle'.format(loader_func.__name__)), 'rb') as fm:
+    with open(os.path.join(CALC_DIR, '{}.pickle'.format(fname_base)), 'rb') as fm:
         tpot = TpotAutoml(mode=MODE,
                           feature_names=df.drop(TARGET, axis=1).columns)
         tpot.fitted_pipeline_ = pickle.load(fm)
-    with open(os.path.join(CALC_DIR, '{}_models.json'.format(loader_func.__name__)), 'r') as fj:
+    with open(os.path.join(CALC_DIR, '{}_models.json'.format(fname_base)), 'r') as fj:
         tpot.evaluated_individuals_ = json.load(fj)
 
 print(tpot.predict(X_test))
