@@ -3,6 +3,7 @@ import json
 import matbench.data.load as loader
 import numpy as np
 import os
+import pandas as pd
 import pickle
 from time import time
 from matbench.analysis import Analysis
@@ -17,7 +18,7 @@ LIMIT = 30
 IGNORE_THESE_COLUMNS = []
 TARGET = 'gap expt'
 MODE = 'regression'
-CALC_DIR = '.'
+CALC_DIR = 'run_data'
 TIMEOUT_MINS = None
 GENERATIONS = 2
 POPULATION_SIZE = 10
@@ -45,14 +46,19 @@ df_init = loader_func()
 if LIMIT and LIMIT<len(df_init):
     df_init = df_init.iloc[np.random.choice(len(df_init), LIMIT, replace=False)]
 
-featzer = Featurize(ignore_cols=IGNORE_THESE_COLUMNS,
-                    exclude=EXCLUDED_FEATURIZERS,
-                    multiindex=MULTIINDEX,
-                    drop_featurized_col=True)
+if not FEAT_FROM_FILE:
+    featzer = Featurize(ignore_cols=IGNORE_THESE_COLUMNS,
+                        exclude=EXCLUDED_FEATURIZERS,
+                        multiindex=MULTIINDEX,
+                        drop_featurized_col=True)
 
-df = featzer.featurize_columns(df_init,
-                               input_cols=FEATUREIZE_THESE_COLUMNS,
-                               guess_oxidstates=False)
+    df = featzer.featurize_columns(df_init,
+                                   input_cols=FEATUREIZE_THESE_COLUMNS,
+                                   guess_oxidstates=False)
+    df.to_pickle(os.path.join(CALC_DIR, '{}_data.pickle'.format(loader_func.__name__)))
+else:
+    df = pd.read_pickle(os.path.join(CALC_DIR, '{}_data.pickle'.format(loader_func.__name__)))
+
 
 prep = PreProcess(target=TARGET)
 df = prep.preprocess(df)
@@ -106,5 +112,5 @@ analysis = Analysis(tpot, X_train, y_train, X_test, y_test, MODE,
                    random_state=SEED)
 
 feature_importance = analysis.get_feature_importance(sort=True)
-print('Top 10 feature importance')
-print(list(feature_importance.items())[:10])
+print('Top 15 feature importance')
+print(list(feature_importance.items())[:15])
