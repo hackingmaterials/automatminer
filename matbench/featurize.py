@@ -41,17 +41,20 @@ class Featurize(object):
             which featurizer they come from.
             * Note: if you set to True and your target is "gap", you need to
             pass target = ("Input Data", "gap") in classes such as PreProcess.
+        n_jobs (int): number of CPUs/workers used in featurization. Default
+            behavior is matminer's default behavior.
     """
 
     def __init__(self, ignore_cols=None, preset_name="matminer",
                  ignore_errors=True, drop_featurized_col=True, exclude=None,
-                 multiindex=False):
+                 multiindex=False, n_jobs=None):
         self.ignore_cols = ignore_cols or []
         self.all_featurizers = AllFeaturizers(preset_name=preset_name,
                                               exclude=exclude)
         self.ignore_errors = ignore_errors
         self.drop_featurized_col = drop_featurized_col
         self.multiindex = multiindex
+        self.n_jobs = n_jobs
 
     def _prescreen_df(self, df, inplace=True, col_id=None):
         if not inplace:
@@ -132,8 +135,12 @@ class Featurize(object):
             df[compcol] = composition_to_oxidcomposition(df[compcol])
         if featurizers == 'all':
             featurizers = self.all_featurizers.composition(**kwargs)
-        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
-            df, compcol, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
+        featzer = MultipleFeaturizer(featurizers)
+        if self.n_jobs:
+            featzer.set_n_jobs(n_jobs=self.n_jobs)
+        df = featzer.fit_featurize_dataframe(df, compcol,
+                                             ignore_errors=self.ignore_errors,
+                                             multiindex=self.multiindex)
         if asindex:
             df = df.set_index(self._pre_screen_col(col_id))
         if self.drop_featurized_col:
@@ -171,8 +178,12 @@ class Featurize(object):
             structure_to_oxidstructure(df[col_id], inplace=True)
         if featurizers == "all":
             featurizers = self.all_featurizers.structure(**kwargs)
-        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
-            df, col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
+        featzer = MultipleFeaturizer(featurizers)
+        if self.n_jobs:
+            featzer.set_n_jobs(n_jobs=self.n_jobs)
+        df = featzer.fit_featurize_dataframe(df, col_id,
+                                             ignore_errors=self.ignore_errors,
+                                             multiindex=self.multiindex)
         if self.drop_featurized_col:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
@@ -202,8 +213,12 @@ class Featurize(object):
             df[col_id] = df[col_id].apply(CompleteDos.from_dict)
         if featurizers == "all":
             featurizers = self.all_featurizers.dos()
-        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
-            df, col_id=col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
+        featzer = MultipleFeaturizer(featurizers)
+        if self.n_jobs:
+            featzer.set_n_jobs(n_jobs=self.n_jobs)
+        df = featzer.fit_featurize_dataframe(df, col_id,
+                                             ignore_errors=self.ignore_errors,
+                                             multiindex=self.multiindex)
         if self.drop_featurized_col:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
@@ -230,8 +245,12 @@ class Featurize(object):
             df[col_id] = df[col_id].apply(BandStructure.from_dict)
         if featurizers == "all":
             featurizers = self.all_featurizers.bandstructure()
-        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
-            df, col_id=col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
+        featzer = MultipleFeaturizer(featurizers)
+        if self.n_jobs:
+            featzer.set_n_jobs(n_jobs=self.n_jobs)
+        df = featzer.fit_featurize_dataframe(df, col_id,
+                                             ignore_errors=self.ignore_errors,
+                                             multiindex=self.multiindex)
         if self.drop_featurized_col:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
