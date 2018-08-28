@@ -35,6 +35,7 @@ EXCLUDED_FEATURIZERS = ['CohesiveEnergy', 'AtomicPackingEfficiency',
                         'MinimumRelativeDistances',
                         'ElectronicRadialDistributionFunction']
 FEATUREIZE_THESE_COLUMNS = ["formula"]
+N_JOBS = 4
 MULTIINDEX = True
 if MULTIINDEX:
     TARGET = ('Input Data', TARGET)
@@ -51,7 +52,8 @@ if not FEAT_FROM_FILE:
     featzer = Featurize(ignore_cols=IGNORE_THESE_COLUMNS,
                         exclude=EXCLUDED_FEATURIZERS,
                         multiindex=MULTIINDEX,
-                        drop_featurized_col=True)
+                        drop_featurized_col=True,
+                        n_jobs=N_JOBS)
 
     df = featzer.featurize_columns(df_init,
                                    input_cols=FEATUREIZE_THESE_COLUMNS,
