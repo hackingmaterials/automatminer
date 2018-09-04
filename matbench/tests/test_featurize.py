@@ -20,20 +20,19 @@ class TestFeaturize(unittest.TestCase):
     def test_featurize_formula(self, limit=5):
         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
         ignore_cols = ['a_1', 'a_2', 'b_1', 'b_2']
-        featurizer = Featurize(df_init,
-                               ignore_cols=ignore_cols,
+        featurizer = Featurize(ignore_cols=ignore_cols,
                                ignore_errors=False,
                                exclude=['CohesiveEnergy'],
                                multiindex=False)
 
-        df = featurizer.featurize_formula(asindex=False,
+        df = featurizer.featurize_formula(df_init,
+                                          asindex=False,
                                           guess_oxidstates=True,
                                           need_oxidstates=True)
 
         # sanity checks
         self.assertTrue(len(df), limit)
         self.assertGreaterEqual(len(df.columns), 70)
-        self.assertTrue(featurizer.df.equals(df_init.drop(ignore_cols,axis=1)))
         self.assertAlmostEqual(
             df[df["formula"]=="AgNbSnTiO6"]["gap gllbsc"].values[0], 2.881, 3)
 
@@ -71,18 +70,17 @@ class TestFeaturize(unittest.TestCase):
             cf.ElementProperty.from_preset(preset_name="matminer"),
             cf.IonProperty()
         ])
-        self.assertGreaterEqual(len(df.columns), 70)
+        self.assertGreaterEqual(len(df.columns), 69)
 
 
     def test_featurize_structure(self, limit=5):
         df_init = load_castelli_perovskites()[:limit]
-        featurizer = Featurize(df_init, ignore_errors=False, multiindex=False)
+        featurizer = Featurize(ignore_errors=False, multiindex=False)
         df = featurizer.featurize_structure(df_init, inplace=False)
 
         # sanity checks
         self.assertTrue(len(df), limit)
         self.assertGreater(len(df.columns), len(df_init.columns))
-        self.assertTrue(featurizer.df.equals(df_init))
 
         # DensityFeatures:
         self.assertTrue((df["packing fraction"] < 0.45).all())
@@ -169,13 +167,12 @@ class TestFeaturize(unittest.TestCase):
         else:
             df_init = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
         df_init = df_init.dropna(axis=0)
-        featurizer = Featurize(df_init, ignore_errors=False, multiindex=False)
+        featurizer = Featurize(ignore_errors=False, multiindex=False)
         df = featurizer.featurize_dos(df_init, inplace=False)
 
         # sanity checks
         self.assertTrue(len(df), limit)
         self.assertGreater(len(df.columns), len(df_init.columns))
-        self.assertTrue(featurizer.df.equals(df_init))
 
         # DOSFeaturizer:
         self.assertEqual(df["cbm_character_1"][0], "p")
@@ -195,7 +192,6 @@ class TestFeaturize(unittest.TestCase):
         # sanity checks
         self.assertTrue("bandstructure" in df)
         self.assertGreater(len(df.columns), len(df_init.columns))
-        self.assertTrue(featurizer.df.equals(df_init))
 
         # BandFeaturizer:
         self.assertAlmostEqual(df["direct_gap"][0], 2.556, 3)

@@ -20,16 +20,14 @@ class Featurize(object):
     the featurize_columns method to featurize via all available featurizers
     with default setting or selectively call featurizer methods.
     Usage examples:
-        featurizer = Featurize(df)
-            df = featurizer.featurize_columns() # all features of all types
+        featurizer = Featurize()
+            df = featurizer.featurize_columns(df) # all features of all types
         or:
-            df = featurizer.featurize_formula() # all formula-related feature
+            df = featurizer.featurize_formula(df) # all formula-related feature
         or:
-            df = featurizer.featurize_dos(featurizers=[Hybridization()])
+            df = featurizer.featurize_dos(df, featurizers=[Hybridization()])
 
     Args:
-        df (pandas.DataFrame): the input data containing at least one of preset
-            inputs (e.g. "formula")
         ignore_cols ([str]): if set, these columns are excluded
         preset_name (str): some featurizers (w/ from_preset) take in this arg
         ignore_errors (bool): whether to ignore exceptions raised when
@@ -43,44 +41,65 @@ class Featurize(object):
             which featurizer they come from.
             * Note: if you set to True and your target is "gap", you need to
             pass target = ("Input Data", "gap") in classes such as PreProcess.
+        n_jobs (int): number of CPUs/workers used in featurization. Default
+            behavior is matminer's default behavior.
     """
 
-    def __init__(self, df, ignore_cols=None, preset_name="matminer",
+    def __init__(self, ignore_cols=None, preset_name="matminer",
                  ignore_errors=True, drop_featurized_col=True, exclude=None,
-                 multiindex=False):
-        self.df = df if ignore_cols is None else df.drop(ignore_cols, axis=1)
+                 multiindex=False, n_jobs=None):
+        self.ignore_cols = ignore_cols or []
         self.all_featurizers = AllFeaturizers(preset_name=preset_name,
                                               exclude=exclude)
         self.ignore_errors = ignore_errors
         self.drop_featurized_col = drop_featurized_col
         self.multiindex = multiindex
+        self.n_jobs = n_jobs
 
     def _prescreen_df(self, df, inplace=True, col_id=None):
-        if df is None:
-            df = self.df.copy(deep=True)
         if not inplace:
             df = df.copy(deep=True)
         if col_id and col_id not in df:
             raise MatbenchError("'{}' column must be in data!".format(col_id))
+        if self.ignore_errors is not None:
+            for col in self.ignore_cols:
+                if col in df:
+                    df = df.drop([col], axis=1)
         return df
 
-    def featurize_columns(self, df=None, input_cols=None):
+    def _pre_screen_col(self, col_id, prefix='Input Data', multiindex=None):
+        multiindex = multiindex or self.multiindex
+        if multiindex and isinstance(col_id, str):
+            return (prefix, col_id)
+        else:
+            return col_id
+
+    def featurize_columns(self, df=None, input_cols=None, **kwargs):
         """
         Featurizes the dataframe based on input_columns.
 
+        **Note: use only if you want call featurize_* methods with the default
+        arguments or when **kwargs are shared between these methods.
+
         Args:
+            df (pandas.DataFrame):
             input_cols ([str]): columns used for featurization (e.g. "structure"),
                 set to None to try all preset columns.
+            kwargs: other keywords arguments related to featurize_* methods
 
         Returns (pandas.DataFrame):
             self.df w/ new features added via featurizering input_cols
         """
         df = self._prescreen_df(df)
         input_cols = input_cols or ["formula", "structure"]
-        for column in input_cols:
+        for idx, column in enumerate(input_cols):
             featurizer = getattr(self, "featurize_{}".format(column), None)
             if featurizer is not None:
-                df = featurizer(df)
+                if idx > 0:
+                    col_id = self._pre_screen_col(column)
+                else:
+                    col_id = column
+                df = featurizer(df, col_id=col_id, **kwargs)
             elif column not in df:
                 raise MatbenchError('no "{}" in the data!')
             else:
@@ -103,7 +122,8 @@ class Featurize(object):
                 OxidationStates, ElectronAffinity and ElectronegativityDiff.
                 Set to False if oxidation states already available in composition.
             asindex (bool): whether to set formula col_id as df index
-            **kwargs: keywords arguments accepted by AllFeaturizers.composition
+            kwargs: keyword args that are accepted by AllFeaturizers.composition
+                may be accepted by other featurize_* methods
 
         Returns (pandas.DataFrame):
             Dataframe with compositional features added.
@@ -115,23 +135,21 @@ class Featurize(object):
             df[compcol] = composition_to_oxidcomposition(df[compcol])
         if featurizers == 'all':
             featurizers = self.all_featurizers.composition(**kwargs)
-        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
-            df, compcol, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
+        featzer = MultipleFeaturizer(featurizers)
+        if self.n_jobs:
+            featzer.set_n_jobs(n_jobs=self.n_jobs)
+        df = featzer.fit_featurize_dataframe(df, compcol,
+                                             ignore_errors=self.ignore_errors,
+                                             multiindex=self.multiindex)
         if asindex:
-            if self.multiindex:
-                df = df.set_index(('Input Data', col_id))
-            else:
-                df = df.set_index(col_id)
+            df = df.set_index(self._pre_screen_col(col_id))
         if self.drop_featurized_col:
-            if self.multiindex:
-                return df.drop(('Input Data', compcol), axis=1)
-            else:
-                return df.drop(compcol, axis=1)
+            return df.drop([self._pre_screen_col(compcol)], axis=1)
         else:
             return df
 
     def featurize_structure(self, df=None, featurizers="all", col_id="structure",
-                            inplace=True, guess_oxidstates=True):
+                            inplace=True, guess_oxidstates=True, **kwargs):
         """
         Featurizes based on crystal structure (pymatgen Structure object)
 
@@ -147,6 +165,8 @@ class Featurize(object):
                 in the structure which is required for some featurizers such as
                 EwaldEnergy, ElectronicRadialDistributionFunction. Set to
                 False if oxidation states already available in the structure.
+            kwargs: keyword args that are accepted by AllFeaturizers.structure
+                may be accepted by other featurize_* methods
 
         Returns (pandas.DataFrame):
             Dataframe with structure features added.
@@ -157,19 +177,20 @@ class Featurize(object):
         if guess_oxidstates:
             structure_to_oxidstructure(df[col_id], inplace=True)
         if featurizers == "all":
-            featurizers = self.all_featurizers.structure()
-        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
-            df, col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
+            featurizers = self.all_featurizers.structure(**kwargs)
+        featzer = MultipleFeaturizer(featurizers)
+        if self.n_jobs:
+            featzer.set_n_jobs(n_jobs=self.n_jobs)
+        df = featzer.fit_featurize_dataframe(df, col_id,
+                                             ignore_errors=self.ignore_errors,
+                                             multiindex=self.multiindex)
         if self.drop_featurized_col:
-            if self.multiindex:
-                return df.drop(('Input Data', col_id), axis=1)
-            else:
-                return df.drop(col_id, axis=1)
+            return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
             return df
 
     def featurize_dos(self, df=None, featurizers="all", col_id="dos",
-                      inplace=True):
+                      inplace=True, **kwargs):
         """
         Featurizes based on density of state (pymatgen CompleteDos object)
 
@@ -181,6 +202,8 @@ class Featurize(object):
             featurizers ([matminer.featurizer] or "all"):
             col_id (str): actual column name to be used as dos
             inplace (bool): whether to modify the input df
+            kwargs: keyword arguments that may be accepted by other featurize_*
+                methods passed through featurize_columns
 
         Returns (pandas.DataFrame):
             Dataframe with dos features added.
@@ -190,29 +213,29 @@ class Featurize(object):
             df[col_id] = df[col_id].apply(CompleteDos.from_dict)
         if featurizers == "all":
             featurizers = self.all_featurizers.dos()
-        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
-            df, col_id=col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
+        featzer = MultipleFeaturizer(featurizers)
+        if self.n_jobs:
+            featzer.set_n_jobs(n_jobs=self.n_jobs)
+        df = featzer.fit_featurize_dataframe(df, col_id,
+                                             ignore_errors=self.ignore_errors,
+                                             multiindex=self.multiindex)
         if self.drop_featurized_col:
-            if self.multiindex:
-                return df.drop(('Input Data', col_id), axis=1)
-            else:
-                return df.drop(col_id, axis=1)
+            return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
             return df
 
     def featurize_bandstructure(self, df=None, featurizers="all",
-                                col_id="bandstructure", inplace=True):
+                                col_id="bandstructure", inplace=True, **kwargs):
         """
         Featurizes based on density of state (pymatgen BandStructure object)
 
         Args:
-            df (pandas.DataFrame):
-            col_id (str): column name containing pymatgen BandStructure
-        Args:
             df (pandas.DataFrame): input data
             featurizers ([matminer.featurizer] or "all"):
-            col_id (str): actual column name to be used as bandstructure
+            col_id (str): actual column name containing the bandstructure data
             inplace (bool): whether to modify the input df
+            kwargs: keyword arguments that may be accepted by other featurize_*
+                methods passed through featurize_columns
 
         Returns (pandas.DataFrame):
             Dataframe with bandstructure features added.
@@ -222,13 +245,14 @@ class Featurize(object):
             df[col_id] = df[col_id].apply(BandStructure.from_dict)
         if featurizers == "all":
             featurizers = self.all_featurizers.bandstructure()
-        df = MultipleFeaturizer(featurizers).fit_featurize_dataframe(
-            df, col_id=col_id, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
+        featzer = MultipleFeaturizer(featurizers)
+        if self.n_jobs:
+            featzer.set_n_jobs(n_jobs=self.n_jobs)
+        df = featzer.fit_featurize_dataframe(df, col_id,
+                                             ignore_errors=self.ignore_errors,
+                                             multiindex=self.multiindex)
         if self.drop_featurized_col:
-            if self.multiindex:
-                return df.drop(('Input Data', col_id), axis=1)
-            else:
-                return df.drop(col_id, axis=1)
+            return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
             return df
 

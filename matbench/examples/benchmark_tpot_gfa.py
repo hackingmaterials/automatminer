@@ -15,9 +15,9 @@ scoring = 'f1'
 
 # load and featurize:
 df_init = load_glass_formation(phase='ternary')
-featzer = Featurize(df_init, ignore_cols=['phase'], ignore_errors=True)
+featzer = Featurize(ignore_cols=['phase'], ignore_errors=True)
 
-df_feats = featzer.featurize_formula(featurizers='all')
+df_feats = featzer.featurize_formula(df_init, featurizers='all')
 
 # preprocessing of the data
 prep = PreProcess(max_colnull=0.1)

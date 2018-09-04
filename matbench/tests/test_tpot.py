@@ -1,4 +1,6 @@
 import unittest
+from collections import OrderedDict
+
 import numpy as np
 
 from matbench.automl.tpot_utils import TpotAutoml
@@ -22,8 +24,8 @@ class TestTpotAutoml(unittest.TestCase):
         target = 'gap gllbsc'
         # load and featurize:
         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
-        featzer = Featurize(df_init, ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
-        df_feats = featzer.featurize_formula(featurizers=[
+        featzer = Featurize(ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
+        df_feats = featzer.featurize_formula(df_init, featurizers=[
             ElementProperty.from_preset(preset_name='matminer'),
             TMetalFraction()])
         # preprocessing of the data
@@ -77,13 +79,19 @@ class TestTpotAutoml(unittest.TestCase):
             ea.false_negatives['{}_predicted'.format(target)]<= \
             ea.false_negatives['{}_true'.format(target)] - rmse).all())
 
+        # test feature importance
+        feature_importance = ea.get_feature_importance(sort=True)
+        self.assertEqual(list(feature_importance.items())[0][0],
+                         'transition metal fraction')
+        self.assertAlmostEqual(feature_importance['range melting_point'], 0.1, 1)
+
 
     def test_tpot_classification(self, limit=500):
         target = 'gfa'
         # load and featurize:
         df_init = load_glass_formation(phase='binary')[:limit]
-        featzer = Featurize(df_init)
-        df_feats = featzer.featurize_formula(featurizers=[
+        featzer = Featurize()
+        df_feats = featzer.featurize_formula(df_init, featurizers=[
             ElementProperty.from_preset(preset_name='matminer'),
             Stoichiometry()])
         # preprocessing of the data
@@ -134,9 +142,10 @@ class TestTpotAutoml(unittest.TestCase):
 
         # test feature importance
         ea.get_feature_importance(sort=True)
-        feature_importance = list(ea.feature_importance.items())
-        self.assertTrue('mendeleev_no' in feature_importance[0][0])
-        self.assertAlmostEqual(feature_importance[0][1], 0.1, 1)
+        self.assertTrue(isinstance(ea.feature_importance, OrderedDict))
+        # feature_importance = list(ea.feature_importance.items())
+        # self.assertEqual('mean block',  feature_importance[0][0])
+        # self.assertAlmostEqual(feature_importance[0][1], 0.6, 1)
 
 
 if __name__ == '__main__':

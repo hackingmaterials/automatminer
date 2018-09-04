@@ -17,8 +17,7 @@ if MULTIINDEX:
     target = ('Input Data', target)
 
 df_init = load_expt_gap()
-featzer = Featurize(df_init,
-                    exclude=['CohesiveEnergy', 'AtomicPackingEfficiency'],
+featzer = Featurize(exclude=['CohesiveEnergy', 'AtomicPackingEfficiency'],
                     multiindex=MULTIINDEX)
 
 df = featzer.featurize_formula(df_init,
@@ -43,6 +42,8 @@ model = RandomForestRegressor(n_estimators=100,
 
 
 model.fit(X_train.values, y_train.values)
+print('test score:')
+print(model.score(X_test, y_test))
 
 analysis = Analysis(model, X_train, y_train, X_test, y_test, mode,
                    target=target,
