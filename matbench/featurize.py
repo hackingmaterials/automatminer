@@ -49,8 +49,12 @@ class Featurize(object):
                  ignore_errors=True, drop_featurized_col=True, exclude=None,
                  multiindex=False, n_jobs=None):
         self.ignore_cols = ignore_cols or []
-        self.all_featurizers = AllFeaturizers(preset_name=preset_name,
-                                              exclude=exclude)
+
+        self.cfset = CompositionFeaturizers()
+        self.sfset = StructureFeaturizers()
+        self.bsfset = BSFeaturizers()
+        self.dosfset = DOSFeaturizers()
+
         self.ignore_errors = ignore_errors
         self.drop_featurized_col = drop_featurized_col
         self.multiindex = multiindex
@@ -148,7 +152,8 @@ class Featurize(object):
         else:
             return df
 
-    def featurize_structure(self, df=None, featurizers="all", col_id="structure",
+    def featurize_structure(self, df=None, featurizers="all",
+                            col_id="structure",
                             inplace=True, guess_oxidstates=True, **kwargs):
         """
         Featurizes based on crystal structure (pymatgen Structure object)
@@ -177,7 +182,7 @@ class Featurize(object):
         if guess_oxidstates:
             structure_to_oxidstructure(df[col_id], inplace=True)
         if featurizers == "all":
-            featurizers = self.all_featurizers.structure(**kwargs)
+            featurizers = self.sfset.all_featurizers
         featzer = MultipleFeaturizer(featurizers)
         if self.n_jobs:
             featzer.set_n_jobs(n_jobs=self.n_jobs)
@@ -212,7 +217,7 @@ class Featurize(object):
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(CompleteDos.from_dict)
         if featurizers == "all":
-            featurizers = self.all_featurizers.dos()
+            featurizers = self.cfset.best
         featzer = MultipleFeaturizer(featurizers)
         if self.n_jobs:
             featzer.set_n_jobs(n_jobs=self.n_jobs)
@@ -244,7 +249,7 @@ class Featurize(object):
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(BandStructure.from_dict)
         if featurizers == "all":
-            featurizers = self.all_featurizers.bandstructure()
+            featurizers = self.bsfset.all_featurizers
         featzer = MultipleFeaturizer(featurizers)
         if self.n_jobs:
             featzer.set_n_jobs(n_jobs=self.n_jobs)
@@ -257,129 +262,162 @@ class Featurize(object):
             return df
 
 
-class AllFeaturizers(object):
+class FeaturizerSet:
+
+    def __init__(self, exclude=None):
+        self.exclude = exclude
+
+    def best(self):
+        raise NotImplementedError("This featurizer set must return a set of "
+                                  "best featurizers")
+
+    def all_featurizers(self):
+        raise NotImplementedError("This featurizer set must return a set of "
+                                  "all featurizers")
+
+
+class CompositionFeaturizers(FeaturizerSet):
     """
-    Contains all available featurizers that take various types of inputs such
-    as "composition" or "formula", "structure", "dos", "band structure", etc.
-    The point of this class is to have one place where available featurizers
-    with default inputs are updated synced with matminer.
-
-    Args:
-        preset_name (str): some featurizers take in this argument
-        exclude ([str]): list of the featurizer names to be excluded. Note
-            that these names are str (e.g. "ElementProperty") and not the class
+    Lists of composition featurizers, depending on requirements.
     """
-    def __init__(self, preset_name="matminer", exclude=None):
-        self.preset_name = preset_name
-        self.exclude = exclude or []
 
-    def composition(self, preset_name=None, need_oxidstates=False,
-                    include_slow=False):
+    @property
+    def fast(self):
         """
-        All composition-based featurizers with default arguments.
-
-        Args:
-            preset_name (str): some featurizers take in this argument
-            need_oxidstates (bool): whether to return those featurizers that
-                require oxidation states decorated Composition
-            include_slow (bool): Whether to include relatively slow featurizers.
-                We have not found evidence that these featurizers improve the
-                prediction scores of the current datasets.
-
-        Returns ([matminer featurizer classes]):
+        Generally fast featurizers.
         """
-        preset_name = preset_name or self.preset_name
+        featzers = [cf.AtomicOrbitals(),
+                    cf.ElementProperty.from_preset("magpie"),
+                    cf.ElementProperty.from_preset("matminer"),
+                    cf.ElementFraction(),
+                    cf.Stoichiometry(),
+                    cf.TMetalFraction()]
+        return [f for f in featzers if f.__name__ not in self.exclude]
+
+    @property
+    def need_oxi(self):
+        """
+        Fast if compositions are already decorated with oxidation states, slow
+        otherwise.
+        """
+        featzers = [cf.CationProperty.from_preset(preset_name='deml'),
+                    cf.OxidationStates.from_preset(preset_name='deml'),
+                    cf.ElectronAffinity(),
+                    cf.ElectronegativityDiff(),
+                    cf.YangSolidSolution(),
+                    cf.IonProperty()]
+        return [f for f in featzers if f.__name__ not in self.exclude]
+
+    @property
+    def slow(self):
+        """
+        Generally slow featurizers under most conditions.
+        """
+        featzers = [cf.Miedema(),
+                    # much slower than the rest
+                    cf.AtomicPackingEfficiency(),
+                    # requires mpid present
+                    cf.CohesiveEnergy()]
+        return [f for f in featzers if f.__name__ not in self.exclude]
+
+    @property
+    def all_featurizers(self):
+        """
+        All composition featurizers
+        """
+        return self.fast + self.need_oxi + self.slow
+
+    @property
+    def best(self):
+        return self.fast
+
+
+class StructureFeaturizers(FeaturizerSet):
+    """
+    Lists of structure featurizers, depending on requirements.
+    """
+
+    @property
+    def matrix(self):
+        featzers = [sf.RadialDistributionFunction(),  # returns dict
+                    sf.CoulombMatrix(),  # returns a matrix
+                    sf.SineCoulombMatrix(),  # returns a matrix
+                    sf.OrbitalFieldMatrix(),  # returns a matrix
+                    sf.MinimumRelativeDistances()]  # returns a list
+        return [f for f in featzers if f.__name__ not in self.exclude]
+
+    @property
+    def fast(self):
+        featzers = [sf.DensityFeatures(),
+                    sf.GlobalSymmetryFeatures(),
+                    sf.EwaldEnergy()]
+        return [f for f in featzers if f.__name__ not in self.exclude]
+
+    @property
+    def many_features(self):
+        featzers = [sf.BagofBonds(),
+                    sf.PartialRadialDistributionFunction(),
+                    sf.BondFractions]
+        return [f for f in featzers if f.__name__ not in self.exclude]
+
+    @property
+    def need_fit(self):
+        featzers = [sf.PartialRadialDistributionFunction(),
+                    sf.BondFractions(),
+                    sf.BagofBonds()]
+        return [f for f in featzers if f.__name__ not in self.exclude]
+
+    @property
+    def slow(self):
         featzers = [
-            cf.ElementProperty.from_preset(preset_name=preset_name),
-            cf.AtomicOrbitals(),
-            cf.BandCenter(),
-            cf.Stoichiometry(),
-            cf.ValenceOrbital(),
-            cf.TMetalFraction(),
-            cf.ElementFraction(),
-        ]
-        if need_oxidstates:
-            featzers += [
-                cf.CationProperty.from_preset(preset_name='deml'),
-                cf.OxidationStates.from_preset(preset_name='deml'),
-                cf.ElectronAffinity(),
-                cf.ElectronegativityDiff(),
-                cf.YangSolidSolution(),
-            ]
-        if include_slow:
-            featzers += [
-                cf.IonProperty(),
-                cf.Miedema(),
-                cf.AtomicPackingEfficiency(),  # much slower than the rest
-                cf.CohesiveEnergy(), # an entry must be found in materialsproject.org
-            ]
-        names = [c.__class__.__name__ for c in featzers]
-        return [f for i,f in enumerate(featzers) if names[i] not in self.exclude]
-
-    def structure(self, preset_name="CrystalNNFingerprint_ops", need_fit=True):
-        """
-        All structure-based featurizers with default arguments that don't
-        require the fit method to be called first.
-
-        Args:
-            preset_name (str): some featurizers take in this argument
-            need_fit (bool): whether to include structure featurizers that
-                require the calling of fit method first
-
-        Returns ([matminer featurizer classes]):
-        """
-        preset_name = preset_name or self.preset_name
-        featzers = [
-            sf.DensityFeatures(),
-            sf.GlobalSymmetryFeatures(),
-            sf.Dimensionality(),
-            sf.RadialDistributionFunction(),  # returns dict!
-            sf.CoulombMatrix(),  # returns a matrix!
-            sf.SineCoulombMatrix(),  # returns a matrix!
-            sf.OrbitalFieldMatrix(),  # returns a matrix!
-            sf.MinimumRelativeDistances(),  # returns a list
+            sf.SiteStatsFingerprint.from_preset('CrystalNNFingerprint_ops'),
+            sf.ChemicalOrdering(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
-            sf.ChemicalOrdering(),
-            sf.XRDPowderPattern(),
-            sf.SiteStatsFingerprint.from_preset(preset=preset_name),
+            sf.XRDPowderPattern()]
+        return [f for f in featzers if f.__name__ not in self.exclude]
 
-            # these need oxidation states present in Structure:
-            sf.ElectronicRadialDistributionFunction(),  # returns dict!
-            sf.EwaldEnergy()
-        ]
-        if need_fit:
-            featzers += [
-            sf.PartialRadialDistributionFunction(),
-            sf.BondFractions(),
-            sf.BagofBonds()
-        ]
-        names = [c.__class__.__name__ for c in featzers]
-        return [f for i, f in enumerate(featzers) if names[i] not in self.exclude]
+    @property
+    def all_featurizers(self):
+        return self.fast + self.slow + self.need_fit
 
-    def dos(self):
-        """
-        All dos-based featurizers with default arguments.
+    @property
+    def best(self):
+        featzers = self.fast + [sf.BondFractions()] + self.slow
+        return [f for f in featzers if f.__name__ not in self.exclude]
 
-        Returns ([matminer featurizer classes]):
-        """
-        featzers = [
-            dosf.DOSFeaturizer(),
-            dosf.DopingFermi(),
-            dosf.Hybridization()
-        ]
-        names = [c.__class__.__name__ for c in featzers]
-        return [f for i,f in enumerate(featzers) if names[i] not in self.exclude]
 
-    def bandstructure(self):
-        """
-        All bandstructure-based featurizers with default arguments.
+class DOSFeaturizers(FeaturizerSet):
+    """
+    Lists of DOS featurizers, depending on requirements
+    """
 
-        Returns ([matminer featurizer classes]):
-        """
-        featzers = [
-            bf.BandFeaturizer(),
-            bf.BranchPointEnergy()
-        ]
-        names = [c.__class__.__name__ for c in featzers]
-        return [f for i,f in enumerate(featzers) if names[i] not in self.exclude]
+    @property
+    def all_featurizers(self):
+        featzers = [dosf.DOSFeaturizer(),
+                    dosf.DopingFermi(),
+                    dosf.Hybridization()]
+        return [f for f in featzers if f.__name__ not in self.exclude]
+
+    @property
+    def best(self):
+        return self.all_featurizers
+
+
+class BSFeaturizers(FeaturizerSet):
+
+    @property
+    def all_featurizers(self):
+        featzers = [bf.BandFeaturizer(), bf.BranchPointEnergy()]
+        return [f for f in featzers if f.__name__ not in self.exclude]
+
+    @property
+    def best(self):
+        return self.all_featurizers
+
+
+if __name__ == "__main__":
+    sfset = StructureFeaturizers()
+    cfset = CompositionFeaturizers()
+    print(sfset.best)
+    print(cfset.fast)
