@@ -16,17 +16,30 @@ from pymatgen.electronic_structure.dos import CompleteDos
 class FeaturizerSet:
     """
     An abstract class for defining sets of featurizers and the methods they
-    must implement
+    must implement.
+
+    Each set returned is a list of matminer featurizer objects.
+
+    Args:
+        exclude ([str]): The class names of the featurizers which should be
+            excluded.
     """
 
     def __init__(self, exclude=None):
         self.exclude = [] if exclude is None else exclude
 
     def best(self):
+        """
+        A set of featurizers that generally gives informative features without
+        excessive featurization time.
+        """
         raise NotImplementedError("This featurizer set must return a set of "
                                   "best featurizers")
 
     def all_featurizers(self):
+        """
+        All featurizers available in matminer for this featurization type.
+        """
         raise NotImplementedError("This featurizer set must return a set of "
                                   "all featurizers")
 
@@ -36,7 +49,8 @@ class CompositionFeaturizers(FeaturizerSet):
     Lists of composition featurizers, depending on requirements.
 
     Args:
-        exclude: The class names of the featurizers th
+        exclude ([str]): The class names of the featurizers which should be
+            excluded.
     """
 
     @property
@@ -81,7 +95,7 @@ class CompositionFeaturizers(FeaturizerSet):
     @property
     def all_featurizers(self):
         """
-        All composition featurizers
+        All composition featurizers.
         """
         return self.fast + self.need_oxi + self.slow
 
@@ -97,6 +111,10 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def matrix(self):
+        """
+        Structure featurizers returning matrices in each column. Not useful
+        for vectorized representations of crystal structures.
+        """
         featzers = [sf.RadialDistributionFunction(),  # returns dict
                     sf.CoulombMatrix(),  # returns a matrix
                     sf.SineCoulombMatrix(),  # returns a matrix
@@ -106,6 +124,9 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def fast(self):
+        """
+        Structure featurizers which are generally fast.
+        """
         featzers = [sf.DensityFeatures(),
                     sf.GlobalSymmetryFeatures(),
                     sf.EwaldEnergy()]
@@ -120,6 +141,10 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def need_fit(self):
+        """
+        Structure featurizers which must be .fit before featurizing.
+        Alternatively, use .fit_featurize_dataframe.
+        """
         featzers = [sf.PartialRadialDistributionFunction(),
                     sf.BondFractions(),
                     sf.BagofBonds()]
@@ -127,6 +152,9 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def slow(self):
+        """
+        Structure featurizers which are generally slow.
+        """
         featzers = [
             sf.SiteStatsFingerprint.from_preset('CrystalNNFingerprint_ops'),
             sf.ChemicalOrdering(),
@@ -163,6 +191,9 @@ class DOSFeaturizers(FeaturizerSet):
 
 
 class BSFeaturizers(FeaturizerSet):
+    """
+    Lists of bandstructure featurizers, depending on requirements.
+    """
 
     @property
     def all_featurizers(self):
@@ -443,5 +474,5 @@ if __name__ == "__main__":
     print(df)
     f = Featurize()
 
-    df = f.featurize_formula(df)
+    df = f.featurize_columns(df)
     print(df.columns.values)
