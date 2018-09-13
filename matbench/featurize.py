@@ -467,12 +467,3 @@ class Featurize(object):
             return df
 
 
-if __name__ == "__main__":
-    from matminer.datasets.dataframe_loader import load_elastic_tensor
-
-    df = load_elastic_tensor()[['K_VRH', 'formula', 'structure']]
-    print(df)
-    f = Featurize()
-
-    df = f.featurize_columns(df)
-    print(df.columns.values)
