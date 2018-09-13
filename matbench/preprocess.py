@@ -9,6 +9,15 @@ from pandas.api.types import is_numeric_dtype
 
 
 class PreProcess(object):
+
+    #TODO: There are a couple of issues with this class
+    #TODO: Seems like preprocessing is performed on the target?!?
+    #TODO: There are a lot of stateful class attrs which don't need to be there, such as self.pca
+    #TODO: df=None and target should be removed from init, and should be specified in every method as args
+    #TODO: Why are correlated features only pruned if the target is present?
+    #TODO: Class should work if there is a target or not
+
+
     """
     PreProcess has several methods to clean and prepare the data
     for visualization and training.
@@ -124,6 +133,7 @@ class PreProcess(object):
         return df
 
     def _prescreen_df(self, df):
+        # TODO: This should be removed when df=None problem is handled
         if df is None:
             df = self.df.copy(deep=True)
         return df
