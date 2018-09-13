@@ -269,7 +269,7 @@ class Featurize(object):
         else:
             return col_id
 
-    def featurize_columns(self, df=None, input_cols=None, **kwargs):
+    def featurize_columns(self, df, input_cols=None, **kwargs):
         """
         Featurizes the dataframe based on input_columns.
 
@@ -301,7 +301,7 @@ class Featurize(object):
                 warn('No method available to featurize "{}"'.format(column))
         return df
 
-    def featurize_formula(self, df=None, featurizers="best", col_id="formula",
+    def featurize_formula(self, df, featurizers="best", col_id="formula",
                           compcol="composition", guess_oxidstates=False,
                           inplace=True, asindex=True):
         """
@@ -348,7 +348,7 @@ class Featurize(object):
         else:
             return df
 
-    def featurize_structure(self, df=None, featurizers="best",
+    def featurize_structure(self, df, featurizers="best",
                             col_id="structure",
                             inplace=True, guess_oxidstates=True):
         """
@@ -393,7 +393,7 @@ class Featurize(object):
         else:
             return df
 
-    def featurize_dos(self, df=None, featurizers="best", col_id="dos",
+    def featurize_dos(self, df, featurizers="best", col_id="dos",
                       inplace=True):
         """
         Featurizes based on density of state (pymatgen CompleteDos object)
@@ -431,7 +431,7 @@ class Featurize(object):
         else:
             return df
 
-    def featurize_bandstructure(self, df=None, featurizers="all",
+    def featurize_bandstructure(self, df, featurizers="all",
                                 col_id="bandstructure", inplace=True):
         """
         Featurizes based on density of state (pymatgen BandStructure object)
