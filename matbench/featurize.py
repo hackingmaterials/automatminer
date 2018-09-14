@@ -36,7 +36,7 @@ class FeaturizerSet:
         raise NotImplementedError("This featurizer set must return a set of "
                                   "best featurizers")
 
-    def all_featurizers(self):
+    def all(self):
         """
         All featurizers available in matminer for this featurization type.
         """
@@ -93,7 +93,7 @@ class CompositionFeaturizers(FeaturizerSet):
         return [i for i in featzers if i.__class__.__name__ not in self.exclude]
 
     @property
-    def all_featurizers(self):
+    def all(self):
         """
         All composition featurizers.
         """
@@ -164,7 +164,7 @@ class StructureFeaturizers(FeaturizerSet):
         return [i for i in featzers if i.__class__.__name__ not in self.exclude]
 
     @property
-    def all_featurizers(self):
+    def all(self):
         return self.fast + self.slow + self.need_fit
 
     @property
@@ -179,7 +179,7 @@ class DOSFeaturizers(FeaturizerSet):
     """
 
     @property
-    def all_featurizers(self):
+    def all(self):
         featzers = [dosf.DOSFeaturizer(),
                     dosf.DopingFermi(),
                     dosf.Hybridization()]
@@ -187,7 +187,7 @@ class DOSFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        return self.all_featurizers
+        return self.all
 
 
 class BSFeaturizers(FeaturizerSet):
@@ -196,13 +196,13 @@ class BSFeaturizers(FeaturizerSet):
     """
 
     @property
-    def all_featurizers(self):
+    def all(self):
         featzers = [bf.BandFeaturizer(), bf.BranchPointEnergy()]
         return [i for i in featzers if i.__class__.__name__ not in self.exclude]
 
     @property
     def best(self):
-        return self.all_featurizers
+        return self.all
 
 
 class Featurize(object):
