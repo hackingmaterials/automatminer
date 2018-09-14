@@ -177,7 +177,8 @@ class StructureFeaturizers(FeaturizerSet):
                     sf.CoulombMatrix(),  # returns a matrix
                     sf.SineCoulombMatrix(),  # returns a matrix
                     sf.OrbitalFieldMatrix(),  # returns a matrix
-                    sf.MinimumRelativeDistances()]  # returns a list
+                    sf.MinimumRelativeDistances(),  # returns a list
+                    sf.ElectronicRadialDistributionFunction()]
         return [i for i in featzers if i.__class__.__name__ not in self.exclude]
 
     @property
@@ -524,8 +525,3 @@ class Featurize(object):
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
             return df
-
-
-if __name__ == "__main__":
-    cfset = StructureFeaturizers()
-    print(cfset.all)
