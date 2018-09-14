@@ -60,6 +60,8 @@ class Preprocess(object):
             features.values = MinMaxScaler().fit_transform(features)
 
         if n_rebate_features:
+            self.logger.info("ReBATE running: retaining {} features.".format(
+                n_rebate_features))
             rf = ReliefF(n_features_to_select=n_rebate_features, n_jobs=-1)
             x = rf.fit_transform(features.values, targets.values)
             # Todo: Find how to get the original labels back?  - AD
@@ -67,6 +69,8 @@ class Preprocess(object):
             features = pd.DataFrame(columns=rfcols, data=x,
                                     index=features.index)
         if n_pca_features:
+            self.logger.info(
+                "PCA running: retaining {} features.".format(n_pca_features))
             n_pca_features = PCA(n_components=n_pca_features)
             x = n_pca_features.fit_transform(features)
             # Todo: I don't know if there is a way to get labels for these - AD
@@ -113,7 +117,8 @@ class Preprocess(object):
                     continue
                 else:
                     if corval >= R_max:
-                        if corr.loc[idx, target_key] > corr.loc[feature, target_key]:
+                        if corr.loc[idx, target_key] > corr.loc[
+                            feature, target_key]:
                             removed_feat = feature
                         else:
                             removed_feat = idx
