@@ -30,7 +30,7 @@ class Preprocess(object):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
 
     def preprocess(self, df, target_key, scale=False, n_pca_features=None,
-                   n_rebate_features=None, na_method='drop'):
+                   n_rebate_features=None, max_na_frac=0.05, na_method='drop'):
         """
         A sequence of data pre-processing steps either through this class or
         sklearn.
@@ -45,12 +45,16 @@ class Preprocess(object):
             n_rebate_features (int or None): Use the EpitasisLab ReBATE feature
                 selection algorithm to reduce the dimensions of the data. None
                 or 0 avoids running ReBATE.
+            max_na_frac (float): The maximum fraction of na entries in a column
+                (feature) allowed before the column is handled by handle_na
+            na_method (str): The method by which handle_na handles nulls. Valid
+                arguments are 'drop' or pandas.fillna args (e.g., "mode")
 
         Returns (pandas.DataFrame
         """
 
         # Remove na rows including those where target=na
-        df = self.handle_na(df, na_method=na_method)
+        df = self.handle_na(df, max_na_frac=max_na_frac, na_method=na_method)
         df = self.prune_correlated_features(df, target_key)
 
         targets = df[target_key].copy(deep=True)
@@ -137,14 +141,14 @@ class Preprocess(object):
                              '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
         return df
 
-    def handle_na(self, df, max_colnull=None, na_method='drop'):
+    def handle_na(self, df, max_na_frac=0.05, na_method='drop'):
         """
         First pass for handling cells wtihout values (null or nan). Additional
         preprocessing may be necessary as one column may be filled with
         median while the other with mean or mode, etc.
 
         Args:
-            max_colnull ([str]): after generating features, drop the columns
+            max_na_frac ([str]): after generating features, drop the columns
                 that have null/na rows with more than this ratio.
             na_method (str): method of handling null rows.
                 Options: "drop", "mode", ... (see pandas fillna method options)
@@ -154,12 +158,12 @@ class Preprocess(object):
         self.logger.info(
             "pre handle_na: {} samples, {} features".format(*df.shape))
         feats0 = set(df.columns)
-        df = df.dropna(axis=1, thresh=int((1 - max_colnull) * len(df)))
+        df = df.dropna(axis=1, thresh=int((1 - max_na_frac) * len(df)))
         if len(df.columns) < len(feats0):
             feats = set(df.columns)
             self.logger.info('These {} features were removed as they '
                              'had more than {}% missing values:\n{}'.format(
-                len(feats0) - len(feats), max_colnull * 100, feats0 - feats))
+                len(feats0) - len(feats), max_na_frac * 100, feats0 - feats))
         if na_method == "drop":  # drop all rows that contain any null
             df = df.dropna(axis=0)
         else:
@@ -167,3 +171,15 @@ class Preprocess(object):
         self.logger.info(
             "post handle_na: {} samples, {} features".format(*df.shape))
         return df
+
+
+if __name__ == "__main__":
+    from matminer.datasets.dataframe_loader import load_elastic_tensor
+    from matbench.featurize import Featurize
+    df = load_elastic_tensor()
+    df = df[["K_VRH", "formula"]]
+    df = Featurize().featurize_formula(df)
+
+    pp = Preprocess()
+    pp.preprocess(df, target_key='K_VRH')
+    print(df)
