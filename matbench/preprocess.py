@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from pandas.api.types import is_numeric_dtype
 
 
-class PreProcess(object):
+class Preprocess(object):
 
     #TODO: There are a couple of issues with this class
     #TODO: Seems like preprocessing is performed on the target?!?
