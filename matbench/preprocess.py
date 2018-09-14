@@ -6,18 +6,10 @@ from matbench.utils.utils import MatbenchError, setup_custom_logger
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 from pandas.api.types import is_numeric_dtype
+from skrebate import ReliefF
 
 
 class Preprocess(object):
-
-    #TODO: There are a couple of issues with this class
-    #TODO: Seems like preprocessing is performed on the target?!?
-    #TODO: There are a lot of stateful class attrs which don't need to be there, such as self.pca
-    #TODO: df=None and target should be removed from init, and should be specified in every method as args
-    #TODO: Why are correlated features only pruned if the target is present?
-    #TODO: Class should work if there is a target or not
-
-
     """
     PreProcess has several methods to clean and prepare the data
     for visualization and training.
@@ -37,7 +29,8 @@ class Preprocess(object):
     def __init__(self, loglevel=logging.INFO, logpath='.'):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
 
-    def preprocess(self, df, target=None, scale=False, pca=False, **kwargs):
+    def preprocess(self, df, target_key=None, scale=False, pca=False,
+                   rebate=False, n_features_to_select=None, na_method='drop'):
         """
         A sequence of data pre-processing steps either through this class or
         sklearn.
@@ -52,39 +45,52 @@ class Preprocess(object):
         Returns (pandas.DataFrame
         """
 
-        df = self.handle_na(df, na_method=kwargs.pop('na_method', 'drop'))
-        if target:
-            excluded_df = df[target].copy(deep=True)
-            valid_df = df.drop(columns=target)
+        # Remove na rows including those where target=na
+        df = self.handle_na(df, na_method=na_method)
 
-
-        if self.target:
-            df = self.prune_correlated_features(df)
+        if target_key is not None:
+            df = self.prune_correlated_features(df, target_key)
         else:
             self.logger.warning('prune_correlated_features skipped as the '
                                 'target is not set...')
+
+        targets = df[target_key].copy(deep=True)
+        features = df.drop(columns=target_key)
+
         if scale:
-            self.scaler = MinMaxScaler()
-            df = self.scaler.fit_transform(df)
-        if pca:
-            self.pca = PCA(n_components=kwargs.pop('n_components', None))
-            df = self.pca.fit_transform(df)
-        if self.target:
-            if not is_numeric_dtype(df[self.target]):
-                raise MatbenchError('Target column "{}" must be numeric'.format(
-                    self.target))
+            features = MinMaxScaler().fit_transform(features)
 
-        # TODO: remove/modify the following once preprocessing methods for str/objects are implemented:
-        # df = df.drop(list(df.columns[df.dtypes == object]), axis=1)
-        for col in list(df.columns[df.dtypes == bool]):
-            df[col] = df[col].apply(int)
-        df = pd.get_dummies(df)
-        df = df.apply(pd.to_numeric)
-        return df
+        # At the moment, only support for either rebate or PCA
+        if rebate:
+            rf = ReliefF(n_features_to_select=n_features_to_select, n_jobs=-1)
+            x = rf.fit_transform(features.values, targets.values)
+            # Todo: Find how to get the original labels back?  - AD
+            rfcols = ["ReliefF feature {}".format(i) for i in x.shape[1]]
+            features = pd.DataFrame(columns=rfcols, data=x,
+                                    index=features.index)
+        elif pca:
+            pca = PCA(n_components=n_features_to_select)
+            x = pca.fit_transform(features)
+            # Todo: I don't know if there is a way to get labels for these - AD
+            pcacols = ["PCA feature {}".format(i) for i in x.shape[1]]
+            features = pd.DataFrame(columns=pcacols, data=x,
+                                    index=features.index)
 
-    def prune_correlated_features(self, df=None, target=None, R_max=0.95):
+        if target_key is not None:
+            if not is_numeric_dtype(targets.values):
+                targets = targets.astype(str, copy=False)
+
+        # Boolean casting to ints
+        # TODO: This might not work with numpy types, haven't checked - AD
+        for col in list(features.columns[features.dtypes == bool]):
+            features[col] = features[col].apply(int)
+        features = pd.get_dummies(features).apply(pd.to_numeric)
+        features[target_key] = targets
+        return features
+
+    def prune_correlated_features(self, df, target, R_max=0.95):
         """
-        Goes over the features and remove those that are cross correlated by
+        A feature selection method that remove those that are cross correlated by
         more than threshold. target must be specified!
 
         Args:
@@ -95,10 +101,6 @@ class Preprocess(object):
         Returns (pandas.DataFrame):
             the dataframe with the highly cross-correlated features removed.
         """
-        df = self._prescreen_df(df)
-        target = target or self.target
-        if target is None:
-            raise MatbenchError('"target" must be set!')
         corr = abs(df.corr())
         corr = corr.sort_values(by=target)
         rm_feats = []
@@ -145,6 +147,8 @@ class Preprocess(object):
         Returns:
 
         """
+        self.logger.info(
+            "pre handle_na: {} samples, {} features".format(*df.shape))
         feats0 = set(df.columns)
         df = df.dropna(axis=1, thresh=int((1 - max_colnull) * len(df)))
         if len(df.columns) < len(feats0):
@@ -156,4 +160,6 @@ class Preprocess(object):
             df = df.dropna(axis=0)
         else:
             df = df.fillna(method=na_method)
+        self.logger.info(
+            "post handle_na: {} samples, {} features".format(*df.shape))
         return df
