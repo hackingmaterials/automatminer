@@ -11,13 +11,9 @@ from skrebate import ReliefF
 
 class Preprocess(object):
     """
-    PreProcess has several methods to clean and prepare the data
-    for visualization and training.
+    Clean and prepare the data for visualization and training.
 
     Args:
-        df (pandas.DataFrame): input data
-        target (str): if set, the target column may be examined (e.g. to be
-            numeric)
         max_colnull (float): after generating features, drop the columns that
             have null/na rows with more than this ratio. Note that there is an
             important trade-off here. this ratio is high, one may lose more
@@ -41,10 +37,10 @@ class Preprocess(object):
             scale (bool): whether to scale/normalize the data
             n_pca_features (int or None): Number of features to select with
                 principal component analysis (PCA). None or 0 avoids running
-                PCA.
+                PCA. Only works on numerical features.
             n_rebate_features (int or None): Use the EpitasisLab ReBATE feature
                 selection algorithm to reduce the dimensions of the data. None
-                or 0 avoids running ReBATE.
+                or 0 avoids running ReBATE. Only works on numerical features.
             max_na_frac (float): The maximum fraction of na entries in a column
                 (feature) allowed before the column is handled by handle_na
             na_method (str): The method by which handle_na handles nulls. Valid
@@ -63,13 +59,16 @@ class Preprocess(object):
         if scale:
             features.values = MinMaxScaler().fit_transform(features)
 
+        # Todo: PCA/Rebate and scaling will mess with dummies converts!
+        features = pd.get_dummies(features).apply(pd.to_numeric)
+
         if n_rebate_features:
             self.logger.info("ReBATE running: retaining {} features.".format(
                 n_rebate_features))
             rf = ReliefF(n_features_to_select=n_rebate_features, n_jobs=-1)
             x = rf.fit_transform(features.values, targets.values)
             # Todo: Find how to get the original labels back?  - AD
-            rfcols = ["ReliefF feature {}".format(i) for i in x.shape[1]]
+            rfcols = ["ReliefF feature {}".format(i) for i in range(x.shape[1])]
             features = pd.DataFrame(columns=rfcols, data=x,
                                     index=features.index)
         if n_pca_features:
@@ -78,7 +77,7 @@ class Preprocess(object):
             n_pca_features = PCA(n_components=n_pca_features)
             x = n_pca_features.fit_transform(features)
             # Todo: I don't know if there is a way to get labels for these - AD
-            pcacols = ["PCA feature {}".format(i) for i in x.shape[1]]
+            pcacols = ["PCA feature {}".format(i) for i in range(x.shape[1])]
             features = pd.DataFrame(columns=pcacols, data=x,
                                     index=features.index)
 
@@ -86,11 +85,6 @@ class Preprocess(object):
             if not is_numeric_dtype(targets.values):
                 targets = targets.astype(str, copy=False)
 
-        # Boolean casting to ints
-        # TODO: This might not work with numpy types, haven't checked - AD
-        for col in list(features.columns[features.dtypes == bool]):
-            features[col] = features[col].apply(int)
-        features = pd.get_dummies(features).apply(pd.to_numeric)
         features[target_key] = targets
         return features
 
@@ -156,7 +150,7 @@ class Preprocess(object):
 
         """
         self.logger.info(
-            "pre handle_na: {} samples, {} features".format(*df.shape))
+            "Before handling na: {} samples, {} features".format(*df.shape))
         feats0 = set(df.columns)
         df = df.dropna(axis=1, thresh=int((1 - max_na_frac) * len(df)))
         if len(df.columns) < len(feats0):
@@ -169,17 +163,5 @@ class Preprocess(object):
         else:
             df = df.fillna(method=na_method)
         self.logger.info(
-            "post handle_na: {} samples, {} features".format(*df.shape))
+            "After handling na: {} samples, {} features".format(*df.shape))
         return df
-
-
-if __name__ == "__main__":
-    from matminer.datasets.dataframe_loader import load_elastic_tensor
-    from matbench.featurize import Featurize
-    df = load_elastic_tensor()
-    df = df[["K_VRH", "formula"]]
-    df = Featurize().featurize_formula(df)
-
-    pp = Preprocess()
-    pp.preprocess(df, target_key='K_VRH')
-    print(df)
