@@ -2,7 +2,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-from matbench.utils.utils import MatbenchError, setup_custom_logger
+from matbench.utils.utils import setup_custom_logger
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 from pandas.api.types import is_numeric_dtype
