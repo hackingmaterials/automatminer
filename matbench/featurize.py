@@ -28,6 +28,9 @@ class FeaturizerSet:
     def __init__(self, exclude=None):
         self.exclude = [] if exclude is None else exclude
 
+    def __call__(self, *args, **kwargs):
+        return self.all
+
     def best(self):
         """
         A set of featurizers that generally gives informative features without
@@ -44,6 +47,54 @@ class FeaturizerSet:
                                   "all featurizers")
 
 
+class AllFeaturizers(FeaturizerSet):
+    """
+    Args:
+        exclude ([str]): The class names of the featurizers which should be
+            excluded.
+
+    Example usage:
+        composition_featurizers = AllFeaturizers().composition
+    """
+
+    @property
+    def best(self):
+        featzers = CompositionFeaturizers().best + \
+                   StructureFeaturizers().best + \
+                   BSFeaturizers().best + \
+                   DOSFeaturizers().best
+
+        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+
+    @property
+    def all(self):
+        featzers = CompositionFeaturizers().all + \
+                   StructureFeaturizers().all + \
+                   BSFeaturizers().all + \
+                   DOSFeaturizers().all
+        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+
+    @property
+    def composition(self):
+        featzers = CompositionFeaturizers().all
+        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+
+    @property
+    def structure(self):
+        featzers = StructureFeaturizers().all
+        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+
+    @property
+    def bandstructure(self):
+        featzers = BSFeaturizers().all
+        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+
+    @property
+    def dos(self):
+        featzers = DOSFeaturizers().all
+        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+
+
 class CompositionFeaturizers(FeaturizerSet):
     """
     Lists of composition featurizers, depending on requirements.
@@ -51,6 +102,9 @@ class CompositionFeaturizers(FeaturizerSet):
     Args:
         exclude ([str]): The class names of the featurizers which should be
             excluded.
+
+    Example usage:
+        fast_featurizers = CompositionFeaturizers().fast
     """
 
     @property
@@ -59,11 +113,12 @@ class CompositionFeaturizers(FeaturizerSet):
         Generally fast featurizers.
         """
         featzers = [cf.AtomicOrbitals(),
-                    cf.ElementProperty.from_preset("magpie"),
                     cf.ElementProperty.from_preset("matminer"),
                     cf.ElementFraction(),
                     cf.Stoichiometry(),
-                    cf.TMetalFraction()]
+                    cf.TMetalFraction(),
+                    cf.BandCenter(),
+                    cf.ValenceOrbital()]
         return [i for i in featzers if i.__class__.__name__ not in self.exclude]
 
     @property
@@ -101,12 +156,15 @@ class CompositionFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        return self.fast
+        return self.fast + [cf.ElementProperty.from_preset("magpie")]
 
 
 class StructureFeaturizers(FeaturizerSet):
     """
     Lists of structure featurizers, depending on requirements.
+
+    Example usage:
+        fast_featurizers = StructureFeaturizers().fast
     """
 
     @property
@@ -160,12 +218,13 @@ class StructureFeaturizers(FeaturizerSet):
             sf.ChemicalOrdering(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
-            sf.XRDPowderPattern()]
+            sf.XRDPowderPattern(),
+            sf.Dimensionality()]
         return [i for i in featzers if i.__class__.__name__ not in self.exclude]
 
     @property
     def all(self):
-        return self.fast + self.slow + self.need_fit
+        return self.fast + self.slow + self.need_fit + self.matrix
 
     @property
     def best(self):
@@ -467,3 +526,6 @@ class Featurize(object):
             return df
 
 
+if __name__ == "__main__":
+    cfset = StructureFeaturizers()
+    print(cfset.all)
