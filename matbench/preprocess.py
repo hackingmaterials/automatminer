@@ -29,48 +29,46 @@ class Preprocess(object):
     def __init__(self, loglevel=logging.INFO, logpath='.'):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
 
-    def preprocess(self, df, target_key=None, scale=False, pca=False,
-                   rebate=False, n_features_to_select=None, na_method='drop'):
+    def preprocess(self, df, target_key, scale=False, n_pca_features=None,
+                   n_rebate_features=None, na_method='drop'):
         """
         A sequence of data pre-processing steps either through this class or
         sklearn.
 
         Args:
+            df (pandas.DataFrame): Contains features and the target_key
+            target_key (str): The name of the target in the dataframe
             scale (bool): whether to scale/normalize the data
-            pca (bool): whether to use principal component analysis (PCA) to
-                reduce the dimensions of the data.
-            kwargs (dict): the keyword arguments that are specific to some
-                of the preprocessing methods such as PCA
+            n_pca_features (int or None): Number of features to select with
+                principal component analysis (PCA). None or 0 avoids running
+                PCA.
+            n_rebate_features (int or None): Use the EpitasisLab ReBATE feature
+                selection algorithm to reduce the dimensions of the data. None
+                or 0 avoids running ReBATE.
 
         Returns (pandas.DataFrame
         """
 
         # Remove na rows including those where target=na
         df = self.handle_na(df, na_method=na_method)
-
-        if target_key is not None:
-            df = self.prune_correlated_features(df, target_key)
-        else:
-            self.logger.warning('prune_correlated_features skipped as the '
-                                'target is not set...')
+        df = self.prune_correlated_features(df, target_key)
 
         targets = df[target_key].copy(deep=True)
         features = df.drop(columns=target_key)
 
         if scale:
-            features = MinMaxScaler().fit_transform(features)
+            features.values = MinMaxScaler().fit_transform(features)
 
-        # At the moment, only support for either rebate or PCA
-        if rebate:
-            rf = ReliefF(n_features_to_select=n_features_to_select, n_jobs=-1)
+        if n_rebate_features:
+            rf = ReliefF(n_features_to_select=n_rebate_features, n_jobs=-1)
             x = rf.fit_transform(features.values, targets.values)
             # Todo: Find how to get the original labels back?  - AD
             rfcols = ["ReliefF feature {}".format(i) for i in x.shape[1]]
             features = pd.DataFrame(columns=rfcols, data=x,
                                     index=features.index)
-        elif pca:
-            pca = PCA(n_components=n_features_to_select)
-            x = pca.fit_transform(features)
+        if n_pca_features:
+            n_pca_features = PCA(n_components=n_pca_features)
+            x = n_pca_features.fit_transform(features)
             # Todo: I don't know if there is a way to get labels for these - AD
             pcacols = ["PCA feature {}".format(i) for i in x.shape[1]]
             features = pd.DataFrame(columns=pcacols, data=x,
@@ -88,13 +86,14 @@ class Preprocess(object):
         features[target_key] = targets
         return features
 
-    def prune_correlated_features(self, df, target, R_max=0.95):
+    def prune_correlated_features(self, df, target_key, R_max=0.95):
         """
-        A feature selection method that remove those that are cross correlated by
-        more than threshold. target must be specified!
+        A feature selection method that remove those that are cross correlated
+        by more than threshold.
 
         Args:
-            target (str): the name of the target column/feature
+            df (pandas.DataFrame): The dataframe containing features, target_key
+            target_key (str): the name of the target column/feature
             R_max (0<float<=1): if R is greater than this value, the
                 feature that has lower correlation with the target is removed.
 
@@ -102,10 +101,10 @@ class Preprocess(object):
             the dataframe with the highly cross-correlated features removed.
         """
         corr = abs(df.corr())
-        corr = corr.sort_values(by=target)
+        corr = corr.sort_values(by=target_key)
         rm_feats = []
         for feature in corr.columns:
-            if feature == target:
+            if feature == target_key:
                 continue
             for idx, corval in zip(corr.index, corr[feature]):
                 if np.isnan(corval):
@@ -114,7 +113,7 @@ class Preprocess(object):
                     continue
                 else:
                     if corval >= R_max:
-                        if corr.loc[idx, target] > corr.loc[feature, target]:
+                        if corr.loc[idx, target_key] > corr.loc[feature, target_key]:
                             removed_feat = feature
                         else:
                             removed_feat = idx
