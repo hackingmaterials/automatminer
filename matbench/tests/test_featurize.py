@@ -7,7 +7,7 @@ import unittest
 from matbench.data.load import load_double_perovskites_gap, \
     load_castelli_perovskites
 from matbench.featurize import Featurize, CompositionFeaturizers, \
-    StructureFeaturizers, DOSFeaturizers, BSFeaturizers
+    StructureFeaturizers, DOSFeaturizers, BSFeaturizers, AllFeaturizers
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
@@ -266,10 +266,10 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(cf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.composition(need_oxidstates=True,
-                                            slow_ones=True)
+        test_feats = self.allfs.composition
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
+
         self.assertEqual(len(test_feats), len(true_feats))
         for featurizer_name in true_feats:
             self.assertTrue(featurizer_name in test_feats)
@@ -294,9 +294,12 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(sf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.structure()
+        test_feats = self.allfs.structure
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
+
+        print(sorted(test_feats))
+        print(sorted(true_feats))
         self.assertEqual(len(test_feats), len(true_feats))
         for featurizer_name in true_feats:
             self.assertTrue(featurizer_name in test_feats)
@@ -311,7 +314,7 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(dosf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.dos()
+        test_feats = self.allfs.dos
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
         self.assertEqual(len(test_feats), len(true_feats))
@@ -328,7 +331,7 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(bf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.bandstructure()
+        test_feats = self.allfs.bandstructure
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
         self.assertEqual(len(test_feats), len(true_feats))
