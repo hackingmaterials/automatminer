@@ -52,7 +52,7 @@ class Preprocess(object):
         Returns (pandas.DataFrame
         """
 
-        df = self.handle_nulls(df, na_method=kwargs.pop('na_method', 'drop'))
+        df = self.handle_na(df, na_method=kwargs.pop('na_method', 'drop'))
         if target:
             excluded_df = df[target].copy(deep=True)
             valid_df = df.drop(columns=target)
@@ -131,11 +131,11 @@ class Preprocess(object):
                              '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
         return df
 
-    def handle_nulls(self, df=None, max_colnull=None, na_method='drop'):
+    def handle_na(self, df, max_colnull=None, na_method='drop'):
         """
         First pass for handling cells wtihout values (null or nan). Additional
-            preprocessing may be necessary as one column may be filled with
-            median while the other with mean or mode, etc.
+        preprocessing may be necessary as one column may be filled with
+        median while the other with mean or mode, etc.
 
         Args:
             max_colnull ([str]): after generating features, drop the columns
@@ -145,8 +145,6 @@ class Preprocess(object):
         Returns:
 
         """
-        df = self._prescreen_df(df)
-        max_colnull = max_colnull or self.max_colnull
         feats0 = set(df.columns)
         df = df.dropna(axis=1, thresh=int((1 - max_colnull) * len(df)))
         if len(df.columns) < len(feats0):
