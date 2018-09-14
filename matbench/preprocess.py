@@ -34,16 +34,10 @@ class Preprocess(object):
         logpath (str): the path to the logfile dir, current folder by default.
     """
 
-    def __init__(self, df=None, target=None, max_colnull=0.05,
-                 loglevel=logging.INFO, logpath='.'):
-        self.df = df
-        self.target = target
-        self.max_colnull = max_colnull
+    def __init__(self, loglevel=logging.INFO, logpath='.'):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
-        self.scaler = None
-        self.pca = None
 
-    def preprocess(self, df=None, scale=False, pca=False, **kwargs):
+    def preprocess(self, df, target=None, scale=False, pca=False, **kwargs):
         """
         A sequence of data pre-processing steps either through this class or
         sklearn.
@@ -55,10 +49,15 @@ class Preprocess(object):
             kwargs (dict): the keyword arguments that are specific to some
                 of the preprocessing methods such as PCA
 
-        Returns (pandas.DataFrame):
+        Returns (pandas.DataFrame
         """
-        df = self._prescreen_df(df)
+
         df = self.handle_nulls(df, na_method=kwargs.pop('na_method', 'drop'))
+        if target:
+            excluded_df = df[target].copy(deep=True)
+            valid_df = df.drop(columns=target)
+
+
         if self.target:
             df = self.prune_correlated_features(df)
         else:
@@ -130,12 +129,6 @@ class Preprocess(object):
             self.logger.info('These {} features were removed due to cross '
                              'correlation with the current features more than '
                              '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
-        return df
-
-    def _prescreen_df(self, df):
-        # TODO: This should be removed when df=None problem is handled
-        if df is None:
-            df = self.df.copy(deep=True)
         return df
 
     def handle_nulls(self, df=None, max_colnull=None, na_method='drop'):
