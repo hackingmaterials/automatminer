@@ -236,6 +236,13 @@ class StructureFeaturizers(FeaturizerSet):
 class DOSFeaturizers(FeaturizerSet):
     """
     Lists of DOS featurizers, depending on requirements
+
+    Args:
+        exclude ([str]): The class names of the featurizers which should be
+            excluded.
+
+    Example usage:
+        fast_featurizers = StructureFeaturizers().fast
     """
 
     @property
@@ -253,6 +260,13 @@ class DOSFeaturizers(FeaturizerSet):
 class BSFeaturizers(FeaturizerSet):
     """
     Lists of bandstructure featurizers, depending on requirements.
+
+    Args:
+        exclude ([str]): The class names of the featurizers which should be
+            excluded.
+
+    Example usage:
+        fast_featurizers = StructureFeaturizers().fast
     """
 
     @property
@@ -328,6 +342,13 @@ class Featurize(object):
             return (prefix, col_id)
         else:
             return col_id
+
+    # todo: Remove once MultipleFeaturizer is fixed
+    def _featurize_sequentially(self, df, fset, col_id, **kwargs):
+        for f in fset:
+            f.set_n_jobs(n_jobs=self.n_jobs)
+            df = f.fit_featurize_dataframe(df, col_id, **kwargs)
+        return df
 
     def featurize_columns(self, df, input_cols=None, **kwargs):
         """
@@ -442,12 +463,19 @@ class Featurize(object):
             structure_to_oxidstructure(df[col_id], inplace=True)
         if isinstance(featurizers, str):
             featurizers = getattr(self.sfset, featurizers)
-        featzer = MultipleFeaturizer(featurizers)
-        if self.n_jobs:
-            featzer.set_n_jobs(n_jobs=self.n_jobs)
-        df = featzer.fit_featurize_dataframe(df, col_id,
-                                             ignore_errors=self.ignore_errors,
-                                             multiindex=self.multiindex)
+
+
+        # Todo: revert to MultipleFeaturizer once it is fixed
+        # featzer = MultipleFeaturizer(featurizers)
+        # if self.n_jobs:
+        #     featzer.set_n_jobs(n_jobs=self.n_jobs)
+        # df = featzer.fit_featurize_dataframe(df, compcol,
+        #                                      ignore_errors=self.ignore_errors,
+        #                                      multiindex=self.multiindex)
+        df = self._featurize_sequentially(df, featurizers, col_id,
+                                          ignore_errors=self.ignore_errors,
+                                          multiindex=self.multiindex)
+
         if self.drop_featurized_col:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
@@ -480,6 +508,7 @@ class Featurize(object):
             df[col_id] = df[col_id].apply(CompleteDos.from_dict)
         if isinstance(featurizers, str):
             featurizers = getattr(self.dosfset, featurizers)
+
         featzer = MultipleFeaturizer(featurizers)
         if self.n_jobs:
             featzer.set_n_jobs(n_jobs=self.n_jobs)
