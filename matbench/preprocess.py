@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from pandas.api.types import is_numeric_dtype
 from skrebate import ReliefF
 
-# Todo: Need basic tests for this!
+
 class Preprocess(object):
     """
     Clean and prepare the data for visualization and training.
@@ -68,9 +68,11 @@ class Preprocess(object):
         else:
             df[target_key] = df[target_key].astype(str, copy=False)
 
-        number_cols = [k for k in df.columns.values if is_numeric_dtype(df[k]) and k != target_key]
+        number_cols = [k for k in df.columns.values if
+                       is_numeric_dtype(df[k]) and k != target_key]
         if retain_categorical:
-            object_cols = [k for k in df.columns.values if k not in number_cols and k != target_key]
+            object_cols = [k for k in df.columns.values if
+                           k not in number_cols and k != target_key]
         else:
             object_cols = []
 
@@ -85,23 +87,25 @@ class Preprocess(object):
         object_df = pd.get_dummies(object_df).apply(pd.to_numeric)
 
         if n_rebate_features:
-            self.logger.info("ReBATE running: retaining {} features.".format(
-                n_rebate_features))
+            self.logger.info(
+                "ReBATE running: retaining {} numerical features.".format(
+                    n_rebate_features))
             rf = ReliefF(n_features_to_select=n_rebate_features, n_jobs=-1)
             x = rf.fit_transform(number_df.values, targets.values)
             # Todo: Find how to get the original labels back?  - AD
             rfcols = ["ReliefF feature {}".format(i) for i in range(x.shape[1])]
             number_df = pd.DataFrame(columns=rfcols, data=x,
-                                    index=number_df.index)
+                                     index=number_df.index)
         if n_pca_features:
             self.logger.info(
-                "PCA running: retaining {} features.".format(n_pca_features))
+                "PCA running: retaining {} numerical features.".format(
+                    n_pca_features))
             n_pca_features = PCA(n_components=n_pca_features)
             x = n_pca_features.fit_transform(number_df)
             # Todo: I don't know if there is a way to get labels for these - AD
             pcacols = ["PCA feature {}".format(i) for i in range(x.shape[1])]
             number_df = pd.DataFrame(columns=pcacols, data=x,
-                                    index=number_df.index)
+                                     index=number_df.index)
 
         return pd.concat([targets, number_df, object_df], axis=1)
 
