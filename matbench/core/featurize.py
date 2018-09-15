@@ -284,11 +284,11 @@ class Featurize(object):
     """
     Takes in a dataframe and generate features from preset columns such as
     "formula", "structure", "bandstructure", "dos", etc. One may use
-    the featurize_columns method to featurize via all available featurizers
+    the auto_featurize method to featurize via all available featurizers
     with default setting or selectively call featurizer methods.
     Usage examples:
         featurizer = Featurize()
-            df = featurizer.featurize_columns(df) # all features of all types
+            df = featurizer.auto_featurize(df) # all features of all types
         or:
             df = featurizer.featurize_formula(df) # all formula-related feature
         or:
@@ -352,7 +352,8 @@ class Featurize(object):
             df = f.fit_featurize_dataframe(df, col_id, **kwargs)
         return df
 
-    def featurize_columns(self, df, input_cols=None, **kwargs):
+    def auto_featurize(self, df, input_cols=("formula", "structure"),
+                       **kwargs):
         """
         Featurizes the dataframe based on input_columns.
 
@@ -369,7 +370,6 @@ class Featurize(object):
             self.df w/ new features added via featurizering input_cols
         """
         df = self._prescreen_df(df)
-        input_cols = input_cols or ["formula", "structure"]
         for idx, column in enumerate(input_cols):
             featurizer = getattr(self, "featurize_{}".format(column), None)
             if featurizer is not None:
@@ -382,7 +382,8 @@ class Featurize(object):
                 self.logger.warn(
                     "{} not found in the dataframe! Skipping...".format(column))
             else:
-                warn('No method available to featurize "{}"'.format(column))
+                self.logger.warn(
+                    'No method available to featurize "{}"'.format(column))
         return df
 
     def featurize_formula(self, df, featurizers="best", col_id="formula",
@@ -494,7 +495,7 @@ class Featurize(object):
             col_id (str): actual column name to be used as dos
             inplace (bool): whether to modify the input df
             kwargs: keyword arguments that may be accepted by other featurize_*
-                methods passed through featurize_columns
+                methods passed through auto_featurize
 
         Returns (pandas.DataFrame):
             Dataframe with dos features added.
@@ -530,7 +531,7 @@ class Featurize(object):
             col_id (str): actual column name containing the bandstructure data
             inplace (bool): whether to modify the input df
             kwargs: keyword arguments that may be accepted by other featurize_*
-                methods passed through featurize_columns
+                methods passed through auto_featurize
 
         Returns (pandas.DataFrame):
             Dataframe with bandstructure features added.
