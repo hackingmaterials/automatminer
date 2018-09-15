@@ -230,8 +230,7 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        featzers = self.fast + [sf.BondFractions()] + self.slow
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+        return self.fast + self.slow
 
 
 class DOSFeaturizers(FeaturizerSet):
