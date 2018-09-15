@@ -42,9 +42,9 @@ featzer = Featurize(ignore_cols=IGNORE_THESE_COLUMNS,
                     multiindex=MULTIINDEX,
                     drop_featurized_col=True)
 
-df = featzer.featurize_columns(df_init,
-                               input_cols=FEATUREIZE_THESE_COLUMNS,
-                               guess_oxidstates=True)
+df = featzer.auto_featurize(df_init,
+                            input_cols=FEATUREIZE_THESE_COLUMNS,
+                            guess_oxidstates=True)
 
 prep = PreProcess(target=TARGET)
 df = prep.preprocess(df)

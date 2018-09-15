@@ -29,6 +29,7 @@ class TestFeaturize(unittest.TestCase):
 
         df = featurizer.featurize_formula(df_init,
                                           featurizers="all",
+                                          compcol=None,
                                           asindex=False,
                                           guess_oxidstates=True)
 

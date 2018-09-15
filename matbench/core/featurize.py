@@ -1,4 +1,5 @@
 from warnings import warn
+import logging
 
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
@@ -7,7 +8,7 @@ import matminer.featurizers.bandstructure as bf
 from matminer.featurizers.base import MultipleFeaturizer
 from matminer.utils.conversions import composition_to_oxidcomposition, \
     structure_to_oxidstructure
-from matbench.utils.utils import MatbenchError
+from matbench.utils.utils import MatbenchError, setup_custom_logger
 from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
@@ -195,7 +196,7 @@ class StructureFeaturizers(FeaturizerSet):
     def many_features(self):
         featzers = [sf.BagofBonds(),
                     sf.PartialRadialDistributionFunction(),
-                    sf.BondFractions]
+                    sf.BondFractions()]
         return [i for i in featzers if i.__class__.__name__ not in self.exclude]
 
     @property
@@ -229,8 +230,7 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        featzers = self.fast + [sf.BondFractions()] + self.slow
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+        return self.fast + self.slow
 
 
 class DOSFeaturizers(FeaturizerSet):
@@ -283,11 +283,11 @@ class Featurize(object):
     """
     Takes in a dataframe and generate features from preset columns such as
     "formula", "structure", "bandstructure", "dos", etc. One may use
-    the featurize_columns method to featurize via all available featurizers
+    the auto_featurize method to featurize via all available featurizers
     with default setting or selectively call featurizer methods.
     Usage examples:
         featurizer = Featurize()
-            df = featurizer.featurize_columns(df) # all features of all types
+            df = featurizer.auto_featurize(df) # all features of all types
         or:
             df = featurizer.featurize_formula(df) # all formula-related feature
         or:
@@ -313,8 +313,9 @@ class Featurize(object):
 
     def __init__(self, ignore_cols=None, ignore_errors=True,
                  drop_featurized_col=True, exclude=None, multiindex=False,
-                 n_jobs=None):
+                 n_jobs=None, loglevel=logging.INFO, logpath='.'):
 
+        self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
         self.ignore_cols = ignore_cols or []
         self.cfset = CompositionFeaturizers(exclude=exclude)
         self.sfset = StructureFeaturizers(exclude=exclude)
@@ -350,7 +351,8 @@ class Featurize(object):
             df = f.fit_featurize_dataframe(df, col_id, **kwargs)
         return df
 
-    def featurize_columns(self, df, input_cols=None, **kwargs):
+    def auto_featurize(self, df, input_cols=("formula", "structure"),
+                       **kwargs):
         """
         Featurizes the dataframe based on input_columns.
 
@@ -367,7 +369,6 @@ class Featurize(object):
             self.df w/ new features added via featurizering input_cols
         """
         df = self._prescreen_df(df)
-        input_cols = input_cols or ["formula", "structure"]
         for idx, column in enumerate(input_cols):
             featurizer = getattr(self, "featurize_{}".format(column), None)
             if featurizer is not None:
@@ -377,9 +378,11 @@ class Featurize(object):
                     col_id = column
                 df = featurizer(df, col_id=col_id, **kwargs)
             elif column not in df:
-                raise MatbenchError('no "{}" in the data!')
+                self.logger.warn(
+                    "{} not found in the dataframe! Skipping...".format(column))
             else:
-                warn('No method available to featurize "{}"'.format(column))
+                self.logger.warn(
+                    'No method available to featurize "{}"'.format(column))
         return df
 
     def featurize_formula(self, df, featurizers="best", col_id="formula",
@@ -416,12 +419,10 @@ class Featurize(object):
         if isinstance(featurizers, str):
             featurizers = getattr(self.cfset, featurizers)
 
-        featzer = MultipleFeaturizer(featurizers)
-        if self.n_jobs:
-            featzer.set_n_jobs(n_jobs=self.n_jobs)
-        df = featzer.fit_featurize_dataframe(df, compcol,
-                                             ignore_errors=self.ignore_errors,
-                                             multiindex=self.multiindex)
+        # Multiple featurizer has issues, just use this bc we get pbar!
+        df = self._featurize_sequentially(df, featurizers, compcol,
+                                          ignore_errors=self.ignore_errors,
+                                          multiindex=self.multiindex)
         if asindex:
             df = df.set_index(self._pre_screen_col(col_id))
         if self.drop_featurized_col:
@@ -464,14 +465,7 @@ class Featurize(object):
         if isinstance(featurizers, str):
             featurizers = getattr(self.sfset, featurizers)
 
-
-        # Todo: revert to MultipleFeaturizer once it is fixed
-        # featzer = MultipleFeaturizer(featurizers)
-        # if self.n_jobs:
-        #     featzer.set_n_jobs(n_jobs=self.n_jobs)
-        # df = featzer.fit_featurize_dataframe(df, compcol,
-        #                                      ignore_errors=self.ignore_errors,
-        #                                      multiindex=self.multiindex)
+        # Multiple featurizer has issues, just use this bc we get pbar!
         df = self._featurize_sequentially(df, featurizers, col_id,
                                           ignore_errors=self.ignore_errors,
                                           multiindex=self.multiindex)
@@ -498,7 +492,7 @@ class Featurize(object):
             col_id (str): actual column name to be used as dos
             inplace (bool): whether to modify the input df
             kwargs: keyword arguments that may be accepted by other featurize_*
-                methods passed through featurize_columns
+                methods passed through auto_featurize
 
         Returns (pandas.DataFrame):
             Dataframe with dos features added.
@@ -509,12 +503,10 @@ class Featurize(object):
         if isinstance(featurizers, str):
             featurizers = getattr(self.dosfset, featurizers)
 
-        featzer = MultipleFeaturizer(featurizers)
-        if self.n_jobs:
-            featzer.set_n_jobs(n_jobs=self.n_jobs)
-        df = featzer.fit_featurize_dataframe(df, col_id,
-                                             ignore_errors=self.ignore_errors,
-                                             multiindex=self.multiindex)
+        # Multiple featurizer has issues, just use this bc we get pbar!
+        df = self._featurize_sequentially(df, featurizers, col_id,
+                                          ignore_errors=self.ignore_errors,
+                                          multiindex=self.multiindex)
         if self.drop_featurized_col:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
@@ -534,7 +526,7 @@ class Featurize(object):
             col_id (str): actual column name containing the bandstructure data
             inplace (bool): whether to modify the input df
             kwargs: keyword arguments that may be accepted by other featurize_*
-                methods passed through featurize_columns
+                methods passed through auto_featurize
 
         Returns (pandas.DataFrame):
             Dataframe with bandstructure features added.
@@ -544,12 +536,10 @@ class Featurize(object):
             df[col_id] = df[col_id].apply(BandStructure.from_dict)
         if isinstance(featurizers, str):
             featurizers = getattr(self.bsfset, featurizers)
-        featzer = MultipleFeaturizer(featurizers)
-        if self.n_jobs:
-            featzer.set_n_jobs(n_jobs=self.n_jobs)
-        df = featzer.fit_featurize_dataframe(df, col_id,
-                                             ignore_errors=self.ignore_errors,
-                                             multiindex=self.multiindex)
+        # Multiple featurizer has issues, just use this bc we get pbar!
+        df = self._featurize_sequentially(df, featurizers, col_id,
+                                          ignore_errors=self.ignore_errors,
+                                          multiindex=self.multiindex)
         if self.drop_featurized_col:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
