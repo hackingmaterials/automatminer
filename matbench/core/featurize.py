@@ -1,4 +1,5 @@
 from warnings import warn
+import logging
 
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
@@ -7,7 +8,7 @@ import matminer.featurizers.bandstructure as bf
 from matminer.featurizers.base import MultipleFeaturizer
 from matminer.utils.conversions import composition_to_oxidcomposition, \
     structure_to_oxidstructure
-from matbench.utils.utils import MatbenchError
+from matbench.utils.utils import MatbenchError, setup_custom_logger
 from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
@@ -313,8 +314,9 @@ class Featurize(object):
 
     def __init__(self, ignore_cols=None, ignore_errors=True,
                  drop_featurized_col=True, exclude=None, multiindex=False,
-                 n_jobs=None):
+                 n_jobs=None, loglevel=logging.INFO, logpath='.'):
 
+        self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
         self.ignore_cols = ignore_cols or []
         self.cfset = CompositionFeaturizers(exclude=exclude)
         self.sfset = StructureFeaturizers(exclude=exclude)
@@ -377,7 +379,8 @@ class Featurize(object):
                     col_id = column
                 df = featurizer(df, col_id=col_id, **kwargs)
             elif column not in df:
-                raise MatbenchError('no "{}" in the data!')
+                self.logger.warn(
+                    "{} not found in the dataframe! Skipping...".format(column))
             else:
                 warn('No method available to featurize "{}"'.format(column))
         return df
@@ -464,14 +467,7 @@ class Featurize(object):
         if isinstance(featurizers, str):
             featurizers = getattr(self.sfset, featurizers)
 
-
-        # Todo: revert to MultipleFeaturizer once it is fixed
-        # featzer = MultipleFeaturizer(featurizers)
-        # if self.n_jobs:
-        #     featzer.set_n_jobs(n_jobs=self.n_jobs)
-        # df = featzer.fit_featurize_dataframe(df, compcol,
-        #                                      ignore_errors=self.ignore_errors,
-        #                                      multiindex=self.multiindex)
+        # Multiple featurizer has issues, just use this bc we get pbar!
         df = self._featurize_sequentially(df, featurizers, col_id,
                                           ignore_errors=self.ignore_errors,
                                           multiindex=self.multiindex)
