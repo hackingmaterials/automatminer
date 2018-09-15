@@ -31,7 +31,7 @@ if __name__ == "__main__":
     prep = PrepareData(df_init,
                        targets=['gap gllbsc'],
                        ignore_cols=['A1', 'A2', 'B1', 'B2'])
-    prep.featurize_columns()
+    prep.auto_featurize()
     # prep.handle_na()
 
     vis = VisualizeData(prep.get_train_target())

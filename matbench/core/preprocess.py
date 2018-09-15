@@ -83,6 +83,7 @@ class Preprocess(object):
         targets = df[target_key].copy(deep=True)
 
         # Todo: StandardScaler might be better
+        # Todo: Data *must* be standardized for PCA...
         if scale:
             number_df[number_cols] = MinMaxScaler().fit_transform(number_df)
 
