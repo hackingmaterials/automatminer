@@ -371,18 +371,19 @@ class Featurize(object):
         df = self._prescreen_df(df)
         for idx, column in enumerate(input_cols):
             featurizer = getattr(self, "featurize_{}".format(column), None)
-            if featurizer is not None:
-                if idx > 0:
-                    col_id = self._pre_screen_col(column)
+            if column in df:
+                if featurizer is not None:
+                    if idx > 0:
+                        col_id = self._pre_screen_col(column)
+                    else:
+                        col_id = column
+                    df = featurizer(df, col_id=col_id, **kwargs)
                 else:
-                    col_id = column
-                df = featurizer(df, col_id=col_id, **kwargs)
-            elif column not in df:
-                self.logger.warn(
-                    "{} not found in the dataframe! Skipping...".format(column))
+                    self.logger.warn(
+                        'No method available to featurize "{}"'.format(column))
             else:
                 self.logger.warn(
-                    'No method available to featurize "{}"'.format(column))
+                    "{} not found in the dataframe! Skipping...".format(column))
         return df
 
     def featurize_formula(self, df, featurizers="best", col_id="formula",
