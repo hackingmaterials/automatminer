@@ -56,7 +56,11 @@ class Preprocess(object):
         df = self.handle_na(df, max_na_frac=max_na_frac, na_method=na_method)
 
         for c in df.columns.values:
-            df[c] = self._convert_numeric(df[c])
+            try:
+                df[c] = pd.to_numeric(df[c])
+            except (TypeError, ValueError):
+                # The target is most likely strings which are not numeric.
+                pass
 
         if is_numeric_dtype(df[target_key]):
             # Pruning correlated features automatically takes accounts for dtype
@@ -66,6 +70,7 @@ class Preprocess(object):
 
         number_cols = [k for k in df.columns.values if is_numeric_dtype(df[k]) and k != target_key]
         object_cols = [k for k in df.columns.values if k not in number_cols and k != target_key]
+
         number_df = df[number_cols]
         object_df = df[object_cols]
         targets = df[target_key].copy(deep=True)
@@ -175,22 +180,18 @@ class Preprocess(object):
             "After handling na: {} samples, {} features".format(*df.shape))
         return df
 
-    def _convert_numeric(self, series):
-        try:
-            return series.apply(pd.to_numeric)
-        except (TypeError, ValueError):
-            # The target is most likely strings which are not numeric.
-            pass
-
 
 if __name__ == "__main__":
     from matminer.datasets.dataframe_loader import load_elastic_tensor
+    from matminer.featurizers.structure import GlobalSymmetryFeatures
     from matbench.featurize import Featurize
 
     df = load_elastic_tensor()[:10][['K_VRH', 'structure']]
     df['K_VRH'] = df['K_VRH'].astype(str)
+
     f = Featurize()
-    df = f.featurize_structure(df)
+    df = f.featurize_structure(df, featurizers=[GlobalSymmetryFeatures()])
+    print(df)
     p = Preprocess()
     df = p.preprocess(df, 'K_VRH')
     print(df)
