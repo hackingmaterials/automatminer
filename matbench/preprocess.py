@@ -26,7 +26,8 @@ class Preprocess(object):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
 
     def preprocess(self, df, target_key, scale=False, n_pca_features=None,
-                   n_rebate_features=None, max_na_frac=0.05, na_method='drop'):
+                   n_rebate_features=None, max_na_frac=0.05, na_method='drop',
+                   retain_categorical=True):
         """
         A sequence of data pre-processing steps either through this class or
         sklearn.
@@ -45,48 +46,56 @@ class Preprocess(object):
                 (feature) allowed before the column is handled by handle_na
             na_method (str): The method by which handle_na handles nulls. Valid
                 arguments are 'drop' or pandas.fillna args (e.g., "mode")
+            retain_categorical (bool): If True, retains features which are
+                categorical and then One-Hot encodes them. If False, drops them.
 
-        Returns (pandas.DataFrame
+        Returns (pandas.DataFrame)
         """
 
         # Remove na rows including those where target=na
         df = self.handle_na(df, max_na_frac=max_na_frac, na_method=na_method)
-        df = self.prune_correlated_features(df, target_key)
 
+        for c in df.columns.values:
+            df[c] = self._convert_numeric(df[c])
+
+        if is_numeric_dtype(df[target_key]):
+            # Pruning correlated features automatically takes accounts for dtype
+            df = self.prune_correlated_features(df, target_key)
+        else:
+            df[target_key] = df[target_key].astype(str, copy=False)
+
+        number_cols = [k for k in df.columns.values if is_numeric_dtype(df[k]) and k != target_key]
+        object_cols = [k for k in df.columns.values if k not in number_cols and k != target_key]
+        number_df = df[number_cols]
+        object_df = df[object_cols]
         targets = df[target_key].copy(deep=True)
-        features = df.drop(columns=target_key)
 
+        # Todo: StandardScaler might be better
         if scale:
-            features.values = MinMaxScaler().fit_transform(features)
+            number_df.values = MinMaxScaler().fit_transform(number_df)
 
-        # Todo: PCA/Rebate and scaling will mess with dummies converts!
-        features = pd.get_dummies(features).apply(pd.to_numeric)
+        object_df = pd.get_dummies(object_df).apply(pd.to_numeric)
 
         if n_rebate_features:
             self.logger.info("ReBATE running: retaining {} features.".format(
                 n_rebate_features))
             rf = ReliefF(n_features_to_select=n_rebate_features, n_jobs=-1)
-            x = rf.fit_transform(features.values, targets.values)
+            x = rf.fit_transform(number_df.values, targets.values)
             # Todo: Find how to get the original labels back?  - AD
             rfcols = ["ReliefF feature {}".format(i) for i in range(x.shape[1])]
-            features = pd.DataFrame(columns=rfcols, data=x,
-                                    index=features.index)
+            number_df = pd.DataFrame(columns=rfcols, data=x,
+                                    index=number_df.index)
         if n_pca_features:
             self.logger.info(
                 "PCA running: retaining {} features.".format(n_pca_features))
             n_pca_features = PCA(n_components=n_pca_features)
-            x = n_pca_features.fit_transform(features)
+            x = n_pca_features.fit_transform(number_df)
             # Todo: I don't know if there is a way to get labels for these - AD
             pcacols = ["PCA feature {}".format(i) for i in range(x.shape[1])]
-            features = pd.DataFrame(columns=pcacols, data=x,
-                                    index=features.index)
+            number_df = pd.DataFrame(columns=pcacols, data=x,
+                                    index=number_df.index)
 
-        if target_key is not None:
-            if not is_numeric_dtype(targets.values):
-                targets = targets.astype(str, copy=False)
-
-        features[target_key] = targets
-        return features
+        return pd.concat([targets, number_df, object_df], axis=1)
 
     def prune_correlated_features(self, df, target_key, R_max=0.95):
         """
@@ -165,3 +174,23 @@ class Preprocess(object):
         self.logger.info(
             "After handling na: {} samples, {} features".format(*df.shape))
         return df
+
+    def _convert_numeric(self, series):
+        try:
+            return series.apply(pd.to_numeric)
+        except (TypeError, ValueError):
+            # The target is most likely strings which are not numeric.
+            pass
+
+
+if __name__ == "__main__":
+    from matminer.datasets.dataframe_loader import load_elastic_tensor
+    from matbench.featurize import Featurize
+
+    df = load_elastic_tensor()[:10][['K_VRH', 'structure']]
+    df['K_VRH'] = df['K_VRH'].astype(str)
+    f = Featurize()
+    df = f.featurize_structure(df)
+    p = Preprocess()
+    df = p.preprocess(df, 'K_VRH')
+    print(df)
