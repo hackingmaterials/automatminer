@@ -2,4 +2,4 @@ matminer==0.3.9
 xlrd==1.1.0
 xgboost==0.72.1
 tpot==0.9.3
-skrebate=0.6
+skrebate==0.6
