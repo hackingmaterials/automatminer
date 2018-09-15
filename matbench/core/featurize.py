@@ -196,7 +196,7 @@ class StructureFeaturizers(FeaturizerSet):
     def many_features(self):
         featzers = [sf.BagofBonds(),
                     sf.PartialRadialDistributionFunction(),
-                    sf.BondFractions]
+                    sf.BondFractions()]
         return [i for i in featzers if i.__class__.__name__ not in self.exclude]
 
     @property
@@ -420,7 +420,7 @@ class Featurize(object):
             featurizers = getattr(self.cfset, featurizers)
 
         # Multiple featurizer has issues, just use this bc we get pbar!
-        df = self._featurize_sequentially(df, featurizers, col_id,
+        df = self._featurize_sequentially(df, featurizers, compcol,
                                           ignore_errors=self.ignore_errors,
                                           multiindex=self.multiindex)
         if asindex:
