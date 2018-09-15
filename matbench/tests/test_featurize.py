@@ -80,8 +80,7 @@ class TestFeaturize(unittest.TestCase):
     def test_featurize_structure(self, limit=5):
         df_init = load_castelli_perovskites()[:limit]
         featurizer = Featurize(ignore_errors=False, multiindex=False)
-        df = featurizer.featurize_structure(df_init, inplace=False,
-                                            featurizers="all")
+        df = featurizer.featurize_structure(df_init, inplace=False)
 
         # sanity checks
         self.assertTrue(len(df), limit)
@@ -297,9 +296,6 @@ class TestAllFeaturizers(unittest.TestCase):
         test_feats = self.allfs.structure
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
-
-        print(sorted(test_feats))
-        print(sorted(true_feats))
         self.assertEqual(len(test_feats), len(true_feats))
         for featurizer_name in true_feats:
             self.assertTrue(featurizer_name in test_feats)
