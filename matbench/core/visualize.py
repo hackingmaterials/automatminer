@@ -32,7 +32,7 @@ if __name__ == "__main__":
                        targets=['gap gllbsc'],
                        ignore_cols=['A1', 'A2', 'B1', 'B2'])
     prep.featurize_columns()
-    # prep.handle_nulls()
+    # prep.handle_na()
 
     vis = VisualizeData(prep.get_train_target())
     vis.targetted_visualize(target='gap gllbsc')
