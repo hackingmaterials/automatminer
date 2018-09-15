@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from pandas.api.types import is_numeric_dtype
 from skrebate import ReliefF
 
-
+# Todo: Need basic tests for this!
 class Preprocess(object):
     """
     Clean and prepare the data for visualization and training.
@@ -25,7 +25,7 @@ class Preprocess(object):
     def __init__(self, loglevel=logging.INFO, logpath='.'):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
 
-    def preprocess(self, df, target_key, scale=False, n_pca_features=None,
+    def preprocess(self, df, target_key, scale=True, n_pca_features=None,
                    n_rebate_features=None, max_na_frac=0.05, na_method='drop',
                    retain_categorical=True):
         """
@@ -69,7 +69,10 @@ class Preprocess(object):
             df[target_key] = df[target_key].astype(str, copy=False)
 
         number_cols = [k for k in df.columns.values if is_numeric_dtype(df[k]) and k != target_key]
-        object_cols = [k for k in df.columns.values if k not in number_cols and k != target_key]
+        if retain_categorical:
+            object_cols = [k for k in df.columns.values if k not in number_cols and k != target_key]
+        else:
+            object_cols = []
 
         number_df = df[number_cols]
         object_df = df[object_cols]
@@ -77,7 +80,7 @@ class Preprocess(object):
 
         # Todo: StandardScaler might be better
         if scale:
-            number_df.values = MinMaxScaler().fit_transform(number_df)
+            number_df[number_cols] = MinMaxScaler().fit_transform(number_df)
 
         object_df = pd.get_dummies(object_df).apply(pd.to_numeric)
 
@@ -179,3 +182,19 @@ class Preprocess(object):
         self.logger.info(
             "After handling na: {} samples, {} features".format(*df.shape))
         return df
+
+
+if __name__ == "__main__":
+    from matminer.datasets.dataframe_loader import load_elastic_tensor
+    from matminer.featurizers.structure import GlobalSymmetryFeatures
+    from matbench.featurize import Featurize
+
+    df = load_elastic_tensor()[:10][['K_VRH', 'structure']]
+    df['K_VRH'] = df['K_VRH'].astype(str)
+
+    f = Featurize()
+    df = f.featurize_structure(df, featurizers=[GlobalSymmetryFeatures()])
+    print(df)
+    p = Preprocess()
+    df = p.preprocess(df, 'K_VRH')
+    print(df)
