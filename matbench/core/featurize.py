@@ -420,12 +420,10 @@ class Featurize(object):
         if isinstance(featurizers, str):
             featurizers = getattr(self.cfset, featurizers)
 
-        featzer = MultipleFeaturizer(featurizers)
-        if self.n_jobs:
-            featzer.set_n_jobs(n_jobs=self.n_jobs)
-        df = featzer.fit_featurize_dataframe(df, compcol,
-                                             ignore_errors=self.ignore_errors,
-                                             multiindex=self.multiindex)
+        # Multiple featurizer has issues, just use this bc we get pbar!
+        df = self._featurize_sequentially(df, featurizers, col_id,
+                                          ignore_errors=self.ignore_errors,
+                                          multiindex=self.multiindex)
         if asindex:
             df = df.set_index(self._pre_screen_col(col_id))
         if self.drop_featurized_col:
@@ -506,12 +504,10 @@ class Featurize(object):
         if isinstance(featurizers, str):
             featurizers = getattr(self.dosfset, featurizers)
 
-        featzer = MultipleFeaturizer(featurizers)
-        if self.n_jobs:
-            featzer.set_n_jobs(n_jobs=self.n_jobs)
-        df = featzer.fit_featurize_dataframe(df, col_id,
-                                             ignore_errors=self.ignore_errors,
-                                             multiindex=self.multiindex)
+        # Multiple featurizer has issues, just use this bc we get pbar!
+        df = self._featurize_sequentially(df, featurizers, col_id,
+                                          ignore_errors=self.ignore_errors,
+                                          multiindex=self.multiindex)
         if self.drop_featurized_col:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
@@ -541,12 +537,10 @@ class Featurize(object):
             df[col_id] = df[col_id].apply(BandStructure.from_dict)
         if isinstance(featurizers, str):
             featurizers = getattr(self.bsfset, featurizers)
-        featzer = MultipleFeaturizer(featurizers)
-        if self.n_jobs:
-            featzer.set_n_jobs(n_jobs=self.n_jobs)
-        df = featzer.fit_featurize_dataframe(df, col_id,
-                                             ignore_errors=self.ignore_errors,
-                                             multiindex=self.multiindex)
+        # Multiple featurizer has issues, just use this bc we get pbar!
+        df = self._featurize_sequentially(df, featurizers, col_id,
+                                          ignore_errors=self.ignore_errors,
+                                          multiindex=self.multiindex)
         if self.drop_featurized_col:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
