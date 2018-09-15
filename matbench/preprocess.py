@@ -2,21 +2,18 @@ import logging
 import numpy as np
 import pandas as pd
 
-from matbench.utils.utils import MatbenchError, setup_custom_logger
+from matbench.utils.utils import setup_custom_logger
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 from pandas.api.types import is_numeric_dtype
+from skrebate import ReliefF
 
 
-class PreProcess(object):
+class Preprocess(object):
     """
-    PreProcess has several methods to clean and prepare the data
-    for visualization and training.
+    Clean and prepare the data for visualization and training.
 
     Args:
-        df (pandas.DataFrame): input data
-        target (str): if set, the target column may be examined (e.g. to be
-            numeric)
         max_colnull (float): after generating features, drop the columns that
             have null/na rows with more than this ratio. Note that there is an
             important trade-off here. this ratio is high, one may lose more
@@ -24,79 +21,115 @@ class PreProcess(object):
         loglevel (int): the level of output; e.g. logging.DEBUG
         logpath (str): the path to the logfile dir, current folder by default.
     """
-    def __init__(self, df=None, target=None, max_colnull=0.05,
-                 loglevel=logging.INFO, logpath='.'):
-        self.df = df
-        self.target = target
-        self.max_colnull = max_colnull
+
+    def __init__(self, loglevel=logging.INFO, logpath='.'):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
-        self.scaler = None
-        self.pca = None
 
-
-    def preprocess(self, df=None, scale=False, pca=False, **kwargs):
+    def preprocess(self, df, target_key, scale=True, n_pca_features=None,
+                   n_rebate_features=None, max_na_frac=0.05, na_method='drop',
+                   retain_categorical=True):
         """
         A sequence of data pre-processing steps either through this class or
         sklearn.
 
         Args:
+            df (pandas.DataFrame): Contains features and the target_key
+            target_key (str): The name of the target in the dataframe
             scale (bool): whether to scale/normalize the data
-            pca (bool): whether to use principal component analysis (PCA) to
-                reduce the dimensions of the data.
-            kwargs (dict): the keyword arguments that are specific to some
-                of the preprocessing methods such as PCA
+            n_pca_features (int or None): Number of features to select with
+                principal component analysis (PCA). None or 0 avoids running
+                PCA. Only works on numerical features.
+            n_rebate_features (int or None): Use the EpitasisLab ReBATE feature
+                selection algorithm to reduce the dimensions of the data. None
+                or 0 avoids running ReBATE. Only works on numerical features.
+            max_na_frac (float): The maximum fraction of na entries in a column
+                (feature) allowed before the column is handled by handle_na
+            na_method (str): The method by which handle_na handles nulls. Valid
+                arguments are 'drop' or pandas.fillna args (e.g., "mode")
+            retain_categorical (bool): If True, retains features which are
+                categorical and then One-Hot encodes them. If False, drops them.
 
-        Returns (pandas.DataFrame):
+        Returns (pandas.DataFrame)
         """
-        df = self._prescreen_df(df)
-        df = self.handle_nulls(df, na_method=kwargs.pop('na_method', 'drop'))
-        if self.target:
-            df = self.prune_correlated_features(df)
+
+        # Remove na rows including those where target=na
+        df = self.handle_na(df, max_na_frac=max_na_frac, na_method=na_method)
+
+        for c in df.columns.values:
+            try:
+                df[c] = pd.to_numeric(df[c])
+            except (TypeError, ValueError):
+                # The target is most likely strings which are not numeric.
+                pass
+
+        if is_numeric_dtype(df[target_key]):
+            # Pruning correlated features automatically takes accounts for dtype
+            df = self.prune_correlated_features(df, target_key)
         else:
-            self.logger.warning('prune_correlated_features skipped as the '
-                                'target is not set...')
+            df[target_key] = df[target_key].astype(str, copy=False)
+
+        # Todo: At the moment, scaling and feature reduction converts ints to floats
+        number_cols = [k for k in df.columns.values if
+                       is_numeric_dtype(df[k]) and k != target_key]
+
+        if retain_categorical:
+            object_cols = [k for k in df.columns.values if
+                           k not in number_cols and k != target_key]
+        else:
+            object_cols = []
+
+        number_df = df[number_cols]
+        object_df = df[object_cols]
+        targets = df[target_key].copy(deep=True)
+
+        # Todo: StandardScaler might be better
         if scale:
-            self.scaler = MinMaxScaler()
-            df = self.scaler.fit_transform(df)
-        if pca:
-            self.pca = PCA(n_components=kwargs.pop('n_components', None))
-            df = self.pca.fit_transform(df)
-        if self.target:
-            if not is_numeric_dtype(df[self.target]):
-                raise MatbenchError('Target column "{}" must be numeric'.format(
-                    self.target))
+            number_df[number_cols] = MinMaxScaler().fit_transform(number_df)
 
-        # TODO: remove/modify the following once preprocessing methods for str/objects are implemented:
-        # df = df.drop(list(df.columns[df.dtypes == object]), axis=1)
-        for col in list(df.columns[df.dtypes == bool]):
-            df[col] = df[col].apply(int)
-        df = pd.get_dummies(df)
-        df = df.apply(pd.to_numeric)
-        return df
+        object_df = pd.get_dummies(object_df).apply(pd.to_numeric)
 
+        if n_rebate_features:
+            self.logger.info(
+                "ReBATE running: retaining {} numerical features.".format(
+                    n_rebate_features))
+            rf = ReliefF(n_features_to_select=n_rebate_features, n_jobs=-1)
+            x = rf.fit_transform(number_df.values, targets.values)
+            # Todo: Find how to get the original labels back?  - AD
+            rfcols = ["ReliefF feature {}".format(i) for i in range(x.shape[1])]
+            number_df = pd.DataFrame(columns=rfcols, data=x,
+                                     index=number_df.index)
+        if n_pca_features:
+            self.logger.info(
+                "PCA running: retaining {} numerical features.".format(
+                    n_pca_features))
+            n_pca_features = PCA(n_components=n_pca_features)
+            x = n_pca_features.fit_transform(number_df)
+            # Todo: I don't know if there is a way to get labels for these - AD
+            pcacols = ["PCA feature {}".format(i) for i in range(x.shape[1])]
+            number_df = pd.DataFrame(columns=pcacols, data=x,
+                                     index=number_df.index)
 
-    def prune_correlated_features(self, df=None, target=None, R_max=0.95):
+        return pd.concat([targets, number_df, object_df], axis=1)
+
+    def prune_correlated_features(self, df, target_key, R_max=0.95):
         """
-        Goes over the features and remove those that are cross correlated by
-        more than threshold. target must be specified!
+        A feature selection method that remove those that are cross correlated
+        by more than threshold.
 
         Args:
-            target (str): the name of the target column/feature
+            df (pandas.DataFrame): The dataframe containing features, target_key
+            target_key (str): the name of the target column/feature
             R_max (0<float<=1): if R is greater than this value, the
                 feature that has lower correlation with the target is removed.
 
         Returns (pandas.DataFrame):
             the dataframe with the highly cross-correlated features removed.
         """
-        df = self._prescreen_df(df)
-        target = target or self.target
-        if target is None:
-            raise MatbenchError('"target" must be set!')
         corr = abs(df.corr())
-        corr = corr.sort_values(by=target)
+        corr = corr.sort_values(by=target_key)
         rm_feats = []
         for feature in corr.columns:
-            if feature == target:
+            if feature == target_key:
                 continue
             for idx, corval in zip(corr.index, corr[feature]):
                 if np.isnan(corval):
@@ -105,15 +138,17 @@ class PreProcess(object):
                     continue
                 else:
                     if corval >= R_max:
-                        if corr.loc[idx, target] > corr.loc[feature, target]:
+                        if corr.loc[idx, target_key] > corr.loc[
+                            feature, target_key]:
                             removed_feat = feature
                         else:
                             removed_feat = idx
                         if removed_feat not in rm_feats:
                             rm_feats.append(removed_feat)
                             self.logger.debug('"{}" correlates strongly with '
-                                             '"{}"'.format(feature, idx))
-                            self.logger.debug('removing "{}"...'.format(removed_feat))
+                                              '"{}"'.format(feature, idx))
+                            self.logger.debug(
+                                'removing "{}"...'.format(removed_feat))
                         if removed_feat == feature:
                             break
         if len(rm_feats) > 0:
@@ -123,38 +158,33 @@ class PreProcess(object):
                              '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
         return df
 
-
-    def _prescreen_df(self, df):
-        if df is None:
-            df = self.df.copy(deep=True)
-        return df
-
-
-    def handle_nulls(self, df=None, max_colnull=None, na_method='drop'):
+    def handle_na(self, df, max_na_frac=0.05, na_method='drop'):
         """
         First pass for handling cells wtihout values (null or nan). Additional
-            preprocessing may be necessary as one column may be filled with
-            median while the other with mean or mode, etc.
+        preprocessing may be necessary as one column may be filled with
+        median while the other with mean or mode, etc.
 
         Args:
-            max_colnull ([str]): after generating features, drop the columns
+            max_na_frac ([str]): after generating features, drop the columns
                 that have null/na rows with more than this ratio.
             na_method (str): method of handling null rows.
                 Options: "drop", "mode", ... (see pandas fillna method options)
         Returns:
 
         """
-        df = self._prescreen_df(df)
-        max_colnull = max_colnull or self.max_colnull
+        self.logger.info(
+            "Before handling na: {} samples, {} features".format(*df.shape))
         feats0 = set(df.columns)
-        df = df.dropna(axis=1, thresh=int((1-max_colnull)*len(df)))
+        df = df.dropna(axis=1, thresh=int((1 - max_na_frac) * len(df)))
         if len(df.columns) < len(feats0):
             feats = set(df.columns)
             self.logger.info('These {} features were removed as they '
                              'had more than {}% missing values:\n{}'.format(
-                len(feats0)-len(feats), max_colnull*100, feats0-feats))
-        if na_method == "drop": # drop all rows that contain any null
+                len(feats0) - len(feats), max_na_frac * 100, feats0 - feats))
+        if na_method == "drop":  # drop all rows that contain any null
             df = df.dropna(axis=0)
         else:
             df = df.fillna(method=na_method)
+        self.logger.info(
+            "After handling na: {} samples, {} features".format(*df.shape))
         return df
