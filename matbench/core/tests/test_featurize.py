@@ -6,7 +6,7 @@ import unittest
 
 from matbench.data.load import load_double_perovskites_gap, \
     load_castelli_perovskites
-from matbench.featurize import Featurize, CompositionFeaturizers, \
+from matbench.core.featurize import Featurize, CompositionFeaturizers, \
     StructureFeaturizers, DOSFeaturizers, BSFeaturizers, AllFeaturizers
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 import matminer.featurizers.composition as cf
