@@ -179,19 +179,3 @@ class Preprocess(object):
         self.logger.info(
             "After handling na: {} samples, {} features".format(*df.shape))
         return df
-
-
-if __name__ == "__main__":
-    from matminer.datasets.dataframe_loader import load_elastic_tensor
-    from matminer.featurizers.structure import GlobalSymmetryFeatures
-    from matbench.featurize import Featurize
-
-    df = load_elastic_tensor()[:10][['K_VRH', 'structure']]
-    df['K_VRH'] = df['K_VRH'].astype(str)
-
-    f = Featurize()
-    df = f.featurize_structure(df, featurizers=[GlobalSymmetryFeatures()])
-    print(df)
-    p = Preprocess()
-    df = p.preprocess(df, 'K_VRH')
-    print(df)
