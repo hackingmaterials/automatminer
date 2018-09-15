@@ -68,8 +68,10 @@ class Preprocess(object):
         else:
             df[target_key] = df[target_key].astype(str, copy=False)
 
+        # Todo: At the moment, scaling and feature reduction converts ints to floats
         number_cols = [k for k in df.columns.values if
                        is_numeric_dtype(df[k]) and k != target_key]
+
         if retain_categorical:
             object_cols = [k for k in df.columns.values if
                            k not in number_cols and k != target_key]
@@ -186,19 +188,3 @@ class Preprocess(object):
         self.logger.info(
             "After handling na: {} samples, {} features".format(*df.shape))
         return df
-
-
-if __name__ == "__main__":
-    from matminer.datasets.dataframe_loader import load_elastic_tensor
-    from matminer.featurizers.structure import GlobalSymmetryFeatures
-    from matbench.featurize import Featurize
-
-    df = load_elastic_tensor()[:10][['K_VRH', 'structure']]
-    df['K_VRH'] = df['K_VRH'].astype(str)
-
-    f = Featurize()
-    df = f.featurize_structure(df, featurizers=[GlobalSymmetryFeatures()])
-    print(df)
-    p = Preprocess()
-    df = p.preprocess(df, 'K_VRH')
-    print(df)
