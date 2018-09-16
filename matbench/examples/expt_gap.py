@@ -55,9 +55,9 @@ if not FEAT_FROM_FILE:
                         drop_featurized_col=True,
                         n_jobs=N_JOBS)
 
-    df = featzer.featurize_columns(df_init,
-                                   input_cols=FEATUREIZE_THESE_COLUMNS,
-                                   guess_oxidstates=False)
+    df = featzer.auto_featurize(df_init,
+                                input_cols=FEATUREIZE_THESE_COLUMNS,
+                                guess_oxidstates=False)
     df.to_pickle(os.path.join(CALC_DIR, '{}_data.pickle'.format(fname_base)))
 else:
     df = pd.read_pickle(os.path.join(CALC_DIR, '{}_data.pickle'.format(fname_base)))

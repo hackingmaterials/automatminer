@@ -4,11 +4,11 @@ from collections import OrderedDict
 import numpy as np
 
 from matbench.automl.tpot_utils import TpotAutoml
-from matbench.analysis import Analysis
+from matbench.core.analysis import Analysis
 from matbench.data.load import load_double_perovskites_gap, \
     load_glass_formation
-from matbench.featurize import Featurize
-from matbench.preprocess import PreProcess
+from matbench.core.featurize import Featurize
+from matbench.core.preprocess import Preprocess
 from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
     Stoichiometry
 from sklearn.model_selection import train_test_split
@@ -29,8 +29,8 @@ class TestTpotAutoml(unittest.TestCase):
             ElementProperty.from_preset(preset_name='matminer'),
             TMetalFraction()])
         # preprocessing of the data
-        prep = PreProcess(max_colnull=0.1)
-        df = prep.handle_nulls(df_feats)
+        prep = Preprocess()
+        df = prep.handle_na(df_feats, max_na_frac=0.1)
         feats0 = set(df.columns)
         df = prep.prune_correlated_features(df, target, R_max=0.95)
         self.assertEqual(len(feats0 - set(df.columns)), 17)
@@ -95,8 +95,8 @@ class TestTpotAutoml(unittest.TestCase):
             ElementProperty.from_preset(preset_name='matminer'),
             Stoichiometry()])
         # preprocessing of the data
-        prep = PreProcess(max_colnull=0.1)
-        df = prep.handle_nulls(df_feats)
+        prep = Preprocess()
+        df = prep.handle_na(df_feats, max_na_frac=0.1)
         feats0 = set(df.columns)
         df = prep.prune_correlated_features(df, target, R_max=0.95)
         self.assertEqual(len(feats0 - set(df.columns)), 49)

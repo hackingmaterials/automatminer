@@ -6,7 +6,8 @@ import unittest
 
 from matbench.data.load import load_double_perovskites_gap, \
     load_castelli_perovskites
-from matbench.featurize import Featurize, AllFeaturizers
+from matbench.core.featurize import Featurize, CompositionFeaturizers, \
+    StructureFeaturizers, DOSFeaturizers, BSFeaturizers, AllFeaturizers
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
@@ -14,6 +15,7 @@ import matminer.featurizers.dos as dosf
 import matminer.featurizers.bandstructure as bf
 
 test_dir = os.path.dirname(__file__)
+
 
 class TestFeaturize(unittest.TestCase):
 
@@ -26,57 +28,61 @@ class TestFeaturize(unittest.TestCase):
                                multiindex=False)
 
         df = featurizer.featurize_formula(df_init,
+                                          featurizers="all",
+                                          compcol=None,
                                           asindex=False,
-                                          guess_oxidstates=True,
-                                          need_oxidstates=True)
+                                          guess_oxidstates=True)
 
         # sanity checks
         self.assertTrue(len(df), limit)
         self.assertGreaterEqual(len(df.columns), 70)
         self.assertAlmostEqual(
-            df[df["formula"]=="AgNbSnTiO6"]["gap gllbsc"].values[0], 2.881, 3)
+            df[df["formula"] == "AgNbSnTiO6"]["gap gllbsc"].values[0], 2.881, 3)
 
         # BandCenter:
         self.assertAlmostEqual(
-            df[df["formula"]=="AgNbSnTiO6"]["band center"].values[0],-2.623, 3)
+            df[df["formula"] == "AgNbSnTiO6"]["band center"].values[0], -2.623,
+            3)
 
         # AtomicOrbitals:
         self.assertAlmostEqual(
-            df[df["formula"]=="AgNbSnTiO6"]["gap_AO"].values[0], 0.129, 3)
+            df[df["formula"] == "AgNbSnTiO6"]["gap_AO"].values[0], 0.129, 3)
 
         # Stoichiometry:
-        self.assertTrue((df["0-norm"].isin([4, 5])).all()) # all 4- or 5-specie
+        self.assertTrue((df["0-norm"].isin([4, 5])).all())  # all 4- or 5-specie
         self.assertTrue((df["2-norm"] < 1).all())
 
         # ValenceOrbital:
         self.assertAlmostEqual(
-            df[df["formula"]=="AgNbLaAlO6"]["frac p valence electrons"].values[0], 0.431, 3)
+            df[df["formula"] == "AgNbLaAlO6"][
+                "frac p valence electrons"].values[0], 0.431, 3)
 
         # TMetalFraction:
         self.assertTrue((df["transition metal fraction"] < 0.45).all())
 
         # YangSolidSolution:
         self.assertAlmostEqual(
-            df[df["formula"]=="AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
+            df[df["formula"] == "AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
 
         # ElectronegativityDiff:
         self.assertAlmostEqual(
-            df[df["formula"]=="AgNbLaGaO6"]["std_dev EN difference"].values[0], 0.366, 3)
+            df[df["formula"] == "AgNbLaGaO6"]["std_dev EN difference"].values[
+                0], 0.366, 3)
 
         # making sure:
-            # featurize_formula works with only composition and not formula
-            # featurize_formula works with a given list of featurizers
+        # featurize_formula works with only composition and not formula
+        # featurize_formula works with a given list of featurizers
         df = featurizer.featurize_formula(df_init, featurizers=[
             cf.ElementProperty.from_preset(preset_name="matminer"),
             cf.IonProperty()
         ])
         self.assertGreaterEqual(len(df.columns), 69)
 
-
     def test_featurize_structure(self, limit=5):
         df_init = load_castelli_perovskites()[:limit]
         featurizer = Featurize(ignore_errors=False, multiindex=False)
-        df = featurizer.featurize_structure(df_init, inplace=False)
+        df = featurizer.featurize_structure(df_init, inplace=False,
+                                            featurizers="all")
 
         # sanity checks
         self.assertTrue(len(df), limit)
@@ -85,15 +91,20 @@ class TestFeaturize(unittest.TestCase):
         # DensityFeatures:
         self.assertTrue((df["packing fraction"] < 0.45).all())
         self.assertAlmostEqual(
-            df[df["formula"]=="RhTeN3"]["density"].values[0], 7.3176, 4)
+            df[df["formula"] == "RhTeN3"]["density"].values[0], 7.3176, 4)
 
         # GlobalSymmetryFeatures:
-        self.assertEqual(df[df["formula"] == "HfTeO3"]["spacegroup_num"].values[0], 99)
-        self.assertEqual(df[df["formula"] == "HfTeO3"]["crystal_system"].values[0], "tetragonal")
-        self.assertTrue(not df[df["formula"] == "HfTeO3"]["is_centrosymmetric"].values[0])
+        self.assertEqual(
+            df[df["formula"] == "HfTeO3"]["spacegroup_num"].values[0], 99)
+        self.assertEqual(
+            df[df["formula"] == "HfTeO3"]["crystal_system"].values[0],
+            "tetragonal")
+        self.assertTrue(
+            not df[df["formula"] == "HfTeO3"]["is_centrosymmetric"].values[0])
 
         # Dimensionality:
-        self.assertEqual(df[df["formula"] == "ReAsO2F"]["dimensionality"].values[0], 2)
+        self.assertEqual(
+            df[df["formula"] == "ReAsO2F"]["dimensionality"].values[0], 2)
 
         # RadialDistributionFunction:
         # TODO: add this test after it returns numbers and not dict!
@@ -103,44 +114,50 @@ class TestFeaturize(unittest.TestCase):
 
         # TODO what are the other presets for SiteStatsFingerprint? need implementation and test?
         # SiteStatsFingerprint with preset==CrystalNNFingerprint_ops:
-        self.assertEqual(df[df["formula"] == "RhTeN3"]["mean wt CN_1"].values[0], 0)
+        self.assertEqual(
+            df[df["formula"] == "RhTeN3"]["mean wt CN_1"].values[0], 0)
         self.assertAlmostEqual(
             df[df["formula"] == "RhTeN3"]["mean wt CN_2"].values[0], 0.412, 3)
 
         # EwaldEnergy:
         self.assertAlmostEqual(
-            df[df["formula"]=="RhTeN3"]["ewald_energy"].values[0], -405.64, 2)
-        self.assertEqual(df[df["formula"]=="HfTeO3"]["ewald_energy"].values[0], 0.0)
+            df[df["formula"] == "RhTeN3"]["ewald_energy"].values[0], -405.64, 2)
+        self.assertEqual(
+            df[df["formula"] == "HfTeO3"]["ewald_energy"].values[0], 0.0)
 
         # StructuralHeterogeneity:
         self.assertAlmostEqual(
-            df[df["formula"]=="RhTeN3"]["min relative bond length"].values[0],
+            df[df["formula"] == "RhTeN3"]["min relative bond length"].values[0],
             0.7896, 4)
         self.assertAlmostEqual(
-            df[df["formula"]=="RhTeN3"]["maximum neighbor distance variation"].values[0],
+            df[df["formula"] == "RhTeN3"][
+                "maximum neighbor distance variation"].values[0],
             0.1224, 4)
 
         # MaximumPackingEfficiency:
         self.assertAlmostEqual(
-            df[df["formula"]=="ReAsO2F"]["max packing efficiency"].values[0], 0.295, 3)
+            df[df["formula"] == "ReAsO2F"]["max packing efficiency"].values[0],
+            0.295, 3)
 
         # ChemicalOrdering:
         self.assertAlmostEqual(
-            df[df["formula"]=="HfTeO3"]["mean ordering parameter shell 1"].values[0], 0.599, 3)
+            df[df["formula"] == "HfTeO3"][
+                "mean ordering parameter shell 1"].values[0], 0.599, 3)
         # TODO: umm, make a PR for shorter feature_labels for some structure featurizers?
 
         # XRDPowderPattern:
         self.assertAlmostEqual(
-            df[df["formula"]=="BiHfO2F"]["xrd_127"].values[0], 0.0011, 4)
+            df[df["formula"] == "BiHfO2F"]["xrd_127"].values[0], 0.0011, 4)
 
         # BondFractions:
         self.assertAlmostEqual(
-            df[df["formula"] == "WReO2S"]["S2- - W3+ bond frac."].values[0], 0.1667, 4)
+            df[df["formula"] == "WReO2S"]["S2- - W3+ bond frac."].values[0],
+            0.1667, 4)
 
         # BagofBonds:
         self.assertAlmostEqual(
-            df[df["formula"] == "HfTeO3"]["O - O bond #1"].values[0], 11.1658, 4)
-
+            df[df["formula"] == "HfTeO3"]["O - O bond #1"].values[0], 11.1658,
+            4)
 
     def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
         """
@@ -185,7 +202,6 @@ class TestFeaturize(unittest.TestCase):
         self.assertAlmostEqual(df["cbm_s"][0], 0.4416, 3)
         self.assertAlmostEqual(df["cbm_sp"][0], 0.9864, 3)
 
-
         df = featurizer.featurize_bandstructure(df_init,
                                                 inplace=False,
                                                 col_id="bandstructure_uniform")
@@ -201,7 +217,6 @@ class TestFeaturize(unittest.TestCase):
         self.assertAlmostEqual(df["branch_point_energy"][0], 5.7677, 4)
 
 
-
 class TestAllFeaturizers(unittest.TestCase):
     """
     Class to ensure the featurizers available in featurizer files in matminer
@@ -209,6 +224,7 @@ class TestAllFeaturizers(unittest.TestCase):
     to catch events when a new featurizer is defined but not listed inside
     AllFeaturizers (e.g. by mistake).
     """
+
     def setUp(self):
         self.allfs = AllFeaturizers()
         self.base_non_featurizers = [
@@ -236,7 +252,6 @@ class TestAllFeaturizers(unittest.TestCase):
         featurizer_names = [c for c in class_names if c not in non_featurizers]
         return featurizer_names
 
-
     def test_composition_featurizers(self):
         non_featurizers = self.base_non_featurizers + [
             "Composition",
@@ -252,14 +267,13 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(cf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.composition(need_oxidstates=True,
-                                            slow_ones=True)
+        test_feats = self.allfs.composition
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
+
         self.assertEqual(len(test_feats), len(true_feats))
         for featurizer_name in true_feats:
             self.assertTrue(featurizer_name in test_feats)
-
 
     def test_structure_featurizers(self):
         non_featurizers = self.base_non_featurizers + [
@@ -281,13 +295,15 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(sf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.structure()
+        test_feats = self.allfs.structure
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
+
+        print(sorted(test_feats))
+        print(sorted(true_feats))
         self.assertEqual(len(test_feats), len(true_feats))
         for featurizer_name in true_feats:
             self.assertTrue(featurizer_name in test_feats)
-
 
     def test_dos_featurizers(self):
         non_featurizers = self.base_non_featurizers + [
@@ -299,13 +315,12 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(dosf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.dos()
+        test_feats = self.allfs.dos
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
         self.assertEqual(len(test_feats), len(true_feats))
         for featurizer_name in true_feats:
             self.assertTrue(featurizer_name in test_feats)
-
 
     def test_bandstructure_featurizers(self):
         non_featurizers = self.base_non_featurizers + [
@@ -317,13 +332,12 @@ class TestAllFeaturizers(unittest.TestCase):
         # get all current featurizers
         true_feats = self.get_true_featurizers(bf, non_featurizers)
         # get all featurizers that are defined in AllFeaturizers class
-        test_feats = self.allfs.bandstructure()
+        test_feats = self.allfs.bandstructure
         test_feats = [c.__class__.__name__ for c in test_feats]
         # featurizers must match exactly
         self.assertEqual(len(test_feats), len(true_feats))
         for featurizer_name in true_feats:
             self.assertTrue(featurizer_name in test_feats)
-
 
 
 if __name__ == '__main__':
