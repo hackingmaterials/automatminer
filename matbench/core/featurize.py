@@ -141,7 +141,7 @@ class CompositionFeaturizers(FeaturizerSet):
         """
         Generally slow featurizers under most conditions.
         """
-        featzers = [cf.Miedema(),
+        featzers = [cf.Miedema(struct_types='all'),
                     # much slower than the rest
                     cf.AtomicPackingEfficiency(),
                     # requires mpid present
