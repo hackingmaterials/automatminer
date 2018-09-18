@@ -6,7 +6,7 @@ import numpy as np
 from matbench.automl.tpot_utils import TpotAutoml
 from matbench.core.analysis import Analysis
 from matbench.data.load import load_double_perovskites_gap, \
-    load_glass_formation
+    load_glass_binary
 from matbench.core.featurize import Featurize
 from matbench.core.preprocess import Preprocess
 from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
@@ -85,11 +85,10 @@ class TestTpotAutoml(unittest.TestCase):
                          'transition metal fraction')
         self.assertAlmostEqual(feature_importance['range melting_point'], 0.1, 1)
 
-
     def test_tpot_classification(self, limit=500):
         target = 'gfa'
         # load and featurize:
-        df_init = load_glass_formation(phase='binary')[:limit]
+        df_init = load_glass_binary()[:limit]
         featzer = Featurize()
         df_feats = featzer.featurize_formula(df_init, featurizers=[
             ElementProperty.from_preset(preset_name='matminer'),
