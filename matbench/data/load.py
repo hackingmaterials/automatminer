@@ -347,21 +347,62 @@ def load_m2ax():
     return df.rename(columns=colmap)
 
 
-def load_glass_formation(phase="ternary"):
+def load_binary_glass():
     """
-    Metallic glass formation data, including ternary and binary alloys,
-    collected from various experimental techniques such as melt-spinning or
-    mechanical alloying.
-    There are 7742 alloys in the "ternary" dataset and 5959 alloys in the
-    "binary" dataset.
+    Metallic glass formation data for binary alloys, collected from various
+    experimental techniques such as melt-spinning or mechanical alloying.
+    This dataset covers all compositions with an interval of 5 at.% in 59
+    binary systems, containing a total of 5959 alloys in the dataset.
+    The target property of this dataset is the glass forming ability (GFA),
+    i.e. whether the composition can form monolithic glass or not, which is
+    either 1 for glass forming or 0 for non-full glass forming.
 
     References:
-        "ternary": https://materials.springer.com/bp/docs/978-3-540-47679-5
-                   https://www.nature.com/articles/npjcompumats201628
-        "binary": https://pubs.acs.org/doi/10.1021/acs.jpclett.7b01046
+        https://pubs.acs.org/doi/10.1021/acs.jpclett.7b01046
+
+    Returns:
+        formula (input): chemical formula
+        phase (target): only in the "ternary" dataset, designating the phase
+                        obtained in glass producing experiments,
+                        "AM": amorphous phase
+                        "CR": crystalline phase
+        gfa (target): glass forming ability, correlated with the phase column,
+                      designating whether the composition can form monolithic
+                      glass or not,
+                      1: glass forming ("AM")
+                      0: non-full-glass forming ("CR")
+
+    """
+    df = pd.read_csv(os.path.join(data_dir, 'glass_binary.csv'))
+    return df
+
+
+def load_ternary_glass_landolt(processing="meltspin", unique_composition=True):
+    """
+    Metallic glass formation datasets for ternary alloys, collected from the
+    "Nonequilibrium Phase Diagrams of Ternary Amorphous Alloys,’ a volume of
+    the Landolt– Börnstein collection.
+    This dataset contains experimental measurements of whether it is
+    possible to form a glass using a variety of processing techniques at
+    thousands of compositions from hundreds of ternary systems.
+    The processing techniques are designated in the "processing" column.
+
+    There are originally 7191 experiments in this dataset, will be reduced to
+    6203 after deduplicated, and will be further reduced to 6118 if combining
+    multiple data for one composition.
+
+    There are originally 6780 melt-spinning experiments in this dataset,
+    will be reduced to 5800 if deduplicated, and will be further reduced to
+    5736 if combining multiple experimental data for one composition.
+
+    References:
+        https://materials.springer.com/bp/docs/978-3-540-47679-5
+        https://www.nature.com/articles/npjcompumats201628
 
     Args:
-        phase (str): "ternary" (as default) or "binary".
+        processing (str): "meltspin" or "sputtering" or "all"
+        unique_composition (bool): whether combine data from difference sources
+                                   but for the same composition
 
     Returns:
         formula (input): chemical formula
@@ -371,23 +412,78 @@ def load_glass_formation(phase="ternary"):
                         "CR": crystalline phase
                         "AC": amorphous-crystalline composite phase
                         "QC": quasi-crystalline phase
-        gfa (target): glass forming ability, i.e. whether the composition can
-                      form monolithic glass or not,
-                      True: glass forming
-                      False: non-glass forming
+        processing (condition): "meltspin" or "sputtering"
+        gfa (target): glass forming ability, correlated with the phase column,
+                      designating whether the composition can form monolithic
+                      glass or not,
+                      1: glass forming ("AM")
+                      0: non-full-glass forming ("CR" or "AC" or "QC")
 
     """
-    if phase == "ternary":
-        df = pd.read_csv(os.path.join(data_dir, 'glass_ternary.csv'))
-    elif phase == "binary":
-        df = pd.read_csv(os.path.join(data_dir, 'glass_binary.csv'))
-    else:
-        raise ValueError("Unknown phase designation for glass formation "
-                         "dataset: {}".format(phase))
-
-    df = df.applymap(lambda x: True if x == 1 else x)
-    df = df.applymap(lambda x: False if x == 0 else x)
+    df = pd.read_csv(os.path.join(data_dir, 'glass_ternary_landolt.csv'))
+    df.drop_duplicates()
+    if processing in ["meltspin", "sputtering"]:
+        df = df[df["processing"] == processing]
+    df["gfa"] = df["phase"].apply(lambda x: 1 if x == "AM" else 0)
+    if unique_composition:
+        df = df.groupby("formula").max().reset_index()
     return df
+
+
+def load_ternary_glass_hipt(system="all"):
+    """
+    Metallic glass formation datasets for ternary alloys, collected from the
+    high-throughput sputtering experiments measuring whether it is possible
+     to form a glass using sputtering.
+
+    There are originally 7191 experiments in this dataset, will be reduced to
+    6203 after deduplicated, and will be further reduced to 6118 if combining
+    multiple data for one composition.
+
+    There are originally 6780 melt-spinning experiments in this dataset,
+    will be reduced to 5800 if deduplicated, and will be further reduced to
+    5736 if combining multiple experimental data for one composition.
+
+    References:
+        http://advances.sciencemag.org/content/4/4/eaaq1566
+
+    Args:
+        system (str): "CoFeZr", "CoTiZr", "CoVZr","FeTiNb" or a list of these
+                      systems e.g. ["CoFeZr", "CoVZr"] or "all"
+
+    Returns:
+        formula (input): chemical formula
+        system (condition): selected system(s)
+        processing (condition): "sputtering"
+        phase (target): only in the "ternary" dataset, designating the phase
+                obtained in glass producing experiments,
+                "AM": amorphous phase
+                "CR": crystalline phase
+                "AC": amorphous-crystalline composite phase
+                "QC": quasi-crystalline phase
+        gfa (target): glass forming ability, correlated with the phase column,
+                      designating whether the composition can form monolithic
+                      glass or not,
+                      1: glass forming ("AM")
+                      0: non-full-glass forming ("CR" or "AC" or "QC")
+
+    """
+    df = pd.read_csv(os.path.join(data_dir, 'glass_ternary_hipt.csv'))
+    if isinstance(system, str):
+        if system == "all":
+            return df
+        else:
+            try:
+                return df[df["system"] == system]
+            except:
+                raise AttributeError("this system {} is not in this dataset".
+                                     format(system))
+    else:
+        try:
+            return df[df["system"].isin(system)]
+        except:
+            raise AttributeError("some of the system list {} are not in this "
+                                 "dataset". format(system))
 
 
 def load_expt_formation_enthalpy():
