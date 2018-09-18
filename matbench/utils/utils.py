@@ -42,6 +42,7 @@ def setup_custom_logger(name='matbench_logger', filepath='.',
     logger.setLevel(level)
     logger.addHandler(screen_handler)
     logger.addHandler(handler)
+
     return logger
 
 
@@ -53,23 +54,37 @@ def is_greater_better(scoring_function):
         scoring_function (str): the name of the scoring function supported by
             TPOT and sklearn. Please see below for more information.
 
-    Returns (bool):
+    Returns (bool): Whether the scoring metric should be considered better if
+        it is larger or better if it is smaller
     """
-    if scoring_function in [
+    desired_high_metrics = {
         'accuracy', 'adjusted_rand_score', 'average_precision',
-        'balanced_accuracy','f1', 'f1_macro', 'f1_micro', 'f1_samples',
+        'balanced_accuracy', 'f1', 'f1_macro', 'f1_micro', 'f1_samples',
         'f1_weighted', 'precision', 'precision_macro', 'precision_micro',
-        'precision_samples','precision_weighted', 'recall',
-        'recall_macro', 'recall_micro','recall_samples',
-        'recall_weighted', 'roc_auc'] + \
-            ['r2', 'neg_median_absolute_error', 'neg_mean_absolute_error',
-            'neg_mean_squared_error']:
-        return True
-    elif scoring_function in ['median_absolute_error',
-                              'mean_absolute_error',
-                              'mean_squared_error']:
-        return False
-    else:
-        warnings.warn('The scoring_function: "{}" not found; continuing assuming'
-                      ' greater score is better'.format(scoring_function))
-        return True
+        'precision_samples', 'precision_weighted', 'recall',
+        'recall_macro', 'recall_micro', 'recall_samples',
+        'recall_weighted', 'roc_auc' 'r2', 'neg_median_absolute_error',
+        'neg_mean_absolute_error', 'neg_mean_squared_error'
+    }
+
+    desired_low_metrics = {
+        'median_absolute_error',
+        'mean_absolute_error',
+        'mean_squared_error'
+    }
+
+    # Check to ensure no metrics are accidentally placed in both sets
+    if desired_high_metrics.intersection(desired_low_metrics):
+        raise MatbenchError("Error, there is a metric in both desired"
+                            " high and desired low metrics")
+
+    if scoring_function not in desired_high_metrics \
+            and scoring_function not in desired_low_metrics:
+
+        warnings.warn(
+            'The scoring_function: "{}" not found; continuing assuming'
+            ' greater score is better'.format(scoring_function))
+
+    # True if not in either set or only in desired_high,
+    # False if in desired_low or both sets
+    return scoring_function not in desired_low_metrics
