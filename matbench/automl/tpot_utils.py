@@ -1,6 +1,8 @@
 import numpy as np
 from collections import OrderedDict
 from matbench.utils.utils import is_greater_better
+from matbench.automl.tpot_configs.classifier import classifier_config_dict_mb
+from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
 from tpot import TPOTClassifier, TPOTRegressor
 
 __author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>'
@@ -22,6 +24,7 @@ returns the best score (supports many scoring metrics)
         - no feature importance as far as I can tell
         - I have had some difficulties using it in Pycharm as opposed to Terminal and Jupyter notebooks
 """
+
 
 def TpotAutoml(mode, feature_names=None, **kwargs):
     """
@@ -80,14 +83,19 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
     class TpotWrapper(tpot_class):
 
         def __init__(self, **kwargs):
-            self.models  = None
+            self.models = None
             self.top_models = OrderedDict()
             self.top_models_scores = OrderedDict()
             self.feature_names = kwargs.pop('feature_names', None)
             if tpot_class.__name__ == 'TPOTClassifier':
                 self.mode = 'classification'
+                # use the customed _config_dicts as default
+                kwargs['config_dict'] = kwargs.get('config_dict',
+                                                   classifier_config_dict_mb)
             elif tpot_class.__name__ == 'TPOTRegressor':
                 self.mode = 'regression'
+                kwargs['config_dict'] = kwargs.get('config_dict',
+                                                   regressor_config_dict_mb)
             self.random_state = kwargs.get('random_state', None)
             if self.random_state is not None:
                 np.random.seed(self.random_state)
@@ -95,7 +103,6 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
             kwargs['cv'] = kwargs.get('cv', 5)
             kwargs['n_jobs'] = kwargs.get('n_jobs', -1)
             super(tpot_class, self).__init__(**kwargs)
-
 
         def get_top_models(self, return_scores=True):
             """
@@ -136,7 +143,6 @@ def _tpot_class_wrapper(tpot_class, **kwargs):
                 return self.top_models_scores
             else:
                 return self.top_models
-
 
         def fit(self, features, target, **kwargs):
             """
