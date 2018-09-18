@@ -5,9 +5,12 @@ This file is modified from the default config files of the TPOT library.
 It contains a customed dict of operators that we want to optimize using 
 genetic algorithm.
 
-The major modification from the TPOT default dict is the removal of 
-Preprocessors/Selectors-related parameters. These procedures are now
-taken care by the Preprocess class in matbench (matbench.core.preprocess).
+We can add/remove Classifiers/Preprocessors/Selectors-related operators 
+to custom the operators to be optimized by tpot in the future. For instance,
+the Preprocessors/Selectors-related procedures are currently taken care of
+by the Preprocess class in matbench, so we may consider to comment out the
+related operators in the config_dicts (or use tpot instead of Preprocess
+to optimize some procedures).
 
 Check the TPOT documentation for information on the structure of config_dicts
 
