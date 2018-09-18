@@ -2,18 +2,18 @@ import numpy as np
 
 """
 This file is modified from the default config files of the TPOT library. 
-It contains a dict of selected parameters that we want to optimize using 
+It contains a customed dict of operators that we want to optimize using 
 genetic algorithm.
 
 The major modification from the TPOT default dict is the removal of 
 Preprocessors/Selectors-related parameters. These procedures are now
 taken care by the Preprocess class in matbench (matbench.core.preprocess).
 
-Check the TPOT documentation for information on the structure of config dicts
+Check the TPOT documentation for information on the structure of config_dicts
 
 """
 
-classifier_config_dict_matbench = {
+classifier_config_dict_mb = {
 
     # Classifiers
     'sklearn.naive_bayes.GaussianNB': {
@@ -123,10 +123,10 @@ classifier_config_dict_matbench = {
         'n_components': range(1, 11)
     },
 
-    'sklearn.decomposition.PCA': {
-        'svd_solver': ['randomized'],
-        'iterated_power': range(1, 11)
-    },
+    # 'sklearn.decomposition.PCA': {
+    #     'svd_solver': ['randomized'],
+    #     'iterated_power': range(1, 11)
+    # },
 
     'sklearn.preprocessing.PolynomialFeatures': {
         'degree': [2],
