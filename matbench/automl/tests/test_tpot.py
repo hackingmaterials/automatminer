@@ -54,7 +54,8 @@ class TestTpotAutoml(unittest.TestCase):
         top_scores = tpot.get_top_models(return_scores=True)
 
         # test customed config_dict
-        self.assertTrue(tpot._config_dict == regressor_config_dict_mb)
+        # .config_dict is changed to ._config_dict in 0.9.5 tpot version
+        self.assertTrue(tpot.config_dict == regressor_config_dict_mb)
 
         self.assertTrue(tpot.greater_score_is_better)
         # self.assertAlmostEqual(top_scores['XGBRegressor'], 0.8622, 1)
@@ -123,7 +124,7 @@ class TestTpotAutoml(unittest.TestCase):
         top_scores = tpot.get_top_models(return_scores=True)
 
         # test customed config_dict
-        self.assertTrue(tpot._config_dict == classifier_config_dict_mb)
+        self.assertTrue(tpot.config_dict == classifier_config_dict_mb)
 
         self.assertAlmostEqual(top_scores['DecisionTreeClassifier'], 0.91, 1)
         self.assertAlmostEqual(top_scores['RandomForestClassifier'], 0.89, 1)
@@ -158,10 +159,11 @@ class TestTpotAutoml(unittest.TestCase):
 
     def test_customed_configs(self):
         tpot_obj = TPOTClassifier(config_dict=classifier_config_dict_mb)
-        tpot_obj._fit_init()
+        # This is not in the 0.9.3 tpot version
+        # tpot_obj._fit_init()
 
-        self.assertTrue(isinstance(tpot_obj._config_dict, str))
-        self.assertTrue(tpot_obj._config_dict == classifier_config_dict_mb)
+        self.assertTrue(isinstance(tpot_obj.config_dict, dict))
+        self.assertTrue(tpot_obj.config_dict == classifier_config_dict_mb)
 
 
 if __name__ == '__main__':
