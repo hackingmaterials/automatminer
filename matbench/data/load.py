@@ -347,7 +347,7 @@ def load_m2ax():
     return df.rename(columns=colmap)
 
 
-def load_binary_glass():
+def load_glass_binary():
     """
     Metallic glass formation data for binary alloys, collected from various
     experimental techniques such as melt-spinning or mechanical alloying.
@@ -377,9 +377,9 @@ def load_binary_glass():
     return df
 
 
-def load_ternary_glass_landolt(processing="meltspin", unique_composition=True):
+def load_glass_ternary_landolt(processing="meltspin", unique_composition=True):
     """
-    Metallic glass formation datasets for ternary alloys, collected from the
+    Metallic glass formation dataset for ternary alloys, collected from the
     "Nonequilibrium Phase Diagrams of Ternary Amorphous Alloys,’ a volume of
     the Landolt– Börnstein collection.
     This dataset contains experimental measurements of whether it is
@@ -390,7 +390,6 @@ def load_ternary_glass_landolt(processing="meltspin", unique_composition=True):
     There are originally 7191 experiments in this dataset, will be reduced to
     6203 after deduplicated, and will be further reduced to 6118 if combining
     multiple data for one composition.
-
     There are originally 6780 melt-spinning experiments in this dataset,
     will be reduced to 5800 if deduplicated, and will be further reduced to
     5736 if combining multiple experimental data for one composition.
@@ -430,19 +429,14 @@ def load_ternary_glass_landolt(processing="meltspin", unique_composition=True):
     return df
 
 
-def load_ternary_glass_hipt(system="all"):
+def load_glass_ternary_hipt(system="all"):
     """
-    Metallic glass formation datasets for ternary alloys, collected from the
+    Metallic glass formation dataset for ternary alloys, collected from the
     high-throughput sputtering experiments measuring whether it is possible
      to form a glass using sputtering.
 
-    There are originally 7191 experiments in this dataset, will be reduced to
-    6203 after deduplicated, and will be further reduced to 6118 if combining
-    multiple data for one composition.
-
-    There are originally 6780 melt-spinning experiments in this dataset,
-    will be reduced to 5800 if deduplicated, and will be further reduced to
-    5736 if combining multiple experimental data for one composition.
+    The hipt experimental data are of the Co-Fe-Zr, Co-Ti-Zr, Co-V-Zr and
+    Fe-Ti-Nb ternary systems.
 
     References:
         http://advances.sciencemag.org/content/4/4/eaaq1566
@@ -459,13 +453,11 @@ def load_ternary_glass_hipt(system="all"):
                 obtained in glass producing experiments,
                 "AM": amorphous phase
                 "CR": crystalline phase
-                "AC": amorphous-crystalline composite phase
-                "QC": quasi-crystalline phase
         gfa (target): glass forming ability, correlated with the phase column,
                       designating whether the composition can form monolithic
                       glass or not,
                       1: glass forming ("AM")
-                      0: non-full-glass forming ("CR" or "AC" or "QC")
+                      0: non-full-glass forming ("CR")
 
     """
     df = pd.read_csv(os.path.join(data_dir, 'glass_ternary_hipt.csv'))
