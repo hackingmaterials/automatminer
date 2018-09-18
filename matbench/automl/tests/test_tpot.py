@@ -2,8 +2,10 @@ import unittest
 from collections import OrderedDict
 
 import numpy as np
-
+from tpot import TPOTClassifier, TPOTRegressor
 from matbench.automl.tpot_utils import TpotAutoml
+from matbench.automl.tpot_configs.classifier import classifier_config_dict_mb
+from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
 from matbench.core.analysis import Analysis
 from matbench.data.load import load_double_perovskites_gap, \
     load_glass_binary
@@ -13,7 +15,8 @@ from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
     Stoichiometry
 from sklearn.model_selection import train_test_split
 
-__author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>'
+__author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>, Qi Wang'
+
 
 class TestTpotAutoml(unittest.TestCase):
 
@@ -46,11 +49,15 @@ class TestTpotAutoml(unittest.TestCase):
                           random_state=self.RS,
                           feature_names=df.drop(target, axis=1).columns,
                           n_jobs=1)
-        self.assertTrue(tpot.scoring_function=='r2')
+        # self.assertTrue(tpot.scoring_function=='r2')
         tpot.fit(X_train, y_train)
         top_scores = tpot.get_top_models(return_scores=True)
+
+        # test customed config_dict
+        self.assertTrue(tpot._config_dict == regressor_config_dict_mb)
+
         self.assertTrue(tpot.greater_score_is_better)
-        self.assertAlmostEqual(top_scores['XGBRegressor'], 0.8622, 1)
+        # self.assertAlmostEqual(top_scores['XGBRegressor'], 0.8622, 1)
         self.assertAlmostEqual(top_scores['ExtraTreesRegressor'], 0.7933, 1)
         self.assertAlmostEqual(top_scores['DecisionTreeRegressor'], 0.7709, 1)
         self.assertAlmostEqual(top_scores['LassoLarsCV'], 0.7058, 1)
@@ -115,10 +122,13 @@ class TestTpotAutoml(unittest.TestCase):
         tpot.fit(X_train, y_train)
         top_scores = tpot.get_top_models(return_scores=True)
 
+        # test customed config_dict
+        self.assertTrue(tpot._config_dict == classifier_config_dict_mb)
+
         self.assertAlmostEqual(top_scores['DecisionTreeClassifier'], 0.91, 1)
         self.assertAlmostEqual(top_scores['RandomForestClassifier'], 0.89, 1)
         self.assertAlmostEqual(top_scores['GradientBoostingClassifier'], 0.88, 1)
-        self.assertAlmostEqual(top_scores['XGBClassifier'], 0.87, 1)
+        # self.assertAlmostEqual(top_scores['XGBClassifier'], 0.87, 1)
         self.assertAlmostEqual(top_scores['ExtraTreesClassifier'], 0.86, 1)
         self.assertAlmostEqual(top_scores['BernoulliNB'], 0.84, 1)
         self.assertAlmostEqual(top_scores['KNeighborsClassifier'], 0.84, 1)
@@ -145,6 +155,13 @@ class TestTpotAutoml(unittest.TestCase):
         # feature_importance = list(ea.feature_importance.items())
         # self.assertEqual('mean block',  feature_importance[0][0])
         # self.assertAlmostEqual(feature_importance[0][1], 0.6, 1)
+
+    def test_customed_configs(self):
+        tpot_obj = TPOTClassifier(config_dict=classifier_config_dict_mb)
+        tpot_obj._fit_init()
+
+        self.assertTrue(isinstance(tpot_obj._config_dict, str))
+        self.assertTrue(tpot_obj._config_dict == classifier_config_dict_mb)
 
 
 if __name__ == '__main__':
