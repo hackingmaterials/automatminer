@@ -1,9 +1,21 @@
 import numpy as np
 
-# Check the TPOT documentation for information on the structure of config dicts
+"""
+This file is modified from the default config files of the TPOT library. 
+It contains a dict of selected parameters that we want to optimize using 
+genetic algorithm.
+
+The major modification from the TPOT default dict is the removal of 
+Preprocessors/Selectors-related parameters. These procedures are now
+taken care by the Preprocess class in matbench (matbench.core.preprocess).
+
+Check the TPOT documentation for information on the structure of config dicts
+
+"""
 
 regressor_config_dict_matbench = {
 
+    # Regressors
     'sklearn.linear_model.ElasticNetCV': {
         'l1_ratio': np.arange(0.0, 1.01, 0.05),
         'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1]

@@ -1,6 +1,17 @@
 import numpy as np
 
-# Check the TPOT documentation for information on the structure of config dicts
+"""
+This file is modified from the default config files of the TPOT library. 
+It contains a dict of selected parameters that we want to optimize using 
+genetic algorithm.
+
+The major modification from the TPOT default dict is the removal of 
+Preprocessors/Selectors-related parameters. These procedures are now
+taken care by the Preprocess class in matbench (matbench.core.preprocess).
+
+Check the TPOT documentation for information on the structure of config dicts
+
+"""
 
 classifier_config_dict_matbench = {
 
