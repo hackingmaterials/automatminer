@@ -3,6 +3,7 @@ import os
 import sys
 import warnings
 
+
 class MatbenchError(Exception):
     """
     Exception specific to matbench methods.
@@ -14,12 +15,13 @@ class MatbenchError(Exception):
     def __str__(self):
         return "MatbenchError : " + self.msg
 
+
 def setup_custom_logger(name='matbench_logger', filepath='.',
                         filename='matbench.log', level=None):
     """
     Custom logger with both screen and file handlers. This is particularly
     useful if there are other programs that call on logging
-    in which case the log results and their levels are distict and clear.
+    in which case the log results and their levels are distinct and clear.
 
     Args:
         name (str): logger name to distinguish between different codes.

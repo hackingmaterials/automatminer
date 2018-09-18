@@ -5,7 +5,7 @@ from pymatgen.core import Structure
 from matbench.metalearning.base import MetaFeatureValue
 from matbench.metalearning import metafeatures
 from matbench.data.load import load_castelli_perovskites, load_jdft2d, \
-    load_glass_formation, load_mp
+    load_glass_binary, load_mp
 
 
 test_dir = os.path.dirname(__file__)
@@ -14,7 +14,7 @@ test_dir = os.path.dirname(__file__)
 class TestCompositionMetafeatures(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.df_glass = load_glass_formation(phase="ternary")
+        cls.df_glass = load_glass_binary()
 
         cls.metafeatures_glass = metafeatures.metafeatures
         cls.helpers_glass = metafeatures.helpers
@@ -26,37 +26,37 @@ class TestCompositionMetafeatures(unittest.TestCase):
     def test_NumberOfFormulas(self):
         nf = self.metafeatures_glass["NumberOfFormulas"](
              self.df_glass["formula"], self.df_glass["gfa"])
-        self.assertEqual(nf.value, 7742)
+        self.assertEqual(nf.value, 5959)
         self.assertIsInstance(nf, MetaFeatureValue)
 
     def test_PercentOfAllMetal(self):
         pm = self.metafeatures_glass["PercentOfAllMetal"](
              self.df_glass["formula"], self.df_glass["gfa"])
-        self.assertEqual(pm.value, 0.3944599195295574)
+        self.assertEqual(pm.value, 0.6577857785778578)
         self.assertIsInstance(pm, MetaFeatureValue)
 
     def test_PercentOfMetalNonmetalCompounds(self):
         pmnc = self.metafeatures_glass["PercentOfMetalNonmetalCompounds"](
                self.df_glass["formula"], self.df_glass["gfa"])
-        self.assertEqual(pmnc.value, 0.6046115753636645)
+        self.assertEqual(pmnc.value, 0.3207920792079208)
         self.assertIsInstance(pmnc, MetaFeatureValue)
 
     def test_PercentOfAllNonmetal(self):
         pan = self.metafeatures_glass["PercentOfAllNonmetal"](
               self.df_glass["formula"], self.df_glass["gfa"])
-        self.assertEqual(pan.value, 0.0007737542556484061)
+        self.assertEqual(pan.value, 0.021422142214221424)
         self.assertIsInstance(pan, MetaFeatureValue)
 
     def test_NumberOfDifferentElements(self):
         nde = self.metafeatures_glass["NumberOfDifferentElements"](
               self.df_glass["formula"], self.df_glass["gfa"])
-        self.assertEqual(nde.value, 57)
+        self.assertEqual(nde.value, 38)
         self.assertIsInstance(nde, MetaFeatureValue)
 
     def test_AvgNumberOfElements(self):
         ane = self.metafeatures_glass["AvgNumberOfElements"](
               self.df_glass["formula"], self.df_glass["gfa"])
-        self.assertEqual(ane.value, 2.8404518724852985)
+        self.assertEqual(ane.value, 1.9801980198019802)
         self.assertIsInstance(ane, MetaFeatureValue)
 
 
