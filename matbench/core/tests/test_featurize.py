@@ -5,7 +5,7 @@ import pandas as pd
 import unittest
 
 from matbench.data.load import load_double_perovskites_gap, \
-    load_castelli_perovskites
+    load_castelli_perovskites, load_phonon_dielectric_mp
 from matbench.core.featurize import Featurize, CompositionFeaturizers, \
     StructureFeaturizers, DOSFeaturizers, BSFeaturizers, AllFeaturizers
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
@@ -215,6 +215,25 @@ class TestFeaturize(unittest.TestCase):
 
         # BranchPointEnergy:
         self.assertAlmostEqual(df["branch_point_energy"][0], 5.7677, 4)
+
+
+    def test_auto_featurize(self, limit=5):
+        df_init = load_phonon_dielectric_mp()[:limit]
+        print(df_init.structure)
+        featurizer = Featurize(ignore_errors=False, multiindex=True)
+        df = featurizer.auto_featurize(df_init, input_cols=('formula', 'structure'))
+
+        # sanity checks
+        self.assertTrue(len(df), limit)
+        self.assertGreater(len(df.columns), len(df_init.columns))
+
+        # DensityFeatures:
+        self.assertEqual(df[('ElementProperty', 'mode SpaceGroupNumber')][1], 194)
+
+        self.assertAlmostEqual( # making sure structure is also featurized
+            df[('SiteStatsFingerprint', 'mean trigonal pyramidal CN_4')][1],
+            0.243648, 3)
+        self.assertEqual(df.index.name, ('Input Data', 'formula'))
 
 
 class TestAllFeaturizers(unittest.TestCase):

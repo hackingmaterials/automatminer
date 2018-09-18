@@ -1,28 +1,29 @@
 import json
-
 import matbench.data.load as loader
 import numpy as np
 import os
 import pandas as pd
 import pickle
 from time import time
-from matbench.analysis import Analysis
+from matbench.core.analysis import Analysis
 from matbench.automl.tpot_utils import TpotAutoml
-from matbench.featurize import Featurize
-from matbench.preprocess import PreProcess
+from matbench.core.featurize import Featurize
+from matbench.core.preprocess import Preprocess
 from sklearn.model_selection import train_test_split
+
+
 
 # inputs
 loader_func = loader.load_expt_gap
-LIMIT = 30
+LIMIT = 40
 IGNORE_THESE_COLUMNS = []
 TARGET = 'gap expt'
 MODE = 'regression'
 CALC_DIR = 'run_data'
 TIMEOUT_MINS = None
 GENERATIONS = 2
-POPULATION_SIZE = 10
-SCORING = 'r2'
+POPULATION_SIZE = 20
+SCORING = 'neg_mean_squared_error'
 SEED = 13
 FEAT_FROM_FILE = False
 TPOT_FROM_FILE = False
@@ -35,7 +36,7 @@ EXCLUDED_FEATURIZERS = ['CohesiveEnergy', 'AtomicPackingEfficiency',
                         'MinimumRelativeDistances',
                         'ElectronicRadialDistributionFunction']
 FEATUREIZE_THESE_COLUMNS = ["formula"]
-N_JOBS = 4
+N_JOBS = 1 # only for featurization
 MULTIINDEX = True
 if MULTIINDEX:
     TARGET = ('Input Data', TARGET)
@@ -56,15 +57,15 @@ if not FEAT_FROM_FILE:
                         n_jobs=N_JOBS)
 
     df = featzer.auto_featurize(df_init,
-                                input_cols=FEATUREIZE_THESE_COLUMNS,
-                                guess_oxidstates=False)
+                                   input_cols=FEATUREIZE_THESE_COLUMNS,
+                                   guess_oxidstates=False)
     df.to_pickle(os.path.join(CALC_DIR, '{}_data.pickle'.format(fname_base)))
 else:
     df = pd.read_pickle(os.path.join(CALC_DIR, '{}_data.pickle'.format(fname_base)))
 
 
-prep = PreProcess(target=TARGET)
-df = prep.preprocess(df)
+prep = Preprocess()
+df = prep.preprocess(df, target_key=TARGET)
 
 
 X_train, X_test, y_train, y_test = train_test_split(
@@ -80,7 +81,7 @@ if not TPOT_FROM_FILE:
                       scoring=SCORING,
                       random_state=SEED,
                       feature_names=df.drop(TARGET, axis=1).columns,
-                      n_jobs=4,
+                      n_jobs=1,
                       verbosity=2)
     tpot.fit(X_train, y_train)
     print('total fitting time: {} s'.format(time() - start_time))
