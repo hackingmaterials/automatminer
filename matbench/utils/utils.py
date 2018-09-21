@@ -1,3 +1,4 @@
+import importlib
 import logging
 import os
 import sys
@@ -31,14 +32,15 @@ def setup_custom_logger(name='matbench_logger', filepath='.',
 
     Returns: a logging instance with customized formatter and handlers
     """
-    level = level or logging.DEBUG
+    level = level or logging.INFO
+    logger = logging.getLogger(name)
+    importlib.reload(logging)
     formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
                                   datefmt='%Y-%m-%d %H:%M:%S')
     handler = logging.FileHandler(os.path.join(filepath, filename), mode='w')
     handler.setFormatter(formatter)
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
-    logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(screen_handler)
     logger.addHandler(handler)
