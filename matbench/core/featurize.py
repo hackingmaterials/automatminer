@@ -1,6 +1,3 @@
-from warnings import warn
-import logging
-
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
@@ -12,7 +9,6 @@ from matbench.utils.utils import MatbenchError, setup_custom_logger
 from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
-
 
 class FeaturizerSet:
     """
@@ -313,7 +309,7 @@ class Featurize(object):
 
     def __init__(self, ignore_cols=None, ignore_errors=True,
                  drop_featurized_col=True, exclude=None, multiindex=False,
-                 n_jobs=None, loglevel=logging.INFO, logpath='.'):
+                 n_jobs=None, loglevel=None, logpath='.'):
 
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
         self.ignore_cols = ignore_cols or []
