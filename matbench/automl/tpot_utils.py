@@ -85,8 +85,10 @@ def _tpot_class_wrapper(mode, **kwargs):
     inherited from the two choices that TPOT package provides: TPOTClassifier
     and TPOTRegressor. The difference is that this new class has additional
     analysis and visualization methods.
+
     Args:
-        tpot_class (class object): TPOTClassifier or TPOTRegressor
+        mode (str): mode specifier that selects between classifier or regressor
+
         **kwargs: keyword arguments related to TPOTClassifier or TPOTRegressor
 
     Returns (class instance): instantiated TpotWrapper
@@ -141,6 +143,9 @@ def _tpot_class_wrapper(mode, **kwargs):
 
             # Update greater is better attribute as scoring function may have
             # changed between instantiation and call
+            if not self.has_been_fit:
+                raise RuntimeError("Error, the model has not yet been fit")
+
             self.greater_score_is_better = is_greater_better(
                 self.scoring_function
             )
