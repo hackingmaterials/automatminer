@@ -25,7 +25,7 @@ class Preprocess(object):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
 
     def preprocess(self, df, target_key, scale=False, n_pca_features=None,
-                   n_rebate_features=None, max_na_frac=0.05, na_method='drop',
+                   n_rebate_features=None, max_na_frac=0.01, na_method='drop',
                    retain_categorical=True):
         """
         A sequence of data pre-processing steps either through this class or
