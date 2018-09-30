@@ -313,9 +313,13 @@ class Featurize(object):
 
     def __init__(self, ignore_cols=None, ignore_errors=True,
                  drop_featurized_col=True, exclude=None, multiindex=False,
-                 n_jobs=None, loglevel=logging.INFO, logpath='.'):
+                 n_jobs=None, logger=None):
 
-        self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
+        if logger is None:
+            self.logger = setup_custom_logger(filepath='.', level=logging.INFO)
+        else:
+            self.logger = logger
+
         self.ignore_cols = ignore_cols or []
         self.cfset = CompositionFeaturizers(exclude=exclude)
         self.sfset = StructureFeaturizers(exclude=exclude)
@@ -361,14 +365,15 @@ class Featurize(object):
 
         Args:
             df (pandas.DataFrame):
-            input_cols ([str]): columns used for featurization (e.g. "structure"),
-                set to None to try all preset columns.
+            input_cols ([str]): columns used for featurization (e.g. "structure")
             kwargs: other keywords arguments related to featurize_* methods
 
         Returns (pandas.DataFrame):
             self.df w/ new features added via featurizering input_cols
         """
         df = self._prescreen_df(df)
+
+
         for idx, column in enumerate(input_cols):
             featurizer = getattr(self, "featurize_{}".format(column), None)
             if column in df:
