@@ -9,6 +9,12 @@ of various featurizers.
 """
 
 
-class FeaturizerRecommendation:
-    pass
+class FeaturizerSelector:
+    """
+    Given a dataset as a dataframe, a computational budget, and other parameters,
+    return a featurizer set.
+    """
+    def __init__(self, df, target_key, budget):
+        pass
+
 
