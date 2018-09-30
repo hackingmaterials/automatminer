@@ -316,8 +316,10 @@ class Featurize(object):
                  n_jobs=None, logger=None):
 
         if logger is None:
+            # Log to the current directory
             self.logger = setup_custom_logger(filepath='.', level=logging.INFO)
         else:
+            # Use the passed logger
             self.logger = logger
 
         self.ignore_cols = ignore_cols or []
