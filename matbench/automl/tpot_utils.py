@@ -8,7 +8,8 @@ from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
 from matbench.utils.utils import is_greater_better
 
 __author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>' \
-             'Daniel Dopp <dbdopp@lbl.gov>'
+             'Daniel Dopp <dbdopp@lbl.gov>' \
+             'Qi Wang <wqthu11@gmail.com>'
 
 """
 -AF: 
