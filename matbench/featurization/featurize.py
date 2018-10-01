@@ -83,7 +83,9 @@ class Featurize(object):
 
     # todo: Remove once MultipleFeaturizer is fixed
     def _featurize_sequentially(self, df, fset, col_id, **kwargs):
-        for f in fset:
+        for idx, f in enumerate(fset):
+            if idx > 0:
+                col_id = self._pre_screen_col(col_id)
             f.set_n_jobs(n_jobs=self.n_jobs)
             df = f.fit_featurize_dataframe(df, col_id, **kwargs)
         return df
@@ -98,17 +100,18 @@ class Featurize(object):
 
         Args:
             df (pandas.DataFrame):
-            input_cols ([str]): columns used for featurization (e.g. "structure")
+            input_cols ([str]): columns used for featurization (e.g. "structure"),
+                set to None to try all preset columns.
             kwargs: other keywords arguments related to featurize_* methods
 
         Returns (pandas.DataFrame):
             self.df w/ new features added via featurizering input_cols
         """
+        df_cols_init = df.columns.values
         df = self._prescreen_df(df)
-
         for idx, column in enumerate(input_cols):
             featurizer = getattr(self, "featurize_{}".format(column), None)
-            if column in df:
+            if column in df_cols_init:
                 if featurizer is not None:
                     if idx > 0:
                         col_id = self._pre_screen_col(column)
@@ -116,10 +119,10 @@ class Featurize(object):
                         col_id = column
                     df = featurizer(df, col_id=col_id, **kwargs)
                 else:
-                    self.logger.warn(
+                    self.logger.warning(
                         'No method available to featurize "{}"'.format(column))
             else:
-                self.logger.warn(
+                self.logger.warning(
                     "{} not found in the dataframe! Skipping...".format(column))
         return df
 
