@@ -5,7 +5,7 @@ classes which take in a dataframe and target key and product useful analytics.
 import datetime
 import logging
 
-from matbench.featurization.featurize import Featurize
+from matbench.featurization.core import Featurize
 from matbench.utils.utils import setup_custom_logger
 
 

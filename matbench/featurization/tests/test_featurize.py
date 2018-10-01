@@ -13,7 +13,7 @@ import matminer.featurizers.bandstructure as bf
 
 from matbench.data.load import load_double_perovskites_gap, \
     load_castelli_perovskites
-from matbench.featurization.featurize import Featurize
+from matbench.featurization.core import Featurize
 from matbench.featurization.sets import AllFeaturizers
 from matbench.data.load import load_phonon_dielectric_mp
 
