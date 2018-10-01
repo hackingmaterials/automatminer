@@ -9,8 +9,8 @@ from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
 from matbench.analysis.analysis import Analysis
 from matbench.data.load import load_double_perovskites_gap, \
     load_glass_binary
-from matbench.featurization.featurize import Featurize
-from matbench.preprocessing.preprocess import Preprocess
+from matbench.featurization.core import Featurize
+from matbench.preprocessing.core import Preprocess
 from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
     Stoichiometry
 from sklearn.model_selection import train_test_split
