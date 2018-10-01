@@ -170,7 +170,7 @@ class FormulaStatistics:
                                                            six.string_types):
             element = Element(element)
         if element.is_transition_metal:
-            if element.is_lanthanoid or element.symbol in ("Y", "Sc"):
+            if element.is_lanthanoid or element.symbol in {"Y", "Sc"}:
                 return 2
             elif element.is_actinoid:
                 return 3
@@ -180,7 +180,7 @@ class FormulaStatistics:
             return 4
         elif element.is_alkaline:
             return 5
-        elif element.symbol in ("Al", "Ga", "In", "Tl", "Sn", "Pb", "Bi", "Po"):
+        elif element.symbol in {"Al", "Ga", "In", "Tl", "Sn", "Pb", "Bi", "Po"}:
             return 6
         elif element.is_metalloid:
             return 7
@@ -188,7 +188,7 @@ class FormulaStatistics:
         #     return 8
         elif element.is_halogen:
             return 8
-        elif element.symbol in ("C", "H", "N", "P", "O", "S", "Se"):
+        elif element.symbol in {"C", "H", "N", "P", "O", "S", "Se"}:
             return 9
         elif element.is_noble_gas:
             return 10
