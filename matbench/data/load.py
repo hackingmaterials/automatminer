@@ -8,6 +8,8 @@ import numpy as np
 from pymatgen import Structure
 from matminer.datasets.dataframe_loader import load_piezoelectric_tensor, \
     load_dielectric_constant, load_elastic_tensor, load_flla
+from matminer.utils.io import load_dataframe_from_json
+from matminer.featurizers.conversions import StructureToComposition
 
 """
 All load* methods return the data in pandas.DataFrame. In each method a raw
@@ -721,13 +723,72 @@ def load_jarvis_dft():
         https://doi.org/10.1103/PhysRevB.98.014107
 
     Returns:
+        formula (input): chemical formula of compounds
+        mpid (input): Materials Project id
+        jid (input): JARVIs id
+        composition (input):
+        structure (input):
+        e_exfol (target): exfoliation energy per atom in eV/atom
+        e_form (target): formation energy per atom, in eV/atom
+        gap opt (target): Band gap calculated with OptB88vDW functional, in eV
+        gap tbmbj (target): Band gap calculated with TBMBJ functional, in eV
+        mu_b (target): Magnetic moment, in Bohr Magneton
+        bulk modulus (target): VRH average calculation of bulk modulus
+        shear modulus (target): VRH average calculation of shear modulus
+        e mass_x (target): Effective electron mass in x direction (BoltzTraP)
+        e mass_y (target): Effective electron mass in y direction (BoltzTraP)
+        e mass_z (target): Effective electron mass in z direction (BoltzTraP)
+        hole mass_x (target): Effective hole mass in x direction (BoltzTraP)
+        hole mass_y (target): Effective hole mass in y direction (BoltzTraP)
+        hole mass_z (target): Effective hole mass in z direction (BoltzTraP)
+        epsilon_x opt (target): Static dielectric function in x direction
+            calculated with OptB88vDW functional.
+        epsilon_y opt (target): Static dielectric function in y direction
+            calculated with OptB88vDW functional.
+        epsilon_z opt (target): Static dielectric function in z direction
+            calculated with OptB88vDW functional.
+        epsilon_x tbmbj (target): Static dielectric function in x direction
+            calculated with TBMBJ functional.
+        epsilon_y tbmbj (target): Static dielectric function in y direction
+            calculated with TBMBJ functional.
+        epsilon_z tbmbj (target): Static dielectric function in z direction
+            calculated with TBMBJ functional.
     """
-    pass
+
+    df = load_dataframe_from_json(os.path.join(data_dir, 'jdft_3d.json'))
+
+    colmap = {"el_mass_x": "e mass_x",
+            "el_mass_y": "e mass_y",
+            "el_mass_z": "e mass_z",
+            "epsx": "epsilon_x opt",
+            "epsy": "epsilon_y opt",
+            "epsz": "epsilon_z opt",
+            "exfoliation_en": "e_exfol",
+            "form_enp": "e_form",
+            "gv": "shear modulus",
+            "hl_mass_x": "hole mass_x",
+            "hl_mass_y": "hole mass_y",
+            "hl_mass_z": "hole mass_z",
+            "kv": "bulk modulus",
+            "magmom": "mu_b",
+            "mbj_gap": "gap tbmbj",
+            "mepsx": "epsilon_x tbmbj",
+            "mepsy": "epsilon_y tbmbj",
+            "mepsz": "epsilon_z tbmbj",
+            "op_gap": "gap tbmbj",
+            "strt": "structure",
+            }
+
+    df = df.rename(columns=colmap)
+    df = df.drop(["multi_elastic", "fin_enp"], axis=1)
+    s = StructureToComposition()
+    df = s.featurize_dataframe(df, "structure")
+    return df
 
 
 if __name__ == "__main__":
     pd.set_option('display.height', 1000)
-    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_rows', 50)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    print(load_expt_formation_enthalpy())
+    print(load_jarvis_dft())
