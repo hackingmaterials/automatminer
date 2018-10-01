@@ -1,11 +1,13 @@
 import logging
 from matminer.utils.conversions import composition_to_oxidcomposition, \
     structure_to_oxidstructure
-from matbench.utils.utils import MatbenchError, setup_custom_logger
 from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
 
+from matbench.utils.utils import MatbenchError, setup_custom_logger
+from matbench.featurization.sets import CompositionFeaturizers, \
+    StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 
 
 class Featurize(object):
@@ -103,7 +105,6 @@ class Featurize(object):
             self.df w/ new features added via featurizering input_cols
         """
         df = self._prescreen_df(df)
-
 
         for idx, column in enumerate(input_cols):
             featurizer = getattr(self, "featurize_{}".format(column), None)
