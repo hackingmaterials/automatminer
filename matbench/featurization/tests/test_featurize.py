@@ -312,6 +312,8 @@ class TestAllFeaturizers(unittest.TestCase):
             "SpacegroupAnalyzer",
             "VoronoiNN",
             "XRDCalculator",
+            "AverageBondAngle",
+            "AverageBondLength",
             "gaussian_kde",
             "itemgetter",
         ]
