@@ -1,7 +1,6 @@
 import logging
 import numpy as np
 import pandas as pd
-
 from matbench.utils.utils import setup_custom_logger
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
@@ -22,7 +21,7 @@ class Preprocess(object):
         logpath (str): the path to the logfile dir, current folder by default.
     """
 
-    def __init__(self, loglevel=logging.INFO, logpath='.'):
+    def __init__(self, loglevel=None, logpath='.'):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
 
     def preprocess(self, df, target_key, scale=False, n_pca_features=None,
