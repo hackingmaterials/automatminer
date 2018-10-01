@@ -2,11 +2,14 @@ from collections import OrderedDict
 
 import numpy as np
 from tpot import TPOTClassifier, TPOTRegressor
+from matbench.automl.tpot_configs.classifier import classifier_config_dict_mb
+from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
 
 from matbench.utils.utils import is_greater_better
 
 __author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>' \
-             'Daniel Dopp <dbdopp@lbl.gov>'
+             'Daniel Dopp <dbdopp@lbl.gov>' \
+             'Qi Wang <wqthu11@gmail.com>'
 
 """
 -AF: 
@@ -119,8 +122,12 @@ def _tpot_class_wrapper(mode, **kwargs):
 
             if mode in _classifier_modes:
                 self.mode = 'classification'
+                kwargs['config_dict'] = kwargs.get('config_dict',
+                                                   classifier_config_dict_mb)
             else:
                 self.mode = 'regression'
+                kwargs['config_dict'] = kwargs.get('config_dict',
+                                                   regressor_config_dict_mb)
 
             kwargs['cv'] = kwargs.get('cv', 5)
             kwargs['n_jobs'] = kwargs.get('n_jobs', -1)
