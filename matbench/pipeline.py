@@ -5,10 +5,8 @@ classes which take in a dataframe and target key and product useful analytics.
 import datetime
 import logging
 
-from matbench.core.preprocess import Preprocess
-from matbench.core.featurize import Featurize
+from matbench.featurization.featurize import Featurize
 from matbench.utils.utils import setup_custom_logger
-from matbench.metalearning.recommend import FeaturizerSelector
 
 
 class PredictionPipeline:
@@ -57,8 +55,7 @@ class PredictionPipeline:
         self.logger.log("Beginning benchmarking.\n")
         self.pipetype = "benchmark"
 
-        # meta learning will go here
-        # TODO: meta learning
+        # TODO: meta learning should go here
 
         f = Featurize()
         df = f.auto_featurize(self.train_df)

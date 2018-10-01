@@ -4,11 +4,11 @@ from collections import OrderedDict
 import numpy as np
 
 from matbench.automl.tpot_utils import TpotAutoml
-from matbench.core.analysis import Analysis
+from matbench.analysis.analysis import Analysis
 from matbench.data.load import load_double_perovskites_gap, \
     load_glass_formation
-from matbench.core.featurize import Featurize
-from matbench.core.preprocess import Preprocess
+from matbench.featurization.featurize import Featurize
+from matbench.preprocessing.preprocess import Preprocess
 from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
     Stoichiometry
 from sklearn.model_selection import train_test_split

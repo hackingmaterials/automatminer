@@ -710,6 +710,20 @@ def load_citrine_thermal_conductivity(room_temperature=True):
     df = df.drop(['k-units', 'k_condition', 'k_condition_units'], axis=1)
     return df
 
+def load_jarvis_dft():
+    """
+    Various properties of 24,759 bulk and 2D materials computed with the
+    OptB88vdW and TBmBJ functionals taken from the JARVIS DFT database.
+
+    References:
+        https://arxiv.org/pdf/1805.07325.pdf
+        https://www.nature.com/articles/sdata201882
+        https://doi.org/10.1103/PhysRevB.98.014107
+
+    Returns:
+    """
+    pass
+
 
 if __name__ == "__main__":
     pd.set_option('display.height', 1000)
