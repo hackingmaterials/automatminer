@@ -1,9 +1,9 @@
 import unittest
-from matbench.core.preprocess import Preprocess
+from matbench.preprocessing.preprocess import Preprocess
 
 from matminer.datasets.dataframe_loader import load_elastic_tensor
 from matminer.featurizers.structure import GlobalSymmetryFeatures
-from matbench.core.featurize import Featurize
+from matbench.featurization.featurize import Featurize
 
 class TestPreprocess(unittest.TestCase):
 
