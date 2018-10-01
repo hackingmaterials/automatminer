@@ -1,7 +1,16 @@
+"""
+Defines sets of featurizers to be used by matbench during featurization.
+
+Classes of featurizer sets should have attributes being lists of featurizers.
+For example, the set of all fast structure featurizers could be found with:
+    StructureFeaturizers().fast
+"""
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
 import matminer.featurizers.bandstructure as bf
+
+__authors__ = ["Alex Dunn"]
 
 
 class FeaturizerSet:
