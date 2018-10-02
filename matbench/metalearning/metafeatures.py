@@ -25,7 +25,7 @@ meta-features of the new dataset, then find some "nearest" strategies and make
 an estimation of computational budget, and finally taking all these factors 
 together to make a final recommendation of featurizers)
 
-Current meta-features to be considered (many can be further added):
+Current meta-feat ures to be considered (many can be further added):
 (i) Composition-related:
     - Number of formulas:
     - Percent of all-metallic alloys:
@@ -52,7 +52,7 @@ Current meta-features to be considered (many can be further added):
         we cannot directly support it in matminer.
         
 (ii) Structure-related:
-    - Percent of ordered structures:
+    - Percent of  ordered structures:
         e.g. can help to decide whether to use some featurizers that only apply
         to ordered structure such as GlobalSymmetryFeatures
     - Avg. number of atoms in structures:
