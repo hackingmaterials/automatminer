@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 import pandas as pd
 from matbench.utils.utils import setup_custom_logger
@@ -8,7 +7,7 @@ from pandas.api.types import is_numeric_dtype
 from skrebate import ReliefF
 
 
-class Preprocess(object):
+class Preprocessing(object):
     """
     Clean and prepare the data for visualization and training.
 
