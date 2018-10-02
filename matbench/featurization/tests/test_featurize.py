@@ -13,7 +13,7 @@ import matminer.featurizers.bandstructure as bf
 
 from matbench.data.load import load_double_perovskites_gap, \
     load_castelli_perovskites
-from matbench.featurization.core import Featurize
+from matbench.featurization.core import Featurization
 from matbench.featurization.sets import AllFeaturizers
 from matbench.data.load import load_phonon_dielectric_mp
 
@@ -25,7 +25,7 @@ class TestFeaturize(unittest.TestCase):
     def test_featurize_formula(self, limit=5):
         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
         ignore_cols = ['a_1', 'a_2', 'b_1', 'b_2']
-        featurizer = Featurize(ignore_cols=ignore_cols,
+        featurizer = Featurization(ignore_cols=ignore_cols,
                                ignore_errors=False,
                                exclude=['CohesiveEnergy'],
                                multiindex=False)
@@ -83,7 +83,7 @@ class TestFeaturize(unittest.TestCase):
 
     def test_featurize_structure(self, limit=5):
         df_init = load_castelli_perovskites()[:limit]
-        featurizer = Featurize(ignore_errors=False, multiindex=False)
+        featurizer = Featurization(ignore_errors=False, multiindex=False)
         df = featurizer.featurize_structure(df_init, inplace=False,
                                             featurizers="all")
 
@@ -187,7 +187,7 @@ class TestFeaturize(unittest.TestCase):
         else:
             df_init = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
         df_init = df_init.dropna(axis=0)
-        featurizer = Featurize(ignore_errors=False, multiindex=False)
+        featurizer = Featurization(ignore_errors=False, multiindex=False)
         df = featurizer.featurize_dos(df_init, inplace=False)
 
         # sanity checks
@@ -222,7 +222,7 @@ class TestFeaturize(unittest.TestCase):
     def test_auto_featurize(self, limit=5):
         df_init = load_phonon_dielectric_mp()[:limit]
         print(df_init.structure)
-        featurizer = Featurize(ignore_errors=False, multiindex=True)
+        featurizer = Featurization(ignore_errors=False, multiindex=True)
         df = featurizer.auto_featurize(df_init,
                                        input_cols=('formula', 'structure'))
 

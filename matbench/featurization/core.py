@@ -10,7 +10,7 @@ from matbench.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 
 
-class Featurize(object):
+class Featurization(object):
     """
     Takes in a dataframe and generate features from preset columns such as
     "formula", "structure", "bandstructure", "dos", etc. One may use

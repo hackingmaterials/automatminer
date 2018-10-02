@@ -2,9 +2,9 @@ import unittest
 
 from matminer.datasets.dataframe_loader import load_elastic_tensor
 from matminer.featurizers.structure import GlobalSymmetryFeatures
-from matbench.featurization.core import Featurize
+from matbench.featurization.core import Featurization
 
-from matbench.preprocessing.core import Preprocess
+from matbench.preprocessing.core import Preprocessing
 
 
 class TestPreprocess(unittest.TestCase):
@@ -19,10 +19,10 @@ class TestPreprocess(unittest.TestCase):
         """
         df = load_elastic_tensor()[:5][['K_VRH', 'structure']]
         df['K_VRH'] = df['K_VRH'].astype(str)
-        f = Featurize()
+        f = Featurization()
         df = f.featurize_structure(df, featurizers=[GlobalSymmetryFeatures()])
 
-        p = Preprocess()
+        p = Preprocessing()
         df = p.preprocess(df, 'K_VRH')
         self.assertAlmostEqual(df['K_VRH'].iloc[0], 194.26888435900003)
         self.assertEqual(df["crystal_system_tetragonal"].iloc[0], 1)

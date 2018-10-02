@@ -6,11 +6,11 @@ from tpot import TPOTClassifier
 from matbench.automl.tpot_utils import TpotAutoml
 from matbench.automl.tpot_configs.classifier import classifier_config_dict_mb
 from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
-from matbench.analysis.analysis import Analysis
+from matbench.analysis.core import Analysis
 from matbench.data.load import load_double_perovskites_gap, \
     load_glass_binary
-from matbench.featurization.core import Featurize
-from matbench.preprocessing.core import Preprocess
+from matbench.featurization.core import Featurization
+from matbench.preprocessing.core import Preprocessing
 from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
     Stoichiometry
 from sklearn.model_selection import train_test_split
@@ -28,12 +28,12 @@ class TestTpotAutoml(unittest.TestCase):
         target = 'gap gllbsc'
         # load and featurize:
         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
-        featzer = Featurize(ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
+        featzer = Featurization(ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
         df_feats = featzer.featurize_formula(df_init, featurizers=[
             ElementProperty.from_preset(preset_name='matminer'),
             TMetalFraction()])
         # preprocessing of the data
-        prep = Preprocess()
+        prep = Preprocessing()
         df = prep.handle_na(df_feats, max_na_frac=0.1)
         feats0 = set(df.columns)
         df = prep.prune_correlated_features(df, target, R_max=0.95)
@@ -95,12 +95,12 @@ class TestTpotAutoml(unittest.TestCase):
         target = 'gfa'
         # load and featurize:
         df_init = load_glass_binary()[:limit]
-        featzer = Featurize()
+        featzer = Featurization()
         df_feats = featzer.featurize_formula(df_init, featurizers=[
             ElementProperty.from_preset(preset_name='matminer'),
             Stoichiometry()])
         # preprocessing of the data
-        prep = Preprocess()
+        prep = Preprocessing()
         df = prep.handle_na(df_feats, max_na_frac=0.1)
         feats0 = set(df.columns)
         df = prep.prune_correlated_features(df, target, R_max=0.95)
