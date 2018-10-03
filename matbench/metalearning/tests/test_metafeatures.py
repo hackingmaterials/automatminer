@@ -2,7 +2,7 @@ import os
 import unittest
 from pymatgen.core import Structure
 
-from matbench.metalearning.base import MetaFeatureValue
+from matbench.metalearning.core import MetaFeatureValue
 from matbench.metalearning import metafeatures
 from matbench.data.load import load_castelli_perovskites, load_jdft2d, \
     load_glass_binary, load_mp
