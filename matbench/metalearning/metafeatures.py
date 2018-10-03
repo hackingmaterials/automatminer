@@ -1,7 +1,7 @@
 import numpy as np
 from pymatgen.core import Composition
-from .base import MetafeatureFunctions, MetaFeature
-from .base import HelperFunctions, HelperFunction
+from .core import MetafeatureFunctions, MetaFeature
+from .core import HelperFunctions, HelperFunction
 from .utils import FormulaStatistics, StructureStatistics
 
 
