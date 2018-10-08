@@ -158,7 +158,8 @@ class Featurization(object):
         if guess_oxidstates:
             cto = CompositionToOxidComposition(target_col_id=compcol,
                                                overwrite_data=True)
-            df = cto.featurize_dataframe(df, compcol)
+            df = cto.featurize_dataframe(df, compcol,
+                                         multiindex=self.multiindex)
 
         if isinstance(featurizers, str):
             featurizers = getattr(self.cfset, featurizers)
@@ -207,7 +208,8 @@ class Featurization(object):
         if guess_oxidstates:
             sto = StructureToOxidStructure(target_col_id=col_id,
                                            overwrite_data=True)
-            df = sto.featurize_dataframe(df, col_id)
+            df = sto.featurize_dataframe(df, col_id,
+                                         multiindex=self.multiindex)
         if isinstance(featurizers, str):
             featurizers = getattr(self.sfset, featurizers)
 
