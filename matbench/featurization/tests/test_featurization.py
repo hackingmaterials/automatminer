@@ -21,7 +21,7 @@ from matbench.data.load import load_phonon_dielectric_mp
 test_dir = os.path.dirname(__file__)
 
 
-class TestFeaturize(unittest.TestCase):
+class TestFeaturization(unittest.TestCase):
 
     def test_featurize_formula(self, limit=5):
         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
