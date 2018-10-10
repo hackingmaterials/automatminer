@@ -5,6 +5,7 @@ import pandas as pd
 import unittest
 
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
+from matminer.featurizers.base import BaseFeaturizer
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
@@ -250,119 +251,64 @@ class TestAllFeaturizers(unittest.TestCase):
 
     def setUp(self):
         self.allfs = AllFeaturizers()
-        self.base_non_featurizers = [
-            "BaseFeaturizer",
-            "Element",
-            "Specie",
-            "OrderedDict",
-            "NotFittedError",
-            "PropertyStats",
-        ]
 
-    def get_true_featurizers(self, module, non_featurizers):
-        """
-        Returns list of all featurizer names given a python module and a list
-        of class names that are not expected to be featurizers.
+    @staticmethod
+    def get_featurizers(module, ignore=None):
+        """Get a list of featurizers class names defined in a module.
+
         Args:
-            module (module):
-            non_featurizers ([str]):
+            module (module): The python module.
+            ignore (`list` of `str`, optional): A list of class names to ignore.
 
-        Returns ([str]):
-            List of all featurizer (class) names
+        Returns:
+            (`list` of `str`): List of all featurizer class names.
         """
-        classes = inspect.getmembers(module, inspect.isclass)
-        class_names = [c[0] for c in classes]
-        featurizer_names = [c for c in class_names if c not in non_featurizers]
-        return featurizer_names
+        ignore = ignore if ignore else []
+
+        def is_featurizer(class_object):
+            return (issubclass(class_object, BaseFeaturizer)
+                    and not class_object == BaseFeaturizer)
+
+        # getmembers returns list of (class_name, class_object)
+        classes = [n for n, c in inspect.getmembers(module, inspect.isclass)
+                   if is_featurizer(c) and c.__module__ == module.__name__]
+        featurizers = [c for c in classes if c not in ignore]
+        return featurizers
+
+    def _test_features_implemented(self, test_feats, true_feats):
+        """Check two lists of featurizers are the same.
+
+        Note that `test_feats` is a list of objects and `true_feats` is a
+        list of class names as strings.
+        """
+        test_feats = [c.__class__.__name__ for c in test_feats]
+
+        for featurizer_name in true_feats:
+            self.assertTrue(featurizer_name in test_feats,
+                            ("{} matminer featurizer not in implemented in "
+                             "matbench").format(featurizer_name))
+
+        self.assertEqual(len(test_feats), len(true_feats))
 
     def test_composition_featurizers(self):
-        non_featurizers = self.base_non_featurizers + [
-            "Composition",
-            "CohesiveEnergyData",
-            "DemlData",
-            "MPRester",
-            "MagpieData",
-            "MixingEnthalpy",
-            "MolecularOrbitals",
-            "NearestNeighbors",
-            "PymatgenData"
-        ]
-        # get all current featurizers
-        true_feats = self.get_true_featurizers(cf, non_featurizers)
-        # get all featurizers that are defined in AllFeaturizers class
+        true_feats = TestAllFeaturizers.get_featurizers(cf)
         test_feats = self.allfs.composition
-        test_feats = [c.__class__.__name__ for c in test_feats]
-        # featurizers must match exactly
-
-        self.assertEqual(len(test_feats), len(true_feats))
-        for featurizer_name in true_feats:
-            self.assertTrue(featurizer_name in test_feats)
+        self._test_features_implemented(test_feats, true_feats)
 
     def test_structure_featurizers(self):
-        non_featurizers = self.base_non_featurizers + [
-            "Structure",
-            "StructureComposition",
-            "CoordinationNumber",
-            "CrystalNNFingerprint",
-            "OPSiteFingerprint",
-            "ValenceIonicRadiusEvaluator",
-            "EwaldSummation",
-            "LocalPropertyDifference",
-            "NotFittedError",
-            "SpacegroupAnalyzer",
-            "VoronoiNN",
-            "XRDCalculator",
-            "AverageBondAngle",
-            "AverageBondLength",
-            "gaussian_kde",
-            "itemgetter",
-        ]
-        # get all current featurizers
-        true_feats = self.get_true_featurizers(sf, non_featurizers)
-        # get all featurizers that are defined in AllFeaturizers class
+        true_feats = self.get_featurizers(sf, ['StructureComposition'])
         test_feats = self.allfs.structure
-        test_feats = [c.__class__.__name__ for c in test_feats]
-        # featurizers must match exactly
-
-        print(sorted(test_feats))
-        print(sorted(true_feats))
-        self.assertEqual(len(test_feats), len(true_feats))
-        for featurizer_name in true_feats:
-            self.assertTrue(featurizer_name in test_feats)
+        self._test_features_implemented(test_feats, true_feats)
 
     def test_dos_featurizers(self):
-        non_featurizers = self.base_non_featurizers + [
-            "CompleteDos",
-            "FermiDos",
-            "BandCenter",
-            "Spin"
-        ]
-        # get all current featurizers
-        true_feats = self.get_true_featurizers(dosf, non_featurizers)
-        # get all featurizers that are defined in AllFeaturizers class
+        true_feats = self.get_featurizers(dosf)
         test_feats = self.allfs.dos
-        test_feats = [c.__class__.__name__ for c in test_feats]
-        # featurizers must match exactly
-        self.assertEqual(len(test_feats), len(true_feats))
-        for featurizer_name in true_feats:
-            self.assertTrue(featurizer_name in test_feats)
+        self._test_features_implemented(test_feats, true_feats)
 
     def test_bandstructure_featurizers(self):
-        non_featurizers = self.base_non_featurizers + [
-            "BandStructure",
-            "BandStructureSymmLine",
-            "SpacegroupAnalyzer",
-            "Spin"
-        ]
-        # get all current featurizers
-        true_feats = self.get_true_featurizers(bf, non_featurizers)
-        # get all featurizers that are defined in AllFeaturizers class
+        true_feats = self.get_featurizers(bf)
         test_feats = self.allfs.bandstructure
-        test_feats = [c.__class__.__name__ for c in test_feats]
-        # featurizers must match exactly
-        self.assertEqual(len(test_feats), len(true_feats))
-        for featurizer_name in true_feats:
-            self.assertTrue(featurizer_name in test_feats)
+        self._test_features_implemented(test_feats, true_feats)
 
 
 if __name__ == '__main__':
