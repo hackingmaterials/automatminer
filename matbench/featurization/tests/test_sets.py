@@ -59,8 +59,6 @@ class TestAllFeaturizers(unittest.TestCase):
                             ("{} matminer featurizer not in implemented in "
                              "matbench").format(featurizer_name))
 
-        self.assertEqual(len(test_feats), len(true_feats))
-
     def test_composition_featurizers(self):
         true_feats = TestAllFeaturizers.get_featurizers(cf)
         test_feats = self.allfs.composition
