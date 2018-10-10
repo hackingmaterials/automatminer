@@ -297,46 +297,65 @@ class StructureFeaturizers(FeaturizerSet):
 
 
 class DOSFeaturizers(FeaturizerSet):
-    """
-    Lists of DOS featurizers, depending on requirements
+    """Featurizer set containing density of states featurizers.
+
+    This class provides subsets all featurizers and the set of best featurizers.
+
+    Example usage::
+
+        dos_featurizers = DOSFeaturizers().best
 
     Args:
-        exclude ([str]): The class names of the featurizers which should be
-            excluded.
-
-    Example usage:
-        fast_featurizers = StructureFeaturizers().fast
+        exclude (list of str, optional): A list of featurizer class names that
+            will be excluded from the set of featurizers returned.
     """
+    def __init__(self, exclude=None):
+        super(FeaturizerSet, self).__init__(exclude=exclude)
+
+        self._best_featurizers = [
+            dosf.DOSFeaturizer(),
+            dosf.DopingFermi(),
+            dosf.Hybridization()
+        ]
 
     @property
     def all(self):
-        featzers = [dosf.DOSFeaturizer(),
-                    dosf.DopingFermi(),
-                    dosf.Hybridization()]
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+        """List of all density of states based featurizers."""
+        return self.best
 
     @property
     def best(self):
-        return self.all
+        """See base class."""
+        return self._get_featurizers(self._best_featurizers)
 
 
 class BSFeaturizers(FeaturizerSet):
-    """
-    Lists of bandstructure featurizers, depending on requirements.
+    """Featurizer set containing band structure featurizers.
+
+    This class provides subsets all featurizers and the set of best featurizers.
+
+    Example usage::
+
+        bs_featurizers = BSFeaturizers().best
 
     Args:
-        exclude ([str]): The class names of the featurizers which should be
-            excluded.
-
-    Example usage:
-        fast_featurizers = StructureFeaturizers().fast
+        exclude (list of str, optional): A list of featurizer class names that
+            will be excluded from the set of featurizers returned.
     """
+    def __init__(self, exclude=None):
+        super(FeaturizerSet, self).__init__(exclude=exclude)
+
+        self._best_featurizers = [
+            bf.BandFeaturizer(),
+            bf.BranchPointEnergy()
+        ]
 
     @property
     def all(self):
-        featzers = [bf.BandFeaturizer(), bf.BranchPointEnergy()]
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+        """List of all band structure based featurizers."""
+        return self.best
 
     @property
     def best(self):
-        return self.all
+        """See base class."""
+        return self._get_featurizers(self._best_featurizers)
