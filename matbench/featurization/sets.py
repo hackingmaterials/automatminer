@@ -86,18 +86,6 @@ class AllFeaturizers(FeaturizerSet):
         }
 
     @property
-    def best(self):
-        """See base class."""
-        featurizers = [f.best for f in self._featurizer_sets.values()]
-        return self._get_featurizers(featurizers)
-
-    @property
-    def all(self):
-        """See base class."""
-        featurizers = [f.all for f in self._featurizer_sets.values()]
-        return self._get_featurizers(featurizers)
-
-    @property
     def composition(self):
         """List of all composition based featurizers."""
         return self._get_featurizers(self._featurizer_sets['comp'].all)
@@ -116,6 +104,18 @@ class AllFeaturizers(FeaturizerSet):
     def dos(self):
         """List of all density of states based featurizers."""
         return self._get_featurizers(self._featurizer_sets['dos'].all)
+
+    @property
+    def all(self):
+        """See base class."""
+        featurizers = [f.all for f in self._featurizer_sets.values()]
+        return self._get_featurizers(featurizers)
+
+    @property
+    def best(self):
+        """See base class."""
+        featurizers = [f.best for f in self._featurizer_sets.values()]
+        return self._get_featurizers(featurizers)
 
 
 class CompositionFeaturizers(FeaturizerSet):
@@ -170,6 +170,11 @@ class CompositionFeaturizers(FeaturizerSet):
         return self._get_featurizers(self._fast_featurizers)
 
     @property
+    def slow(self):
+        """List of featurizers that are generally slow to featurize."""
+        return self._get_featurizers(self._slow_featurizers)
+
+    @property
     def need_oxi(self):
         """Featurizers that require the composition to have oxidation states.
 
@@ -178,11 +183,6 @@ class CompositionFeaturizers(FeaturizerSet):
         in featurization time.
         """
         return self._get_featurizers(self._need_oxi_featurizers)
-
-    @property
-    def slow(self):
-        """List of featurizers that are generally slow to featurize."""
-        return self._get_featurizers(self._slow_featurizers)
 
     @property
     def all(self):
@@ -196,75 +196,103 @@ class CompositionFeaturizers(FeaturizerSet):
 
 
 class StructureFeaturizers(FeaturizerSet):
-    """
-    Lists of structure featurizers, depending on requirements.
+    """Featurizer set containing structure featurizers.
 
-    Example usage:
+    This class provides subsets for featurizers that require fitting,
+    return matrices rather than vectors, and produce many features, as well as
+    fast, and slow featurizers. Additional sets containing all featurizers and
+    the set of best featurizers are provided.
+
+    Example usage::
+
         fast_featurizers = StructureFeaturizers().fast
+
+    Args:
+        exclude (list of str, optional): A list of featurizer class names that
+            will be excluded from the set of featurizers returned.
     """
 
-    @property
-    def matrix(self):
-        """
-        Structure featurizers returning matrices in each column. Not useful
-        for vectorized representations of crystal structures.
-        """
-        featzers = [sf.RadialDistributionFunction(),  # returns dict
-                    sf.CoulombMatrix(),  # returns a matrix
-                    sf.SineCoulombMatrix(),  # returns a matrix
-                    sf.OrbitalFieldMatrix(),  # returns a matrix
-                    sf.MinimumRelativeDistances(),  # returns a list
-                    sf.ElectronicRadialDistributionFunction()]
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+    def __init__(self, exclude=None):
+        super(FeaturizerSet, self).__init__(exclude=exclude)
 
-    @property
-    def fast(self):
-        """
-        Structure featurizers which are generally fast.
-        """
-        featzers = [sf.DensityFeatures(),
-                    sf.GlobalSymmetryFeatures(),
-                    sf.EwaldEnergy()]
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+        self._fast_featurizers = [
+            sf.DensityFeatures(),
+            sf.GlobalSymmetryFeatures(),
+            sf.EwaldEnergy()
+        ]
 
-    @property
-    def many_features(self):
-        featzers = [sf.BagofBonds(),
-                    sf.PartialRadialDistributionFunction(),
-                    sf.BondFractions()]
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
-
-    @property
-    def need_fit(self):
-        """
-        Structure featurizers which must be .fit before featurizing.
-        Alternatively, use .fit_featurize_dataframe.
-        """
-        featzers = [sf.PartialRadialDistributionFunction(),
-                    sf.BondFractions(),
-                    sf.BagofBonds()]
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
-
-    @property
-    def slow(self):
-        """
-        Structure featurizers which are generally slow.
-        """
-        featzers = [
+        self._slow_featurizers = [
             sf.SiteStatsFingerprint.from_preset('CrystalNNFingerprint_ops'),
             sf.ChemicalOrdering(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
             sf.XRDPowderPattern(),
-            sf.Dimensionality()]
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+            sf.Dimensionality()
+        ]
+
+        self._need_fitting_featurizers = [
+            sf.PartialRadialDistributionFunction(),
+            sf.BondFractions(),
+            sf.BagofBonds()
+        ]
+
+        self._matrix_featurizers = [
+            sf.RadialDistributionFunction(),  # returns dict
+            sf.CoulombMatrix(),  # returns a matrix
+            sf.SineCoulombMatrix(),  # returns a matrix
+            sf.OrbitalFieldMatrix(),  # returns a matrix
+            sf.MinimumRelativeDistances(),  # returns a list
+            sf.ElectronicRadialDistributionFunction()
+        ]
+
+        self._many_features_featurizers = [
+            sf.BagofBonds(),
+            sf.PartialRadialDistributionFunction(),
+            sf.BondFractions()
+        ]
+
+    @property
+    def fast(self):
+        """List of featurizers that are generally fast to featurize."""
+        return self._get_featurizers(self._fast_featurizers)
+
+    @property
+    def slow(self):
+        """List of featurizers that are generally slow to featurize."""
+        return self._get_featurizers(self._slow_featurizers)
+
+    @property
+    def need_fit(self):
+        """List of featurizers which must be fit before featurizing.
+
+        Fitting can be performed using the `Featurizer.fit()` method.
+        Alternatively, the `Featurizer.fit_featurize_dataframe()` can be used
+        to fit and featurize simultaneously.
+        """
+        return self._get_featurizers(self._need_fitting_featurizers)
+
+    @property
+    def matrix(self):
+        """List of featurizers that return matrices as features.
+
+        These featurizers are not useful for vectorized representations of
+        crystal structures.
+        """
+        return self._get_featurizers(self._matrix_featurizers)
+
+    @property
+    def many_features(self):
+        """List of featurizers that return many features."""
+        return self._get_featurizers(self._many_features_featurizers)
 
     @property
     def all(self):
+        """List of all structure based featurizers."""
         return self.fast + self.slow + self.need_fit + self.matrix
 
     @property
     def best(self):
+        """See base class."""
         return self.fast + self.slow
 
 
