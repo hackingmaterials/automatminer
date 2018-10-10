@@ -2,9 +2,9 @@
 Defines sets of featurizers to be used by matbench during featurization.
 
 Featurizer sets are classes with attributes containing lists of featurizers.
-For example, the set of all fast structure featurizers could be found with:
+For example, the set of all fast structure featurizers could be found with::
 
-    `StructureFeaturizers().fast`
+    StructureFeaturizers().fast
 """
 
 import matminer.featurizers.composition as cf
@@ -63,15 +63,16 @@ class AllFeaturizers(FeaturizerSet):
     """Featurizer set containing all available featurizers.
 
     This class provides subsets for composition, structure, density of states
-    and band structure based featurizers.
-
-    Args:
-        exclude (list of str, optional): A list of featurizer class names that
-            will be excluded from the set of featurizers returned.
+    and band structure based featurizers. Additional sets containing all
+    featurizers and the set of best featurizers are provided.
 
     Example usage::
 
         composition_featurizers = AllFeaturizers().composition
+
+    Args:
+        exclude (list of str, optional): A list of featurizer class names that
+            will be excluded from the set of featurizers returned.
     """
 
     def __init__(self, exclude=None):
@@ -118,67 +119,80 @@ class AllFeaturizers(FeaturizerSet):
 
 
 class CompositionFeaturizers(FeaturizerSet):
-    """
-    Lists of composition featurizers, depending on requirements.
+    """Featurizer set containing composition featurizers.
+
+    This class provides subsets for featurizers that require the composition
+    to have oxidation states, as well as fast, and slow featurizers. Additional
+    sets containing all featurizers and the set of best featurizers are
+    provided.
+
+    Example usage::
+
+        fast_featurizers = CompositionFeaturizers().fast
 
     Args:
-        exclude ([str]): The class names of the featurizers which should be
-            excluded.
-
-    Example usage:
-        fast_featurizers = CompositionFeaturizers().fast
+        exclude (list of str, optional): A list of featurizer class names that
+            will be excluded from the set of featurizers returned.
     """
+
+    def __init__(self, exclude=None):
+        super(FeaturizerSet, self).__init__(exclude=exclude)
+
+        self._fast_featurizers = [
+            cf.AtomicOrbitals(),
+            cf.ElementProperty.from_preset("matminer"),
+            cf.ElementProperty.from_preset("magpie"),
+            cf.ElementFraction(),
+            cf.Stoichiometry(),
+            cf.TMetalFraction(),
+            cf.BandCenter(),
+            cf.ValenceOrbital()
+        ]
+
+        self._slow_featurizers = [
+            cf.Miedema(),
+            cf.AtomicPackingEfficiency(),  # slower than the rest
+            cf.CohesiveEnergy()  # requires mpid present
+        ]
+
+        self._need_oxi_featurizers = [
+            cf.CationProperty.from_preset(preset_name='deml'),
+            cf.OxidationStates.from_preset(preset_name='deml'),
+            cf.ElectronAffinity(),
+            cf.ElectronegativityDiff(),
+            cf.YangSolidSolution(),
+            cf.IonProperty()
+        ]
 
     @property
     def fast(self):
-        """
-        Generally fast featurizers.
-        """
-        featzers = [cf.AtomicOrbitals(),
-                    cf.ElementProperty.from_preset("matminer"),
-                    cf.ElementFraction(),
-                    cf.Stoichiometry(),
-                    cf.TMetalFraction(),
-                    cf.BandCenter(),
-                    cf.ValenceOrbital()]
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+        """List of featurizers that are generally quick to featurize."""
+        return self._get_featurizers(self._fast_featurizers)
 
     @property
     def need_oxi(self):
+        """Featurizers that require the composition to have oxidation states.
+
+        If the composition is not decorated with oxidation states the
+        oxidation states will be guessed. This can cause a significant increase
+        in featurization time.
         """
-        Fast if compositions are already decorated with oxidation states, slow
-        otherwise.
-        """
-        featzers = [cf.CationProperty.from_preset(preset_name='deml'),
-                    cf.OxidationStates.from_preset(preset_name='deml'),
-                    cf.ElectronAffinity(),
-                    cf.ElectronegativityDiff(),
-                    cf.YangSolidSolution(),
-                    cf.IonProperty()]
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+        return self._get_featurizers(self._need_oxi_featurizers)
 
     @property
     def slow(self):
-        """
-        Generally slow featurizers under most conditions.
-        """
-        featzers = [cf.Miedema(),
-                    # much slower than the rest
-                    cf.AtomicPackingEfficiency(),
-                    # requires mpid present
-                    cf.CohesiveEnergy()]
-        return [i for i in featzers if i.__class__.__name__ not in self.exclude]
+        """List of featurizers that are generally slow to featurize."""
+        return self._get_featurizers(self._slow_featurizers)
 
     @property
     def all(self):
-        """
-        All composition featurizers.
-        """
+        """List of all composition based featurizers."""
         return self.fast + self.need_oxi + self.slow
 
     @property
     def best(self):
-        return self.fast + [cf.ElementProperty.from_preset("magpie")]
+        """See base class."""
+        return self.fast
 
 
 class StructureFeaturizers(FeaturizerSet):
