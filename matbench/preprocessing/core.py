@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
-from matbench.utils.utils import setup_custom_logger
+from matbench.utils.utils import setup_custom_logger, MatbenchError
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+
 from pandas.api.types import is_numeric_dtype
 from skrebate import ReliefF
 
@@ -22,6 +23,7 @@ class Preprocessing(object):
 
     def __init__(self, loglevel=None, logpath='.'):
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
+        self.scaler = None # make scaler available for inverse_transform
 
     def preprocess(self, df, target_key, scale=False, n_pca_features=None,
                    n_rebate_features=None, max_na_frac=0.01, na_method='drop',
@@ -49,66 +51,82 @@ class Preprocessing(object):
 
         Returns (pandas.DataFrame)
         """
-
-        # Remove na rows including those where target=na
         df = self.handle_na(df, max_na_frac=max_na_frac, na_method=na_method)
-
-        for c in df.columns.values:
-            try:
-                df[c] = pd.to_numeric(df[c])
-            except (TypeError, ValueError):
-                # The target is most likely strings which are not numeric.
-                pass
-
-        if is_numeric_dtype(df[target_key]):
-            # Pruning correlated features automatically takes accounts for dtype
-            df = self.prune_correlated_features(df, target_key)
-        else:
-            df[target_key] = df[target_key].astype(str, copy=False)
-
-        # Todo: At the moment, scaling and feature reduction converts ints to floats
-        number_cols = [k for k in df.columns.values if
-                       is_numeric_dtype(df[k]) and k != target_key]
-
-        if retain_categorical:
-            object_cols = [k for k in df.columns.values if
-                           k not in number_cols and k != target_key]
-        else:
-            object_cols = []
-
-        number_df = df[number_cols]
-        object_df = df[object_cols]
-        targets = df[target_key].copy(deep=True)
-
-        # Todo: StandardScaler might be better
-        # Todo: Data *must* be standardized for PCA...
+        df_numerical = self.to_numerical(df, retain_categorical=retain_categorical)
+        y = df_numerical[target_key]
+        X = df_numerical.drop(target_key, axis=1)
         if scale:
-            number_df[number_cols] = MinMaxScaler().fit_transform(number_df)
-
-        object_df = pd.get_dummies(object_df).apply(pd.to_numeric)
+            self.scaler = MinMaxScaler()
+            X = self.scaler.fit_transform(X)
 
         if n_rebate_features:
             self.logger.info(
                 "ReBATE running: retaining {} numerical features.".format(
                     n_rebate_features))
             rf = ReliefF(n_features_to_select=n_rebate_features, n_jobs=-1)
-            x = rf.fit_transform(number_df.values, targets.values)
+            matrix = rf.fit_transform(X.values, y.values)
             # Todo: Find how to get the original labels back?  - AD
-            rfcols = ["ReliefF feature {}".format(i) for i in range(x.shape[1])]
-            number_df = pd.DataFrame(columns=rfcols, data=x,
-                                     index=number_df.index)
+            rfcols = ["ReliefF {}".format(i) for i in range(matrix.shape[1])]
+            X = pd.DataFrame(columns=rfcols, data=matrix, index=X.index)
+
         if n_pca_features:
+            if self.scaler is None:
+                if X.max().max() > 5.0:  # 5 allowing for StandardScaler
+                    raise MatbenchError('attempted PCA before data normalization!')
             self.logger.info(
                 "PCA running: retaining {} numerical features.".format(
                     n_pca_features))
             n_pca_features = PCA(n_components=n_pca_features)
-            x = n_pca_features.fit_transform(number_df)
+            matrix = n_pca_features.fit_transform(X)
             # Todo: I don't know if there is a way to get labels for these - AD
-            pcacols = ["PCA feature {}".format(i) for i in range(x.shape[1])]
-            number_df = pd.DataFrame(columns=pcacols, data=x,
-                                     index=number_df.index)
+            pcacols = ["PCA {}".format(i) for i in range(matrix.shape[1])]
+            X = pd.DataFrame(columns=pcacols, data=matrix, index=X.index)
+        return pd.concat([X, y], axis=1)
 
-        return pd.concat([targets, number_df, object_df], axis=1)
+
+    def to_numerical(self, df, retain_categorical=True,
+                     encoding_method='one-hot'):
+        """
+        Transforms non-numerical columns to numerical columns which are
+            machine learning-friendly.
+
+        Args:
+            df (pandas.DataFrame): The dataframe containing features
+            retain_categorical (bool): If True, retains features which are
+                categorical (data type is string or object) and then
+                one-hot encodes them. If False, drops them.
+            encoding_method (str): choose a method for encoding the categorical
+                variables. Current options: 'one-hot' and 'label'
+
+        Returns:
+
+        """
+        number_cols = []
+        object_cols = []
+        for c in df.columns.values:
+            try:
+                df[c] = pd.to_numeric(df[c])
+                number_cols.append(c)
+            except (TypeError, ValueError):
+                # The target is most likely strings which are not numeric.
+                object_cols.append(c)
+
+        number_df = df[number_cols]
+        object_df = df[object_cols]
+        if retain_categorical:
+            if encoding_method=='one-hot':
+                object_df = pd.get_dummies(object_df).apply(pd.to_numeric)
+            elif encoding_method=='label':
+                for c in object_df.columns:
+                    object_df[c] = LabelEncoder().fit_transform(object_df[c])
+                self.logger.warning('LabelEncoder used for categorical colums '
+                    'For access to the original labels via inverse_transform, '
+                    'encode manually and set retain_categorical to False')
+
+            return pd.concat([number_df, object_df], axis=1)
+        else:
+            return number_df
+
 
     def prune_correlated_features(self, df, target_key, R_max=0.95):
         """
