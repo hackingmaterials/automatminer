@@ -31,7 +31,7 @@ class FeaturizerSet:
     """
 
     def __init__(self, exclude=None):
-        self.exclude = exclude if exclude else None
+        self.exclude = exclude if exclude else []
 
     def __call__(self, *args, **kwargs):
         return self.all
@@ -76,7 +76,7 @@ class AllFeaturizers(FeaturizerSet):
     """
 
     def __init__(self, exclude=None):
-        super(FeaturizerSet, self).__init__(exclude=exclude)
+        super(AllFeaturizers, self).__init__(exclude=exclude)
 
         self._featurizer_sets = {
             'comp': CompositionFeaturizers(),
@@ -107,13 +107,11 @@ class AllFeaturizers(FeaturizerSet):
 
     @property
     def all(self):
-        """See base class."""
         featurizers = [f.all for f in self._featurizer_sets.values()]
         return self._get_featurizers(featurizers)
 
     @property
     def best(self):
-        """See base class."""
         featurizers = [f.best for f in self._featurizer_sets.values()]
         return self._get_featurizers(featurizers)
 
@@ -136,7 +134,7 @@ class CompositionFeaturizers(FeaturizerSet):
     """
 
     def __init__(self, exclude=None):
-        super(FeaturizerSet, self).__init__(exclude=exclude)
+        super(CompositionFeaturizers, self).__init__(exclude=exclude)
 
         self._fast_featurizers = [
             cf.AtomicOrbitals(),
@@ -191,7 +189,6 @@ class CompositionFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        """See base class."""
         return self.fast
 
 
@@ -213,7 +210,7 @@ class StructureFeaturizers(FeaturizerSet):
     """
 
     def __init__(self, exclude=None):
-        super(FeaturizerSet, self).__init__(exclude=exclude)
+        super(StructureFeaturizers, self).__init__(exclude=exclude)
 
         self._fast_featurizers = [
             sf.DensityFeatures(),
@@ -245,10 +242,11 @@ class StructureFeaturizers(FeaturizerSet):
             sf.ElectronicRadialDistributionFunction()
         ]
 
+        # these are the same as _need_fitting_featurizers
         self._many_features_featurizers = [
-            sf.BagofBonds(),
             sf.PartialRadialDistributionFunction(),
-            sf.BondFractions()
+            sf.BondFractions(),
+            sf.BagofBonds(),
         ]
 
     @property
@@ -292,7 +290,6 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        """See base class."""
         return self.fast + self.slow
 
 
@@ -310,7 +307,7 @@ class DOSFeaturizers(FeaturizerSet):
             will be excluded from the set of featurizers returned.
     """
     def __init__(self, exclude=None):
-        super(FeaturizerSet, self).__init__(exclude=exclude)
+        super(DOSFeaturizers, self).__init__(exclude=exclude)
 
         self._best_featurizers = [
             dosf.DOSFeaturizer(),
@@ -325,7 +322,6 @@ class DOSFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        """See base class."""
         return self._get_featurizers(self._best_featurizers)
 
 
@@ -343,7 +339,7 @@ class BSFeaturizers(FeaturizerSet):
             will be excluded from the set of featurizers returned.
     """
     def __init__(self, exclude=None):
-        super(FeaturizerSet, self).__init__(exclude=exclude)
+        super(BSFeaturizers, self).__init__(exclude=exclude)
 
         self._best_featurizers = [
             bf.BandFeaturizer(),
@@ -357,5 +353,4 @@ class BSFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        """See base class."""
         return self._get_featurizers(self._best_featurizers)
