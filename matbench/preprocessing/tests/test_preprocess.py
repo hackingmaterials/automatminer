@@ -1,6 +1,6 @@
 import unittest
 
-from matminer.datasets.dataframe_loader import load_elastic_tensor
+from matminer.datasets import load_dataset
 from matminer.featurizers.structure import GlobalSymmetryFeatures
 from matbench.featurization.core import Featurization
 
@@ -17,7 +17,7 @@ class TestPreprocess(unittest.TestCase):
 
         Returns: None
         """
-        df = load_elastic_tensor()[:5][['K_VRH', 'structure']]
+        df = load_dataset("elastic_tensor_2015")[:5][['K_VRH', 'structure']]
         df['K_VRH'] = df['K_VRH'].astype(str)
         f = Featurization()
         df = f.featurize_structure(df, featurizers=[GlobalSymmetryFeatures()])

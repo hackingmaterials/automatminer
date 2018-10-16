@@ -6,8 +6,7 @@ import warnings
 import pandas as pd
 import numpy as np
 from pymatgen import Structure
-from matminer.datasets.dataframe_loader import load_piezoelectric_tensor, \
-    load_dielectric_constant, load_elastic_tensor, load_flla
+from matminer.datasets import load_dataset
 from matminer.utils.io import load_dataframe_from_json
 from matminer.featurizers.conversions import StructureToComposition
 
@@ -590,7 +589,7 @@ def load_matminer_dielectric():
         pot. ferroelectric (target): If imaginary optical phonon modes present at
             the Gamma point, the material is potentially ferroelectric
     """
-    df = load_dielectric_constant()
+    df = load_dataset("dielectric_constant")
     dropcols = ['volume', 'space_group', 'e_electronic', 'e_total']
     df = df.drop(dropcols, axis=1)
     df['structure'] = [s.as_dict() for s in df['structure']]
@@ -629,7 +628,7 @@ def load_matminer_elastic():
         load_mp. However, this dataframe is 'clean' with regard to elastic
         properties.
     """
-    df = load_elastic_tensor()
+    df = load_dataset("elastic_tensor_2015")
     dropcols = ['volume', 'space_group', 'G_Reuss', 'G_Voigt', 'K_Reuss',
                 'K_Voigt', 'compliance_tensor', 'elastic_tensor',
                 'elastic_tensor_original']
@@ -664,7 +663,7 @@ def load_matminer_piezoelectric():
         vmax_x/y/z (target): vmax = [vmax_x, vmax_y, vmax_z]. vmax is the
             direction of eij_max (or family of directions, e.g., <111>)
     """
-    df = load_piezoelectric_tensor()
+    df = load_dataset("piezoelectric_tensor")
     df['v_max'] = [np.fromstring(str(x)[1:-1], sep=',') for x in df['v_max']]
     df['vmax_x'] = [v[0] for v in df['v_max']]
     df['vmax_y'] = [v[1] for v in df['v_max']]
@@ -696,7 +695,7 @@ def load_matminer_flla():
         e_form (target): Formation energy in eV/atom
         e_hull (target): Energy above hull, in form
     """
-    df = load_flla()
+    df = load_dataset("flla")
     df = df.drop(["formula", "formation_energy", "nsites"], axis=1)
     df["formula"] = [s.composition.reduced_formula for s in df['structure']]
     df["structure"] = [s.as_dict() for s in df['structure']]

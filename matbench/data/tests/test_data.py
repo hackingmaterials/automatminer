@@ -4,7 +4,7 @@ import pandas as pd
 import unittest
 
 import matbench.data.load as loaders_source
-import matminer.datasets.dataframe_loader as blacklist_source
+import matminer.datasets.dataset_retrieval as blacklist_source
 import matminer.utils.io as blacklist_source_2
 from pymatgen import Composition
 
