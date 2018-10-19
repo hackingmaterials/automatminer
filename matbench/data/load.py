@@ -180,10 +180,12 @@ def load_boltztrap_mp():
     Effective mass and thermoelectric properties of 9036 compounds in The
     Materials Project database that are calculated by the BoltzTraP software
     package run on the GGA-PBE or GGA+U density functional theory calculation
-    results.
+    results. The properties are reported at the temperature of 300 Kelvin and
+    the carrier concentration of 1e18 1/cm3.
 
     References:
         https://www.nature.com/articles/sdata201785
+        https://contribs.materialsproject.org/carrier_transport/
 
     Returns:
         mpid (input): The Materials Project mpid, as a string.
