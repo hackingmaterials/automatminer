@@ -32,13 +32,17 @@ class TreeBasedFeatureReduction(object):
         """
 
         Args:
-            X (pandas.DataFrame):
-            y:
-            tree:
-            recursive:
+            X (pandas.DataFrame): input data, note that numpy matrix is NOT
+                accepted since the X.columns is used for feature names
+            y (pandas.Series or np.ndarray): list of outputs used for fitting
+                the tree model
+            tree (str or instantiated sklearn tree-based model): if a model is
+                directly fed, it must have the .feature_importances_ attribute
+            recursive (bool): whether to recursively reduce the features (True)
+                or just do it once (False)
 
-        Returns:
-
+        Returns (None):
+            sets the class attribute .selected_features
         """
         m0 = len(X.columns)
         if isinstance(tree, str):
@@ -54,6 +58,7 @@ class TreeBasedFeatureReduction(object):
                     tree = GradientBoostingRegressor()
             else:
                 raise MatbenchError('Unsupported tree_type {}!'.format(tree))
+
         m_curr = 0 # current number of top/important features
         m_prev = len(X.columns)
         while m_curr < m_prev:
