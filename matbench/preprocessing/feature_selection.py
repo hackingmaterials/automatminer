@@ -6,12 +6,15 @@ from sklearn.model_selection import check_cv
 
 class TreeBasedFeatureReduction(object):
     """
-    Provides different methods for feature selection/reduction mainly before
-    the production model is fit hence being under preprocessing.
+    Tree-based feature reduction tools based on sklearn models that have
+        the .feature_importances_ attribute.
 
     Args:
+        mode (str): "regression" or "classification"
         importance_percentile (float): the selected percentile of the features
             sorted (descending) based on their importance.
+        random_state (int): relevant if non-deterministic algorithms such as
+            random forest are used.
     """
     def __init__(self, mode, importance_percentile=0.95, loglevel=None,
                  logpath='.', random_state=0):
