@@ -1,7 +1,9 @@
+import pandas as pd
 from matbench.utils.utils import setup_custom_logger, MatbenchError
+from sklearn.base import is_classifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
     GradientBoostingClassifier, GradientBoostingRegressor
-
+from sklearn.model_selection import RandomizedSearchCV, check_cv
 
 class TreeBasedFeatureReduction(object):
     """
@@ -47,7 +49,7 @@ class TreeBasedFeatureReduction(object):
                 break
         return tfeats
 
-    def fit(self, X, y, tree='rf', recursive=True):
+    def fit(self, X, y, tree='rf', recursive=True, cv=5):
         """
         Fits to the data (X) and target (y) to determine the selected_features.
 
@@ -79,10 +81,16 @@ class TreeBasedFeatureReduction(object):
             else:
                 raise MatbenchError('Unsupported tree_type {}!'.format(tree))
 
-        tfeats = self.get_reduced_features(tree, X, y, recursive=recursive)
-        self.logger.info('Finished one_tree_reduction reducing the number of '
-                         'features from {} to {}'.format(m0, len(tfeats)))
-        self.selected_features = tfeats
+        cv = check_cv(cv=cv, y=y, classifier=is_classifier(tree))
+        all_feats = []
+        for train, test in cv.split(X, y, groups=None):
+            Xtrn = X.iloc[train]
+            ytrn = y[train]
+            all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
+        # take the union of selected features of each fold
+        self.selected_features = list(set(all_feats))
+        self.logger.info('Finished tree-based feature reduction of {} intial '
+                         'features to {}'.format(m0, len(self.selected_features)))
 
     def transform(self, X, y=None):
         if self.selected_features is None:
