@@ -1,9 +1,8 @@
-import pandas as pd
 from matbench.utils.utils import setup_custom_logger, MatbenchError
 from sklearn.base import is_classifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
     GradientBoostingClassifier, GradientBoostingRegressor
-from sklearn.model_selection import RandomizedSearchCV, check_cv
+from sklearn.model_selection import check_cv
 
 class TreeBasedFeatureReduction(object):
     """
@@ -23,6 +22,18 @@ class TreeBasedFeatureReduction(object):
         self.rs = random_state
 
     def get_top_features(self, feat_importance):
+        """
+        Simple function to through a sorted list of features and select top
+            percentiles.
+
+        Args:
+            feat_importance ([(str, float)]): a sorted list of
+                (feature, importance) tuples
+
+        Returns ([str]): list of the top * percentile of features. * determined
+            by importance_percentile argument.
+
+        """
         selected_feats = []
         frac = 0.0
         for feat in feat_importance:
@@ -33,6 +44,19 @@ class TreeBasedFeatureReduction(object):
         return selected_feats
 
     def get_reduced_features(self, tree_model, X, y, recursive=True):
+        """
+        Gives a reduced list of feature names given a tree-based model that
+            has the .feature_importances_ attribute.
+
+        Args:
+            tree_model (instantiated sklearn tree-based model):
+            X (pandas.dataframe):
+            y (pandas.Series or numpy.ndarray): the target column
+            recursive (bool):
+
+        Returns ([str]): list of the top * percentile of features. * determined
+            by importance_percentile argument.
+        """
         m_curr = 0  # current number of top/important features
         m_prev = len(X.columns)
         while m_curr < m_prev:
@@ -93,6 +117,17 @@ class TreeBasedFeatureReduction(object):
                          'features to {}'.format(m0, len(self.selected_features)))
 
     def transform(self, X, y=None):
+        """
+        Transforms the data with the subset of features determined after
+            calling the fit method on the data.
+
+        Args:
+            X (pandas.DataFrame): input data, note that numpy matrix is NOT
+                accepted since the X.columns is used for feature names
+            y (placeholder): ignored input (for consistency in notation)
+
+        Returns (pandas.DataFrame): the data with reduced number of features.
+        """
         if self.selected_features is None:
-            raise MatbenchError('Please call fit first')
+            raise MatbenchError('The fit method should be called first!')
         return X[self.selected_features]
