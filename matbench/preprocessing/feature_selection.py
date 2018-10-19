@@ -12,11 +12,13 @@ class TreeBasedFeatureReduction(object):
         importance_percentile (float): the selected percentile of the features
             sorted (descending) based on their importance.
     """
-    def __init__(self, mode, importance_percentile=0.95, loglevel=None, logpath='.'):
+    def __init__(self, mode, importance_percentile=0.95, loglevel=None,
+                 logpath='.', random_state=0):
         self.mode = mode
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
         self.importance_percentile = importance_percentile
         self.selected_features = None
+        self.rs = random_state
 
     def get_top_features(self, feat_importance):
         selected_feats = []
@@ -28,8 +30,26 @@ class TreeBasedFeatureReduction(object):
                 break
         return selected_feats
 
+    def get_reduced_features(self, tree_model, X, y, recursive=True):
+        m_curr = 0  # current number of top/important features
+        m_prev = len(X.columns)
+        while m_curr < m_prev:
+            tree_model.fit(X, y)
+            fimportance = sorted(zip(X.columns, tree_model.feature_importances_),
+                                 key=lambda x: x[1], reverse=True)
+            tfeats = self.get_top_features(fimportance)
+            m_curr = len(tfeats)
+            m_prev = len(X.columns)
+            self.logger.debug(
+                'nfeatures: {}->{}'.format(len(X.columns), m_curr))
+            X = X[tfeats]
+            if not recursive:
+                break
+        return tfeats
+
     def fit(self, X, y, tree='rf', recursive=True):
         """
+        Fits to the data (X) and target (y) to determine the selected_features.
 
         Args:
             X (pandas.DataFrame): input data, note that numpy matrix is NOT
@@ -48,30 +68,18 @@ class TreeBasedFeatureReduction(object):
         if isinstance(tree, str):
             if tree.lower() in ['rf', 'random forest', 'randomforest']:
                 if self.mode.lower() in ['classification', 'classifier']:
-                    tree = RandomForestClassifier()
+                    tree = RandomForestClassifier(random_state=self.rs)
                 else:
-                    tree = RandomForestRegressor()
+                    tree = RandomForestRegressor(random_state=self.rs)
             elif tree.lower() in ['gb', 'gbt', 'gradiet boosting']:
                 if self.mode.lower() in ['classification', 'classifier']:
-                    tree = GradientBoostingClassifier()
+                    tree = GradientBoostingClassifier(random_state=self.rs)
                 else:
-                    tree = GradientBoostingRegressor()
+                    tree = GradientBoostingRegressor(random_state=self.rs)
             else:
                 raise MatbenchError('Unsupported tree_type {}!'.format(tree))
 
-        m_curr = 0 # current number of top/important features
-        m_prev = len(X.columns)
-        while m_curr < m_prev:
-            tree.fit(X, y)
-            fimportance = sorted(zip(X.columns, tree.feature_importances_),
-                                 key=lambda x: x[1], reverse=True)
-            tfeats = self.get_top_features(fimportance)
-            m_curr = len(tfeats)
-            m_prev = len(X.columns)
-            self.logger.debug('nfeatures: {}->{}'.format(len(X.columns), m_curr))
-            X = X[tfeats]
-            if not recursive:
-                break
+        tfeats = self.get_reduced_features(tree, X, y, recursive=recursive)
         self.logger.info('Finished one_tree_reduction reducing the number of '
                          'features from {} to {}'.format(m0, len(tfeats)))
         self.selected_features = tfeats
