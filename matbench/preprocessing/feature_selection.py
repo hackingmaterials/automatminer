@@ -1,5 +1,6 @@
 from matbench.utils.utils import setup_custom_logger, MatbenchError
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
+    GradientBoostingClassifier, GradientBoostingRegressor
 
 
 class TreeBasedFeatureReduction(object):
@@ -11,7 +12,8 @@ class TreeBasedFeatureReduction(object):
         importance_percentile (float): the selected percentile of the features
             sorted (descending) based on their importance.
     """
-    def __init__(self, importance_percentile=0.95, loglevel=None, logpath='.'):
+    def __init__(self, mode, importance_percentile=0.95, loglevel=None, logpath='.'):
+        self.mode = mode
         self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
         self.importance_percentile = importance_percentile
         self.selected_features = None
@@ -27,10 +29,29 @@ class TreeBasedFeatureReduction(object):
         return selected_feats
 
     def fit(self, X, y, tree='rf', recursive=True):
-        m0 = len(X.columns) # initial number of features
+        """
+
+        Args:
+            X (pandas.DataFrame):
+            y:
+            tree:
+            recursive:
+
+        Returns:
+
+        """
+        m0 = len(X.columns)
         if isinstance(tree, str):
-            if tree=='rf':
-                tree = RandomForestRegressor()
+            if tree.lower() in ['rf', 'random forest', 'randomforest']:
+                if self.mode.lower() in ['classification', 'classifier']:
+                    tree = RandomForestClassifier()
+                else:
+                    tree = RandomForestRegressor()
+            elif tree.lower() in ['gb', 'gbt', 'gradiet boosting']:
+                if self.mode.lower() in ['classification', 'classifier']:
+                    tree = GradientBoostingClassifier()
+                else:
+                    tree = GradientBoostingRegressor()
             else:
                 raise MatbenchError('Unsupported tree_type {}!'.format(tree))
         m_curr = 0 # current number of top/important features
