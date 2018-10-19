@@ -10,7 +10,7 @@ from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction
 class TestPreprocess(unittest.TestCase):
 
     def setUp(self):
-        self.random_seed = 12
+        self.random_state = 12
 
     # Todo: Add more tests
     def test_preprocess_basic(self):
@@ -34,7 +34,7 @@ class TestPreprocess(unittest.TestCase):
         X = df.drop('gap expt', axis=1)
         y = df['gap expt']
         tbfr = TreeBasedFeatureReduction(mode='regression',
-                                         random_state=self.random_seed)
+                                         random_state=self.random_state)
         tbfr.fit(X, y, cv=3)
         self.assertEqual(len(tbfr.selected_features), 19)
         X_reduced = tbfr.transform(X)
