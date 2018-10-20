@@ -21,10 +21,6 @@ class Preprocessing(object):
         logpath (str): the path to the logfile dir, current folder by default.
     """
 
-    def __init__(self, loglevel=None, logpath='.'):
-        self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
-        self.scaler = None # make scaler available for inverse_transform
-
     def preprocess(self, df, target_key, scale=False, n_pca_features=None,
                    n_rebate_features=None, max_na_frac=0.01, na_method='drop',
                    retain_categorical=True):
@@ -205,3 +201,7 @@ class Preprocessing(object):
         self.logger.info(
             "After handling na: {} samples, {} features".format(*df.shape))
         return df
+
+
+class DataCleaner:
+    def __init__(self):
