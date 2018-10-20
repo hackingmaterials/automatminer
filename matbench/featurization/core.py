@@ -1,6 +1,7 @@
 import logging
-from matminer.utils.conversions import composition_to_oxidcomposition, \
-    structure_to_oxidstructure
+
+from matminer.featurizers.conversions import (CompositionToOxidComposition,
+                                              StructureToOxidStructure)
 from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
@@ -155,7 +156,10 @@ class Featurization(object):
         if compcol not in df:
             df[compcol] = df[col_id].apply(Composition)
         if guess_oxidstates:
-            df[compcol] = composition_to_oxidcomposition(df[compcol])
+            cto = CompositionToOxidComposition(target_col_id=compcol,
+                                               overwrite_data=True)
+            df = cto.featurize_dataframe(df, compcol,
+                                         multiindex=self.multiindex)
 
         if isinstance(featurizers, str):
             featurizers = getattr(self.cfset, featurizers)
@@ -202,7 +206,10 @@ class Featurization(object):
         if isinstance(df[col_id][0], dict):
             df[col_id] = df[col_id].apply(Structure.from_dict)
         if guess_oxidstates:
-            structure_to_oxidstructure(df[col_id], inplace=True)
+            sto = StructureToOxidStructure(target_col_id=col_id,
+                                           overwrite_data=True)
+            df = sto.featurize_dataframe(df, col_id,
+                                         multiindex=self.multiindex)
         if isinstance(featurizers, str):
             featurizers = getattr(self.sfset, featurizers)
 
