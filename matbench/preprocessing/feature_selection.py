@@ -89,6 +89,8 @@ class TreeBasedFeatureReduction(object):
                 directly fed, it must have the .feature_importances_ attribute
             recursive (bool): whether to recursively reduce the features (True)
                 or just do it once (False)
+            cv (int or CrossValidation): sklearn's cross-validation with the
+                same options (int or actual instantiated CrossValidation)
 
         Returns (None):
             sets the class attribute .selected_features
@@ -134,3 +136,9 @@ class TreeBasedFeatureReduction(object):
         if self.selected_features is None:
             raise MatbenchError('The fit method should be called first!')
         return X[self.selected_features]
+
+    def citations(self):
+        return []
+
+    def implementors(self):
+        return ['Alireza Faghaninia']
