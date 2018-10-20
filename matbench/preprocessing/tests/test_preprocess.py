@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import unittest
 
 from matminer.datasets import load_dataset
@@ -6,6 +7,8 @@ from matminer.featurizers.structure import GlobalSymmetryFeatures
 from matbench.featurization.core import Featurization
 from matbench.preprocessing.core import Preprocessing
 from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction
+
+test_dir = os.path.dirname(__file__)
 
 class TestPreprocess(unittest.TestCase):
 
@@ -30,7 +33,8 @@ class TestPreprocess(unittest.TestCase):
         self.assertEqual(df['crystal_system_tetragonal'].iloc[0], 1)
 
     def test_TreeBasedFeatureReduction(self):
-        df = pd.read_csv('test_featurized_df.csv').set_index('formula')
+        df = pd.read_csv(os.path.join(test_dir, 'test_featurized_df.csv'))
+        df = df.set_index('formula')
         X = df.drop('gap expt', axis=1)
         y = df['gap expt']
         tbfr = TreeBasedFeatureReduction(mode='regression',
