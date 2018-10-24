@@ -1,15 +1,10 @@
 import warnings
-import matminer.featurizers.composition as cf
-import matminer.featurizers.structure as sf
 from matbench.metalearning.metafeatures import formula_metafeatures, \
     structure_metafeatures
 
 """
-Get recommendation of featurizers based on meta-features of the new dataset 
-and some pre-defined strategies obtained by extensive benchmarking for 
-datasets of different meta-features as well as some basic understandings 
-of various featurizers. 
-
+Automatically filter some featurizers based on metafeatures calculated for
+the dataset. 
 """
 
 
@@ -64,7 +59,7 @@ class FeaturizerAutoFilter:
     @staticmethod
     def formula_featurizer_excludes(mfs, max_na_percent=0.05):
         excludes = list()
-        if mfs:
+        try:
             if mfs["percent_of_all_nonmetal"] > max_na_percent:
                 excludes.extend(["Miedema",
                                  "YangSolidSolution"])
@@ -74,17 +69,34 @@ class FeaturizerAutoFilter:
                                  "Miedema",
                                  "YangSolidSolution"])
 
+            if mfs["PercentOfAllMetal"] > (1 - max_na_percent):
+                excludes.extend(["CationProperty",
+                                 "OxidationStates",
+                                 "ElectronAffinity",
+                                 "ElectronegativityDiff",
+                                 "IonProperty"])
+        except KeyError:
+            warnings.warn("The metafeature dict does not contain all the"
+                          "metafeatures for filtering featurizers for the "
+                          "formula! Please call DatasetMetaFeatures first"
+                          "to derive the metafeature dict.")
+
         # return dict {"formula_excludes": excludes}??
-        return excludes
+        return list(set(excludes))
 
     @staticmethod
     def structure_featurizer_excludes(mfs, max_na_percent=0.05):
         excludes = list()
-        if mfs:
+        try:
             if mfs["percent_of_ordered_structures"] < (1 - max_na_percent):
                 excludes.extend(["GlobalSymmetryFeatures"])
 
-        return excludes
+        except KeyError:
+            warnings.warn("The metafeature dict does not contain all the"
+                          "metafeatures for filtering featurizers for the "
+                          "structure! Please call DatasetMetaFeatures first"
+                          "to derive the metafeature dict.")
+        return list(set(excludes))
 
     def auto_excludes(self, dataset_cols=("formula", "structure")):
         auto_excludes = list()
@@ -92,11 +104,10 @@ class FeaturizerAutoFilter:
             auto_metafeatures(dataset_cols)
         for column in dataset_cols:
             mfs = auto_mfs.get("{}_metafeatures".format(column))
-            if mfs:
-                excludes_fts = getattr(self,
-                                        "{}_featurizer_excludes".format(column), None)
-                auto_excludes.append(excludes_fts(mfs)
-                                     if excludes_fts is not None else [])
+            excludes_fts = getattr(self,
+                                   "{}_featurizer_excludes".format(column),
+                                   None)
+            auto_excludes.append(excludes_fts(mfs)
+                                 if excludes_fts is not None else [])
 
-        return auto_excludes
-
+        return list(set(auto_excludes))

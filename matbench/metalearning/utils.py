@@ -1,6 +1,5 @@
 import six
 from collections import OrderedDict
-
 from pymatgen.core import Composition, Element, Structure
 
 
