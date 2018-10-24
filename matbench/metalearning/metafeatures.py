@@ -128,12 +128,12 @@ def _formula_stats(X):
 
 
 class NumberOfFormulas(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         return len(X)
 
 
 class PercentOfAllMetal(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         stats = formula_stats(X)
         num = sum([1 if stat["major_formula_category"] == 1 else 0
                   for stat in stats.values()])
@@ -141,7 +141,7 @@ class PercentOfAllMetal(MetaFeature):
 
 
 class PercentOfMetalNonmetal(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         stats = formula_stats(X)
         num = sum([1 if stat["major_formula_category"] == 2 else 0
                   for stat in stats.values()])
@@ -149,7 +149,7 @@ class PercentOfMetalNonmetal(MetaFeature):
 
 
 class PercentOfAllNonmetal(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         stats = formula_stats(X)
         num = sum([1 if stat["major_formula_category"] == 3 else 0
                   for stat in stats.values()])
@@ -157,7 +157,7 @@ class PercentOfAllNonmetal(MetaFeature):
 
 
 class NumberOfDifferentElements(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         stats = formula_stats(X)
         elements = set()
         for stat in stats.values():
@@ -166,21 +166,21 @@ class NumberOfDifferentElements(MetaFeature):
 
 
 class AvgNumberOfElements(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         stats = formula_stats(X)
         nelements_sum = sum([stat["n_elements"] for stat in stats.values()])
         return nelements_sum / len(stats)
 
 
 class MaxNumberOfElements(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         stats = formula_stats(X)
         nelements_max = max([stat["n_elements"] for stat in stats.values()])
         return nelements_max
 
 
 class MinNumberOfElements(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         stats = formula_stats(X)
         nelements_min = min([stat["n_elements"] for stat in stats.values()])
         return nelements_min
@@ -207,33 +207,33 @@ def _structure_stats(X):
 
 
 class NumberOfStructures(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         return len(X)
 
 
 class PercentOfOrderedStructures(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         stats = structure_stats(X)
         num = sum([1 if stat["is_ordered"] else 0 for stat in stats.values()])
         return num/len(stats)
 
 
 class AvgNumberOfSites(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         stats = structure_stats(X)
         nsites_sum = sum([stat["n_sites"] for stat in stats.values()])
         return nsites_sum / len(stats)
 
 
 class MaxNumberOfSites(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         stats = structure_stats(X)
         nsites_max = max([stat["n_sites"] for stat in stats.values()])
         return nsites_max
 
 
 class NumberOfDifferentElementsInStructure(MetaFeature):
-    def calc(self, X, y):
+    def calc(self, X, y=None):
         elements = set()
         for struct in X:
             c = Composition(struct.formula)
@@ -242,7 +242,7 @@ class NumberOfDifferentElementsInStructure(MetaFeature):
         return len(elements)
 
 
-_formula_metafeatures = \
+formula_mfs_list = \
     {"number_of_formulas": NumberOfFormulas(),
      "percent_of_all_metal": PercentOfAllMetal(),
      "percent_of_metal_nonmetal": PercentOfMetalNonmetal(),
@@ -252,7 +252,7 @@ _formula_metafeatures = \
      "max_number_of_elements": MaxNumberOfElements(),
      "min_number_of_elements": MinNumberOfElements()}
 
-_structure_metafeatures = \
+structure_mfs_list = \
     {"number_of_structures": NumberOfStructures(),
      "percent_of_ordered_structures": PercentOfOrderedStructures(),
      "avg_number_of_sites": AvgNumberOfSites(),

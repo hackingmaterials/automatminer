@@ -10,33 +10,27 @@ class TestFormulaMetafeatures(unittest.TestCase):
         cls.df_glass = load_glass_binary()
 
     def test_NumberOfFormulas(self):
-        nf = NumberOfFormulas().calc(self.df_glass["formula"],
-                                     self.df_glass["gfa"])
+        nf = NumberOfFormulas().calc(self.df_glass["formula"])
         self.assertEqual(nf, 5959)
 
     def test_PercentOfAllMetal(self):
-        pm = PercentOfAllMetal().calc(self.df_glass["formula"],
-                                      self.df_glass["gfa"])
+        pm = PercentOfAllMetal().calc(self.df_glass["formula"])
         self.assertEqual(pm, 0.6577857785778578)
 
     def test_PercentOfMetalNonmetal(self):
-        pmnc = PercentOfMetalNonmetal().calc(self.df_glass["formula"],
-                                             self.df_glass["gfa"])
+        pmnc = PercentOfMetalNonmetal().calc(self.df_glass["formula"])
         self.assertEqual(pmnc, 0.3207920792079208)
 
     def test_PercentOfAllNonmetal(self):
-        pan = PercentOfAllNonmetal().calc(self.df_glass["formula"],
-                                          self.df_glass["gfa"])
+        pan = PercentOfAllNonmetal().calc(self.df_glass["formula"])
         self.assertEqual(pan, 0.021422142214221424)
 
     def test_NumberOfDifferentElements(self):
-        nde = NumberOfDifferentElements().calc(self.df_glass["formula"],
-                                               self.df_glass["gfa"])
+        nde = NumberOfDifferentElements().calc(self.df_glass["formula"])
         self.assertEqual(nde, 38)
 
     def test_AvgNumberOfElements(self):
-        ane = AvgNumberOfElements().calc(self.df_glass["formula"],
-                                         self.df_glass["gfa"])
+        ane = AvgNumberOfElements().calc(self.df_glass["formula"])
         self.assertEqual(ane, 1.9801980198019802)
 
 
@@ -48,28 +42,24 @@ class TestStructureMetafeatures(unittest.TestCase):
             apply(lambda x: Structure.from_dict(x))
 
     def test_NumberOfStructures(self):
-        ns = NumberOfStructures().calc(self.df_castelli["structure"],
-                                       self.df_castelli["e_form"])
+        ns = NumberOfStructures().calc(self.df_castelli["structure"])
         self.assertEqual(ns, 18928)
 
     def test_PercentOfOrderedStructures(self):
-        pos = PercentOfOrderedStructures().calc(self.df_castelli["structure"],
-                                                self.df_castelli["e_form"])
+        pos = PercentOfOrderedStructures().calc(self.df_castelli["structure"])
         self.assertEqual(pos, 1.0)
 
     def test_AvgNumberOfSitess(self):
-        ans = AvgNumberOfSites().calc(self.df_castelli["structure"],
-                                      self.df_castelli["e_form"])
+        ans = AvgNumberOfSites().calc(self.df_castelli["structure"])
         self.assertEqual(ans, 5.0)
 
     def test_MaxNumberOfSites(self):
-        mns = MaxNumberOfSites().calc(self.df_castelli["structure"],
-                                      self.df_castelli["e_form"])
+        mns = MaxNumberOfSites().calc(self.df_castelli["structure"])
         self.assertEqual(mns, 5.0)
 
     def test_NumberOfDifferentElementsInStructure(self):
         mns = NumberOfDifferentElementsInStructure().calc(
-            self.df_castelli["structure"], self.df_castelli["e_form"])
+            self.df_castelli["structure"])
         self.assertEqual(mns, 56)
 
 
