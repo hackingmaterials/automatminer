@@ -1,7 +1,7 @@
 import numpy as np
+from functools import lru_cache
 from pymatgen.core import Composition
-from .core import MetaFeature
-from .core import Helper
+from abc import ABCMeta, abstractmethod
 from .utils import FormulaStatistics, StructureStatistics
 
 
@@ -80,13 +80,42 @@ To do:
 
 """
 
+
+class AbstractMetaFeature(object):
+    """
+
+    """
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def calc(cls, X, y):
+        pass
+
+
+class MetaFeature(AbstractMetaFeature):
+    def __init__(self, dependence=None):
+        self.dependence = dependence
+        super(MetaFeature, self).__init__()
+
+
+class Helper(AbstractMetaFeature):
+    def __init__(self):
+        super(Helper, self).__init__()
+
+
 #######################################################
 # formula-related metafeatures
 #######################################################
-class FormulaStats(Helper):
-    def calc(self, X, y):
-        stats = FormulaStatistics(X).calc()
-        return stats
+
+
+@lru_cache()
+def formula_stats(X, y):
+    stats = FormulaStatistics(X).calc()
+    return stats
 
 
 class NumberOfFormulas(MetaFeature):
@@ -96,7 +125,7 @@ class NumberOfFormulas(MetaFeature):
 
 class PercentOfAllMetal(MetaFeature):
     def calc(self, X, y):
-        stats = self.dependence
+        stats = formula_stats(X, y)
         num = sum([1 if stat["major_formula_category"] == 1 else 0
                   for stat in stats.values()])
         return num / len(stats)
@@ -104,7 +133,7 @@ class PercentOfAllMetal(MetaFeature):
 
 class PercentOfMetalNonmetal(MetaFeature):
     def calc(self, X, y):
-        stats = self.dependence
+        stats = formula_stats(X, y)
         num = sum([1 if stat["major_formula_category"] == 2 else 0
                   for stat in stats.values()])
         return num / len(stats)
@@ -112,7 +141,7 @@ class PercentOfMetalNonmetal(MetaFeature):
 
 class PercentOfAllNonmetal(MetaFeature):
     def calc(self, X, y):
-        stats = self.dependence
+        stats = formula_stats(X, y)
         num = sum([1 if stat["major_formula_category"] == 3 else 0
                   for stat in stats.values()])
         return num / len(stats)
@@ -120,7 +149,7 @@ class PercentOfAllNonmetal(MetaFeature):
 
 class NumberOfDifferentElements(MetaFeature):
     def calc(self, X, y):
-        stats = self.dependence
+        stats = formula_stats(X, y)
         elements = set()
         for stat in stats.values():
             elements = elements.union(set(stat["elements"]))
@@ -129,21 +158,21 @@ class NumberOfDifferentElements(MetaFeature):
 
 class AvgNumberOfElements(MetaFeature):
     def calc(self, X, y):
-        stats = self.dependence
+        stats = formula_stats(X, y)
         nelements_sum = sum([stat["n_elements"] for stat in stats.values()])
         return nelements_sum / len(stats)
 
 
 class MaxNumberOfElements(MetaFeature):
     def calc(self, X, y):
-        stats = self.dependence
+        stats = formula_stats(X, y)
         nelements_max = max([stat["n_elements"] for stat in stats.values()])
         return nelements_max
 
 
 class MinNumberOfElements(MetaFeature):
     def calc(self, X, y):
-        stats = self.dependence
+        stats = formula_stats(X, y)
         nelements_min = min([stat["n_elements"] for stat in stats.values()])
         return nelements_min
 
@@ -151,10 +180,11 @@ class MinNumberOfElements(MetaFeature):
 #######################################################
 # structure-related metafeatures
 #######################################################
-class StructureStats(Helper):
-    def calc(self, X, y):
-        stats = StructureStatistics(X).calc()
-        return stats
+
+@lru_cache()
+def structure_stats(X, y):
+    stats = StructureStatistics(X).calc()
+    return stats
 
 
 class NumberOfStructures(MetaFeature):
@@ -164,21 +194,21 @@ class NumberOfStructures(MetaFeature):
 
 class PercentOfOrderedStructures(MetaFeature):
     def calc(self, X, y):
-        stats = self.dependence
+        stats = structure_stats(X, y)
         num = sum([1 if stat["is_ordered"] else 0 for stat in stats.values()])
         return num/len(stats)
 
 
 class AvgNumberOfSites(MetaFeature):
     def calc(self, X, y):
-        stats = self.dependence
+        stats = structure_stats(X, y)
         nsites_sum = sum([stat["n_sites"] for stat in stats.values()])
         return nsites_sum / len(stats)
 
 
 class MaxNumberOfSites(MetaFeature):
     def calc(self, X, y):
-        stats = self.dependence
+        stats = structure_stats(X, y)
         nsites_max = max([stat["n_sites"] for stat in stats.values()])
         return nsites_max
 
@@ -194,18 +224,18 @@ class NumberOfDifferentElementsInStructure(MetaFeature):
 
 
 formula_metafeatures = \
-    {"number_of_formulas": NumberOfFormulas,
-     "percent_of_all_metal": PercentOfAllMetal,
-     "percent_of_metal_nonmetal": PercentOfMetalNonmetal,
-     "percent_of_all_nonmetal": PercentOfAllNonmetal,
-     "number_of_different_elements": NumberOfDifferentElements,
-     "avg_number_of_elements": AvgNumberOfElements,
-     "max_number_of_elements": MaxNumberOfElements,
-     "min_number_of_elements": MinNumberOfElements}
+    {"number_of_formulas": NumberOfFormulas(),
+     "percent_of_all_metal": PercentOfAllMetal(),
+     "percent_of_metal_nonmetal": PercentOfMetalNonmetal(),
+     "percent_of_all_nonmetal": PercentOfAllNonmetal(),
+     "number_of_different_elements": NumberOfDifferentElements(),
+     "avg_number_of_elements": AvgNumberOfElements(),
+     "max_number_of_elements": MaxNumberOfElements(),
+     "min_number_of_elements": MinNumberOfElements()}
 
 structure_metafeatures = \
-    {"number_of_structures": NumberOfStructures,
-     "percent_of_ordered_structures": PercentOfOrderedStructures,
-     "avg_number_of_sites": AvgNumberOfSites,
-     "max_number_of_sites": MaxNumberOfSites,
-     "number_of_different_elements_in_structures": NumberOfDifferentElements}
+    {"number_of_structures": NumberOfStructures(),
+     "percent_of_ordered_structures": PercentOfOrderedStructures(),
+     "avg_number_of_sites": AvgNumberOfSites(),
+     "max_number_of_sites": MaxNumberOfSites(),
+     "number_of_different_elements_in_structures": NumberOfDifferentElements()}
