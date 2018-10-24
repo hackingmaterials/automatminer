@@ -223,7 +223,7 @@ class NumberOfDifferentElementsInStructure(MetaFeature):
         return len(elements)
 
 
-formula_metafeatures = \
+_formula_metafeatures = \
     {"number_of_formulas": NumberOfFormulas(),
      "percent_of_all_metal": PercentOfAllMetal(),
      "percent_of_metal_nonmetal": PercentOfMetalNonmetal(),
@@ -233,7 +233,7 @@ formula_metafeatures = \
      "max_number_of_elements": MaxNumberOfElements(),
      "min_number_of_elements": MinNumberOfElements()}
 
-structure_metafeatures = \
+_structure_metafeatures = \
     {"number_of_structures": NumberOfStructures(),
      "percent_of_ordered_structures": PercentOfOrderedStructures(),
      "avg_number_of_sites": AvgNumberOfSites(),
