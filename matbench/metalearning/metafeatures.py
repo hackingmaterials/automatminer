@@ -194,21 +194,21 @@ class NumberOfStructures(MetaFeature):
 
 class PercentOfOrderedStructures(MetaFeature):
     def calc(self, X, y):
-        stats = structure_stats(X, y)
+        stats = structure_stats(tuple(X.values), tuple(y.values))
         num = sum([1 if stat["is_ordered"] else 0 for stat in stats.values()])
         return num/len(stats)
 
 
 class AvgNumberOfSites(MetaFeature):
     def calc(self, X, y):
-        stats = structure_stats(X, y)
+        stats = structure_stats(tuple(X.values), tuple(y.values))
         nsites_sum = sum([stat["n_sites"] for stat in stats.values()])
         return nsites_sum / len(stats)
 
 
 class MaxNumberOfSites(MetaFeature):
     def calc(self, X, y):
-        stats = structure_stats(X, y)
+        stats = structure_stats(tuple(X.values), tuple(y.values))
         nsites_max = max([stat["n_sites"] for stat in stats.values()])
         return nsites_max
 

@@ -53,43 +53,30 @@ class TestStructureMetafeatures(unittest.TestCase):
         cls.df_castelli["structure"] = cls.df_castelli["structure"].\
             apply(lambda x: Structure.from_dict(x))
 
-        cls.metafeatures_castelli = metafeatures.metafeatures
-        cls.helpers_castelli = metafeatures.helpers
-
-        cls.helpers_castelli.set_value(
-            "structure_stats", cls.helpers_castelli["structure_stats"]
-            (cls.df_castelli["structure"], cls.df_castelli["e_form"]))
-
     def test_NumberOfStructures(self):
-        ns = self.metafeatures_castelli["number_of_structures"](
-             self.df_castelli["structure"], self.df_castelli["e_form"])
+        ns = NumberOfStructures().calc(self.df_castelli["structure"],
+                                       self.df_castelli["e_form"])
         self.assertEqual(ns.value, 18928)
-        self.assertIsInstance(ns, MetaFeatureValue)
 
     def test_PercentOfOrderedStructures(self):
-        pos = self.metafeatures_castelli["percent_of_ordered_structures"](
-             self.df_castelli["structure"], self.df_castelli["e_form"])
+        pos = PercentOfOrderedStructures().calc(self.df_castelli["structure"],
+                                                self.df_castelli["e_form"])
         self.assertEqual(pos.value, 1.0)
-        self.assertIsInstance(pos, MetaFeatureValue)
 
-    def test_AverageNumberOfSites(self):
-        ans = self.metafeatures_castelli["avg_number_of_sites"](
-             self.df_castelli["structure"], self.df_castelli["e_form"])
+    def test_AvgNumberOfSitess(self):
+        ans = AvgNumberOfSites().calc(self.df_castelli["structure"],
+                                      self.df_castelli["e_form"])
         self.assertEqual(ans.value, 5.0)
-        self.assertIsInstance(ans, MetaFeatureValue)
 
     def test_MaxNumberOfSites(self):
-        mns = self.metafeatures_castelli["max_number_of_sites"](
-            self.df_castelli["structure"], self.df_castelli["e_form"])
+        mns = MaxNumberOfSites().calc(self.df_castelli["structure"],
+                                      self.df_castelli["e_form"])
         self.assertEqual(mns.value, 5.0)
-        self.assertIsInstance(mns, MetaFeatureValue)
 
     def test_NumberOfDifferentElementsInStructure(self):
-        mns = self.metafeatures_castelli[
-            "number_of_different_elements_in_structure"](
+        mns = NumberOfDifferentElementsInStructure().calc(
             self.df_castelli["structure"], self.df_castelli["e_form"])
         self.assertEqual(mns.value, 56)
-        self.assertIsInstance(mns, MetaFeatureValue)
 
 
 if __name__ == "__main__":
