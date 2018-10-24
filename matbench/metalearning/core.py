@@ -61,23 +61,27 @@ class FeaturizerAutoFilter:
         self.X = X
         self.y = y
 
-    def formula_excludes(self, mfs):
+    @staticmethod
+    def formula_featurizer_excludes(mfs, max_na_percent=0.05):
         excludes = list()
         if mfs:
-            if mfs["percent_of_all_nonmetal"] > 0.80:
+            if mfs["percent_of_all_nonmetal"] > max_na_percent:
                 excludes.extend(["Miedema",
                                  "YangSolidSolution"])
 
-            if mfs["percent_of_transition_metal_alloy"] < 0.80:
-                excludes.extend(["TMetalFraction"])
+            if mfs["percent_of_transition_metal_alloy"] < (1 - max_na_percent):
+                excludes.extend(["TMetalFraction",
+                                 "Miedema",
+                                 "YangSolidSolution"])
 
         # return dict {"formula_excludes": excludes}??
         return excludes
 
-    def structure_excludes(self, mfs):
+    @staticmethod
+    def structure_featurizer_excludes(mfs, max_na_percent=0.05):
         excludes = list()
         if mfs:
-            if mfs["percent_of_ordered_structures"] < 0.80:
+            if mfs["percent_of_ordered_structures"] < (1 - max_na_percent):
                 excludes.extend(["GlobalSymmetryFeatures"])
 
         return excludes
@@ -89,10 +93,10 @@ class FeaturizerAutoFilter:
         for column in dataset_cols:
             mfs = auto_mfs.get("{}_metafeatures".format(column))
             if mfs:
-                excludes_func = getattr(self,
-                                        "{}_excludes".format(column), None)
-                auto_excludes.append(excludes_func(mfs)
-                                     if excludes_func is not None else [])
+                excludes_fts = getattr(self,
+                                        "{}_featurizer_excludes".format(column), None)
+                auto_excludes.append(excludes_fts(mfs)
+                                     if excludes_fts is not None else [])
 
         return auto_excludes
 
