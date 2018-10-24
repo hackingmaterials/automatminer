@@ -20,9 +20,9 @@ class DatasetMetaFeatures:
                 mfs[mf] = mf_class.calc(self.df[formula_col])
             return {"formula_metafeatures": mfs}
         else:
-            warnings.warn("Input X does not contain formula column of {}, "
-                          "will not return any statistical metafeatures "
-                          "for formulas in this dataset!".format(formula_col))
+            # warnings.warn("Input X does not contain formula column of {}, "
+            #               "will not return any statistical metafeatures "
+            #               "for formulas in this dataset!".format(formula_col))
             return None
 
     def structure_metafeatures(self, structure_col="structure"):
@@ -32,10 +32,10 @@ class DatasetMetaFeatures:
                 mfs[mf] = mf_class.calc(self.df[structure_col])
             return {"structure_metafeatures": mfs}
         else:
-            warnings.warn("Input X does not contain structure column of {}, "
-                          "will not return any statistical metafeatures "
-                          "for formulas in this dataset!".format(structure_col))
-            return None
+            # warnings.warn("Input X does not contain structure column of {}, "
+            #               "will not return any statistical metafeatures "
+            #               "for formulas in this dataset!".format(structure_col))
+            return {"structure_metafeatures": None}
 
     def auto_metafeatures(self, **kwargs):
         auto_mfs = dict()
@@ -53,9 +53,9 @@ class FeaturizerAutoFilter:
     Currently only support removing definitely useless featurizers.
     Cannot recommend featurizers based on the target.
     """
-    def __init__(self, X, y):
-        self.X = X
-        self.y = y
+    def __init__(self, df, max_na_percent=0.05):
+        self.df = df
+        self.max_na_percent = max_na_percent
 
     @staticmethod
     def formula_featurizer_excludes(mfs, max_na_percent=0.05):
@@ -65,19 +65,19 @@ class FeaturizerAutoFilter:
                 excludes.extend(["Miedema",
                                  "YangSolidSolution"])
 
-            if mfs["percent_of_transition_metal_alloy"] < (1 - max_na_percent):
+            if mfs["percent_of_contain_trans_metal"] < (1 - max_na_percent):
                 excludes.extend(["TMetalFraction",
                                  "Miedema",
                                  "YangSolidSolution"])
 
-            if mfs["PercentOfAllMetal"] > (1 - max_na_percent):
+            if mfs["percent_of_all_metal"] > max_na_percent:
                 excludes.extend(["CationProperty",
                                  "OxidationStates",
                                  "ElectronAffinity",
                                  "ElectronegativityDiff",
                                  "IonProperty"])
         except KeyError:
-            warnings.warn("The metafeature dict does not contain all the"
+            warnings.warn("The metafeature dict does not contain all the "
                           "metafeatures for filtering featurizers for the "
                           "formula! Please call DatasetMetaFeatures first"
                           "to derive the metafeature dict.")
@@ -99,16 +99,17 @@ class FeaturizerAutoFilter:
                           "to derive the metafeature dict.")
         return list(set(excludes))
 
-    def auto_excludes(self, **kwargs):
+    def auto_excludes(self, **auto_mfs_kwargs):
         auto_excludes = list()
-        auto_mfs = DatasetMetaFeatures(self.df).\
-            auto_metafeatures(dataset_cols)
-        for column in dataset_cols:
-            mfs = auto_mfs.get("{}_metafeatures".format(column))
-            excludes_fts = getattr(self,
-                                   "{}_featurizer_excludes".format(column),
-                                   None)
-            auto_excludes.append(excludes_fts(mfs)
-                                 if excludes_fts is not None else [])
+        auto_mfs = DatasetMetaFeatures(self.df).auto_metafeatures(
+            **auto_mfs_kwargs)
+        for mfs_type in _supported_mfs_types:
+            mfs = auto_mfs.get("{}_metafeatures".format(mfs_type))
+            if mfs is not None:
+                exclude_fts = getattr(self,
+                                      "{}_featurizer_excludes".format(mfs_type),
+                                      None)
+                auto_excludes.extend(exclude_fts(mfs, self.max_na_percent)
+                                     if exclude_fts is not None else [])
 
         return list(set(auto_excludes))

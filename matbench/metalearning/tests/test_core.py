@@ -22,6 +22,8 @@ class TestDatasetMetaFeatures(unittest.TestCase):
         self.assertAlmostEqual(
             mfs_values["percent_of_metal_nonmetal"], 0.3208, 4)
         self.assertAlmostEqual(mfs_values["percent_of_all_nonmetal"], 0.0214, 4)
+        self.assertAlmostEqual(
+            mfs_values["percent_of_contain_trans_metal"], 0.6877, 4)
         self.assertEqual(mfs_values["number_of_different_elements"], 38)
         self.assertAlmostEqual(mfs_values["avg_number_of_elements"], 1.9802, 4)
         self.assertEqual(mfs_values["max_number_of_elements"], 2)
@@ -37,3 +39,45 @@ class TestDatasetMetaFeatures(unittest.TestCase):
         self.assertEqual(
             mfs_values["number_of_different_elements_in_structures"], 56)
 
+    def test_auto_metafeatures(self):
+        mfs = DatasetMetaFeatures(self.df_glass).auto_metafeatures()
+        self.assertIn("formula_metafeatures", mfs.keys())
+        self.assertIn("structure_metafeatures", mfs.keys())
+        self.assertIsNone(mfs["structure_metafeatures"])
+
+
+class TestFeaturizerAutoFilter(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.df_glass = load_glass_binary()
+        cls.df_castelli = load_castelli_perovskites()
+        cls.df_castelli["structure"] = cls.df_castelli["structure"].\
+            apply(lambda x: Structure.from_dict(x))
+
+    def test_auto_excludes(self):
+        glass_ftz_excludes = \
+            FeaturizerAutoFilter(self.df_glass,
+                                 max_na_percent=0.05).auto_excludes()
+        self.assertIn("IonProperty", glass_ftz_excludes)
+        self.assertIn("ElectronAffinity", glass_ftz_excludes)
+        self.assertIn("ElectronegativityDiff", glass_ftz_excludes)
+        self.assertIn("TMetalFraction", glass_ftz_excludes)
+        self.assertIn("YangSolidSolution", glass_ftz_excludes)
+        self.assertIn("CationProperty", glass_ftz_excludes)
+        self.assertIn("Miedema", glass_ftz_excludes)
+
+        glass_ftz_excludes = \
+            FeaturizerAutoFilter(self.df_glass,
+                                 max_na_percent=0.4).auto_excludes()
+        self.assertIn("IonProperty", glass_ftz_excludes)
+        self.assertIn("ElectronAffinity", glass_ftz_excludes)
+        self.assertIn("ElectronegativityDiff", glass_ftz_excludes)
+        self.assertIn("OxidationStates", glass_ftz_excludes)
+        self.assertIn("CationProperty", glass_ftz_excludes)
+
+        castelli_ftz_excludes = \
+            FeaturizerAutoFilter(self.df_castelli,
+                                 max_na_percent=0.05).auto_excludes()
+        self.assertIn("YangSolidSolution", castelli_ftz_excludes)
+        self.assertIn("Miedema", castelli_ftz_excludes)
+        self.assertIn("TMetalFraction", castelli_ftz_excludes)
