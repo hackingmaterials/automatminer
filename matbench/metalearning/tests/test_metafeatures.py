@@ -25,6 +25,10 @@ class TestFormulaMetafeatures(unittest.TestCase):
         pan = PercentOfAllNonmetal().calc(self.df_glass["formula"])
         self.assertAlmostEqual(pan, 0.0214, 4)
 
+    def test_PercentOfContainTransMetal(self):
+        pctm = PercentOfContainTransMetal().calc(self.df_glass["formula"])
+        self.assertAlmostEqual(pctm, 0.6877, 4)
+
     def test_NumberOfDifferentElements(self):
         nde = NumberOfDifferentElements().calc(self.df_glass["formula"])
         self.assertEqual(nde, 38)
