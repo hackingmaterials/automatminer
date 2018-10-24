@@ -92,7 +92,7 @@ class AbstractMetaFeature(object):
         pass
 
     @abstractmethod
-    def calc(cls, X, y):
+    def calc(self, X, y):
         pass
 
 
@@ -125,7 +125,7 @@ class NumberOfFormulas(MetaFeature):
 
 class PercentOfAllMetal(MetaFeature):
     def calc(self, X, y):
-        stats = formula_stats(X, y)
+        stats = formula_stats(tuple(X.values), tuple(y.values))
         num = sum([1 if stat["major_formula_category"] == 1 else 0
                   for stat in stats.values()])
         return num / len(stats)
@@ -133,7 +133,7 @@ class PercentOfAllMetal(MetaFeature):
 
 class PercentOfMetalNonmetal(MetaFeature):
     def calc(self, X, y):
-        stats = formula_stats(X, y)
+        stats = formula_stats(tuple(X.values), tuple(y.values))
         num = sum([1 if stat["major_formula_category"] == 2 else 0
                   for stat in stats.values()])
         return num / len(stats)
@@ -141,7 +141,7 @@ class PercentOfMetalNonmetal(MetaFeature):
 
 class PercentOfAllNonmetal(MetaFeature):
     def calc(self, X, y):
-        stats = formula_stats(X, y)
+        stats = formula_stats(tuple(X.values), tuple(y.values))
         num = sum([1 if stat["major_formula_category"] == 3 else 0
                   for stat in stats.values()])
         return num / len(stats)
@@ -149,7 +149,7 @@ class PercentOfAllNonmetal(MetaFeature):
 
 class NumberOfDifferentElements(MetaFeature):
     def calc(self, X, y):
-        stats = formula_stats(X, y)
+        stats = formula_stats(tuple(X.values), tuple(y.values))
         elements = set()
         for stat in stats.values():
             elements = elements.union(set(stat["elements"]))
@@ -158,21 +158,21 @@ class NumberOfDifferentElements(MetaFeature):
 
 class AvgNumberOfElements(MetaFeature):
     def calc(self, X, y):
-        stats = formula_stats(X, y)
+        stats = formula_stats(tuple(X.values), tuple(y.values))
         nelements_sum = sum([stat["n_elements"] for stat in stats.values()])
         return nelements_sum / len(stats)
 
 
 class MaxNumberOfElements(MetaFeature):
     def calc(self, X, y):
-        stats = formula_stats(X, y)
+        stats = formula_stats(tuple(X.values), tuple(y.values))
         nelements_max = max([stat["n_elements"] for stat in stats.values()])
         return nelements_max
 
 
 class MinNumberOfElements(MetaFeature):
     def calc(self, X, y):
-        stats = formula_stats(X, y)
+        stats = formula_stats(tuple(X.values), tuple(y.values))
         nelements_min = min([stat["n_elements"] for stat in stats.values()])
         return nelements_min
 
