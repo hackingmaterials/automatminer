@@ -15,15 +15,15 @@ class TestFormulaMetafeatures(unittest.TestCase):
 
     def test_PercentOfAllMetal(self):
         pm = PercentOfAllMetal().calc(self.df_glass["formula"])
-        self.assertEqual(pm, 0.6577857785778578)
+        self.assertAlmostEqual(pm, 0.6578, 4)
 
     def test_PercentOfMetalNonmetal(self):
         pmnc = PercentOfMetalNonmetal().calc(self.df_glass["formula"])
-        self.assertEqual(pmnc, 0.3207920792079208)
+        self.assertAlmostEqual(pmnc, 0.3208, 4)
 
     def test_PercentOfAllNonmetal(self):
         pan = PercentOfAllNonmetal().calc(self.df_glass["formula"])
-        self.assertEqual(pan, 0.021422142214221424)
+        self.assertAlmostEqual(pan, 0.0214, 4)
 
     def test_NumberOfDifferentElements(self):
         nde = NumberOfDifferentElements().calc(self.df_glass["formula"])
@@ -31,7 +31,15 @@ class TestFormulaMetafeatures(unittest.TestCase):
 
     def test_AvgNumberOfElements(self):
         ane = AvgNumberOfElements().calc(self.df_glass["formula"])
-        self.assertEqual(ane, 1.9801980198019802)
+        self.assertAlmostEqual(ane, 1.9802, 4)
+
+    def test_MaxNumberOfElements(self):
+        mne = MaxNumberOfElements().calc(self.df_glass["formula"])
+        self.assertEqual(mne, 2)
+
+    def test_MinNumberOfElements(self):
+        mne = MinNumberOfElements().calc(self.df_glass["formula"])
+        self.assertEqual(mne, 1)
 
 
 class TestStructureMetafeatures(unittest.TestCase):
@@ -47,15 +55,15 @@ class TestStructureMetafeatures(unittest.TestCase):
 
     def test_PercentOfOrderedStructures(self):
         pos = PercentOfOrderedStructures().calc(self.df_castelli["structure"])
-        self.assertEqual(pos, 1.0)
+        self.assertAlmostEqual(pos, 1.0)
 
     def test_AvgNumberOfSitess(self):
         ans = AvgNumberOfSites().calc(self.df_castelli["structure"])
-        self.assertEqual(ans, 5.0)
+        self.assertAlmostEqual(ans, 5.0)
 
     def test_MaxNumberOfSites(self):
         mns = MaxNumberOfSites().calc(self.df_castelli["structure"])
-        self.assertEqual(mns, 5.0)
+        self.assertAlmostEqual(mns, 5.0)
 
     def test_NumberOfDifferentElementsInStructure(self):
         mns = NumberOfDifferentElementsInStructure().calc(

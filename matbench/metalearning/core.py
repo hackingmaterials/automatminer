@@ -1,47 +1,48 @@
 import warnings
-from matbench.metalearning.metafeatures import _formula_metafeatures, \
-    _structure_metafeatures
+from matbench.metalearning.metafeatures import formula_mfs_list, \
+    structure_mfs_list
 
 """
 Automatically filter some featurizers based on metafeatures calculated for
 the dataset. 
 """
+_supported_mfs_types = ("formula", "structure")
 
 
 class DatasetMetaFeatures:
-    def __init__(self, X, y):
-        self.X = X
-        self.y = y
+    def __init__(self, df):
+        self.df = df
 
-    def formula_metafeatures(self):
-        if "formula" in self.X.columns:
+    def formula_metafeatures(self, formula_col="formula"):
+        if formula_col in self.df.columns:
             mfs = dict()
-            for mf, mf_class in _formula_metafeatures.items():
-                mfs[mf] = mf_class.calc(self.X, self.y)
+            for mf, mf_class in formula_mfs_list.items():
+                mfs[mf] = mf_class.calc(self.df[formula_col])
             return {"formula_metafeatures": mfs}
         else:
-            warnings.warn("Input X does not contain 'formula' column, "
+            warnings.warn("Input X does not contain formula column of {}, "
                           "will not return any statistical metafeatures "
-                          "for formulas in this dataset!")
+                          "for formulas in this dataset!".format(formula_col))
             return None
 
-    def structure_metafeatures(self):
-        if "structure" in self.X.columns:
+    def structure_metafeatures(self, structure_col="structure"):
+        if structure_col in self.df.columns:
             mfs = dict()
-            for mf, mf_class in _structure_metafeatures.items():
-                mfs[mf] = mf_class.calc(self.X, self.y)
+            for mf, mf_class in structure_mfs_list.items():
+                mfs[mf] = mf_class.calc(self.df[structure_col])
             return {"structure_metafeatures": mfs}
         else:
-            warnings.warn("Input X does not contain 'structure' column, "
+            warnings.warn("Input X does not contain structure column of {}, "
                           "will not return any statistical metafeatures "
-                          "for structures in this dataset!")
+                          "for formulas in this dataset!".format(structure_col))
             return None
 
-    def auto_metafeatures(self, dataset_cols=("formula", "structure")):
+    def auto_metafeatures(self, **kwargs):
         auto_mfs = dict()
-        for column in dataset_cols:
-            mfs_func = getattr(self, "{}_metafeatures".format(column), None)
-            auto_mfs.update(mfs_func() if mfs_func is not None else {})
+        for mfs_type in _supported_mfs_types:
+            input_col = kwargs.get("{}_col".format(mfs_type), mfs_type)
+            mfs_func = getattr(self, "{}_metafeatures".format(mfs_type), None)
+            auto_mfs.update(mfs_func(input_col) if mfs_func is not None else {})
 
         return auto_mfs
 
@@ -98,9 +99,9 @@ class FeaturizerAutoFilter:
                           "to derive the metafeature dict.")
         return list(set(excludes))
 
-    def auto_excludes(self, dataset_cols=("formula", "structure")):
+    def auto_excludes(self, **kwargs):
         auto_excludes = list()
-        auto_mfs = DatasetMetaFeatures(self.X, self.y).\
+        auto_mfs = DatasetMetaFeatures(self.df).\
             auto_metafeatures(dataset_cols)
         for column in dataset_cols:
             mfs = auto_mfs.get("{}_metafeatures".format(column))

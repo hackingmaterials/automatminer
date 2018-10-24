@@ -257,4 +257,5 @@ structure_mfs_list = \
      "percent_of_ordered_structures": PercentOfOrderedStructures(),
      "avg_number_of_sites": AvgNumberOfSites(),
      "max_number_of_sites": MaxNumberOfSites(),
-     "number_of_different_elements_in_structures": NumberOfDifferentElements()}
+     "number_of_different_elements_in_structures":
+         NumberOfDifferentElementsInStructure()}
