@@ -81,3 +81,7 @@ class TestFeaturizerAutoFilter(unittest.TestCase):
         self.assertIn("YangSolidSolution", castelli_ftz_excludes)
         self.assertIn("Miedema", castelli_ftz_excludes)
         self.assertIn("TMetalFraction", castelli_ftz_excludes)
+
+
+if __name__ == "__main__":
+    unittest.main()

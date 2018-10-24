@@ -4,7 +4,8 @@ from functools import lru_cache
 from pymatgen.core.composition import Composition
 from pymatgen.core.structure import Structure, IStructure
 from abc import ABCMeta, abstractmethod
-from .utils import FormulaStatistics, StructureStatistics
+from matbench.featurization.metalearning.utils import FormulaStatistics,\
+    StructureStatistics
 
 
 """
@@ -117,7 +118,7 @@ class Helper(AbstractMetaFeature):
 def formula_stats(X):
     if isinstance(X, (pd.Series, pd.DataFrame)):
         return _formula_stats(tuple(X.values))
-    if isinstance(X, (list, np.array)):
+    if isinstance(X, (list, np.ndarray)):
         return _formula_stats(tuple(X))
 
 
