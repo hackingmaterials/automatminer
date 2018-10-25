@@ -1,7 +1,8 @@
 import six
 from collections import OrderedDict
 
-from pymatgen.core import Composition, Element, Structure
+from pymatgen.core import Composition, Element
+from pymatgen.core.structure import Structure, IStructure
 
 
 class FormulaStatistics:
@@ -209,7 +210,7 @@ class StructureStatistics:
         self.structures = structures
 
     def calc(self):
-        if isinstance(self.structures, Structure):
+        if isinstance(self.structures, (Structure, IStructure)):
             self.structures = [self.structures]
         stats = OrderedDict()
         for i, structure in enumerate(self.structures):
@@ -229,5 +230,5 @@ class StructureStatistics:
             ...to be continued
 
         """
-        return {"n_sites": len(structure),
+        return {"n_sites": len(structure.sites),
                 "is_ordered": structure.is_ordered}
