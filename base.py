@@ -6,6 +6,9 @@ __authors__ = ["Alex Dunn <ardunn@lbl.gov>"]
 
 
 class Loggable:
+    """
+    A mixin class for easy logging (or absence of it).
+    """
     def _log(self, lvl, msg):
         """
         Convenience method for logging.
