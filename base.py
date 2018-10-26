@@ -5,7 +5,7 @@ Base classes, mixins, and other inheritables.
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>"]
 
 
-class Loggable:
+class LoggableMixin:
     """
     A mixin class for easy logging (or absence of it).
     """
@@ -20,13 +20,13 @@ class Loggable:
         Returns:
             None
         """
-        if not hasattr(self, "logger"):
-            raise AttributeError("Loggable object has no logger object!")
-
-        if self.logger is not None:
-            if lvl == "warn":
-                self.logger.warning(msg)
-            elif lvl == "info":
-                self.logger.info(msg)
-            elif lvl == "debug":
-                self.logger.debug(msg)
+        if hasattr(self, "logger"):
+            if self.logger is not None:
+                if lvl == "warn":
+                    self.logger.warning(msg)
+                elif lvl == "info":
+                    self.logger.info(msg)
+                elif lvl == "debug":
+                    self.logger.debug(msg)
+        else:
+            raise AttributeError("Loggable object has no logger attr!")
