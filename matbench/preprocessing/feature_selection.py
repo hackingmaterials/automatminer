@@ -4,7 +4,8 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
     GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.model_selection import check_cv
 
-class TreeBasedFeatureReduction(object):
+
+class TreeBasedFeatureReduction:
     """
     Tree-based feature reduction tools based on sklearn models that have
         the .feature_importances_ attribute.
