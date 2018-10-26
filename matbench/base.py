@@ -17,14 +17,14 @@ class DataFrameTransformer:
     transformation.
     """
 
-    def fit(self, df, target, *args, **kwargs):
+    def fit(self, df, target):
         raise NotImplementedError(
             "All dataframe transformers must implement fit.")
 
-    def transform(self, df, target, *args, **kwargs):
+    def transform(self, df, target):
         raise NotImplementedError(
             "All dataframe transformers must implement transform.")
 
-    def fit_transform(self, df, target, *args, **kwargs):
-        self.fit(df, target, *args, **kwargs)
+    def fit_transform(self, df, target):
+        self.fit(df, target)
         return self.transform(df, target, )
