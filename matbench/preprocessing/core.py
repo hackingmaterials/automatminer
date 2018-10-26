@@ -1,84 +1,53 @@
 """
-Base classes.
+Preprocessing classes.
 """
 
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.base import TransformerMixin, BaseEstimator
-from pandas.api.types import is_numeric_dtype
+from sklearn.exceptions import NotFittedError
 from skrebate import ReliefF
 
 from matbench.utils.utils import MatbenchError, setup_custom_logger
-from matminer.featurizers.base import BaseFeaturizer
 
-
-
-class Preprocesser(object):
-    """
-    Clean and prepare the data for visualization and training.
-
-    Args:
-        max_colnull (float): after generating features, drop the columns that
-            have null/na rows with more than this ratio. Note that there is an
-            important trade-off here. this ratio is high, one may lose more
-            features and if it is low one may lose more samples.
-        loglevel (int): the level of output; e.g. logging.DEBUG
-        logpath (str): the path to the logfile dir, current folder by default.
-    """
-
-
-    def prune_correlated_features(self, df, target_key, R_max=0.95):
-        """
-        A feature selection method that remove those that are cross correlated
-        by more than threshold.
-
-        Args:
-            df (pandas.DataFrame): The dataframe containing features, target_key
-            target_key (str): the name of the target column/feature
-            R_max (0<float<=1): if R is greater than this value, the
-                feature that has lower correlation with the target is removed.
-
-        Returns (pandas.DataFrame):
-            the dataframe with the highly cross-correlated features removed.
-        """
-        corr = abs(df.corr())
-        corr = corr.sort_values(by=target_key)
-        rm_feats = []
-        for feature in corr.columns:
-            if feature == target_key:
-                continue
-            for idx, corval in zip(corr.index, corr[feature]):
-                if np.isnan(corval):
-                    break
-                if idx == feature or idx in rm_feats:
-                    continue
-                else:
-                    if corval >= R_max:
-                        if corr.loc[idx, target_key] > corr.loc[feature, target_key]:
-                            removed_feat = feature
-                        else:
-                            removed_feat = idx
-                        if removed_feat not in rm_feats:
-                            rm_feats.append(removed_feat)
-                            self.logger.debug('"{}" correlates strongly with '
-                                              '"{}"'.format(feature, idx))
-                            self.logger.debug(
-                                'removing "{}"...'.format(removed_feat))
-                        if removed_feat == feature:
-                            break
-        if len(rm_feats) > 0:
-            df = df.drop(rm_feats, axis=1)
-            self.logger.info('These {} features were removed due to cross '
-                             'correlation with the current features more than '
-                             '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
-        return df
 
 
 class DataCleaner(BaseEstimator, TransformerMixin):
-
     """
+    Transform a featurized dataframe into an ML-ready dataframe.
+
+    Args:
+        scale (bool): If True, scales the numerical feature data. Data is scaled
+            before one-hot encoding, if encoding is enabled.
+        max_na_frac (float): The maximum fraction (0.0 - 1.0) of samples for a
+            given feature allowed. Columns containing a higher nan fraction are
+            dropped.
+        na_method (str): How to deal with samples still containing nans after
+            troublesome columns are already dropped. Default is 'drop'. Other
+            options are from pandas.DataFrame.fillna: {‘backfill’, ‘bfill’,
+            ‘pad’, ‘ffill’, None}
+        encode_categories (bool): If True, retains features which are
+            categorical (data type is string or object) and then
+            one-hot encodes them. If False, drops them.
+        encoding_method (str): choose a method for encoding the categorical
+            variables. Current options: 'one-hot' and 'label'.
+        drop_na_targets (bool): Drop samples containing target values which are
+            na.
+        logger (logging.Logger): The logger to be used. Defaults to the matbench
+            top-level logger. None means no logging will be done.
+
+    Attributes:
+        The following attrs are set during fitting.
+
+        dropped_features (list): The features which were dropped.
+        retained_features (list): The features which were retained
+        object_cols (list): The features identified as objects/categories
+        number_cols (list): The features identified as numerical
+        dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped.
+        df_numerical (pandas.DataFrame): A cleaned dataframe
+
 
     """
     def __init__(self, scale=False, max_na_frac=0.01, na_method='drop',
@@ -92,8 +61,28 @@ class DataCleaner(BaseEstimator, TransformerMixin):
         self.drop_na_targets = drop_na_targets
         self.logger = logger
 
+        # Attributes which will be set during transformation
+        self.dropped_features = None
+        self.retained_features = None
+        self.object_cols = None
+        self.number_cols = None
+        self.dropped_samples = None
+        self.df_numerical = None
+
     def fit(self, df, target):
-        pass
+        """
+        Assign attributes before actually transforming. Useful if you want
+        to see what the transformation will do before actually transforming.
+
+        Args:
+            df (pandas.DataFrame): Contains features and the target_key
+            target (str): The name of the target in the dataframe
+
+        Returns:
+
+        """
+        self.handle_na(df, target)
+        self.to_numerical(df, target)
 
     def transform(self, df, target):
         """
@@ -110,7 +99,7 @@ class DataCleaner(BaseEstimator, TransformerMixin):
         df_numerical = self.to_numerical(df, target)
         y = df_numerical[target]
         X = df_numerical.drop(target, axis=1)
-        X = MinMaxScaler().fit_transform(X) if self.scale else X
+        X = StandardScaler().fit_transform(X) if self.scale else X
         return pd.concat([y, X], axis=1)
 
     def handle_na(self, df, target):
@@ -120,85 +109,170 @@ class DataCleaner(BaseEstimator, TransformerMixin):
         median while the other with mean or mode, etc.
 
         Args:
-            df (pandas.DataFrame): the incumbent dataframe
+            df (pandas.DataFrame): The dataframe containing features
+            target (str): The key defining the ML target.
 
         Returns:
             (pandas.DataFrame) The cleaned df
         """
-        self.logger.info("Before handling na: {} samples, {} features".format(*df.shape))
+        self._log("info", "Before handling na: {} samples, {} features".format(*df.shape))
 
         # Drop targets containing na before further processing
         if self.drop_na_targets:
-            df = df.dropna(axis=0, how='any', subset=target)
+            clean_df = df.dropna(axis=0, how='any', subset=target)
+            self.dropped_samples = df[~df.index.isin(clean_df.index)]
+            df = clean_df
 
         # Remove features failing the max_na_frac limit
         feats0 = set(df.columns)
-        df = df.dropna(axis=1, thresh=int((1 - self.max_na_frac) * len(df)))
+        clean_df = df.dropna(axis=1, thresh=int((1 - self.max_na_frac) * len(df)))
+        self.dropped_features = [c for c in df.columns.values if c not in feats0]
+        df = clean_df
+
         if len(df.columns) < len(feats0):
             feats = set(df.columns)
             n_feats = len(feats0) - len(feats)
             napercent = self.max_na_frac * 100
             feat_names = feats0 - feats
-            self.logger.info('These {} features were removed as they '
+            self._log("info", 'These {} features were removed as they '
                              'had more than {}% missing values:\n{}'.format(n_feats, napercent, feat_names))
 
         # Handle all rows that still contain any nans
         if self.na_method == "drop":
-            df = df.dropna(axis=0, how='any')
+            clean_df = df.dropna(axis=0, how='any')
+            self.dropped_samples = pd.concat((df[~df.index.isin(clean_df.index)], self.dropped_samples), axis=0)
+            df = clean_df
         else:
             df = df.fillna(method=self.na_method)
-        self.logger.info("After handling na: {} samples, {} features".format(*df.shape))
+        self._log("info", "After handling na: {} samples, {} features".format(*df.shape))
+        self.retained_features = df.columns.values.tolist()
         return df
 
     def to_numerical(self, df, target):
         """
         Transforms non-numerical columns to numerical columns which are
-            machine learning-friendly.
+        machine learning-friendly.
 
         Args:
             df (pandas.DataFrame): The dataframe containing features
-            encode_categories (bool): If True, retains features which are
-                categorical (data type is string or object) and then
-                one-hot encodes them. If False, drops them.
-            encoding_method (str): choose a method for encoding the categorical
-                variables. Current options: 'one-hot' and 'label'
+            target (str): The key defining the ML target.
 
         Returns:
-
+            (pandas.DataFrame) The numerical df
         """
 
-        number_cols = []
-        object_cols = []
+        self.number_cols = []
+        self.object_cols = []
         for c in df.columns.values:
             try:
                 df[c] = pd.to_numeric(df[c])
-                number_cols.append(c)
+                self.number_cols.append(c)
             except (TypeError, ValueError):
                 # The target is most likely strings which are not numeric.
                 # Prevent target being encoded
                 if c != target:
-                    object_cols.append(c)
+                    self.object_cols.append(c)
 
-        number_df = df[number_cols]
-        object_df = df[object_cols]
+        number_df = df[self.number_cols]
+        object_df = df[self.object_cols]
         if self.encode_categories:
             if self.encoder == 'one-hot':
                 object_df = pd.get_dummies(object_df).apply(pd.to_numeric)
             elif self.encoder == 'label':
                 for c in object_df.columns:
                     object_df[c] = LabelEncoder().fit_transform(object_df[c])
-                self.logger.warning('LabelEncoder used for categorical colums '
+                self._log("warn", 'LabelEncoder used for categorical colums '
                     'For access to the original labels via inverse_transform, '
                     'encode manually and set retain_categorical to False')
-
             return pd.concat([number_df, object_df], axis=1)
         else:
             return number_df
 
+    def _log(self, lvl, msg):
+        """
+        Convenience method for logging.
+
+        Args:
+            lvl (str): Level of the log message, either "info", "warn", or "debug"
+            msg (str): The message for the logger.
+
+        Returns:
+            None
+        """
+        if self.logger is not None:
+            if lvl == "warn":
+                self.logger.warning(msg)
+            elif lvl == "info":
+                self.logger.info(msg)
+            elif lvl == "debug":
+                self.logger.debug(msg)
 
 
-class FeatureReducer(DataFrameTransformer):
-    def __init__(self):
+
+
+class FeatureReducer(BaseEstimator, TransformerMixin):
+    """
+    Perform feature reduction on a clean dataframe.
+
+    Args:
+
+
+    Attributes:
+
+    """
+    def __init__(self, reducers=('prune_corr', 'tree')):
+
+
+
+        class Preprocesser(o
+            def prune_correlated_features(self, df, target_key, R_max=0.95):
+                """
+                A feature selection method that remove those that are cross correlated
+                by more than threshold.
+
+                Args:
+                    df (pandas.DataFrame): The dataframe containing features, target_key
+                    target_key (str): the name of the target column/feature
+                    R_max (0<float<=1): if R is greater than this value, the
+                        feature that has lower correlation with the target is removed.
+
+                Returns (pandas.DataFrame):
+                    the dataframe with the highly cross-correlated features removed.
+                """
+                corr = abs(df.corr())
+                corr = corr.sort_values(by=target_key)
+                rm_feats = []
+                for feature in corr.columns:
+                    if feature == target_key:
+                        continue
+                    for idx, corval in zip(corr.index, corr[feature]):
+                        if np.isnan(corval):
+                            break
+                        if idx == feature or idx in rm_feats:
+                            continue
+                        else:
+                            if corval >= R_max:
+                                if corr.loc[idx, target_key] > corr.loc[
+                                    feature, target_key]:
+                                    removed_feat = feature
+                                else:
+                                    removed_feat = idx
+                                if removed_feat not in rm_feats:
+                                    rm_feats.append(removed_feat)
+                                    self.logger.debug(
+                                        '"{}" correlates strongly with '
+                                        '"{}"'.format(feature, idx))
+                                    self.logger.debug(
+                                        'removing "{}"...'.format(removed_feat))
+                                if removed_feat == feature:
+                                    break
+                if len(rm_feats) > 0:
+                    df = df.drop(rm_feats, axis=1)
+                    self.logger.info(
+                        'These {} features were removed due to cross '
+                        'correlation with the current features more than '
+                        '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
+                return df
 
 
         if n_rebate_features:
