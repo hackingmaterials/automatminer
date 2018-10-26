@@ -1,5 +1,3 @@
-from sklearn.base import TransformerMixin
-
 class MatbenchError(BaseException):
     """
     Exception specific to matbench methods.
@@ -11,10 +9,12 @@ class MatbenchError(BaseException):
     def __str__(self):
         return "MatbenchError : " + self.msg
 
+
 class DataFrameTransformer:
     """
-    Abstract base class for transforming dataframes in the same way BaseEstimator
-    and Tra
+    Abstract base class for transforming dataframes in the same way
+    BaseEstimator and TransformerMixin are abc's for sklearn matrix
+    transformation.
     """
 
     def fit(self, df, target, *args, **kwargs):
