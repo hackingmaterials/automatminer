@@ -8,13 +8,17 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.exceptions import NotFittedError
-from skrebate import ReliefF
+from skrebate import MultiSURF
 
 from matbench.utils.utils import MatbenchError, setup_custom_logger
+from matbench.base import LoggableMixin
 
 
+__authors__ = ["Alex Dunn <ardunn@lbl.gov>",
+               "Alireza Faghaninia <alireza@lbl.gov>"]
 
-class DataCleaner(BaseEstimator, TransformerMixin):
+
+class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
     """
     Transform a featurized dataframe into an ML-ready dataframe.
 
@@ -188,113 +192,150 @@ class DataCleaner(BaseEstimator, TransformerMixin):
         else:
             return number_df
 
-    def _log(self, lvl, msg):
-        """
-        Convenience method for logging.
-
-        Args:
-            lvl (str): Level of the log message, either "info", "warn", or "debug"
-            msg (str): The message for the logger.
-
-        Returns:
-            None
-        """
-        if self.logger is not None:
-            if lvl == "warn":
-                self.logger.warning(msg)
-            elif lvl == "info":
-                self.logger.info(msg)
-            elif lvl == "debug":
-                self.logger.debug(msg)
 
 
-
-
-class FeatureReducer(BaseEstimator, TransformerMixin):
+class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
     """
     Perform feature reduction on a clean dataframe.
 
     Args:
+        reducers ((str)): The set of feature reduction operations to be
+            performed on the data. The order of strings determines the order
+            in which the reducers will be applied. Valid reducer strings are
+            the following:
+                'corr': Removes any cross-correlated features having corr.
+                    coefficients larger than a threshold value. Retains
+                    feature names.
 
+                'tree': Perform iterative feature reduction via a tree-based
+                    feature reduction, using ._feature_importances implemented
+                    in sklearn. Retains feature names.
+
+                'relief': Perform ReliefF feature reduction using the skrebate
+                    package. Retains feature names.
+
+                'pca': Perform Principal Component Analysis via
+                    eigendecomposition. Note the feature labels will be renamed
+                    to "PCA Feature X" if pca is present anywhere in the feature
+                    reduction scheme!
+
+            Example: Apply tree-based feature reduction, then pca:
+                reducers = ('tree', 'pca')
+        logger (logging.Logger): The logger to be used. Defaults to the matbench
+            top-level logger. None means no logging will be done.
 
     Attributes:
+        The following attrs are set during fitting.
 
+        features_removed (dict): The keys are the feature reduction methods
+            applied. The values are the feature labels removed by that feature
+            reduction method.
+        features_retained (list): The features retained.
+        reducer_params (dict): The keys are the feature reduction methods
+            applied. The values are the parameters used by each feature reducer.
     """
-    def __init__(self, reducers=('prune_corr', 'tree')):
+    def __init__(self, reducers=('prune_corr', 'tree'), logger=setup_custom_logger()):
+        for reducer in reducers:
+            if reducer not in ["corr", "tree", "rebate", "pca"]:
+                raise ValueError("Reducer {} not found in known reducers!".format(reducer))
+
+        self.reducers = reducers
+        self.logger = logger
+
+
+    def fit(self, df, target):
+        for r in self.reducers:
+            if r == "corr":
+                df = self.rm_correlated(df, target)
+
+    def transform(self, df, target):
+        return df[self.retained_features + [target]]
+
+
+    def rebate(self, df, target, n_features):
+        self._log("info", "ReBATE running: retaining {} numerical features.".format(n_features))
+        X = df.drop(target)
+        y = df[target]
+        rf = MultiSURF(n_features_to_select=n_features, n_jobs=-1)
 
 
 
-        class Preprocesser(o
-            def prune_correlated_features(self, df, target_key, R_max=0.95):
-                """
-                A feature selection method that remove those that are cross correlated
-                by more than threshold.
+    def rm_correlated(self, df, target_key, R_max=0.95):
+        """
+        A feature selection method that remove those that are cross correlated
+        by more than threshold.
 
-                Args:
-                    df (pandas.DataFrame): The dataframe containing features, target_key
-                    target_key (str): the name of the target column/feature
-                    R_max (0<float<=1): if R is greater than this value, the
-                        feature that has lower correlation with the target is removed.
+        Args:
+            df (pandas.DataFrame): The dataframe containing features, target_key
+            target_key (str): the name of the target column/feature
+            R_max (0<float<=1): if R is greater than this value, the
+                feature that has lower correlation with the target is removed.
 
-                Returns (pandas.DataFrame):
-                    the dataframe with the highly cross-correlated features removed.
-                """
-                corr = abs(df.corr())
-                corr = corr.sort_values(by=target_key)
-                rm_feats = []
-                for feature in corr.columns:
-                    if feature == target_key:
-                        continue
-                    for idx, corval in zip(corr.index, corr[feature]):
-                        if np.isnan(corval):
-                            break
-                        if idx == feature or idx in rm_feats:
-                            continue
+        Returns (pandas.DataFrame):
+            the dataframe with the highly cross-correlated features removed.
+        """
+        corr = abs(df.corr())
+        corr = corr.sort_values(by=target_key)
+        rm_feats = []
+        for feature in corr.columns:
+            if feature == target_key:
+                continue
+            for idx, corval in zip(corr.index, corr[feature]):
+                if np.isnan(corval):
+                    break
+                if idx == feature or idx in rm_feats:
+                    continue
+                else:
+                    if corval >= R_max:
+                        if corr.loc[idx, target_key] > corr.loc[
+                            feature, target_key]:
+                            removed_feat = feature
                         else:
-                            if corval >= R_max:
-                                if corr.loc[idx, target_key] > corr.loc[
-                                    feature, target_key]:
-                                    removed_feat = feature
-                                else:
-                                    removed_feat = idx
-                                if removed_feat not in rm_feats:
-                                    rm_feats.append(removed_feat)
-                                    self.logger.debug(
-                                        '"{}" correlates strongly with '
-                                        '"{}"'.format(feature, idx))
-                                    self.logger.debug(
-                                        'removing "{}"...'.format(removed_feat))
-                                if removed_feat == feature:
-                                    break
-                if len(rm_feats) > 0:
-                    df = df.drop(rm_feats, axis=1)
-                    self.logger.info(
-                        'These {} features were removed due to cross '
-                        'correlation with the current features more than '
-                        '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
-                return df
-
-
-        if n_rebate_features:
+                            removed_feat = idx
+                        if removed_feat not in rm_feats:
+                            rm_feats.append(removed_feat)
+                            self.logger.debug(
+                                '"{}" correlates strongly with '
+                                '"{}"'.format(feature, idx))
+                            self.logger.debug(
+                                'removing "{}"...'.format(removed_feat))
+                        if removed_feat == feature:
+                            break
+        if len(rm_feats) > 0:
+            df = df.drop(rm_feats, axis=1)
             self.logger.info(
-                "ReBATE running: retaining {} numerical features.".format(
-                    n_rebate_features))
-            rf = ReliefF(n_features_to_select=n_rebate_features, n_jobs=-1)
-            matrix = rf.fit_transform(X.values, y.values)
-            # Todo: Find how to get the original labels back?  - AD
-            rfcols = ["ReliefF {}".format(i) for i in range(matrix.shape[1])]
-            X = pd.DataFrame(columns=rfcols, data=matrix, index=X.index)
+                'These {} features were removed due to cross '
+                'correlation with the current features more than '
+                '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
+        return df
 
-        if n_pca_features:
-            if self.scaler is None:
-                if X.max().max() > 5.0:  # 5 allowing for StandardScaler
-                    raise MatbenchError(
-                        'attempted PCA before data normalization!')
-            self.logger.info(
-                "PCA running: retaining {} numerical features.".format(
-                    n_pca_features))
-            n_pca_features = PCA(n_components=n_pca_features)
-            matrix = n_pca_features.fit_transform(X)
-            # Todo: I don't know if there is a way to get labels for these - AD
-            pcacols = ["PCA {}".format(i) for i in range(matrix.shape[1])]
-            X = pd.DataFrame(columns=pcacols, data=matrix, index=X.index)
+        #
+        #
+        # if n_rebate_features:
+
+        #     rf = ReliefF(n_features_to_select=n_rebate_features, n_jobs=-1)
+        #     matrix = rf.fit_transform(X.values, y.values)
+        #     # Todo: Find how to get the original labels back?  - AD
+        #     rfcols = ["ReliefF {}".format(i) for i in range(matrix.shape[1])]
+        #     X = pd.DataFrame(columns=rfcols, data=matrix, index=X.index)
+        #
+        # if n_pca_features:
+        #     if self.scaler is None:
+        #         if X.max().max() > 5.0:  # 5 allowing for StandardScaler
+        #             raise MatbenchError(
+        #                 'attempted PCA before data normalization!')
+        #     self.logger.info(
+        #         "PCA running: retaining {} numerical features.".format(
+        #             n_pca_features))
+        #     n_pca_features = PCA(n_components=n_pca_features)
+        #     matrix = n_pca_features.fit_transform(X)
+        #     # Todo: I don't know if there is a way to get labels for these - AD
+        #     pcacols = ["PCA {}".format(i) for i in range(matrix.shape[1])]
+        #     X = pd.DataFrame(columns=pcacols, data=matrix, index=X.index)
+
+    def implementors(self):
+        return ['Alex Dunn']
+
+
+if __name__ == "__main__":
+    pass
