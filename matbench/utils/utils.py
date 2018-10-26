@@ -5,7 +5,7 @@ import sys
 import warnings
 
 
-class MatbenchError(Exception):
+class MatbenchError(BaseException):
     """
     Exception specific to matbench methods.
     """
