@@ -162,7 +162,7 @@ def rebate(df, target, n_features):
     Returns:
 
     """
-    X = df.drop(target)
+    X = df.drop(target, axis=1)
     y = df[target]
     rf = MultiSURF(n_features_to_select=n_features, n_jobs=-1)
     matrix = rf.fit_transform(X.values, y.values)
