@@ -1,7 +1,7 @@
 import unittest
 
 from matbench.data.load import load_castelli_perovskites, load_glass_binary
-from matbench.featurization.metalearning.core import DatasetMetaFeatures, \
+from matbench.featurization.metaselection.core import DatasetMetaFeatures, \
     FeaturizerAutoFilter
 from pymatgen.core.structure import Structure
 

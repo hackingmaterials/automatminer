@@ -1,6 +1,6 @@
 import warnings
 
-from matbench.featurization.metalearning.metafeatures import formula_mfs_list, \
+from matbench.featurization.metaselection.metafeatures import formula_mfs_list, \
     structure_mfs_list
 
 """
