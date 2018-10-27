@@ -247,7 +247,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             applied. The values are the parameters used by each feature reducer.
     """
 
-    def __init__(self, reducers=('prune_corr', 'tree'), n_pca_features=15,
+    def __init__(self, reducers=('corr', 'tree'), n_pca_features=15,
                  n_rebate_features=15, logger=setup_custom_logger()):
         for reducer in reducers:
             if reducer not in ["corr", "tree", "rebate", "pca"]:
@@ -295,7 +295,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                                   len(reduced_df.columns)))
                     self._log("debug",
                               "ReBATE MultiSURF gave the following features".format(
-                                  reduced_df.columns.toist()))
+                                  reduced_df.columns.tolist()))
                     self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
 
                 # todo: PCA will not work with string columns!!!!!
@@ -320,7 +320,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             self.removed_features[r] = removed
             df = reduced_df
 
-        self.retained_features = df.columns.tolist()
+        self.retained_features = [c for c in df.columns.tolist() if c != target]
         return self
 
     def transform(self, df, target):
