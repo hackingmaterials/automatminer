@@ -1,34 +1,55 @@
-import pandas as pd
 import os
 import unittest
 
-from matminer.datasets import load_dataset
-from matminer.featurizers.structure import GlobalSymmetryFeatures
-from matbench.featurization.core import Featurization
-# from matbench.preprocessing.core import Preprocesser
+import numpy as np
+import pandas as pd
+
+from matbench.preprocessing.core import DataCleaner, FeatureReducer
 from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, rebate
 
 test_dir = os.path.dirname(__file__)
 
-# class TestPreprocess(unittest.TestCase):
+class TestPreprocess(unittest.TestCase):
+    #todo: add more tests
 
+    def setUp(self):
+        df = pd.read_csv(os.path.join(test_dir, 'test_featurized_df.csv'))
+        self.test_df = df.drop(columns=["formula"])
 
-    # Todo: Add more tests
-    # def test_preprocess_basic(self):
-    #     """
-    #     A basic test ensuring Preprocess can handle numerical features and
-    #     features/targets  that may be strings but should be numbers.
-    #
-    #     Returns: None
-    #     """
-    #     df = load_dataset('elastic_tensor_2015')[:15][['K_VRH', 'structure']]
-    #     df['K_VRH'] = df['K_VRH'].astype(str)
-    #     f = Featurization()
-    #     df = f.featurize_structure(df, featurizers=[GlobalSymmetryFeatures()])
-    #     p = Preprocesser()
-    #     df = p.preprocess(df, 'K_VRH')
-    #     self.assertAlmostEqual(df['K_VRH'].iloc[0], 194.26888435900003)
-    #     self.assertEqual(df['crystal_system_tetragonal'].iloc[0], 1)
+    def test_DataCleaner(self):
+        """
+        A basic test ensuring Preprocess can handle numerical features and
+        features/targets  that may be strings but should be numbers.
+
+        Returns: None
+        """
+        df = self.test_df
+        dc = DataCleaner()
+
+        # Test the case of numbers as strings
+        df['gap expt'] = df['gap expt'].astype(str)
+        df = dc.fit_transform(df, 'gap expt')
+        self.assertAlmostEqual(df['gap expt'].iloc[0], 0.35)
+
+        # Test if there is an nan in target
+        df['gap expt'].iloc[8] = np.nan
+        df = dc.fit_transform(df, 'gap expt')
+        self.assertEqual(df.shape[0], self.test_df.shape[0] - 1)
+
+        # Test if there is an nan in feature
+        df['HOMO_energy'].iloc[40] = np.nan
+        df = dc.fit_transform(df, 'gap expt')
+        self.assertEqual(df.shape[0], self.test_df.shape[0] - 2)
+
+        # Test if nan threshold is exceeded for a feature
+        df["LUMO_energy"].iloc[:-2] = [np.nan] * (df.shape[0] - 2)
+        df = dc.fit_transform(df, 'gap expt')
+        self.assertEqual(df.shape[1], self.test_df.shape[1] - 1)
+
+    def test_FeatureReducer(self):
+        df = self.test_df
+        fr = FeatureReducer()
+
 
 
 class TestFeatureReduction(unittest.TestCase):
