@@ -80,8 +80,7 @@ class TreeBasedFeatureReduction(BaseEstimator, TransformerMixin, LoggableMixin):
             tfeats = self.get_top_features(fimportance)
             m_curr = len(tfeats)
             m_prev = len(X.columns)
-            self.logger.debug(
-                'nfeatures: {}->{}'.format(len(X.columns), m_curr))
+            self._log("debug", 'nfeatures: {}->{}'.format(len(X.columns), m_curr))
             X = X[tfeats]
             if not recursive:
                 break
@@ -129,7 +128,7 @@ class TreeBasedFeatureReduction(BaseEstimator, TransformerMixin, LoggableMixin):
             all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
         # take the union of selected features of each fold
         self.selected_features = list(set(all_feats))
-        self.logger.info('Finished tree-based feature reduction of {} intial '
+        self._log("info", 'Finished tree-based feature reduction of {} intial '
                          'features to {}'.format(m0, len(self.selected_features)))
 
     def transform(self, X, y=None):
