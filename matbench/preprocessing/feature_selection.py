@@ -11,8 +11,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from matbench.utils.utils import setup_custom_logger, MatbenchError
 from matbench.base import LoggableMixin
 
-__authors__ = ["Alex Dunn <ardunn@lbl.gov>",
-               "Alireza Faghaninia <alireza@lbl.gov>"]
+__authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
+               "Alex Dunn <ardunn@lbl.gov>"]
 
 class TreeBasedFeatureReduction(BaseEstimator, TransformerMixin, LoggableMixin):
     """
