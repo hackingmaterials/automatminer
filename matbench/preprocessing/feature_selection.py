@@ -10,13 +10,13 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from skrebate import MultiSURF
 
 from matbench.utils.utils import setup_custom_logger, MatbenchError
-from matbench.base import LoggableMixin
+from matbench.base import LoggableMixin, DataframeTransformer
 
 __authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
                "Alex Dunn <ardunn@lbl.gov>"]
 
 
-class TreeBasedFeatureReduction(BaseEstimator, TransformerMixin, LoggableMixin):
+class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
     """
     Tree-based feature reduction tools based on sklearn models that have
         the .feature_importances_ attribute.
@@ -131,6 +131,7 @@ class TreeBasedFeatureReduction(BaseEstimator, TransformerMixin, LoggableMixin):
         self.selected_features = list(set(all_feats))
         self._log("info", 'Finished tree-based feature reduction of {} intial '
                          'features to {}'.format(m0, len(self.selected_features)))
+        return self
 
     def transform(self, X, y=None):
         """

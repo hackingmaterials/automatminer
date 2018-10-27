@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.base import TransformerMixin, BaseEstimator
 
 from matbench.utils.utils import setup_custom_logger
-from matbench.base import LoggableMixin
+from matbench.base import LoggableMixin, DataframeTransformer
 from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, \
     rebate
 
@@ -17,7 +17,7 @@ __authors__ = ["Alex Dunn <ardunn@lbl.gov>",
                "Alireza Faghaninia <alireza@lbl.gov>"]
 
 
-class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
+class DataCleaner(DataframeTransformer, LoggableMixin):
     """
     Transform a featurized dataframe into an ML-ready dataframe.
 
@@ -202,7 +202,7 @@ class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
             return number_df
 
 
-class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
+class FeatureReducer(DataframeTransformer, LoggableMixin):
     """
     Perform feature reduction on a clean dataframe.
 
