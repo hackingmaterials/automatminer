@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
     GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.model_selection import check_cv
 from sklearn.base import BaseEstimator, TransformerMixin
+from skrebate import MultiSURF
 
 from matbench.utils.utils import setup_custom_logger, MatbenchError
 from matbench.base import LoggableMixin
@@ -146,3 +147,27 @@ class TreeBasedFeatureReduction(BaseEstimator, TransformerMixin, LoggableMixin):
         if self.selected_features is None:
             raise MatbenchError('The fit method should be called first!')
         return X[self.selected_features]
+
+
+def rebate(df, target, n_features):
+    """
+    Run the ReBATE relief algorithm on a dataframe, returning the reduced df.
+
+    Args:
+        df (pandas.DataFrame): A dataframe
+        target (str): The target key (must be present in df)
+        n_features (int): The number of features desired to be returned.
+
+    Returns:
+
+    """
+    X = df.drop(target)
+    y = df[target]
+    rf = MultiSURF(n_features_to_select=n_features, n_jobs=-1)
+    matrix = rf.fit_transform(X.values, y.values)
+    feats = []
+    for c in matrix.T:
+        for f in X.columns.values:
+            if X[f].values == c and f not in feats:
+                feats.append(f)
+    return df[feats]
