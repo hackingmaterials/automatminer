@@ -1,5 +1,5 @@
 import unittest
-from matbench.featurization.metalearning.metafeatures import *
+from matbench.featurization.metaselection.metafeatures import *
 from matbench.data.load import load_castelli_perovskites, load_glass_binary
 
 

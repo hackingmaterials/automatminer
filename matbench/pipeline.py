@@ -5,8 +5,13 @@ classes which take in a dataframe and target key and product useful analytics.
 import datetime
 import logging
 
-from matbench.featurization.core import Featurize
-from matbench.utils.utils import setup_custom_logger
+from sklearn.model_selection import train_test_split
+
+from matbench.featurization.core import Featurization
+from matbench.preprocessing.core import Preprocesser
+from matbench.automl.tpot_utils import TpotAutoml
+
+# todo: this is a WIP - AD
 
 
 class PredictionPipeline:
@@ -14,37 +19,20 @@ class PredictionPipeline:
     Accepts a dataset and runs a matbench pipeline on it.
     Also contains all data needed for generating reports and understanding
     a matbench pipeline that was executed.
-
-    Args:
-        df:
-        target_key:
-        time_limit:
-        test_frac:
-        aux_keys:
-        persistence_lvl (int): Determines which files will be saved. 0 means
-            nothing will be saved. 1 means final model will be saved. 2 means
-            all intermediate dataframes will be saved.
     """
-
-    def __init__(self, df, target_key, time_limit=None,
-                 test_frac=None, aux_keys=None, logpath=".",
-                 loglvl=logging.INFO, persistence_lvl=2):
-        self.train_df = prescreen_df(df)
-        self.target_key = target_key
+    def __init__(self, time_limit=None, persistence_lvl=2, name=None):
         self.time_limit = time_limit
-        self.test_frac = test_frac
-        self.aux_keys = aux_keys
         self.persistence_lvl = persistence_lvl
-        self.logger = setup_custom_logger(filepath=logpath, level=loglvl)
         self.pipetype = None
+        self.name = name
 
         if self.persistence_lvl > 1:
             now = datetime.datetime.now().isoformat()
             input_df_name = "input_df_{}.json".format(now)
-            self.logger.log("Saving input df as {}".format(input_df_name))
-            self.train_df.to_json()
 
-    def benchmark(self):
+        self.best_model = None
+
+    def fit(self, df, target_key, test_frac=None):
         """
         Benchmarks an AutoML pipeline including featurization, feature
         reduction, and model selection.
@@ -52,23 +40,47 @@ class PredictionPipeline:
         Returns:
             A MatbenchPipeline object
         """
-        self.logger.log("Beginning benchmarking.\n")
         self.pipetype = "benchmark"
 
-        # TODO: meta learning should go here
+        # TODO: featurizer selection should go here
+        #self.featurizers = FeaturizerSelection()
 
-        f = Featurize()
-        df = f.auto_featurize(self.train_df)
+        f = Featurization()
+        df = f.auto_featurize(df)
 
         if self.persistence_lvl > 1:
-            now = datetime.datetime.now().isoformat()
-            df.to_json("featurized_df_{}.json".format(now))
+            df.to_json("{}_featurized_df_{}.json".format(self.name, datetime.datetime.now().isoformat()))
 
-        pass
+        p = Preprocesser()
+        df = p.preprocess(df, target_key, scale=True, max_na_frac=0.01)
+
+        if self.persistence_lvl > 1:
+            df.to_json("{}_preprocessed_df_{}.json".format(self.name, datetime.datetime.now().isoformat()))
+
+        #todo: need to account for when validation fraction is zero
+
+        tpot = TpotAutoml(mode="regression",
+                          max_time_mins=360,
+                          scoring='neg_mean_absolute_error',
+                          feature_names=df.drop(target_key, axis=1).columns,
+                          n_jobs=8,
+                          verbosity=2)
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            df.drop(target_key, axis=1).values, df[target_key],
+            test_size=test_frac)
+
+        tpot.fit(X_train, y_train)
+        self.validation_score = tpot.score(X_test, y_test)
+        self.top_models = tpot.get_top_models(return_scores=True)
+
+        # todo: should save tpot model here
+        # self.tpot_top_predictor = ??
+        return self
 
     def predict(self, predict_df):
         """
-        Using the data in df, makes predictions with an automated pipeline.
+        Using pipeline created with fit, makes predictions with an automated pipeline.
 
         Args:
             predict_df: The dataframe containing
@@ -78,7 +90,11 @@ class PredictionPipeline:
 
         """
         self.pipetype = "prediction"
+        pass
 
 
-def prescreen_df(df, must_include_cols=None, cant_include_cols=None):
-    return df
+if __name__ == "__main__":
+    from matbench.data.load import load_jarvis_dft
+    df = load_jarvis_dft()["structure", "e_form"]
+    from sklearn.linear_model import LinearRegression
+    # mbp = PredictionPipeline(df, target_key="e_form")

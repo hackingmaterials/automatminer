@@ -1,10 +1,22 @@
-from matbench.utils.utils import setup_custom_logger, MatbenchError
+"""
+Various in-house feature reduction techniques.
+"""
+import numpy as np
 from sklearn.base import is_classifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
     GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.model_selection import check_cv
+from sklearn.base import BaseEstimator, TransformerMixin
+from skrebate import MultiSURF
 
-class TreeBasedFeatureReduction(object):
+from matbench.utils.utils import setup_custom_logger, MatbenchError
+from matbench.base import LoggableMixin, DataframeTransformer
+
+__authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
+               "Alex Dunn <ardunn@lbl.gov>"]
+
+
+class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
     """
     Tree-based feature reduction tools based on sklearn models that have
         the .feature_importances_ attribute.
@@ -16,10 +28,10 @@ class TreeBasedFeatureReduction(object):
         random_state (int): relevant if non-deterministic algorithms such as
             random forest are used.
     """
-    def __init__(self, mode, importance_percentile=0.95, loglevel=None,
-                 logpath='.', random_state=0):
+    def __init__(self, mode, importance_percentile=0.95,
+                 logger=setup_custom_logger(), random_state=0):
         self.mode = mode
-        self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
+        self.logger = logger
         self.importance_percentile = importance_percentile
         self.selected_features = None
         self.rs = random_state
@@ -69,8 +81,7 @@ class TreeBasedFeatureReduction(object):
             tfeats = self.get_top_features(fimportance)
             m_curr = len(tfeats)
             m_prev = len(X.columns)
-            self.logger.debug(
-                'nfeatures: {}->{}'.format(len(X.columns), m_curr))
+            self._log("debug", 'nfeatures: {}->{}'.format(len(X.columns), m_curr))
             X = X[tfeats]
             if not recursive:
                 break
@@ -118,8 +129,9 @@ class TreeBasedFeatureReduction(object):
             all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
         # take the union of selected features of each fold
         self.selected_features = list(set(all_feats))
-        self.logger.info('Finished tree-based feature reduction of {} intial '
+        self._log("info", 'Finished tree-based feature reduction of {} intial '
                          'features to {}'.format(m0, len(self.selected_features)))
+        return self
 
     def transform(self, X, y=None):
         """
@@ -137,8 +149,26 @@ class TreeBasedFeatureReduction(object):
             raise MatbenchError('The fit method should be called first!')
         return X[self.selected_features]
 
-    def citations(self):
-        return []
 
-    def implementors(self):
-        return ['Alireza Faghaninia']
+def rebate(df, target, n_features):
+    """
+    Run the ReBATE relief algorithm on a dataframe, returning the reduced df.
+
+    Args:
+        df (pandas.DataFrame): A dataframe
+        target (str): The target key (must be present in df)
+        n_features (int): The number of features desired to be returned.
+
+    Returns:
+
+    """
+    X = df.drop(target, axis=1)
+    y = df[target]
+    rf = MultiSURF(n_features_to_select=n_features, n_jobs=-1)
+    matrix = rf.fit_transform(X.values, y.values)
+    feats = []
+    for c in matrix.T:
+        for f in X.columns.values:
+            if np.array_equal(c, X[f].values) and f not in feats:
+                feats.append(f)
+    return df[feats]

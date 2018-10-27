@@ -4,7 +4,7 @@ from functools import lru_cache
 from pymatgen.core.composition import Composition
 from pymatgen.core.structure import Structure, IStructure
 from abc import ABCMeta, abstractmethod
-from matbench.featurization.metalearning.utils import FormulaStatistics,\
+from matbench.featurization.metaselection.utils import FormulaStatistics,\
     StructureStatistics
 
 
