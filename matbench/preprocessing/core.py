@@ -7,7 +7,6 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.base import TransformerMixin, BaseEstimator
-from skrebate import MultiSURF
 
 from matbench.utils.utils import setup_custom_logger
 from matbench.base import LoggableMixin
@@ -89,6 +88,7 @@ class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
         """
         self.handle_na(df, target)
         self.to_numerical(df, target)
+        return self
 
     def transform(self, df, target):
         """
@@ -126,7 +126,7 @@ class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
 
         # Drop targets containing na before further processing
         if self.drop_na_targets:
-            clean_df = df.dropna(axis=0, how='any', subset=target)
+            clean_df = df.dropna(axis=0, how='any', subset=[target])
             self.dropped_samples = df[~df.index.isin(clean_df.index)]
             df = clean_df
 
@@ -188,7 +188,7 @@ class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
 
         number_df = df[self.number_cols]
         object_df = df[self.object_cols]
-        if self.encode_categories:
+        if self.encode_categories and self.object_cols:
             if self.encoder == 'one-hot':
                 object_df = pd.get_dummies(object_df).apply(pd.to_numeric)
             elif self.encoder == 'label':
@@ -321,6 +321,7 @@ class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
             df = reduced_df
 
         self.retained_features = df.columns.tolist()
+        return self
 
     def transform(self, df, target):
         return df[self.retained_features + [target]]
@@ -353,7 +354,7 @@ class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
                 else:
                     if corval >= R_max:
                         if corr.loc[idx, target_key] > corr.loc[
-                            feature, target_key]:
+                                feature, target_key]:
                             removed_feat = feature
                         else:
                             removed_feat = idx
