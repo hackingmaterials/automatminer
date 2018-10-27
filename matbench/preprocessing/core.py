@@ -11,8 +11,8 @@ from skrebate import MultiSURF
 
 from matbench.utils.utils import setup_custom_logger
 from matbench.base import LoggableMixin
-from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, rebate
-
+from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, \
+    rebate
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>",
                "Alireza Faghaninia <alireza@lbl.gov>"]
@@ -54,8 +54,10 @@ class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
 
 
     """
+
     def __init__(self, scale=False, max_na_frac=0.01, na_method='drop',
-                 encode_categories=True, encoder='one-hot', drop_na_targets=True,
+                 encode_categories=True, encoder='one-hot',
+                 drop_na_targets=True,
                  logger=setup_custom_logger()):
         self.scale = scale
         self.max_na_frac = max_na_frac
@@ -119,7 +121,8 @@ class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
         Returns:
             (pandas.DataFrame) The cleaned df
         """
-        self._log("info", "Before handling na: {} samples, {} features".format(*df.shape))
+        self._log("info", "Before handling na: {} samples, {} features".format(
+            *df.shape))
 
         # Drop targets containing na before further processing
         if self.drop_na_targets:
@@ -129,8 +132,10 @@ class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
 
         # Remove features failing the max_na_frac limit
         feats0 = set(df.columns)
-        clean_df = df.dropna(axis=1, thresh=int((1 - self.max_na_frac) * len(df)))
-        self.dropped_features = [c for c in df.columns.values if c not in feats0]
+        clean_df = df.dropna(axis=1,
+                             thresh=int((1 - self.max_na_frac) * len(df)))
+        self.dropped_features = [c for c in df.columns.values if
+                                 c not in feats0]
         df = clean_df
 
         if len(df.columns) < len(feats0):
@@ -139,16 +144,20 @@ class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
             napercent = self.max_na_frac * 100
             feat_names = feats0 - feats
             self._log("info", 'These {} features were removed as they '
-                             'had more than {}% missing values:\n{}'.format(n_feats, napercent, feat_names))
+                              'had more than {}% missing values:\n{}'.format(
+                n_feats, napercent, feat_names))
 
         # Handle all rows that still contain any nans
         if self.na_method == "drop":
             clean_df = df.dropna(axis=0, how='any')
-            self.dropped_samples = pd.concat((df[~df.index.isin(clean_df.index)], self.dropped_samples), axis=0)
+            self.dropped_samples = pd.concat(
+                (df[~df.index.isin(clean_df.index)], self.dropped_samples),
+                axis=0)
             df = clean_df
         else:
             df = df.fillna(method=self.na_method)
-        self._log("info", "After handling na: {} samples, {} features".format(*df.shape))
+        self._log("info", "After handling na: {} samples, {} features".format(
+            *df.shape))
         self.retained_features = df.columns.values.tolist()
         return df
 
@@ -186,8 +195,8 @@ class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
                 for c in object_df.columns:
                     object_df[c] = LabelEncoder().fit_transform(object_df[c])
                 self._log("warn", 'LabelEncoder used for categorical colums '
-                    'For access to the original labels via inverse_transform, '
-                    'encode manually and set retain_categorical to False')
+                                  'For access to the original labels via inverse_transform, '
+                                  'encode manually and set retain_categorical to False')
             return pd.concat([number_df, object_df], axis=1)
         else:
             return number_df
@@ -237,11 +246,13 @@ class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
         reducer_params (dict): The keys are the feature reduction methods
             applied. The values are the parameters used by each feature reducer.
     """
+
     def __init__(self, reducers=('prune_corr', 'tree'), n_pca_features=15,
                  n_rebate_features=15, logger=setup_custom_logger()):
         for reducer in reducers:
             if reducer not in ["corr", "tree", "rebate", "pca"]:
-                raise ValueError("Reducer {} not found in known reducers!".format(reducer))
+                raise ValueError(
+                    "Reducer {} not found in known reducers!".format(reducer))
 
         self.reducers = reducers
         self.n_pca_features = n_pca_features
@@ -250,7 +261,6 @@ class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
         self.removed_features = {}
         self.retained_features = []
         self.reducer_params = {}
-
 
     def fit(self, df, target):
         for r in self.reducers:
@@ -267,31 +277,43 @@ class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
                         pd.to_numeric(df[target])
                     except BaseException:
                         mode = "classification"
-                    tbfr = TreeBasedFeatureReduction(mode=mode, logger=self.logger)
+                    tbfr = TreeBasedFeatureReduction(mode=mode,
+                                                     logger=self.logger)
                     reduced_df = tbfr.fit_transform(X, y)
-                    self.reducer_params[r] = {"importance_percentile": tbfr.importance_percentile,
-                                              "mode": tbfr.mode,
-                                              "random_state": tbfr.rs}
+                    self.reducer_params[r] = {
+                        "importance_percentile": tbfr.importance_percentile,
+                        "mode": tbfr.mode,
+                        "random_state": tbfr.rs}
                 elif r == "rebate":
                     self._log("info",
-                              "ReBATE MultiSURF running: retaining {} numerical features.".format(self.n_rebate_features))
-                    reduced_df = rebate(df, target, n_features=self.n_rebate_features)
+                              "ReBATE MultiSURF running: retaining {} numerical features.".format(
+                                  self.n_rebate_features))
+                    reduced_df = rebate(df, target,
+                                        n_features=self.n_rebate_features)
                     self._log("info",
-                              "ReBATE MultiSURF completed: retained {} numerical features.".format(len(reduced_df.columns)))
+                              "ReBATE MultiSURF completed: retained {} numerical features.".format(
+                                  len(reduced_df.columns)))
                     self._log("debug",
-                              "ReBATE MultiSURF gave the following features".format(reduced_df.columns.toist()))
+                              "ReBATE MultiSURF gave the following features".format(
+                                  reduced_df.columns.toist()))
                     self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
 
                 # todo: PCA will not work with string columns!!!!!
                 elif r == "pca":
                     self._log("info",
-                              "PCA running: retaining {} numerical features.".format(self.n_rebate_features))
-                    matrix = PCA(n_components=self.n_pca_features).fit_transform(X.values, y.values)
-                    pcacols = ["PCA {}".format(i) for i in range(matrix.shape[1])]
-                    reduced_df = pd.DataFrame(columns=pcacols, data=matrix, index=X.index)
+                              "PCA running: retaining {} numerical features.".format(
+                                  self.n_rebate_features))
+                    matrix = PCA(
+                        n_components=self.n_pca_features).fit_transform(
+                        X.values, y.values)
+                    pcacols = ["PCA {}".format(i) for i in
+                               range(matrix.shape[1])]
+                    reduced_df = pd.DataFrame(columns=pcacols, data=matrix,
+                                              index=X.index)
 
                     self._log("info",
-                              "PCA completed: retained {} numerical features.".format(len(reduced_df.columns)))
+                              "PCA completed: retained {} numerical features.".format(
+                                  len(reduced_df.columns)))
 
             retained = reduced_df.columns.values.tolist()
             removed = [c for c in df.columns.values if c not in retained]
@@ -300,10 +322,8 @@ class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
 
         self.retained_features = df.columns.tolist()
 
-
     def transform(self, df, target):
         return df[self.retained_features + [target]]
-
 
     def rm_correlated(self, df, target_key, R_max=0.95):
         """
@@ -332,7 +352,8 @@ class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
                     continue
                 else:
                     if corval >= R_max:
-                        if corr.loc[idx, target_key] > corr.loc[feature, target_key]:
+                        if corr.loc[idx, target_key] > corr.loc[
+                            feature, target_key]:
                             removed_feat = feature
                         else:
                             removed_feat = idx
