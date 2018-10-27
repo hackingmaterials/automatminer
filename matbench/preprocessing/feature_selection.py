@@ -1,11 +1,17 @@
-from matbench.utils.utils import setup_custom_logger, MatbenchError
+"""
+Various in-house feature reduction techniques.
+"""
+
 from sklearn.base import is_classifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
     GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.model_selection import check_cv
+from sklearn.base import BaseEstimator, TransformerMixin
 
+from matbench.utils.utils import setup_custom_logger, MatbenchError
+from matbench.base import LoggableMixin
 
-class TreeBasedFeatureReduction:
+class TreeBasedFeatureReduction(BaseEstimator, TransformerMixin, LoggableMixin):
     """
     Tree-based feature reduction tools based on sklearn models that have
         the .feature_importances_ attribute.
@@ -17,10 +23,10 @@ class TreeBasedFeatureReduction:
         random_state (int): relevant if non-deterministic algorithms such as
             random forest are used.
     """
-    def __init__(self, mode, importance_percentile=0.95, loglevel=None,
-                 logpath='.', random_state=0):
+    def __init__(self, mode, importance_percentile=0.95,
+                 logger=setup_custom_logger(), random_state=0):
         self.mode = mode
-        self.logger = setup_custom_logger(filepath=logpath, level=loglevel)
+        self.logger = logger
         self.importance_percentile = importance_percentile
         self.selected_features = None
         self.rs = random_state
