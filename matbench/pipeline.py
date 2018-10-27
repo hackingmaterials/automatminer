@@ -5,11 +5,13 @@ classes which take in a dataframe and target key and product useful analytics.
 import datetime
 import logging
 
-from matbench.featurization.core import Featurization
-from matbench.preprocessing.core import Preprocessing
-from matbench.utils.utils import setup_custom_logger
-from matbench.automl.tpot_utils import TpotAutoml
 from sklearn.model_selection import train_test_split
+
+from matbench.featurization.core import Featurization
+from matbench.preprocessing.core import Preprocesser
+from matbench.automl.tpot_utils import TpotAutoml
+
+# todo: this is a WIP - AD
 
 
 class PredictionPipeline:
@@ -49,7 +51,7 @@ class PredictionPipeline:
         if self.persistence_lvl > 1:
             df.to_json("{}_featurized_df_{}.json".format(self.name, datetime.datetime.now().isoformat()))
 
-        p = Preprocessing()
+        p = Preprocesser()
         df = p.preprocess(df, target_key, scale=True, max_na_frac=0.01)
 
         if self.persistence_lvl > 1:
