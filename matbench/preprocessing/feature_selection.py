@@ -1,7 +1,7 @@
 """
 Various in-house feature reduction techniques.
 """
-
+import numpy as np
 from sklearn.base import is_classifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
     GradientBoostingClassifier, GradientBoostingRegressor
@@ -168,6 +168,6 @@ def rebate(df, target, n_features):
     feats = []
     for c in matrix.T:
         for f in X.columns.values:
-            if X[f].values == c and f not in feats:
+            if np.array_equal(c, X[f].values) and f not in feats:
                 feats.append(f)
     return df[feats]
