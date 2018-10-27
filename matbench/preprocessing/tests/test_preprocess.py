@@ -10,7 +10,7 @@ from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, 
 test_dir = os.path.dirname(__file__)
 
 class TestPreprocess(unittest.TestCase):
-    #todo: add more tests
+    #todo: need test case for categorical target and categorical features -AD
 
     def setUp(self):
         df = pd.read_csv(os.path.join(test_dir, 'test_featurized_df.csv'))
@@ -49,6 +49,20 @@ class TestPreprocess(unittest.TestCase):
     def test_FeatureReducer(self):
         df = self.test_df
         fr = FeatureReducer()
+
+        # ultra-basic case: are we reducing at least 1 feature?
+        df = fr.fit_transform(df, 'gap expt')
+        self.assertTrue(df.shape[1] < self.test_df.shape[1])
+
+        # ensure metadata is being written correctly
+        self.assertTrue('gap expt' not in fr.retained_features)
+        self.assertTrue(len(list(fr.removed_features.keys())) == 2)
+
+        # ensure other combinations of feature reducers are working
+        fr = FeatureReducer(reducers=('corr', 'rebate'), n_rebate_features=40)
+        df = fr.fit_transform(self.test_df, 'gap expt')
+        self.assertEqual(df.shape[1], 41)  # 40 features + target
+        self.assertTrue('gap expt' in df.columns)
 
 
 
