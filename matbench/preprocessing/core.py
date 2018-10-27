@@ -7,11 +7,11 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.exceptions import NotFittedError
 from skrebate import MultiSURF
 
-from matbench.utils.utils import MatbenchError, setup_custom_logger
+from matbench.utils.utils import setup_custom_logger
 from matbench.base import LoggableMixin
+from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, rebate
 
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>",
@@ -193,7 +193,6 @@ class DataCleaner(BaseEstimator, TransformerMixin, LoggableMixin):
             return number_df
 
 
-
 class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
     """
     Perform feature reduction on a clean dataframe.
@@ -221,43 +220,89 @@ class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
 
             Example: Apply tree-based feature reduction, then pca:
                 reducers = ('tree', 'pca')
+        n_pca_features (int): The number of features to be retained by PCA, if
+            PCA is present in the reducers
+        n_rebate_features (int): The number of ReBATE relief features to be
+            retained, if ReBATE is present in the reducers.
         logger (logging.Logger): The logger to be used. Defaults to the matbench
             top-level logger. None means no logging will be done.
 
     Attributes:
         The following attrs are set during fitting.
 
-        features_removed (dict): The keys are the feature reduction methods
+        removed_features (dict): The keys are the feature reduction methods
             applied. The values are the feature labels removed by that feature
             reduction method.
-        features_retained (list): The features retained.
+        retained_features (list): The features retained.
         reducer_params (dict): The keys are the feature reduction methods
             applied. The values are the parameters used by each feature reducer.
     """
-    def __init__(self, reducers=('prune_corr', 'tree'), logger=setup_custom_logger()):
+    def __init__(self, reducers=('prune_corr', 'tree'), n_pca_features=15,
+                 n_rebate_features=15, logger=setup_custom_logger()):
         for reducer in reducers:
             if reducer not in ["corr", "tree", "rebate", "pca"]:
                 raise ValueError("Reducer {} not found in known reducers!".format(reducer))
 
         self.reducers = reducers
+        self.n_pca_features = n_pca_features
+        self.n_rebate_features = n_rebate_features
         self.logger = logger
+        self.removed_features = {}
+        self.retained_features = []
+        self.reducer_params = {}
 
 
     def fit(self, df, target):
         for r in self.reducers:
             if r == "corr":
-                df = self.rm_correlated(df, target)
+                reduced_df = self.rm_correlated(df, target)
+
+            # More advanced feature reduction methods
+            else:
+                X = df.drop(columns=[target])
+                y = df[target]
+                if r == "tree":
+                    mode = "regression"
+                    try:
+                        pd.to_numeric(df[target])
+                    except BaseException:
+                        mode = "classification"
+                    tbfr = TreeBasedFeatureReduction(mode=mode, logger=self.logger)
+                    reduced_df = tbfr.fit_transform(X, y)
+                    self.reducer_params[r] = {"importance_percentile": tbfr.importance_percentile,
+                                              "mode": tbfr.mode,
+                                              "random_state": tbfr.rs}
+                elif r == "rebate":
+                    self._log("info",
+                              "ReBATE MultiSURF running: retaining {} numerical features.".format(self.n_rebate_features))
+                    reduced_df = rebate(df, target, n_features=self.n_rebate_features)
+                    self._log("info",
+                              "ReBATE MultiSURF completed: retained {} numerical features.".format(len(reduced_df.columns)))
+                    self._log("debug",
+                              "ReBATE MultiSURF gave the following features".format(reduced_df.columns.toist()))
+                    self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
+
+                # todo: PCA will not work with string columns!!!!!
+                elif r == "pca":
+                    self._log("info",
+                              "PCA running: retaining {} numerical features.".format(self.n_rebate_features))
+                    matrix = PCA(n_components=self.n_pca_features).fit_transform(X.values, y.values)
+                    pcacols = ["PCA {}".format(i) for i in range(matrix.shape[1])]
+                    reduced_df = pd.DataFrame(columns=pcacols, data=matrix, index=X.index)
+
+                    self._log("info",
+                              "PCA completed: retained {} numerical features.".format(len(reduced_df.columns)))
+
+            retained = reduced_df.columns.values.tolist()
+            removed = [c for c in df.columns.values if c not in retained]
+            self.removed_features[r] = removed
+            df = reduced_df
+
+        self.retained_features = df.columns.tolist()
+
 
     def transform(self, df, target):
         return df[self.retained_features + [target]]
-
-
-    def rebate(self, df, target, n_features):
-        self._log("info", "ReBATE running: retaining {} numerical features.".format(n_features))
-        X = df.drop(target)
-        y = df[target]
-        rf = MultiSURF(n_features_to_select=n_features, n_jobs=-1)
-
 
 
     def rm_correlated(self, df, target_key, R_max=0.95):
@@ -287,8 +332,7 @@ class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
                     continue
                 else:
                     if corval >= R_max:
-                        if corr.loc[idx, target_key] > corr.loc[
-                            feature, target_key]:
+                        if corr.loc[idx, target_key] > corr.loc[feature, target_key]:
                             removed_feat = feature
                         else:
                             removed_feat = idx
@@ -308,33 +352,6 @@ class FeatureReducer(BaseEstimator, TransformerMixin, LoggableMixin):
                 'correlation with the current features more than '
                 '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
         return df
-
-        #
-        #
-        # if n_rebate_features:
-
-        #     rf = ReliefF(n_features_to_select=n_rebate_features, n_jobs=-1)
-        #     matrix = rf.fit_transform(X.values, y.values)
-        #     # Todo: Find how to get the original labels back?  - AD
-        #     rfcols = ["ReliefF {}".format(i) for i in range(matrix.shape[1])]
-        #     X = pd.DataFrame(columns=rfcols, data=matrix, index=X.index)
-        #
-        # if n_pca_features:
-        #     if self.scaler is None:
-        #         if X.max().max() > 5.0:  # 5 allowing for StandardScaler
-        #             raise MatbenchError(
-        #                 'attempted PCA before data normalization!')
-        #     self.logger.info(
-        #         "PCA running: retaining {} numerical features.".format(
-        #             n_pca_features))
-        #     n_pca_features = PCA(n_components=n_pca_features)
-        #     matrix = n_pca_features.fit_transform(X)
-        #     # Todo: I don't know if there is a way to get labels for these - AD
-        #     pcacols = ["PCA {}".format(i) for i in range(matrix.shape[1])]
-        #     X = pd.DataFrame(columns=pcacols, data=matrix, index=X.index)
-
-    def implementors(self):
-        return ['Alex Dunn']
 
 
 if __name__ == "__main__":
