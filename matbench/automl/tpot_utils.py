@@ -107,7 +107,7 @@ def _tpot_class_wrapper(mode, **kwargs):
             self.features = None
             self.target = None
             self.models = None
-            self.has_been_fit = False
+            self.is_fit = False
             self.top_models = OrderedDict()
             self.top_models_scores = OrderedDict()
             self.feature_names = kwargs.pop('feature_names', None)
@@ -150,7 +150,7 @@ def _tpot_class_wrapper(mode, **kwargs):
 
             # Update greater is better attribute as scoring function may have
             # changed between instantiation and call
-            if not self.has_been_fit:
+            if not self.is_fit:
                 raise RuntimeError("Error, the model has not yet been fit")
 
             self.greater_score_is_better = is_greater_better(
@@ -214,7 +214,7 @@ def _tpot_class_wrapper(mode, **kwargs):
             Returns:
                 please see the documentation of TPOT for a full description.
             """
-            self.has_been_fit = True
+            self.is_fit = True
             self.features = features
             self.target = target
             super(TpotWrapper, self).fit(features, target, **kwargs)
