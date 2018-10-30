@@ -1,17 +1,26 @@
 import logging
 
-from matminer.featurizers.conversions import (CompositionToOxidComposition,
-                                              StructureToOxidStructure)
 from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
+from matminer.featurizers.conversions import (CompositionToOxidComposition,
+                                              StructureToOxidStructure)
 
 from matbench.utils.utils import MatbenchError, setup_custom_logger
+from matbench.base import DataframeTransformer
 from matbench.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 
 
-class Featurization(object):
+_composition_aliases = ["comp", "Composition", "composition", "COMPOSITION",
+                        "comp.", "formula", "chemical composition", "compositions"]
+_structure_aliases = ["structure", "struct", "struc", "struct.", "structures",
+                      "STRUCTURES", "Structure", "structures", "structs"]
+_bandstructure_aliases = ["bandstructure", "bs", "bsdos", "BS", "BSDOS",
+                          "Bandstructure"]
+_dos_aliases = ["density of states", "dos", "DOS", "Density of States"]
+
+class Featurization():
     """
     Takes in a dataframe and generate features from preset columns such as
     "formula", "structure", "bandstructure", "dos", etc. One may use
@@ -45,7 +54,7 @@ class Featurization(object):
 
     def __init__(self, ignore_cols=None, ignore_errors=True,
                  drop_featurized_col=True, exclude=None, multiindex=False,
-                 n_jobs=None, logger=None):
+                 n_jobs=None, featurizers=None, logger=None):
 
         if logger is None:
             # Log to the current directory
@@ -55,10 +64,22 @@ class Featurization(object):
             self.logger = logger
 
         self.ignore_cols = ignore_cols or []
-        self.cfset = CompositionFeaturizers(exclude=exclude)
-        self.sfset = StructureFeaturizers(exclude=exclude)
-        self.bsfset = BSFeaturizers(exclude=exclude)
-        self.dosfset = DOSFeaturizers(exclude=exclude)
+        if not featurizers:
+            cfset = CompositionFeaturizers(exclude=exclude)
+            sfset = StructureFeaturizers(exclude=exclude)
+            bsfset = BSFeaturizers(exclude=exclude)
+            dosfset = DOSFeaturizers(exclude=exclude)
+            self.featurizers = {"composition": cfset,
+                                "structure": sfset,
+                                "bandstructure": bsfset,
+                                "dos": dosfset}
+        else:
+            if not isinstance(featurizers, dict):
+                raise TypeError("Featurizers must be a dictionary with keys"
+                                "of 'composition', 'structure', 'bandstructure', "
+                                "and 'dos' and values of corresponding lists of "
+                                "featurizers.")
+            elif
         self.ignore_errors = ignore_errors
         self.drop_featurized_col = drop_featurized_col
         self.multiindex = multiindex
@@ -90,6 +111,10 @@ class Featurization(object):
             f.set_n_jobs(n_jobs=self.n_jobs)
             df = f.fit_featurize_dataframe(df, col_id, **kwargs)
         return df
+
+    def fit(self, df, target):
+
+
 
     def auto_featurize(self, df, input_cols=("formula", "structure"),
                        **kwargs):
