@@ -4,7 +4,7 @@ from sklearn.exceptions import NotFittedError
 from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
-from matminer.featurizers.conversions import CompositionToOxidComposition, StructureToOxidStructure
+from matminer.featurizers.conversions import CompositionToOxidComposition, StructureToOxidStructure, StrToComposition, DictToObject
 
 
 from matbench.utils.utils import MatbenchError, setup_custom_logger
@@ -89,22 +89,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     df = df.drop([col], axis=1)
         return df
 
-    def _pre_screen_col(self, col_id, prefix='Input Data', multiindex=None):
-        multiindex = multiindex or self.multiindex
-        if multiindex and isinstance(col_id, str):
-            return (prefix, col_id)
-        else:
-            return col_id
-
-    # todo: Remove once MultipleFeaturizer is fixed
-    def _featurize_sequentially(self, df, fset, col_id, **kwargs):
-        for idx, f in enumerate(fset):
-            if idx > 0:
-                col_id = self._pre_screen_col(col_id)
-            f.set_n_jobs(n_jobs=self.n_jobs)
-            df = f.fit_featurize_dataframe(df, col_id, **kwargs)
-        return df
-
     def fit(self, df, target):
         """
         Fit all featurizers to the df.
@@ -138,14 +122,30 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.is_fit = True
         return self
 
-    def transform(self, df, target):
+    def transform(self, df, target, guess_oxidstates=True):
         if not self.is_fit:
             raise NotFittedError("AutoFeaturizer has not been fit!")
         df = self._prescreen_df(df, inplace=True, col_id=target)
         for featurizer_type, featurizers in self.featurizers.items():
+
+            if featurizer_type == "composition":
+                if guess_oxidstates:
+                    cto = CompositionToOxidComposition(target_col_id=featurizer_type,
+                                                       overwrite_data=True)
+                    df = cto.featurize_dataframe(df, featurizer_type,  multiindex=self.multiindex)
+
+            elif featurizer_type == "structure":
+                if isinstance(df[featurizer_type][0], dict):
+                    df[featurizer_type] = df[featurizer_type].apply(Structure.from_dict)
+
+                if guess_oxidstates:
+                    sto = StructureToOxidStructure(target_col_id=featurizer_type,
+                                                   overwrite_data=True)
+                    df = sto.featurize_dataframe(df, col_id,
+                                                 multiindex=self.multiindex)
+
             for f in featurizers:
                 df = f.featurize_dataframe(df, featurizer_type, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
-
 
 
     def auto_featurize(self, df, input_cols=("formula", "structure"),
