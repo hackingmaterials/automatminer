@@ -56,7 +56,9 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         multiiindex (bool): If True, returns a multiindexed dataframe.
         n_jobs (int): The number of parallel jobs to use during featurization
             for each featurizer. -1 sets n_jobs = n_cores
-        logger (logging.Logger): The logger object to use for logging.
+        logger (Logger, bool): A custom logger object to use for logging.
+            Alternatively, if set to True, the default matbench logger will be
+            used. If set to False, then no logging will occur.
 
     Attributes:
         featurizers (dict): Same format as input dictionary in Args. Values
@@ -65,11 +67,18 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
     """
 
     def __init__(self, featurizers=None, ignore_cols=None, ignore_errors=True,
-                 drop_inputs=True, exclude=None, guess_oxistates=True, multiindex=False,
-                 n_jobs=None, logger=setup_custom_logger()):
+                 drop_inputs=True, exclude=None, guess_oxistates=True,
+                 multiindex=False, n_jobs=None, logger=True):
 
-        self.logger = logger
+        self._logger = self.get_logger(logger)
         self.ignore_cols = ignore_cols or []
+        self.is_fit = False
+        self.ignore_errors = ignore_errors
+        self.drop_inputs = drop_inputs
+        self.multiindex = multiindex
+        self.n_jobs = n_jobs
+        self.guess_oxistates = guess_oxistates
+        self.features = []
 
         # Set featurizers
         if not featurizers:
@@ -100,22 +109,14 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                         featurizers["dos"] = featurizers.pop(ftype)
                     else:
                         raise ValueError(
-                            "The featurizers dict key {} is not a valid featurizer type. Please choose from {}".format(
+                            "The featurizers dict key {} is not a valid "
+                            "featurizer type. Please choose from {}".format(
                                 ftype, _aliases))
                 # Assign empty featurizer list to featurizers not specified by type
                 for ftype in ["composition", "structure", "bandstructure", "dos"]:
                     if ftype not in featurizers:
                         featurizers[ftype] = []
-
                 self.featurizers = featurizers
-
-        self.is_fit = False
-        self.ignore_errors = ignore_errors
-        self.drop_inputs = drop_inputs
-        self.multiindex = multiindex
-        self.n_jobs = n_jobs
-        self.guess_oxistates = guess_oxistates
-        self.features = []
 
     def fit(self, df, target):
         """
@@ -143,14 +144,14 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         df = self._add_composition_from_structure(df)
         for featurizer_type, featurizers in self.featurizers.items():
             if not featurizers:
-                self._log("info", "No {} featurizers being used.".format(featurizer_type))
+                self.logger.info("No {} featurizers being used.".format(featurizer_type))
             if featurizer_type in df.columns:
                 df = self._tidy_column(df, featurizer_type)
                 for f in featurizers:
                     f.fit(df[featurizer_type].tolist())
                     f.set_n_jobs(self.n_jobs)
                     self.features += f.feature_labels()
-                    self._log("info", "Fit {} to {} samples in dataframe.".format(f.__class__.__name__, df.shape[0]))
+                    self.logger.info("Fit {} to {} samples in dataframe.".format(f.__class__.__name__, df.shape[0]))
         self.is_fit = True
         return self
 
@@ -180,7 +181,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     df = f.featurize_dataframe(df, featurizer_type, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
                 df = df.drop(columns=[featurizer_type])
             else:
-                self._log("info", "Featurizer type {} not in the dataframe. Skiping...".format(featurizer_type))
+                self.logger.info("Featurizer type {} not in the dataframe. Skiping...".format(featurizer_type))
         return df
 
     def _prescreen_df(self, df, inplace=True, col_id=None):
@@ -267,7 +268,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
         Returns:
             df (pandas.DataFrame): Contains composition column if desired
-
         """
         if self.featurizers["composition"]:
             if "structure" in df.columns and "composition" not in df.columns:
