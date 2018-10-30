@@ -1,11 +1,5 @@
-import logging
-
 from sklearn.exceptions import NotFittedError
-from pymatgen import Composition, Structure
-from pymatgen.electronic_structure.bandstructure import BandStructure
-from pymatgen.electronic_structure.dos import CompleteDos
 from matminer.featurizers.conversions import CompositionToOxidComposition, StructureToOxidStructure, StrToComposition, DictToObject, StructureToComposition
-
 
 from matbench.utils.utils import MatbenchError, setup_custom_logger
 from matbench.base import DataframeTransformer, LoggableMixin
@@ -25,6 +19,32 @@ _aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases + 
 
 class AutoFeaturizer(DataframeTransformer, LoggableMixin):
     """
+    Automatically featurize a dataframe.
+
+    Use this object first by calling fit, then by calling transform.
+    
+    AutoFeaturizer works with a fixed set of possible column names.
+        "composition": To use composition features
+        "structure": To use structure features
+        "bandstructure": To use bandstructure features
+        "dos": To use density of states features
+
+    The featurizers corresponding to each featurizer type cannot be used if
+    the correct column name is not present.
+
+    Args:
+        featurizers (dict): Values are the featurizer types you want applied
+            (e.g., "structure", "composition"). The corresponding values
+            are lists of featurizer objects you want applied for each featurizer
+            type.
+
+            Example:
+                 {"composition": [ElementProperty.from_preset("matminer"),
+                                  EwaldEnergy()]
+                  "structure": [BagofBonds(), GlobalSymmetryFeatures()]}
+            Valid keys for each featurizer type are given in the *_aliases
+            constants above.
+
     """
 
     def __init__(self, featurizers=None, ignore_cols=None, ignore_errors=True,
@@ -77,6 +97,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.drop_inputs = drop_inputs
         self.multiindex = multiindex
         self.n_jobs = n_jobs
+        self.features = []
+
 
     def _prescreen_df(self, df, inplace=True, col_id=None):
         if not inplace:
@@ -118,6 +140,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             for f in featurizers:
                 f.fit(df[featurizer_type].tolist())
                 f.set_n_jobs(self.n_jobs)
+                self.features += f.feature_labels()
                 self.logger._log("info", "Fit {} to {} samples in dataframe.".format(f.__class__.__name__, df.shape[0]))
         self.is_fit = True
         return self
