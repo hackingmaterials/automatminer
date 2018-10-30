@@ -5,10 +5,7 @@ import unittest
 
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.datasets.dataset_retrieval import load_dataset
-import matminer.featurizers.composition as cf
 
-from matbench.data.load import load_double_perovskites_gap, \
-    load_castelli_perovskites
 from matbench.featurization.core import AutoFeaturizer
 from matbench.data.load import load_phonon_dielectric_mp
 
@@ -18,17 +15,24 @@ test_dir = os.path.dirname(__file__)
 class TestAutoFeaturizer(unittest.TestCase):
 
     def setUp(self):
-        self.test_df = load_dataset('elastic_tensor_2015')
+        self.test_df = load_dataset('elastic_tensor_2015').rename(columns={"formula": "composition"})
 
     def test_featurize_formula(self, limit=5):
         target = "K_VRH"
-        df = self.test_df[['formula', target]]
+        df = self.test_df[['composition', target]]
 
         # sanity checks
-        self.assertTrue(df['formula'].iloc[0], "Nb4CoSi")
-        self.assertTrue(df["formula"].iloc[1179], "Al2Cu")
+        self.assertTrue(df['composition'].iloc[0], "Nb4CoSi")
+        self.assertTrue(df["composition"].iloc[1179], "Al2Cu")
         self.assertEqual(df.shape[0], 1181)
         self.assertEqual(df.shape[1], 2)
+
+        # test automatic featurization abilities with all defaults
+        df = df.iloc[:limit]
+        af = AutoFeaturizer()
+        df = af.fit_transform(df, target)
+        self.assertAlmostEqual(df["frac f valence electrons"].iloc[2], 0.5384615384615384)
+        self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
 
 
     def test_featurize_structure(self, limit=5):
