@@ -9,7 +9,7 @@ from sklearn.model_selection import check_cv
 from sklearn.base import BaseEstimator, TransformerMixin
 from skrebate import MultiSURF
 
-from matbench.utils.utils import setup_custom_logger, MatbenchError
+from matbench.utils.utils import MatbenchError
 from matbench.base import LoggableMixin, DataframeTransformer
 
 __authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
@@ -27,11 +27,14 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
             sorted (descending) based on their importance.
         random_state (int): relevant if non-deterministic algorithms such as
             random forest are used.
+        logger (Logger, bool): A custom logger object to use for logging.
+            Alternatively, if set to True, the default matbench logger will be
+            used. If set to False, then no logging will occur.
     """
     def __init__(self, mode, importance_percentile=0.95,
-                 logger=setup_custom_logger(), random_state=0):
+                 logger=True, random_state=0):
+        self._logger = self.get_logger(logger)
         self.mode = mode
-        self.logger = logger
         self.importance_percentile = importance_percentile
         self.selected_features = None
         self.rs = random_state
@@ -81,7 +84,8 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
             tfeats = self.get_top_features(fimportance)
             m_curr = len(tfeats)
             m_prev = len(X.columns)
-            self._log("debug", 'nfeatures: {}->{}'.format(len(X.columns), m_curr))
+            self.logger.debug('nfeatures: {}->{}'.format(
+                len(X.columns), m_curr))
             X = X[tfeats]
             if not recursive:
                 break
@@ -129,8 +133,9 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
             all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
         # take the union of selected features of each fold
         self.selected_features = list(set(all_feats))
-        self._log("info", 'Finished tree-based feature reduction of {} intial '
-                         'features to {}'.format(m0, len(self.selected_features)))
+        self.logger.info(
+            'Finished tree-based feature reduction of {} intial features to '
+            '{}'.format(m0, len(self.selected_features)))
         return self
 
     def transform(self, X, y=None):
