@@ -7,7 +7,7 @@ from matminer.featurizers.conversions import (CompositionToOxidComposition,
                                               StructureToOxidStructure)
 
 from matbench.utils.utils import MatbenchError, setup_custom_logger
-from matbench.base import DataframeTransformer
+from matbench.base import DataframeTransformer, LoggableMixin
 from matbench.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 
@@ -19,56 +19,25 @@ _structure_aliases = ["structure", "struct", "struc", "struct.", "structures",
 _bandstructure_aliases = ["bandstructure", "bs", "bsdos", "BS", "BSDOS",
                           "Bandstructure"]
 _dos_aliases = ["density of states", "dos", "DOS", "Density of States"]
+_aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases + _dos_aliases
 
-class Featurization():
+class Featurization(DataframeTransformer, LoggableMixin):
     """
-    Takes in a dataframe and generate features from preset columns such as
-    "formula", "structure", "bandstructure", "dos", etc. One may use
-    the auto_featurize method to featurize via all available featurizers
-    with default setting or selectively call featurizer methods.
-    Usage examples:
-        featurizer = Featurize()
-            df = featurizer.auto_featurize(df) # all features of all types
-        or:
-            df = featurizer.featurize_formula(df) # all formula-related feature
-        or:
-            df = featurizer.featurize_dos(df, featurizers=[Hybridization()])
-
-    Args:
-        ignore_cols ([str]): if set, these columns are excluded
-        preset_name (str): some featurizers (w/ from_preset) take in this arg
-        ignore_errors (bool): whether to ignore exceptions raised when
-            featurize_dataframe is called
-        drop_featurized_col (bool): whether to drop the featurized column after
-            the corresponding featurize_* method is called
-        exclude ([str]): list of the featurizer names to be excluded. Note
-            that these names are str (e.g. "ElementProperty") and not the class
-        multiindex (bool): a matminer featurizer argument that transforms
-            feature label to tuples that makes it easier to track them back to
-            which featurizer they come from.
-            * Note: if you set to True and your target is "gap", you need to
-            pass target = ("Input Data", "gap") in classes such as PreProcess.
-        n_jobs (int): number of CPUs/workers used in featurization. Default
-            behavior is matminer's default behavior.
     """
 
     def __init__(self, ignore_cols=None, ignore_errors=True,
-                 drop_featurized_col=True, exclude=None, multiindex=False,
-                 n_jobs=None, featurizers=None, logger=None):
+                 drop_inputs=True, exclude=None, multiindex=False,
+                 n_jobs=None, featurizers=None, logger=setup_custom_logger()):
 
-        if logger is None:
-            # Log to the current directory
-            self.logger = setup_custom_logger(filepath='.', level=logging.INFO)
-        else:
-            # Use the passed logger
-            self.logger = logger
-
+        self.logger = logger
         self.ignore_cols = ignore_cols or []
+
+        # Set featurizers
         if not featurizers:
-            cfset = CompositionFeaturizers(exclude=exclude)
-            sfset = StructureFeaturizers(exclude=exclude)
-            bsfset = BSFeaturizers(exclude=exclude)
-            dosfset = DOSFeaturizers(exclude=exclude)
+            cfset = CompositionFeaturizers(exclude=exclude).best
+            sfset = StructureFeaturizers(exclude=exclude).best
+            bsfset = BSFeaturizers(exclude=exclude).best
+            dosfset = DOSFeaturizers(exclude=exclude).best
             self.featurizers = {"composition": cfset,
                                 "structure": sfset,
                                 "bandstructure": bsfset,
@@ -79,9 +48,25 @@ class Featurization():
                                 "of 'composition', 'structure', 'bandstructure', "
                                 "and 'dos' and values of corresponding lists of "
                                 "featurizers.")
-            elif
+            else:
+                for ftype in featurizers:
+                    # Normalize the names from the aliases
+                    if ftype in _composition_aliases:
+                        featurizers["composition"] = featurizers.pop(ftype)
+                    elif ftype in _structure_aliases:
+                        featurizers["structure"] = featurizers.pop(ftype)
+                    elif ftype in _bandstructure_aliases:
+                        featurizers["bandstructure"] = featurizers.pop(ftype)
+                    elif ftype in _dos_aliases:
+                        featurizers["dos"] = featurizers.pop(ftype)
+                    else:
+                        raise ValueError(
+                            "The featurizers dict key {} is not a valid featurizer type. Please choose from {}".format(
+                                ftype, _aliases))
+                self.featurizers = featurizers
+
         self.ignore_errors = ignore_errors
-        self.drop_featurized_col = drop_featurized_col
+        self.drop_inputs = drop_inputs
         self.multiindex = multiindex
         self.n_jobs = n_jobs
 
@@ -195,7 +180,7 @@ class Featurization():
                                           multiindex=self.multiindex)
         if asindex:
             df = df.set_index(self._pre_screen_col(col_id))
-        if self.drop_featurized_col:
+        if self.drop_inputs:
             return df.drop([self._pre_screen_col(compcol)], axis=1)
         else:
             return df
@@ -243,7 +228,7 @@ class Featurization():
                                           ignore_errors=self.ignore_errors,
                                           multiindex=self.multiindex)
 
-        if self.drop_featurized_col:
+        if self.drop_inputs:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
             return df
@@ -280,7 +265,7 @@ class Featurization():
         df = self._featurize_sequentially(df, featurizers, col_id,
                                           ignore_errors=self.ignore_errors,
                                           multiindex=self.multiindex)
-        if self.drop_featurized_col:
+        if self.drop_inputs:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
             return df
@@ -313,7 +298,7 @@ class Featurization():
         df = self._featurize_sequentially(df, featurizers, col_id,
                                           ignore_errors=self.ignore_errors,
                                           multiindex=self.multiindex)
-        if self.drop_featurized_col:
+        if self.drop_inputs:
             return df.drop([self._pre_screen_col(col_id)], axis=1)
         else:
             return df
