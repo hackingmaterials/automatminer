@@ -21,7 +21,7 @@ _bandstructure_aliases = ["bandstructure", "bs", "bsdos", "BS", "BSDOS",
 _dos_aliases = ["density of states", "dos", "DOS", "Density of States"]
 _aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases + _dos_aliases
 
-class Featurization(DataframeTransformer, LoggableMixin):
+class AutoFeaturizer(DataframeTransformer, LoggableMixin):
     """
     """
 
