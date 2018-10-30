@@ -1,8 +1,9 @@
 # coding: utf-8
 import os
-import pandas as pd
 import unittest
 
+import pandas as pd
+from pymatgen import Composition
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.datasets.dataset_retrieval import load_dataset
 
@@ -14,29 +15,79 @@ test_dir = os.path.dirname(__file__)
 
 class TestAutoFeaturizer(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self, limit=5):
         self.test_df = load_dataset('elastic_tensor_2015').rename(columns={"formula": "composition"})
+        self.limit = limit
 
-    def test_featurize_formula(self, limit=5):
-        target = "K_VRH"
-        df = self.test_df[['composition', target]]
-
+    def test_sanity(self):
+        df = self.test_df
         # sanity checks
         self.assertTrue(df['composition'].iloc[0], "Nb4CoSi")
         self.assertTrue(df["composition"].iloc[1179], "Al2Cu")
         self.assertEqual(df.shape[0], 1181)
         self.assertEqual(df.shape[1], 2)
 
-        # test automatic featurization abilities with all defaults
-        df = df.iloc[:limit]
+
+    def test_featurize_composition(self):
+        """
+        Test automatic featurization while only considering formula/composition.
+        Args:
+            limit:
+
+        Returns:
+
+        """
+        target = "K_VRH"
+
+        # When compositions are strings
+        df = self.test_df[['composition', target]].iloc[:self.limit]
         af = AutoFeaturizer()
         df = af.fit_transform(df, target)
-        self.assertAlmostEqual(df["frac f valence electrons"].iloc[2], 0.5384615384615384)
+        self.assertAlmostEqual(df["frac f valence electrons"].iloc[2],
+                               0.5384615384615384)
         self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
+        self.assertTrue("composition" not in df.columns)
+
+        # When compositions are Composition objects
+        df = self.test_df[["composition", target]].iloc[:self.limit]
+        df["composition"] = [Composition(s) for s in df["composition"]]
+        af = AutoFeaturizer()
+        df = af.fit_transform(df, target)
+        self.assertAlmostEqual(df["frac f valence electrons"].iloc[2],
+                               0.5384615384615384)
+        self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
+        self.assertTrue("composition" not in df.columns)
 
 
-    def test_featurize_structure(self, limit=5):
-        pass
+    def test_featurize_structure(self):
+        target = "K_VRH"
+
+        # When structures are Structure objects
+        df = self.test_df[['structure', target]].iloc[:self.limit]
+        af = AutoFeaturizer()
+        df = af.fit_transform(df, target)
+        # Ensure there are some structure features created
+        self.assertTrue("dimensionality" in df.columns)
+        # Ensure that composition features are automatically added without
+        # explicit column
+        self.assertTrue("HOMO_character" in df.columns)
+        self.assertTrue("composition" not in df.columns)
+        self.assertTrue("structure" not in df.columns)
+
+        # When structures are dictionaries
+        df = self.test_df[['structure', target]].iloc[:self.limit]
+        df["structure"] = [s.as_dict() for s in df["structure"]]
+        af = AutoFeaturizer()
+        df = af.fit_transform(df, target)
+        # Ensure there are some structure features created
+        self.assertTrue("dimensionality" in df.columns)
+        # Ensure that composition features are automatically added without
+        # explicit column
+        self.assertTrue("HOMO_character" in df.columns)
+        self.assertTrue("composition" not in df.columns)
+        self.assertTrue("structure" not in df.columns)
+
+    def test_exclusions(self):
 
 
     def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
