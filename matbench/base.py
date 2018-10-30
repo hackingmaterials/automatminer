@@ -85,6 +85,8 @@ class AutoMLAdaptor(DataframeTransformer):
     A base class to adapt from an AutoML backend to a sklearn-style fit/predict
     scheme and add a few extensions.
     """
+    def transform(self, df, target):
+        return self.predict(df, target)
 
     def predict(self, df, target):
         """
@@ -114,7 +116,10 @@ class AutoMLAdaptor(DataframeTransformer):
         Returns:
             ([str]): The feature labels
         """
-        raise NotImplementedError("{} has no features attr implemented!".format(self.__class__.__name__))
+        try:
+            return self._features
+        except AttributeError:
+            raise NotImplementedError("{} has no features attr implemented!".format(self.__class__.__name__))
 
     @property
     def ml_data(self):
@@ -125,7 +130,10 @@ class AutoMLAdaptor(DataframeTransformer):
             (dict): At minimum, the raw X and y matrices being used for training.
                 May also contain other data.
         """
-        raise NotImplementedError("{} has no ML data attr implemented!".format(self.__class__.__name__))
+        try:
+            return self._ml_data
+        except AttributeError:
+            raise NotImplementedError("{} has no ML data attr implemented!".format(self.__class__.__name__))
 
 
     @property
@@ -136,7 +144,10 @@ class AutoMLAdaptor(DataframeTransformer):
         Returns:
             (list or OrderedDict}: The best models as determined by the AutoML package.
         """
-        raise NotImplementedError("{} has no best models attr implemented!".format(self.__class__.__name__))
+        try:
+            return self._best_models
+        except AttributeError:
+            raise NotImplementedError("{} has no best models attr implemented!".format(self.__class__.__name__))
 
     @property
     def backend(self):
@@ -147,4 +158,7 @@ class AutoMLAdaptor(DataframeTransformer):
             Backend object (e.g., TPOTClassifier)
 
         """
-        raise NotImplementedError("{} has no backend object attr implemented!".format(self.__class__.__name__))
+        try:
+            return self._backend
+        except AttributeError:
+            raise NotImplementedError("{} has no backend object attr implemented!".format(self.__class__.__name__))
