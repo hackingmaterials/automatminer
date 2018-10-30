@@ -22,7 +22,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
     Automatically featurize a dataframe.
 
     Use this object first by calling fit, then by calling transform.
-    
+
     AutoFeaturizer works with a fixed set of possible column names.
         "composition": To use composition features
         "structure": To use structure features
@@ -44,7 +44,17 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                   "structure": [BagofBonds(), GlobalSymmetryFeatures()]}
             Valid keys for each featurizer type are given in the *_aliases
             constants above.
-
+        ignore_cols ([str]): Column names to be ignored/removed from any
+            dataframe undergoing fitting or transformation.
+        ignore_errors (bool): If True, each featurizer will ignore all errors
+            during featurization.
+        drop_inputs (bool): Drop the columns containing input objects for
+            featurization (e.g., drop composition column folllowing featurization).
+        exclude ([str]): Class names of featurizers to exclude.
+        multiiindex (bool): If True, returns a multiindexed dataframe.
+        n_jobs (int): The number of parallel jobs to use during featurization
+            for each featurizer. -1 sets n_jobs = n_cores
+        logger (logging.Logger): The logger object to use for logging. 
     """
 
     def __init__(self, featurizers=None, ignore_cols=None, ignore_errors=True,
