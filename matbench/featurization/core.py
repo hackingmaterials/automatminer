@@ -57,6 +57,11 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         n_jobs (int): The number of parallel jobs to use during featurization
             for each featurizer. -1 sets n_jobs = n_cores
         logger (logging.Logger): The logger object to use for logging.
+
+    Attributes:
+        featurizers (dict): Same format as input dictionary in Args. Values
+            contain the actual objects being used for featurization.
+
     """
 
     def __init__(self, featurizers=None, ignore_cols=None, ignore_errors=True,
@@ -111,62 +116,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.n_jobs = n_jobs
         self.guess_oxistates = guess_oxistates
         self.features = []
-
-
-    def _prescreen_df(self, df, inplace=True, col_id=None):
-        if not inplace:
-            df = df.copy(deep=True)
-        if col_id and col_id not in df:
-            raise MatbenchError("'{}' column must be in data!".format(col_id))
-        if self.ignore_errors is not None:
-            for col in self.ignore_cols:
-                if col in df:
-                    df = df.drop([col], axis=1)
-        return df
-
-    def _tidy_column(self, df, featurizer_type):
-        # todo: Make the following conversions more robust (no lazy [0] type checking)
-        # todo: needs MAJOR logging!!!!!!!!!!!!!!!!!
-        if featurizer_type == "composition":
-            # Convert formulas to composition objects
-            if isinstance(df[featurizer_type][0], str):
-                stc = StrToComposition(overwrite_data=True,
-                                       target_col_id=featurizer_type)
-                df = stc.featurize_dataframe(df, featurizer_type,
-                                             multiindex=self.multiindex)
-
-            elif isinstance(df[featurizer_type][0], dict):
-                df[featurizer_type] = [Composition.from_dict(d) for d in df[featurizer_type]]
-
-            # Convert non-oxidstate containing comps to oxidstate comps
-            if self.guess_oxistates:
-                cto = CompositionToOxidComposition(
-                    target_col_id=featurizer_type,
-                    overwrite_data=True)
-                df = cto.featurize_dataframe(df, featurizer_type,
-                                             multiindex=self.multiindex)
-
-        else:
-            # Convert structure/bs/dos dicts to objects (robust already)
-            dto = DictToObject(overwrite_data=True, target_col_id=featurizer_type)
-            df = dto.featurize_dataframe(df, featurizer_type)
-
-            # Decorate with oxidstates
-            if featurizer_type == "structure" and self.guess_oxistates:
-                sto = StructureToOxidStructure(target_col_id=featurizer_type,
-                                               overwrite_data=True)
-                df = sto.featurize_dataframe(df, featurizer_type,
-                                             multiindex=self.multiindex)
-        return df
-
-    def _add_composition_from_structure(self, df):
-        # Add compositions from structures if not already present and composition features are desired
-        if "composition" in self.featurizers.keys():
-            if "structure" in df.columns and "composition" not in df.columns:
-                struct2comp = StructureToComposition(
-                    target_col_id="composition", overwrite_data=False)
-                df = struct2comp.featurize_dataframe(df, "structure")
-        return df
 
     def fit(self, df, target):
         """
@@ -232,6 +181,99 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 df = df.drop(columns=[featurizer_type])
             else:
                 self._log("info", "Featurizer type {} not in the dataframe. Skiping...".format(featurizer_type))
+        return df
+
+    def _prescreen_df(self, df, inplace=True, col_id=None):
+        """
+        Pre-screen a dataframe.
+
+        Args:
+            df (pandas.DataFrame): The dataframe to be screened.
+            inplace (bool): Manipulate the df in-place in memory
+            col_id: The column id to ensure is present.
+
+        Returns:
+            df (pandas.DataFrame) The screened dataframe.
+
+        """
+        if not inplace:
+            df = df.copy(deep=True)
+        if col_id and col_id not in df:
+            raise MatbenchError("'{}' column must be in data!".format(col_id))
+        if self.ignore_errors is not None:
+            for col in self.ignore_cols:
+                if col in df:
+                    df = df.drop([col], axis=1)
+        return df
+
+    def _tidy_column(self, df, featurizer_type):
+        """
+        Various conversions to homogenize columns for featurization input.
+        For example, take a column of compositions and ensure they are decorated
+        with oxidation states, are not strings, etc.
+
+        Args:
+            df (pandas.DataFrame)
+            featurizer_type: The key defining the featurizer input. For example,
+                composition featurizers should have featurizer_type of
+                "composition".
+
+        Returns:
+            df (pandas.DataFrame): DataFrame with featurizer_type column
+                ready for featurization.
+        """
+        # todo: Make the following conversions more robust (no lazy [0] type checking)
+        # todo: needs MAJOR logging!!!!!!!!!!!!!!!!!
+        if featurizer_type == "composition":
+            # Convert formulas to composition objects
+            if isinstance(df[featurizer_type][0], str):
+                stc = StrToComposition(overwrite_data=True,
+                                       target_col_id=featurizer_type)
+                df = stc.featurize_dataframe(df, featurizer_type,
+                                             multiindex=self.multiindex)
+
+            elif isinstance(df[featurizer_type][0], dict):
+                df[featurizer_type] = [Composition.from_dict(d) for d in df[featurizer_type]]
+
+            # Convert non-oxidstate containing comps to oxidstate comps
+            if self.guess_oxistates:
+                cto = CompositionToOxidComposition(
+                    target_col_id=featurizer_type,
+                    overwrite_data=True)
+                df = cto.featurize_dataframe(df, featurizer_type,
+                                             multiindex=self.multiindex)
+
+        else:
+            # Convert structure/bs/dos dicts to objects (robust already)
+            dto = DictToObject(overwrite_data=True, target_col_id=featurizer_type)
+            df = dto.featurize_dataframe(df, featurizer_type)
+
+            # Decorate with oxidstates
+            if featurizer_type == "structure" and self.guess_oxistates:
+                sto = StructureToOxidStructure(target_col_id=featurizer_type,
+                                               overwrite_data=True)
+                df = sto.featurize_dataframe(df, featurizer_type,
+                                             multiindex=self.multiindex)
+        return df
+
+    def _add_composition_from_structure(self, df):
+        """
+        Automatically deduce compositions from structures if:
+            1. structures are available
+            2. composition features are actually desired. (deduced from whether
+                composition featurizers are present in self.featurizers).
+        Args:
+            df (pandas.DataFrame): May or may not contain composition column.
+
+        Returns:
+            df (pandas.DataFrame): Contains composition column if desired
+
+        """
+        if self.featurizers["composition"]:
+            if "structure" in df.columns and "composition" not in df.columns:
+                struct2comp = StructureToComposition(
+                    target_col_id="composition", overwrite_data=False)
+                df = struct2comp.featurize_dataframe(df, "structure")
         return df
 
 if __name__ == "__main__":
