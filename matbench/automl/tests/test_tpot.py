@@ -3,13 +3,13 @@ from collections import OrderedDict
 
 import numpy as np
 from tpot import TPOTClassifier
-from matbench.automl.tpot_utils import TpotAutoml
+from matbench.automl.tpot_utils import TPOTAutoML
 from matbench.automl.tpot_configs.classifier import classifier_config_dict_mb
 from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
 from matbench.analysis.core import Analysis
 from matbench.data.load import load_double_perovskites_gap, \
     load_glass_binary
-from matbench.featurization.core import Featurization
+from matbench.featurization.core import AutoFeaturizer
 # from matbench.preprocessing.core import Preprocesser
 # from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
 #     Stoichiometry
@@ -28,7 +28,7 @@ __author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>, ' \
 #         target = 'gap gllbsc'
 #         # load and featurize:
 #         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
-#         featzer = Featurization(ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
+#         featzer = AutoFeaturizer(ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
 #         df_feats = featzer.featurize_formula(df_init, featurizers=[
 #             ElementProperty.from_preset(preset_name='matminer'),
 #             TMetalFraction()])
@@ -43,7 +43,7 @@ __author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>, ' \
 #             train_test_split(df.drop(target, axis=1).values,
 #             df[target], train_size=0.75, test_size=0.25, random_state=self.RS)
 #
-#         tpot = TpotAutoml(mode='regressor',
+#         tpot = TPOTAutoML(mode='regressor',
 #                           generations=1,
 #                           population_size=25,
 #                           scoring='r2',
@@ -95,7 +95,7 @@ __author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>, ' \
 #         target = 'gfa'
 #         # load and featurize:
 #         df_init = load_glass_binary()[:limit]
-#         featzer = Featurization()
+#         featzer = AutoFeaturizer()
 #         df_feats = featzer.featurize_formula(df_init, featurizers=[
 #             ElementProperty.from_preset(preset_name='matminer'),
 #             Stoichiometry()])
@@ -110,7 +110,7 @@ __author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>, ' \
 #             train_test_split(df.drop(target, axis=1).values,
 #             df[target], train_size=0.75, test_size=0.25, random_state=self.RS)
 #
-#         tpot = TpotAutoml(mode='classify',
+#         tpot = TPOTAutoML(mode='classify',
 #                           generations=1,
 #                           population_size=25,
 #                           scoring='f1_weighted',

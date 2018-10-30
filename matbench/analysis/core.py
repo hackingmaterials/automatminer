@@ -14,7 +14,7 @@ class Analysis(object):
     package: https://github.com/marcotcr/lime
 
     Args:
-        model (TpotAutoml or sklearn Estimator): must have fit and predict
+        model (TPOTAutoML or sklearn Estimator): must have fit and predict
             methods.
         ...
         mode (str): options are "regression" or "classification"

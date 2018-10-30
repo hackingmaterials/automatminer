@@ -2,7 +2,7 @@ import matbench.data.load as loader
 import numpy as np
 from time import time
 from matbench.analysis import Analysis
-from matbench.automl.tpot_utils import TpotAutoml
+from matbench.automl.tpot_utils import TPOTAutoML
 from matbench.featurize import Featurize
 from matbench.preprocess import PreProcess
 from sklearn.model_selection import train_test_split
@@ -55,7 +55,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 print('start timing...')
 start_time = time()
-tpot = TpotAutoml(mode=MODE,
+tpot = TPOTAutoML(mode=MODE,
                   max_time_mins=TIMEOUT_MINS,
                   generations=GENERATIONS,
                   population_size=POPULATION_SIZE,

@@ -7,9 +7,9 @@ import logging
 
 from sklearn.model_selection import train_test_split
 
-from matbench.featurization.core import Featurization
+from matbench.featurization.core import AutoFeaturizer
 from matbench.preprocessing.core import Preprocesser
-from matbench.automl.tpot_utils import TpotAutoml
+from matbench.automl.tpot_utils import TPOTAutoML
 
 # todo: this is a WIP - AD
 
@@ -45,7 +45,7 @@ class PredictionPipeline:
         # TODO: featurizer selection should go here
         #self.featurizers = FeaturizerSelection()
 
-        f = Featurization()
+        f = AutoFeaturizer()
         df = f.auto_featurize(df)
 
         if self.persistence_lvl > 1:
@@ -59,7 +59,7 @@ class PredictionPipeline:
 
         #todo: need to account for when validation fraction is zero
 
-        tpot = TpotAutoml(mode="regression",
+        tpot = TPOTAutoML(mode="regression",
                           max_time_mins=360,
                           scoring='neg_mean_absolute_error',
                           feature_names=df.drop(target_key, axis=1).columns,

@@ -6,7 +6,7 @@ import pandas as pd
 import pickle
 from time import time
 from matbench.core.analysis import Analysis
-from matbench.automl.tpot_utils import TpotAutoml
+from matbench.automl.tpot_utils import TPOTAutoML
 from matbench.core.featurize import Featurize
 from matbench.core.preprocess import Preprocess
 from sklearn.model_selection import train_test_split
@@ -74,7 +74,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 if not TPOT_FROM_FILE:
     print('start timing...')
     start_time = time()
-    tpot = TpotAutoml(mode=MODE,
+    tpot = TPOTAutoML(mode=MODE,
                       max_time_mins=TIMEOUT_MINS,
                       generations=GENERATIONS,
                       population_size=POPULATION_SIZE,
@@ -92,7 +92,7 @@ if not TPOT_FROM_FILE:
         json.dump(tpot.evaluated_individuals_, fj)
 else:
     with open(os.path.join(CALC_DIR, '{}.pickle'.format(fname_base)), 'rb') as fm:
-        tpot = TpotAutoml(mode=MODE,
+        tpot = TPOTAutoML(mode=MODE,
                           feature_names=df.drop(TARGET, axis=1).columns)
         tpot.fitted_pipeline_ = pickle.load(fm)
     with open(os.path.join(CALC_DIR, '{}_models.json'.format(fname_base)), 'r') as fj:

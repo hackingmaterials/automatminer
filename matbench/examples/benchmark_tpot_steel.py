@@ -1,4 +1,4 @@
-from matbench.automl.tpot_utils import TpotAutoml
+from matbench.automl.tpot_utils import TPOTAutoML
 from matbench.data.load import load_steel_strength
 from matbench.featurize import Featurize
 from matbench.preprocess import PreProcess
@@ -34,7 +34,7 @@ X_train, X_test, y_train, y_test = \
 
 print('start timing...')
 start_time = time()
-tpot = TpotAutoml(mode=model_type,
+tpot = TPOTAutoML(mode=model_type,
                   max_time_mins=timelimitmins,
                   scoring=scoring,
                   random_state=RS,
