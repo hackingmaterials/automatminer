@@ -1,10 +1,11 @@
 import logging
 
+from sklearn.exceptions import NotFittedError
 from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
-from matminer.featurizers.conversions import (CompositionToOxidComposition,
-                                              StructureToOxidStructure)
+from matminer.featurizers.conversions import CompositionToOxidComposition, StructureToOxidStructure
+
 
 from matbench.utils.utils import MatbenchError, setup_custom_logger
 from matbench.base import DataframeTransformer, LoggableMixin
@@ -21,13 +22,14 @@ _bandstructure_aliases = ["bandstructure", "bs", "bsdos", "BS", "BSDOS",
 _dos_aliases = ["density of states", "dos", "DOS", "Density of States"]
 _aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases + _dos_aliases
 
+
 class AutoFeaturizer(DataframeTransformer, LoggableMixin):
     """
     """
 
-    def __init__(self, ignore_cols=None, ignore_errors=True,
+    def __init__(self, featurizers=None, ignore_cols=None, ignore_errors=True,
                  drop_inputs=True, exclude=None, multiindex=False,
-                 n_jobs=None, featurizers=None, logger=setup_custom_logger()):
+                 n_jobs=None, logger=setup_custom_logger()):
 
         self.logger = logger
         self.ignore_cols = ignore_cols or []
@@ -63,8 +65,14 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                         raise ValueError(
                             "The featurizers dict key {} is not a valid featurizer type. Please choose from {}".format(
                                 ftype, _aliases))
+                # Assign empty featurizer list to featurizers not specified by type
+                for ftype in ["composition", "structure", "bandstructure", "dos"]:
+                    if ftype not in featurizers:
+                        featurizers[ftype] = []
+
                 self.featurizers = featurizers
 
+        self.is_fit = False
         self.ignore_errors = ignore_errors
         self.drop_inputs = drop_inputs
         self.multiindex = multiindex
@@ -98,6 +106,45 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         return df
 
     def fit(self, df, target):
+        """
+        Fit all featurizers to the df.
+
+        WARNING: for fitting to work, the dataframe must contain the following
+        keys and column value types for each kind of featurization:
+
+            Composition features: "composition" - strings or pymatgen
+                Composition objects
+            Structure features: "structure" - pymatgen Structure objects
+            Bandstructure features: "bandstructure" - pymatgen BandStructure objects
+            DOS features: "dos" - pymatgen DOS objects
+
+        Args:
+            df (pandas.DataFrame): A dataframe containing at least one of the keys
+                listed above. The column defined by that key should have the corresponding
+                types of objects in it.
+            target (str): The ML target key in the dataframe.
+
+        Returns:
+            (AutoFeaturizer): self
+        """
+        df = self._prescreen_df(df, inplace=True, col_id=target)
+        for featurizer_type, featurizers in self.featurizers.items():
+            if not featurizers:
+                self.logger._log("info", "No {} featurizers being used.".format(featurizer_type))
+            for f in featurizers:
+                f.fit(df[featurizer_type].tolist())
+                f.set_n_jobs(self.n_jobs)
+                self.logger._log("info", "Fit {} to {} samples in dataframe.".format(f.__class__.__name__, df.shape[0]))
+        self.is_fit = True
+        return self
+
+    def transform(self, df, target):
+        if not self.is_fit:
+            raise NotFittedError("AutoFeaturizer has not been fit!")
+        df = self._prescreen_df(df, inplace=True, col_id=target)
+        for featurizer_type, featurizers in self.featurizers.items():
+            for f in featurizers:
+                df = f.featurize_dataframe(df, featurizer_type, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
 
 
 
