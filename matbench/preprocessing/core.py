@@ -6,9 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, LabelEncoder
-from sklearn.base import TransformerMixin, BaseEstimator
 
-from matbench.utils.utils import setup_custom_logger
 from matbench.base import LoggableMixin, DataframeTransformer
 from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, \
     rebate
@@ -38,8 +36,9 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             variables. Current options: 'one-hot' and 'label'.
         drop_na_targets (bool): Drop samples containing target values which are
             na.
-        logger (logging.Logger): The logger to be used. Defaults to the matbench
-            top-level logger. None means no logging will be done.
+        logger (Logger, bool): A custom logger object to use for logging.
+            Alternatively, if set to True, the default matbench logger will be
+            used. If set to False, then no logging will occur.
 
     Attributes:
         The following attrs are set during fitting.
@@ -57,14 +56,14 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
     def __init__(self, scale=False, max_na_frac=0.01, na_method='drop',
                  encode_categories=True, encoder='one-hot',
                  drop_na_targets=True,
-                 logger=setup_custom_logger()):
+                 logger=True):
+        self._logger = self.get_logger(logger)
         self.scale = scale
         self.max_na_frac = max_na_frac
         self.na_method = na_method
         self.encoder = encoder
         self.encode_categories = encode_categories
         self.drop_na_targets = drop_na_targets
-        self.logger = logger
 
         # Attributes which will be set during transformation
         self.dropped_features = None
@@ -121,7 +120,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Returns:
             (pandas.DataFrame) The cleaned df
         """
-        self._log("info", "Before handling na: {} samples, {} features".format(
+        self.logger.info("Before handling na: {} samples, {} features".format(
             *df.shape))
 
         # Drop targets containing na before further processing
@@ -143,8 +142,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             n_feats = len(feats0) - len(feats)
             napercent = self.max_na_frac * 100
             feat_names = feats0 - feats
-            self._log("info", 'These {} features were removed as they '
-                              'had more than {}% missing values:\n{}'.format(
+            self.logger.info('These {} features were removed as they had more '
+                             'than {}% missing values:\n{}'.format(
                 n_feats, napercent, feat_names))
 
         # Handle all rows that still contain any nans
@@ -156,7 +155,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             df = clean_df
         else:
             df = df.fillna(method=self.na_method)
-        self._log("info", "After handling na: {} samples, {} features".format(
+        self.logger.info("After handling na: {} samples, {} features".format(
             *df.shape))
         self.retained_features = df.columns.values.tolist()
         return df
@@ -194,9 +193,10 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             elif self.encoder == 'label':
                 for c in object_df.columns:
                     object_df[c] = LabelEncoder().fit_transform(object_df[c])
-                self._log("warn", 'LabelEncoder used for categorical colums '
-                                  'For access to the original labels via inverse_transform, '
-                                  'encode manually and set retain_categorical to False')
+                self.logger.warning(
+                    'LabelEncoder used for categorical colums. For access to '
+                    'the original labels via inverse_transform, encode '
+                    'manually and set retain_categorical to False')
             return pd.concat([number_df, object_df], axis=1)
         else:
             return number_df
@@ -233,8 +233,9 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             PCA is present in the reducers
         n_rebate_features (int): The number of ReBATE relief features to be
             retained, if ReBATE is present in the reducers.
-        logger (logging.Logger): The logger to be used. Defaults to the matbench
-            top-level logger. None means no logging will be done.
+        logger (Logger, bool): A custom logger object to use for logging.
+            Alternatively, if set to True, the default matbench logger will be
+            used. If set to False, then no logging will occur.
 
     Attributes:
         The following attrs are set during fitting.
@@ -248,7 +249,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
     """
 
     def __init__(self, reducers=('corr', 'tree'), n_pca_features=15,
-                 n_rebate_features=15, logger=setup_custom_logger()):
+                 n_rebate_features=15, logger=True):
         for reducer in reducers:
             if reducer not in ["corr", "tree", "rebate", "pca"]:
                 raise ValueError(
@@ -257,7 +258,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         self.reducers = reducers
         self.n_pca_features = n_pca_features
         self.n_rebate_features = n_rebate_features
-        self.logger = logger
+        self._logger = self.get_logger(logger)
         self.removed_features = {}
         self.retained_features = []
         self.reducer_params = {}
@@ -285,24 +286,23 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                         "mode": tbfr.mode,
                         "random_state": tbfr.rs}
                 elif r == "rebate":
-                    self._log("info",
-                              "ReBATE MultiSURF running: retaining {} numerical features.".format(
-                                  self.n_rebate_features))
+                    self.logger.info(
+                        "ReBATE MultiSURF running: retaining {} numerical "
+                        "features.".format(self.n_rebate_features))
                     reduced_df = rebate(df, target,
                                         n_features=self.n_rebate_features)
-                    self._log("info",
-                              "ReBATE MultiSURF completed: retained {} numerical features.".format(
-                                  len(reduced_df.columns)))
-                    self._log("debug",
-                              "ReBATE MultiSURF gave the following features".format(
-                                  reduced_df.columns.tolist()))
+                    self.logger.info(
+                        "ReBATE MultiSURF completed: retained {} numerical "
+                        "features.".format(len(reduced_df.columns)))
+                    self.logger.debug(
+                        "ReBATE MultiSURF gave the following "
+                        "features".format(reduced_df.columns.tolist()))
                     self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
 
                 # todo: PCA will not work with string columns!!!!!
                 elif r == "pca":
-                    self._log("info",
-                              "PCA running: retaining {} numerical features.".format(
-                                  self.n_rebate_features))
+                    self.logger.info("PCA running: retaining {} numerical "
+                                     "features.".format(self.n_rebate_features))
                     matrix = PCA(
                         n_components=self.n_pca_features).fit_transform(
                         X.values, y.values)
@@ -311,9 +311,9 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                     reduced_df = pd.DataFrame(columns=pcacols, data=matrix,
                                               index=X.index)
 
-                    self._log("info",
-                              "PCA completed: retained {} numerical features.".format(
-                                  len(reduced_df.columns)))
+                    self.logger.info(
+                        "PCA completed: retained {} numerical "
+                        "features.".format(len(reduced_df.columns)))
 
             retained = reduced_df.columns.values.tolist()
             removed = [c for c in df.columns.values if c not in retained]

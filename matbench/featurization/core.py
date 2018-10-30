@@ -1,17 +1,16 @@
-import logging
-
 from matminer.featurizers.conversions import (CompositionToOxidComposition,
                                               StructureToOxidStructure)
 from pymatgen import Composition, Structure
 from pymatgen.electronic_structure.bandstructure import BandStructure
 from pymatgen.electronic_structure.dos import CompleteDos
 
-from matbench.utils.utils import MatbenchError, setup_custom_logger
+from matbench.base import LoggableMixin
+from matbench.utils.utils import MatbenchError
 from matbench.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 
 
-class Featurization(object):
+class Featurization(LoggableMixin):
     """
     Takes in a dataframe and generate features from preset columns such as
     "formula", "structure", "bandstructure", "dos", etc. One may use
@@ -41,19 +40,15 @@ class Featurization(object):
             pass target = ("Input Data", "gap") in classes such as PreProcess.
         n_jobs (int): number of CPUs/workers used in featurization. Default
             behavior is matminer's default behavior.
+        logger (Logger, bool): A custom logger object to use for logging.
+            Alternatively, if set to True, the default matbench logger will be
+            used. If set to False, then no logging will occur.
     """
 
     def __init__(self, ignore_cols=None, ignore_errors=True,
                  drop_featurized_col=True, exclude=None, multiindex=False,
-                 n_jobs=None, logger=None):
-
-        if logger is None:
-            # Log to the current directory
-            self.logger = setup_custom_logger(filepath='.', level=logging.INFO)
-        else:
-            # Use the passed logger
-            self.logger = logger
-
+                 n_jobs=None, logger=True):
+        self._logger = self.get_logger(logger)
         self.ignore_cols = ignore_cols or []
         self.cfset = CompositionFeaturizers(exclude=exclude)
         self.sfset = StructureFeaturizers(exclude=exclude)
