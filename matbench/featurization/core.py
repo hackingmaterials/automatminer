@@ -2,7 +2,7 @@ from sklearn.exceptions import NotFittedError
 from pymatgen import Composition
 from matminer.featurizers.conversions import CompositionToOxidComposition, StructureToOxidStructure, StrToComposition, DictToObject, StructureToComposition
 
-from matbench.utils.utils import MatbenchError, setup_custom_logger
+from matbench.utils.utils import MatbenchError
 from matbench.base import DataframeTransformer, LoggableMixin
 from matbench.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
@@ -271,8 +271,9 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         """
         if self.featurizers["composition"]:
             if "structure" in df.columns and "composition" not in df.columns:
+                df = self._tidy_column(df, "structure")
                 struct2comp = StructureToComposition(
-                    target_col_id="composition", overwrite_data=False)
+                    target_col_id="composition", overwrite_data=True)
                 df = struct2comp.featurize_dataframe(df, "structure")
         return df
 
