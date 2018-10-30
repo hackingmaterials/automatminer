@@ -18,12 +18,10 @@ class MatbenchError(BaseException):
 
 def initialize_logger(filepath='.', filename=None, level=None):
     """Initialize the default logger with stdout and file handlers.
-
     Args:
         filepath (str): Path to the folder where the log file will be written.
         filename (str): The log filename.
         level (int): The log level. For example logging.DEBUG.
-
     Returns:
         (Logger): A logging instance with customized formatter and handlers.
     """
@@ -49,7 +47,6 @@ def initialize_logger(filepath='.', filename=None, level=None):
 
 def initialize_null_logger():
     """Initialize the a dummy logger which will swallow all logging commands.
-
     Returns:
         (Logger): A dummy logging instance with no output.
     """
@@ -62,11 +59,9 @@ def initialize_null_logger():
 def is_greater_better(scoring_function):
     """
     Determines whether scoring_function being greater is more favorable/better.
-
     Args:
         scoring_function (str): the name of the scoring function supported by
             TPOT and sklearn. Please see below for more information.
-
     Returns (bool): Whether the scoring metric should be considered better if
         it is larger or better if it is smaller
     """

@@ -2,34 +2,47 @@
 Base classes, mixins, and other inheritables.
 """
 
-__authors__ = ["Alex Dunn <ardunn@lbl.gov>"]
+import logging
+from matbench.utils.utils import initialize_logger, initialize_null_logger
+
+__authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
 
 
-class LoggableMixin:
-    """
-    A mixin class for easy logging (or absence of it).
-    """
-    def _log(self, lvl, msg):
+class LoggableMixin(object):
+    """A mixin class for easy logging (or absence of it)."""
+
+    @property
+    def logger(self):
+        """Get the class logger.
+        If the logger is None, the logging calls will be redirected to a dummy
+        logger that has no output.
         """
-        Convenience method for logging.
-
-        Args:
-            lvl (str): Level of the log message, either "info", "warn", or "debug"
-            msg (str): The message for the logger.
-
-        Returns:
-            None
-        """
-        if hasattr(self, "logger"):
-            if self.logger is not None:
-                if lvl == "warn":
-                    self.logger.warning(msg)
-                elif lvl == "info":
-                    self.logger.info(msg)
-                elif lvl == "debug":
-                    self.logger.debug(msg)
+        if hasattr(self, "_logger"):
+            return self._logger
         else:
-            raise AttributeError("Loggable object has no logger attr!")
+            raise AttributeError("Loggable object has no _logger attribute!")
+
+    def get_logger(self, logger):
+        """Set the class logger.
+        Args:
+            logger (Logger, bool): A custom logger object to use for logging.
+                Alternatively, if set to True, the default matbench logger will
+                be used. If set to False, then no logging will occur.
+        """
+        # need comparison to True and False to avoid overwriting Logger objects
+        if logger is True:
+            logger = logging.getLogger(self.__module__.split('.')[0])
+
+            if not logger.handlers:
+                initialize_logger()
+
+        elif logger is False:
+            logger = logging.getLogger(self.__module__.split('.')[0] + "_null")
+
+            if not logger.handlers:
+                initialize_null_logger()
+
+        return logger
 
 
 class DataframeTransformer:
