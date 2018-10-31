@@ -26,8 +26,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue(df['composition'].iloc[0], "Nb4CoSi")
         self.assertTrue(df["composition"].iloc[1179], "Al2Cu")
         self.assertEqual(df.shape[0], 1181)
-        self.assertEqual(df.shape[1], 2)
-
 
     def test_featurize_composition(self):
         """
