@@ -6,9 +6,10 @@ import pandas as pd
 from pymatgen import Composition
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.datasets.dataset_retrieval import load_dataset
+from matminer.featurizers.composition import ElectronAffinity, ElementProperty, AtomicOrbitals
+from matminer.featurizers.structure import GlobalSymmetryFeatures, DensityFeatures
 
 from matbench.featurization.core import AutoFeaturizer
-from matbench.data.load import load_phonon_dielectric_mp
 
 test_dir = os.path.dirname(__file__)
 
@@ -31,11 +32,6 @@ class TestAutoFeaturizer(unittest.TestCase):
     def test_featurize_composition(self):
         """
         Test automatic featurization while only considering formula/composition.
-        Args:
-            limit:
-
-        Returns:
-
         """
         target = "K_VRH"
 
@@ -60,6 +56,10 @@ class TestAutoFeaturizer(unittest.TestCase):
 
 
     def test_featurize_structure(self):
+        """
+        Test automatic featurization while only considering structure.
+        May automatically infer composition features.
+        """
         target = "K_VRH"
 
         # When structures are Structure objects
@@ -88,6 +88,38 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("structure" not in df.columns)
 
     def test_exclusions(self):
+        """
+        Test custom args for featurizers to use.
+        """
+        df = self.test_df[:self.limit]
+        target = "K_VRH"
+        exclude = ["ElementProperty"]
+
+        dn = DensityFeatures()
+        gsf = GlobalSymmetryFeatures()
+        ep = ElementProperty.from_preset("matminer")
+        ef = ElectronAffinity()
+        ao = AtomicOrbitals()
+        ep_feats = ep.feature_labels()
+        ef_feats = ef.feature_labels()
+        ao_feats = ao.feature_labels()
+
+        # Test to make sure excluded does not show up
+        af = AutoFeaturizer(exclude=exclude)
+        af.fit(df, target)
+        print(af.features)
+        df = af.fit_transform(df, target)
+        self.assertFalse(any([f in df.columns for f in ep_feats]))
+
+        # Test to make sure composition features are not automatically
+        # created if explicitly not included in featurizers dict
+        # Also make sure no errors when excluding non-present featurizers
+        df = self.test_df[:self.limit]
+        featurizers = {"structure": [gsf, dn]}
+        af = AutoFeaturizer(featurizers=featurizers)
+        df = af.fit_transform(df, target)
+        for flabels in [ep_feats, ef_feats, ao_feats]:
+            self.assertFalse(any([f in df.columns for f in flabels]))
 
 
     def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
@@ -102,25 +134,31 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         Returns (None):
         """
+        target = "color"
         df_bsdos_pickled = "mp_data_with_dos_bandstructure.pickle"
         if refresh_df_init:
             mpdr = MPDataRetrieval()
-            df_init = mpdr.get_dataframe(criteria={"material_id": "mp-149"},
+            df = mpdr.get_dataframe(criteria={"material_id": "mp-149"},
                                          properties=["pretty_formula",
                                                      "dos",
                                                      "bandstructure",
                                                      "bandstructure_uniform"]
                                          )
-            df_init.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
+            df.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
         else:
-            df_init = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
-        df_init = df_init.dropna(axis=0)
+            df = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
+        df = df.dropna(axis=0)
+        df = df.rename(columns={"bandstructure_uniform": "bandstructure",
+                                "bandstructure": "line bandstructure"})
+        df[target] = [["red"]]
+        n_cols_init = df.shape[1]
+
         featurizer = AutoFeaturizer(ignore_errors=False, multiindex=False)
-        df = featurizer.featurize_dos(df_init, inplace=False)
+        df = featurizer.fit_transform(df, target)
 
         # sanity checks
         self.assertTrue(len(df), limit)
-        self.assertGreater(len(df.columns), len(df_init.columns))
+        self.assertGreater(len(df.columns), n_cols_init)
 
         # DOSFeaturizer:
         self.assertEqual(df["cbm_character_1"][0], "p")
@@ -133,13 +171,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertAlmostEqual(df["cbm_s"][0], 0.4416, 3)
         self.assertAlmostEqual(df["cbm_sp"][0], 0.9864, 3)
 
-        df = featurizer.featurize_bandstructure(df_init,
-                                                inplace=False,
-                                                col_id="bandstructure_uniform")
-        # sanity checks
-        self.assertTrue("bandstructure" in df)
-        self.assertGreater(len(df.columns), len(df_init.columns))
-
         # BandFeaturizer:
         self.assertAlmostEqual(df["direct_gap"][0], 2.556, 3)
         self.assertAlmostEqual(df["n_ex1_norm"][0], 0.6285, 4)
@@ -147,25 +178,23 @@ class TestAutoFeaturizer(unittest.TestCase):
         # BranchPointEnergy:
         self.assertAlmostEqual(df["branch_point_energy"][0], 5.7677, 4)
 
-    def test_auto_featurize(self, limit=5):
-        df_init = load_phonon_dielectric_mp()[:limit]
-        print(df_init.structure)
-        featurizer = AutoFeaturizer(ignore_errors=False, multiindex=True)
-        df = featurizer.auto_featurize(df_init,
-                                       input_cols=('formula', 'structure'))
+    def test_modularity(self):
+        """
+        Test that an autofeaturizer object is able to be fit on one dataset
+        and applied to another.
+        """
+        target = "K_VRH"
+        cols = ["composition", target]
+        df1 = self.test_df[cols].iloc[:self.limit]
+        df2 = self.test_df[cols].iloc[-1 * self.limit:]
 
-        # sanity checks
-        self.assertTrue(len(df), limit)
-        self.assertGreater(len(df.columns), len(df_init.columns))
+        af = AutoFeaturizer()
+        af.fit(df1, target)
 
-        # DensityFeatures:
-        self.assertEqual(df[('ElementProperty', 'mode SpaceGroupNumber')][1],
-                         194)
-
-        self.assertAlmostEqual(  # making sure structure is also featurized
-            df[('SiteStatsFingerprint', 'mean trigonal pyramidal CN_4')][1],
-            0.243648, 3)
-        self.assertEqual(df.index.name, ('Input Data', 'formula'))
+        df2 = af.transform(df2, target)
+        print(df2)
+        self.assertAlmostEqual(df2[target].iloc[0], 111.788114, places=5)
+        self.assertAlmostEqual(df2["minimum X"].iloc[1], 1.36, places=2)
 
 
 if __name__ == '__main__':
