@@ -107,6 +107,9 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         X = StandardScaler().fit_transform(X) if self.scale else X
         return pd.concat([y, X], axis=1)
 
+    def fit_transform(self, df, target):
+        return self.transform(df, target)
+
     def handle_na(self, df, target):
         """
         First pass for handling cells wtihout values (null or nan). Additional
