@@ -147,7 +147,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             (AutoFeaturizer): self
         """
-        df = self._prescreen_df(df, inplace=True, col_id=target)
+        df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
         for featurizer_type, featurizers in self.featurizers.items():
             if not featurizers:
@@ -177,7 +177,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         if not self.is_fit:
             # Featurization requires featurizers already be fit...
             raise NotFittedError("AutoFeaturizer has not been fit!")
-        df = self._prescreen_df(df, inplace=True, col_id=target)
+        df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
 
         for featurizer_type, featurizers in self.featurizers.items():
@@ -191,14 +191,13 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 self.logger.info("Featurizer type {} not in the dataframe. Skiping...".format(featurizer_type))
         return df
 
-    def _prescreen_df(self, df, inplace=True, col_id=None):
+    def _prescreen_df(self, df, inplace=True):
         """
         Pre-screen a dataframe.
 
         Args:
             df (pandas.DataFrame): The dataframe to be screened.
             inplace (bool): Manipulate the df in-place in memory
-            col_id: The column id to ensure is present.
 
         Returns:
             df (pandas.DataFrame) The screened dataframe.
@@ -206,8 +205,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         """
         if not inplace:
             df = df.copy(deep=True)
-        if col_id and col_id not in df:
-            raise MatbenchError("'{}' column must be in data!".format(col_id))
         if self.ignore_errors is not None:
             for col in self.ignore_cols:
                 if col in df:
