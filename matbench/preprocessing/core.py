@@ -102,10 +102,13 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
         df = self.handle_na(df, target)
         df_numerical = self.to_numerical(df, target)
-        y = df_numerical[target]
-        X = df_numerical.drop(target, axis=1)
-        X = StandardScaler().fit_transform(X) if self.scale else X
-        return pd.concat([y, X], axis=1)
+        if target in df.columns:
+            y = df_numerical[target]
+            X = df_numerical.drop(target, axis=1)
+            X = StandardScaler().fit_transform(X) if self.scale else X
+            return pd.concat([y, X], axis=1)
+        else:
+            return StandardScaler().fit_transform(df_numerical) if self.scale else df_numerical
 
     def fit_transform(self, df, target):
         return self.transform(df, target)
@@ -127,7 +130,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             *df.shape))
 
         # Drop targets containing na before further processing
-        if self.drop_na_targets:
+        if self.drop_na_targets and target in df.columns:
             clean_df = df.dropna(axis=0, how='any', subset=[target])
             self.dropped_samples = df[~df.index.isin(clean_df.index)]
             df = clean_df
