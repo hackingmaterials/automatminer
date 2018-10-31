@@ -13,6 +13,7 @@ from matbench.featurization.core import AutoFeaturizer
 
 test_dir = os.path.dirname(__file__)
 
+__author__ = ["Alex Dunn <ardunn@lbl.gov>", "Alireza Faghaninia <alireza@lbl.gov>"]
 
 class TestAutoFeaturizer(unittest.TestCase):
 
