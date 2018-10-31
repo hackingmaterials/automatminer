@@ -7,6 +7,8 @@ from matbench.base import DataframeTransformer, LoggableMixin
 from matbench.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 
+__author__ = ["Alex Dunn <ardunn@lbl.gov>", "Alireza Faghaninia <alireza@lbl.gov>"]
+
 
 _composition_aliases = ["comp", "Composition", "composition", "COMPOSITION",
                         "comp.", "formula", "chemical composition", "compositions"]
@@ -51,7 +53,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             during featurization.
         drop_inputs (bool): Drop the columns containing input objects for
             featurization (e.g., drop composition column folllowing featurization).
-        exclude ([str]): Class names of featurizers to exclude.
+        exclude ([str]): Class names of featurizers to exclude. Only used if
+            your own featurizer dict is NOT passed.
         guess_oxistates (bool): If True, try to decorate sites with oxidation state.
         multiiindex (bool): If True, returns a multiindexed dataframe.
         n_jobs (int): The number of parallel jobs to use during featurization
@@ -227,13 +230,13 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         # todo: needs MAJOR logging!!!!!!!!!!!!!!!!!
         if featurizer_type == "composition":
             # Convert formulas to composition objects
-            if isinstance(df[featurizer_type][0], str):
+            if isinstance(df[featurizer_type].iloc[0], str):
                 stc = StrToComposition(overwrite_data=True,
                                        target_col_id=featurizer_type)
                 df = stc.featurize_dataframe(df, featurizer_type,
                                              multiindex=self.multiindex)
 
-            elif isinstance(df[featurizer_type][0], dict):
+            elif isinstance(df[featurizer_type].iloc[0], dict):
                 df[featurizer_type] = [Composition.from_dict(d) for d in df[featurizer_type]]
 
             # Convert non-oxidstate containing comps to oxidstate comps
@@ -273,7 +276,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             if "structure" in df.columns and "composition" not in df.columns:
                 df = self._tidy_column(df, "structure")
                 struct2comp = StructureToComposition(
-                    target_col_id="composition", overwrite_data=True)
+                    target_col_id="composition", overwrite_data=False)
                 df = struct2comp.featurize_dataframe(df, "structure")
         return df
 
