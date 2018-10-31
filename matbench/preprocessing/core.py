@@ -330,7 +330,10 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         return self
 
     def transform(self, df, target):
-        return df[self.retained_features + [target]]
+        if target in df.columns:
+            return df[self.retained_features + [target]]
+        else:
+            return df[self.retained_features]
 
     def rm_correlated(self, df, target_key, R_max=0.95):
         """
