@@ -64,8 +64,12 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             used. If set to False, then no logging will occur.
 
     Attributes:
+        These attributes are set during fitting
+
         featurizers (dict): Same format as input dictionary in Args. Values
             contain the actual objects being used for featurization.
+        features (dict): The features generated from the application of all
+            featurizers.
 
     """
 
