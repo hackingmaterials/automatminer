@@ -109,10 +109,14 @@ def compare_columns(df1, df2, ignore=None):
 
     Returns:
         (dict): {"df1_not_in_df2": [The columns in df1 not in df2],
-                 "df2_not_in_df1": [The columns in df2 not in df1]}
+                 "df2_not_in_df1": [The columns in df2 not in df1],
+                 "mismatch": (bool)}
     """
     ignore = () if ignore is None else ignore
     df2_not_in_df1 = [f for f in df2.columns if f not in df1.columns and f not in ignore]
     df1_not_in_df2 = [f for f in df1.columns if f not in df2.columns and f not in ignore]
-    return {"df2_not_in_df1": df2_not_in_df1, "df1_not_in_df2": df1_not_in_df2}
+    mismatch = not df1_not_in_df2 and not df2_not_in_df1
+    return {"df2_not_in_df1": df2_not_in_df1,
+            "df1_not_in_df2": df1_not_in_df2,
+            "mismatch": mismatch}
 
