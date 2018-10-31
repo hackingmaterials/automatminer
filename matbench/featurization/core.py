@@ -147,6 +147,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             (AutoFeaturizer): self
         """
+        self.is_fit = False
         df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
         for featurizer_type, featurizers in self.featurizers.items():
