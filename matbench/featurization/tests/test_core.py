@@ -177,7 +177,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         # BranchPointEnergy:
         self.assertAlmostEqual(df["branch_point_energy"][0], 5.7677, 4)
 
-    def test_modularity(self):
+    def test_transferability(self):
         """
         Test that an autofeaturizer object is able to be fit on one dataset
         and applied to another.
