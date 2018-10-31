@@ -96,3 +96,23 @@ def is_greater_better(scoring_function):
     # True if not in either set or only in desired_high,
     # False if in desired_low or both sets
     return scoring_function not in desired_low_metrics
+
+
+def compare_columns(df1, df2, ignore=None):
+    """
+    Compare the columns of a dataframe.
+
+    Args:
+        df1 (pandas.DataFrame): The first dataframe.
+        df2 (pandas.DataFrame): The second dataframe.
+        ignore ([str]): The feature labels to ignore in the analyis.
+
+    Returns:
+        (dict): {"df1_not_in_df2": [The columns in df1 not in df2],
+                 "df2_not_in_df1": [The columns in df2 not in df1]}
+    """
+    ignore = () if ignore is None else ignore
+    df2_not_in_df1 = [f for f in df2.columns if f not in df1.columns and f not in ignore]
+    df1_not_in_df2 = [f for f in df1.columns if f not in df2.columns and f not in ignore]
+    return {"df2_not_in_df1": df2_not_in_df1, "df1_not_in_df2": df1_not_in_df2}
+
