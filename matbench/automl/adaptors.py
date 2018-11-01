@@ -113,7 +113,10 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         self.is_fit = True
         self.fitted_target = target
         self.logger.info("TPOT fitting started.")
-        return self._backend.fit(X, y, **fit_kwargs)
+        self._backend = self._backend.fit(X, y, **fit_kwargs)
+        self.logger.info("TPOT fitting finished.")
+        return self
+
 
     @property
     def _best_models(self):
@@ -214,6 +217,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
             X = df[self._features].values         # rectify feature order
             y_pred = self._backend.predict(X)
             df[target + " predicted"] = y_pred
+            self.logger.debug("Prediction finished successfully.")
             return df
 
 
