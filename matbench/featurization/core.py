@@ -21,7 +21,7 @@ _aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases + 
 
 
 # todo: use the matminer version once its fixed and pushed
-from matminer.featurizers.conversion import ConversionFeaturizer
+from matminer.featurizers.conversions import ConversionFeaturizer
 class CompositionToOxidComposition(ConversionFeaturizer):
     """Utility featurizer to add oxidation states to a pymatgen Composition.
 
