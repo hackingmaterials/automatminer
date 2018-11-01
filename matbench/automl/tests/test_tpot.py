@@ -1,3 +1,4 @@
+import os
 import unittest
 from collections import OrderedDict
 
@@ -167,8 +168,9 @@ __author__ = ['Alireza Faghaninia <alireza.faghaninia@gmail.com>,',
 
 class TestTPOTAdaptor(unittest.TestCase):
     def setUp(self):
-        self.training_df = pd.read_csv("mini_training_df_automl.csv")
-        self.validation_df = pd.read_csv("mini_validation_df_automl.csv")
+        basedir = os.path.dirname(os.path.realpath(__file__))
+        self.training_df = pd.read_csv(basedir + "/mini_training_df_automl.csv")
+        self.validation_df = pd.read_csv(basedir + "/mini_validation_df_automl.csv")
 
     def test_customized_configs(self):
         self.assertTrue(True)
