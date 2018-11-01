@@ -133,23 +133,28 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
         # We assume the two targets are the same from here on out
         df = self.to_numerical(df, target)
-        df = self.handle_na(df, target, coerce_mistmatch=True)
+        df = self.handle_na(df, target, coerce_mismatch=True)
         # df = self.scale_df(df, target)
 
         # Ensure the order of columns is identical
         if target in df.columns:
-            df = df[self.fitted_df]
+            df = df[self.fitted_df.columns]
         else:
-            df = df[self.fitted_df.drop(columns=[target]).columns]
+            print(self.fitted_df.drop(columns=[target]).columns.tolist())
+            colstodrop = self.fitted_df.drop(columns=[target]).columns.tolist()
+            for c in colstodrop:
+                if c not in df:
+                    print("BAD: {}".format(c))
+            df = df[colstodrop]
         return df
 
     def fit_transform(self, df, target):
         self.fit(df, target)
         return self.fitted_df
 
-    def handle_na(self, df, target, coerce_mistmatch=True):
+    def handle_na(self, df, target, coerce_mismatch=True):
         """
-        First pass for handling cells wtihout values (null or nan). Additional
+        First pass for handling cells without values (null or nan). Additional
         preprocessing may be necessary as one column may be filled with
         median while the other with mean or mode, etc.
 
@@ -160,7 +165,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                 must return those features (this may wind up dropping many
                 samples). If None, automatically uses max_na_frac to decide
                 features.
-            coerce_mistmatch (bool): If there is a mismatch between the fitted
+            coerce_mismatch (bool): If there is a mismatch between the fitted
                 dataframe columns and the argument dataframe columns, create
                 and drop mismatch columns so the dataframes are matching. If
                 False, raises an error. New columns are instantiated as all
@@ -197,10 +202,13 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                         n_feats, napercent, feat_names))
         else:
             mismatch = compare_columns(self.fitted_df, df, ignore=target)
+            print("jhere1")
+            print(mismatch)
             if mismatch["mismatch"]:
+                print("in mismatc")
                 self.logger.warning("Mismatched columns found in dataframe "
                                     "used for fitting and argument dataframe.")
-                if not coerce_mistmatch:
+                if not coerce_mismatch:
                     raise MatbenchError("Mismatch between columns found in "
                                         "arg dataframe and dataframe used for "
                                         "fitting!")
@@ -213,13 +221,15 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                                             "following new columns:\n{}"
                                             "".format(mismatch["df1_not_in_df2"]))
                         for c in self.fitted_df.columns:
-                            # Interpret as one-hot problems...
-                            df[c] = np.zeros((df.shape[0]))
+                            if c not in df:
+                                print("SETTING: {}".format(c))
+                                # Interpret as one-hot problems...
+                                df[c] = np.zeros((df.shape[0]))
                     elif mismatch["df2_not_in_df1"]: # arg cols not in fitted
                         self.logger.warning("Following columns are being "
                                             "dropped:\n{}"
                                             "".format(mismatch["df2_not_in_df1"]))
-                        df = df.drop(columns = mismatch["df2_not_in_df1"])
+                        df = df.drop(columns=mismatch["df2_not_in_df1"])
 
         # Handle all rows that still contain any nans
         if self.na_method == "drop":
