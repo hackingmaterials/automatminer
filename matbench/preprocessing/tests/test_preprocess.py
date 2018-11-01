@@ -5,13 +5,15 @@ import numpy as np
 import pandas as pd
 
 from matbench.preprocessing.core import DataCleaner, FeatureReducer
-from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, rebate
+from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, \
+    rebate
 from matbench.utils.utils import compare_columns
 
 test_dir = os.path.dirname(__file__)
 
+
 class TestPreprocess(unittest.TestCase):
-    #todo: need test case for categorical target and categorical features -AD
+    # todo: need test case for categorical target and categorical features -AD
 
     def setUp(self):
         df = pd.read_csv(os.path.join(test_dir, 'test_featurized_df.csv'))
@@ -80,8 +82,6 @@ class TestPreprocess(unittest.TestCase):
         self.assertListEqual(df.columns.tolist(), df2.columns.tolist())
 
 
-
-
 class TestFeatureReduction(unittest.TestCase):
 
     def setUp(self):
@@ -103,5 +103,3 @@ class TestFeatureReduction(unittest.TestCase):
     def test_rebate(self):
         df_reduced = rebate(self.test_df, "gap expt", 10)
         self.assertEqual(df_reduced.shape[1], 10)
-
-

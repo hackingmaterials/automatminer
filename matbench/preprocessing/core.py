@@ -220,7 +220,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                                             "".format(
                             mismatch["df1_not_in_df2"]))
                         for c in self.fitted_df.columns:
-                            if c not in df and c is not target:
+                            if c not in df.columns and c != target:
                                 # Interpret as one-hot problems...
                                 df[c] = np.zeros((df.shape[0]))
                     elif mismatch["df2_not_in_df1"]:  # arg cols not in fitted
