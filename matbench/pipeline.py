@@ -43,7 +43,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             actually run a auto-ml pipeline on the clean, reduced, featurized
             dataframe.
     """
-    def __init__(self, logger=False):
+    def __init__(self, logger=True):
         self._logger = self.get_logger(logger)
         self.auto_featurizer = None
         self.data_cleaner = None
