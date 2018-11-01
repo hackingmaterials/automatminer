@@ -52,7 +52,9 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
             used. If set to False, then no logging will occur.
 
     Attributes:
-        These attributes are set during fitting.
+        mode (str): Either "regression" or "classification"
+
+            The following attributes are set during fitting.
 
         features (list): The features labels used to develop the ml model.
         ml_data (dict): The raw ml data used for training.

@@ -2,21 +2,24 @@ import unittest
 from collections import OrderedDict
 
 import numpy as np
-from tpot import TPOTClassifier
-from matbench.automl.tpot_utils import TPOTAutoML
-from matbench.automl.tpot_configs.classifier import classifier_config_dict_mb
-from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
-from matbench.analysis.core import Analysis
-from matbench.data.load import load_double_perovskites_gap, \
-    load_glass_binary
-from matbench.featurization.core import AutoFeaturizer
-# from matbench.preprocessing.core import Preprocesser
-# from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
-#     Stoichiometry
-from sklearn.model_selection import train_test_split
+import pandas as pd
 
-__author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>, ' \
-             'Qi Wang <wqthu11@gmail.com>'
+# from tpot import TPOTClassifier
+# # from matbench.automl.tpot_utils import TPOTAutoML
+# from matbench.automl.tpot_configs.classifier import classifier_config_dict_mb
+# from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
+# from matbench.analysis.core import Analysis
+# from matbench.data.load import load_double_perovskites_gap, \
+#     load_glass_binary
+# from matbench.featurization.core import AutoFeaturizer
+# # from matbench.preprocessing.core import Preprocesser
+# # from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
+# #     Stoichiometry
+# from sklearn.model_selection import train_test_split
+
+__author__ = ['Alireza Faghaninia <alireza.faghaninia@gmail.com>,',
+             'Qi Wang <wqthu11@gmail.com>',
+             'Alex Dunn <ardunn@lbl.gov']
 
 
 # class TestTpotAutoml(unittest.TestCase):
@@ -159,6 +162,31 @@ __author__ = 'Alireza Faghaninia <alireza.faghaninia@gmail.com>, ' \
 #
 #         self.assertTrue(isinstance(tpot_obj.config_dict, dict))
 #         self.assertTrue(tpot_obj.config_dict == classifier_config_dict_mb)
+
+
+class TestTPOTAdaptor(unittest.TestCase):
+    def setUp(self):
+        self.training_df = pd.read_csv("mini_training_df_automl.csv")
+        self.validation_df = pd.read_csv("mini_validation_df_automl.csv")
+
+    def test_customized_configs(self):
+        pass
+
+    def test_defaults(self):
+        pass
+
+    def test_regression(self):
+        pass
+
+    def test_classification(self):
+        pass
+
+    def test_transferability(self):
+        pass
+
+    def test_feature_mismatching(self):
+        pass
+
 
 
 if __name__ == '__main__':

@@ -4,6 +4,8 @@ The highest level classes for pipelines.
 
 from matbench.base import LoggableMixin, DataframeTransformer
 
+#todo: needs tests - alex
+
 class MatPipe(DataframeTransformer, LoggableMixin):
     """
     Establish an ML pipeline for transforming compositions, structures,
