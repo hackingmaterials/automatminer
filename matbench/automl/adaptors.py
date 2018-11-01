@@ -231,8 +231,8 @@ if __name__ == "__main__":
 
     # Load a dataset
     df = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"})[["composition",  "K_VRH"]]
-    testdf = df.iloc[60:90]
-    traindf = df.iloc[:500]
+    testdf = df.iloc[501:550]
+    traindf = df.iloc[:100]
     target = "K_VRH"
 
     # Get top-lvel transformers
@@ -245,13 +245,11 @@ if __name__ == "__main__":
     traindf = autofeater.fit_transform(traindf, target)
     traindf = cleaner.fit_transform(traindf, target)
     traindf = reducer.fit_transform(traindf, target)
+    learner.fit(traindf, target)
 
     # Use transformers on testing data
     testdf = autofeater.transform(testdf, target)
     testdf = cleaner.transform(testdf, target)
     testdf = reducer.transform(testdf, target)
-
-    # Use training data to predict testing data
-    learner.fit(traindf, target)
     testdf = learner.predict(testdf, target)
     print(testdf)
