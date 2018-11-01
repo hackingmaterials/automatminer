@@ -1,3 +1,11 @@
+"""
+Adaptor classes for using AutoML packages in a Matbench pipeline.
+
+Current adaptor classes are:
+
+    TPOTAdaptor: Uses the backend from the automl project TPOT, which can be
+        found at https://github.com/EpistasisLab/tpot
+"""
 from collections import OrderedDict
 
 import numpy as np
@@ -9,32 +17,10 @@ from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
 from matbench.utils.utils import is_greater_better, MatbenchError
 from matbench.base import AutoMLAdaptor
 
-__authors__ = ['Alireza Faghaninia <alireza.faghaninia@gmail.com>',
-               'Daniel Dopp <dbdopp@lbl.gov>',
+__authors__ = ['Alex Dunn <ardunn@lbl.gov'
+               'Alireza Faghaninia <alireza.faghaninia@gmail.com>',
                'Qi Wang <wqthu11@gmail.com>',
-               'Alex Dunn <ardunn@lbl.gov']
-
-"""
--AF: 
-TPOT (https://github.com/EpistasisLab/tpot) is an academic open-sourced 
-package that seems to be suitable overall to matbench though there doesn't 
-seem to be an explicit support for feature importance.
-
-It uses genetic algorithm to find the estimator with the set of parameters that 
-returns the best score (supports many scoring metrics)
-
-    pros:
-        + easy install: "pip install tpot"; written in python
-        + easily accessible history of models tried and their accuracy 
-          (in evaluated_individuals_)
-        + automatic global optimization already implemented
-        + seems more organized than automl
-        + writes sample pipeline to file to resume/modify analysis
-    cons:
-        - no feature importance as far as I can tell
-        - I have had some difficulties using it in Pycharm as opposed to 
-          Terminal and Jupyter notebooks
-"""
+               'Daniel Dopp <dbdopp@lbl.gov>']
 
 _classifier_modes = {'classifier', 'classification', 'classify'}
 
