@@ -213,15 +213,31 @@ def _tpot_class_wrapper(mode, **kwargs):
 
 class TPOTAdaptor(AutoMLAdaptor):
     """
-    A wrapper for the TPOT class.
-
+    A dataframe adaptor for the TPOT classifiers and regressors.
 
     Args:
         mode (str): Either "regression" or "classification".
         tpot_kwargs: All kwargs accepted by a TPOTRegressor/TPOTClassifier
             or TPOTBase object.
 
+            Note that for example, you can limit the models that TPOT explores
+            by setting config_dict directly. For example, if you want to only
+            use random forest:
+        config_dict = {
+            'sklearn.ensemble.RandomForestRegressor': {
+                'n_estimators': [100],
+                'max_features': np.arange(0.05, 1.01, 0.05),
+                'min_samples_split': range(2, 21),
+                'min_samples_leaf': range(1, 21),
+                'bootstrap': [True, False]
+                },
+            }
+
     Attributes:
+        These attributes are set during fitting.
+
+        is_fit (bool): If True, the adaptor and backend are fit to a dataset.
+        models
 
     """
 
@@ -253,16 +269,41 @@ class TPOTAdaptor(AutoMLAdaptor):
             else TPOTClassifier(**tpot_kwargs)
 
     def fit(self, df, target, **fit_kwargs):
+        """
+        Train a TPOTRegressor or TPOTClassifier by fitting on a dataframe.
+
+        Args:
+            df (pandas.DataFrame): The df to be used for training.
+            target (str): The key used to identify the machine learning target.
+            **fit_kwargs: Keyword arguments to be passed to the TPOT backend.
+                These arguments must be valid arguments to the TPOTBase class.
+
+        Returns:
+
+        """
         # Prevent goofy pandas casting by casting to native
         y = df[target].values.tolist()
         X = df.drop(columns=target).values.tolist()
         self._features = df.drop(columns=target).columns.tolist()
         self._ml_data = {"X": X, "y": y}
         self.is_fit = True
+        self.fitted_target = target
         return self._backend.fit(X, y, **fit_kwargs)
 
     @property
     def _best_models(self):
+        """
+        The best models found by TPOT, in order of descending performance.
+
+        Performance is evaluated based on the TPOT scoring. This can be changed
+        by passing a "scoring" kwarg into the __init__ method.
+
+        Returns:
+            best_models_and_scores (dict): Keys are names of models. Values
+                are the best internal cv scores of that model with the
+                best hyperparameter combination found.
+
+        """
         if not self.is_fit:
             raise NotFittedError("Error, the model has not yet been fit")
 
@@ -313,16 +354,28 @@ class TPOTAdaptor(AutoMLAdaptor):
         """
         Predict the target property of materials given a df of features.
 
+        The predictions are appended to the dataframe in a column called:
+            "{target} predicted"
+
         Args:
-            df:
-            target:
+            df (pandas.DataFrame): Contains all features needed for ML (i.e.,
+                all features contained in the training dataframe.
+            target (str): The property to be predicted. Should match the target
+                used for fitting. May or may not be present in the argument
+                dataframe.
 
         Returns:
+            (pandas.DataFrame): The argument dataframe plus a column containing
+                the predictions of the target.
 
         """
-        if target in df.columns:
-            raise MatbenchError(
-                "Target {} already present in dataframe!".format(target))
+        # todo: We should have the ability to ensembelize predictions based on
+        # todo: the top models (including one model type with mutliple
+        # todo: combinations of model params).
+        if target != self.fitted_target:
+            raise MatbenchError("Argument dataframe target {} is different from"
+                                " the fitted dataframe target! {}"
+                                "".format(target, self.fitted_target))
         elif not self.is_fit:
             raise NotFittedError("The TPOT models have not been fit!")
         elif not all([f in df.columns for f in self._features]):
@@ -334,7 +387,7 @@ class TPOTAdaptor(AutoMLAdaptor):
                                 "in df not in model: \n{}".format(not_in_df,
                                                                   not_in_model))
         else:
-            X = df[self._features].values
+            X = df[self._features].values         # rectify feature order
             y_pred = self._backend.predict(X)
             df[target + " predicted"] = y_pred
             return df
@@ -366,9 +419,9 @@ if __name__ == "__main__":
     # dfp.to_csv("mini_validation_df_automl.csv")
 
 
-    # print(target in dfp.columns)
-    #
-    # tpotw = TPOTAdaptor("regression", max_time_mins=2)
-    # tpotw.fit(df, target)
-    # dfp = tpotw.predict(dfp, target)
-    # print(dfp)
+    print(target in dfp.columns)
+
+    tpotw = TPOTAdaptor("regression", max_time_mins=2)
+    tpotw.fit(df, target)
+    dfp = tpotw.predict(dfp, target)
+    print(dfp)
