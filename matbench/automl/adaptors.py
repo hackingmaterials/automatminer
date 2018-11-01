@@ -65,7 +65,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         fitted_target (str): The target name in the df used for training.
     """
 
-    def __init__(self, mode, logger=False, **tpot_kwargs):
+    def __init__(self, mode, logger=True, **tpot_kwargs):
         if mode.lower() not in _classifier_modes \
                 and mode.lower() not in _regressor_modes:
             raise ValueError('Unsupported mode: "{}"'.format(mode))
@@ -227,31 +227,28 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
 if __name__ == "__main__":
     from matminer.datasets.dataset_retrieval import load_dataset
     from matbench.featurization import AutoFeaturizer
-    from matbench.preprocessing import DataCleaner
+    from matbench.preprocessing import DataCleaner, FeatureReducer
 
+    # Load a dataset
     df = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"})[["composition",  "K_VRH"]]
-    dfp = df.iloc[60:90]
-    df = df.iloc[:50]
+    testdf = df.iloc[60:90]
+    traindf = df.iloc[:500]
     target = "K_VRH"
 
-    af = AutoFeaturizer()
-    af.fit(df, target)
-    df = af.transform(df, target)
-
-    dfp = dfp.drop(columns=[target])
-    dfp = af.transform(dfp, target)
-
-    dc = DataCleaner()
-    df = dc.fit_transform(df, target=target)
-    dfp = dc.transform(dfp, target=target)
-
-    # df.to_csv("mini_training_df_automl.csv")
-    # dfp.to_csv("mini_validation_df_automl.csv")
-
-
-    print(target in dfp.columns)
+    # Make top-lvel transformers
+    autofeater = AutoFeaturizer()
+    cleaner = DataCleaner()
+    reducer = FeatureReducer()
 
     tpotw = TPOTAdaptor("regression", max_time_mins=5)
-    tpotw.fit(df, target)
-    dfp = tpotw.predict(dfp, target)
-    print(dfp)
+
+
+    traindf = autofeater.fit_transform(traindf, target)
+    traindf = cleaner.fit_transform(traindf, target)
+
+    testdf = autofeater.transform(testdf, target)
+    testdf = cleaner.transform(testdf, target)
+
+    tpotw.fit(traindf, target)
+    dfp = tpotw.predict(testdf, target)
+    print(testdf)
