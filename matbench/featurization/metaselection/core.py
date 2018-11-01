@@ -1,7 +1,7 @@
 import warnings
 
-from matbench.featurization.metaselection.metafeatures import formula_mfs_list, \
-    structure_mfs_list
+from matbench.featurization.metaselection.metafeatures import formula_mfs_dict, \
+    structure_mfs_dict
 
 """
 Automatically filter some featurizers based on metafeatures calculated for
@@ -17,7 +17,7 @@ class DatasetMetaFeatures:
     def formula_metafeatures(self, formula_col="formula"):
         if formula_col in self.df.columns:
             mfs = dict()
-            for mf, mf_class in formula_mfs_list.items():
+            for mf, mf_class in formula_mfs_dict.items():
                 mfs[mf] = mf_class.calc(self.df[formula_col])
             return {"formula_metafeatures": mfs}
         else:
@@ -26,7 +26,7 @@ class DatasetMetaFeatures:
     def structure_metafeatures(self, structure_col="structure"):
         if structure_col in self.df.columns:
             mfs = dict()
-            for mf, mf_class in structure_mfs_list.items():
+            for mf, mf_class in structure_mfs_dict.items():
                 mfs[mf] = mf_class.calc(self.df[structure_col])
             return {"structure_metafeatures": mfs}
         else:

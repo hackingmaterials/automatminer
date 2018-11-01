@@ -164,6 +164,7 @@ class PercentOfContainTransMetal(MetaFeature):
                   for stat in stats.values()])
         return num / len(stats)
 
+
 class NumberOfDifferentElements(MetaFeature):
     def calc(self, X, y=None):
         stats = formula_stats(X)
@@ -250,7 +251,7 @@ class NumberOfDifferentElementsInStructure(MetaFeature):
         return len(elements)
 
 
-formula_mfs_list = \
+formula_mfs_dict = \
     {"number_of_formulas": NumberOfFormulas(),
      "percent_of_all_metal": PercentOfAllMetal(),
      "percent_of_metal_nonmetal": PercentOfMetalNonmetal(),
@@ -261,7 +262,7 @@ formula_mfs_list = \
      "max_number_of_elements": MaxNumberOfElements(),
      "min_number_of_elements": MinNumberOfElements()}
 
-structure_mfs_list = \
+structure_mfs_dict = \
     {"number_of_structures": NumberOfStructures(),
      "percent_of_ordered_structures": PercentOfOrderedStructures(),
      "avg_number_of_sites": AvgNumberOfSites(),
