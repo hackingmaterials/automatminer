@@ -1,5 +1,5 @@
 """
-Preprocessing classes.
+Top level preprocessing classes.
 """
 
 import numpy as np
@@ -133,11 +133,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                     target, self.fitted_target))
 
         # We assume the two targets are the same from here on out
-        print("1", target in df.columns)
         df = self.to_numerical(df, target)
-        print("2", target in df.columns)
         df = self.handle_na(df, target, coerce_mismatch=True)
-        print("3", target in df.columns)
         # df = self.scale_df(df, target)
 
         # Ensure the order of columns is identical
@@ -146,8 +143,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         else:
             colstodrop = self.fitted_df.drop(columns=[target]).columns.tolist()
             df = df[colstodrop]
-
-        print("4", target in df.columns)
 
         return df
 
