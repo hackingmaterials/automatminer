@@ -99,6 +99,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Returns:
 
         """
+        self.logger.debug("Fitting to new dataframe...")
         if target not in df.columns:
             raise MatbenchError(
                 "Target {} must be contained in df.".format(target))
@@ -139,6 +140,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
         # Ensure the order of columns is identical
         if target in df.columns:
+            self.logger.info("Target not found in df columns. Ignoring...")
             df = df[self.fitted_df.columns]
         else:
             colstodrop = self.fitted_df.drop(columns=[target]).columns.tolist()
@@ -179,6 +181,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         if self.drop_na_targets and target in df.columns:
             clean_df = df.dropna(axis=0, how='any', subset=[target])
             self.dropped_samples = df[~df.index.isin(clean_df.index)]
+            self.logger.info("{} samples did not have target values. They were "
+                             "dropped.".format(len(self.dropped_samples)))
             df = clean_df
 
         # Remove features failing the max_na_frac limit
@@ -291,6 +295,23 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         else:
             return pd.concat([target_df, number_df], axis=1)
 
+    def _reset_attrs(self):
+        """
+        Reset all fit-dependent attrs.
+
+        Returns:
+            None
+        """
+        self.dropped_features = None
+        self.object_cols = None
+        self.number_cols = None
+        self.fitted_df = None
+        self.fitted_target = None
+        self.dropped_samples = None
+        self.is_fit = False
+        self.scaler_obj = None
+
+
     # def scale_df(self, df, target):
     #     print("2a", df.shape)
     #     if target in df.columns:
@@ -314,22 +335,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
     #     else:
     #         print("2db", X.shape)
     #         return X
-
-    def _reset_attrs(self):
-        """
-        Reset all fit-dependent attrs.
-
-        Returns:
-            None
-        """
-        self.dropped_features = None
-        self.object_cols = None
-        self.number_cols = None
-        self.fitted_df = None
-        self.fitted_target = None
-        self.dropped_samples = None
-        self.is_fit = False
-        self.scaler_obj = None
 
 
 class FeatureReducer(DataframeTransformer, LoggableMixin):
