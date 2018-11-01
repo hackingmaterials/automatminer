@@ -95,7 +95,7 @@ def _tpot_class_wrapper(mode, **kwargs):
 
         **kwargs: keyword arguments related to TPOTClassifier or TPOTRegressor
 
-    Returns (class instance): instantiated TPOTWrapper
+    Returns (class instance): instantiated TPOTAdaptor
     """
 
     class TPOTWrapper(
@@ -211,12 +211,15 @@ def _tpot_class_wrapper(mode, **kwargs):
     return TPOTWrapper(**kwargs)
 
 
-class TPOTWrapper(AutoMLAdaptor):
+class TPOTAdaptor(AutoMLAdaptor):
     """
     A wrapper for the TPOT class.
 
 
     Args:
+        mode (str): Either "regression" or "classification".
+        tpot_kwargs: All kwargs accepted by a TPOTRegressor/TPOTClassifier
+            or TPOTBase object.
 
     Attributes:
 
@@ -227,7 +230,7 @@ class TPOTWrapper(AutoMLAdaptor):
                 and mode.lower() not in _regressor_modes:
             raise ValueError('Unsupported mode: "{}"'.format(mode))
 
-        self.features = None
+        self._features = None
         self.target = None
         self.models = None
         self.is_fit = False
@@ -245,19 +248,21 @@ class TPOTWrapper(AutoMLAdaptor):
         tpot_kwargs['cv'] = tpot_kwargs.get('cv', 5)
         tpot_kwargs['n_jobs'] = tpot_kwargs.get('n_jobs', -1)
 
-        self.backend = TPOTRegressor(**tpot_kwargs) if mode in _regressor_modes \
+        self.tpot_kwargs = tpot_kwargs
+        self._backend = TPOTRegressor(**tpot_kwargs) if mode in _regressor_modes \
             else TPOTClassifier(**tpot_kwargs)
 
     def fit(self, df, target, **fit_kwargs):
-        y = df[target].values
-        X = df.drop(columns=target).values
-        self.features = df.drop(columns=target).columns.tolist()
-        self.ml_data = {"X": X, "y": y}
+        # Prevent goofy pandas casting by casting to native
+        y = df[target].values.tolist()
+        X = df.drop(columns=target).values.tolist()
+        self._features = df.drop(columns=target).columns.tolist()
+        self._ml_data = {"X": X, "y": y}
         self.is_fit = True
-        return self.backend.fit(X, y, **fit_kwargs)
+        return self._backend.fit(X, y, **fit_kwargs)
 
     @property
-    def best_models(self):
+    def _best_models(self):
         if not self.is_fit:
             raise NotFittedError("Error, the model has not yet been fit")
 
@@ -304,19 +309,66 @@ class TPOTWrapper(AutoMLAdaptor):
         self.models = models
         return best_models_and_scores
 
-    def predict(self, df, target, ensemble=False):
+    def predict(self, df, target):
+        """
+        Predict the target property of materials given a df of features.
+
+        Args:
+            df:
+            target:
+
+        Returns:
+
+        """
         if target in df.columns:
             raise MatbenchError(
                 "Target {} already present in dataframe!".format(target))
         elif not self.is_fit:
             raise NotFittedError("The TPOT models have not been fit!")
+        elif not all([f in df.columns for f in self._features]):
+            not_in_model = [f for f in self._features if f not in df.columns]
+            not_in_df = [f for f in df.columns if f not in self._features]
+            raise MatbenchError("Features used to build model are different "
+                                "from df columns! Features located in model "
+                                "not located in df: \n{} \n Features located "
+                                "in df not in model: \n{}".format(not_in_df,
+                                                                  not_in_model))
         else:
-            if not ensemble:
-                # best_model = self.best_models.keys
-                print(self.best_models)
+            X = df[self._features].values
+            y_pred = self._backend.predict(X)
+            df[target + " predicted"] = y_pred
+            return df
 
 
 
 if __name__ == "__main__":
-    pass
+    from matminer.datasets.dataset_retrieval import load_dataset
+    from matbench.featurization import AutoFeaturizer
+    from matbench.preprocessing import DataCleaner
 
+    df = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"})[["composition",  "K_VRH"]]
+    dfp = df.iloc[60:90]
+    df = df.iloc[:500]
+    target = "K_VRH"
+
+    af = AutoFeaturizer()
+    af.fit(df, target)
+    df = af.transform(df, target)
+
+    dfp = dfp.drop(columns=[target])
+    dfp = af.transform(dfp, target)
+
+    dc = DataCleaner()
+    df = dc.fit_transform(df, target=target)
+    dfp = dc.transform(dfp, target=target)
+
+    # df.to_csv("mini_training_df_automl.csv")
+    # dfp.to_csv("mini_validation_df_automl.csv")
+
+
+    # print(target in dfp.columns)
+    #
+    # tpotw = TPOTAdaptor("regression", max_time_mins=2)
+    # tpotw.fit(df, target)
+    # dfp = tpotw.predict(dfp, target)
+    # print(dfp)
