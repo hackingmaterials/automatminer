@@ -152,14 +152,16 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         df = self._add_composition_from_structure(df)
         for featurizer_type, featurizers in self.featurizers.items():
             if not featurizers:
-                self.logger.info("No {} featurizers being used.".format(featurizer_type))
+                self.logger.info("No {} featurizers being used."
+                                 "".format(featurizer_type))
             if featurizer_type in df.columns:
                 df = self._tidy_column(df, featurizer_type)
                 for f in featurizers:
                     f.fit(df[featurizer_type].tolist())
                     f.set_n_jobs(self.n_jobs)
                     self.features += f.feature_labels()
-                    self.logger.info("Fit {} to {} samples in dataframe.".format(f.__class__.__name__, df.shape[0]))
+                    self.logger.info("Fit {} to {} samples in dataframe."
+                                     "".format(f.__class__.__name__, df.shape[0]))
         self.is_fit = True
         return self
 
@@ -186,10 +188,12 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 df = self._tidy_column(df, featurizer_type)
 
                 for f in featurizers:
-                    df = f.featurize_dataframe(df, featurizer_type, ignore_errors=self.ignore_errors, multiindex=self.multiindex)
+                    df = f.featurize_dataframe(df, featurizer_type,
+                                               ignore_errors=self.ignore_errors,
+                                               multiindex=self.multiindex)
                 df = df.drop(columns=[featurizer_type])
             else:
-                self.logger.info("Featurizer type {} not in the dataframe. Skiping...".format(featurizer_type))
+                self.logger.info("Featurizer type {} not in the dataframe. Skipping...".format(featurizer_type))
         return df
 
     def _prescreen_df(self, df, inplace=True):
@@ -229,20 +233,25 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 ready for featurization.
         """
         # todo: Make the following conversions more robust (no lazy [0] type checking)
-        # todo: needs MAJOR logging!!!!!!!!!!!!!!!!!
         if featurizer_type == "composition":
             # Convert formulas to composition objects
             if isinstance(df[featurizer_type].iloc[0], str):
+                self.logger.info("Compositions detected as strings. Attempting "
+                                 "conversion to Composition objects...")
                 stc = StrToComposition(overwrite_data=True,
                                        target_col_id=featurizer_type)
                 df = stc.featurize_dataframe(df, featurizer_type,
                                              multiindex=self.multiindex)
 
             elif isinstance(df[featurizer_type].iloc[0], dict):
+                self.logger.info("Compositions detected as dicts. Attempting "
+                                 "conversion to Composition objects...")
                 df[featurizer_type] = [Composition.from_dict(d) for d in df[featurizer_type]]
 
             # Convert non-oxidstate containing comps to oxidstate comps
             if self.guess_oxistates:
+                self.logger.info("Guessing oxidation states of compositions, as"
+                                 " they were not present in input.")
                 cto = CompositionToOxidComposition(
                     target_col_id=featurizer_type,
                     overwrite_data=True)
@@ -251,11 +260,16 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
         else:
             # Convert structure/bs/dos dicts to objects (robust already)
+            self.logger.info("{} detected as strings. Attempting "
+                             "conversion to Composition objects..."
+                             "".format(featurizer_type))
             dto = DictToObject(overwrite_data=True, target_col_id=featurizer_type)
             df = dto.featurize_dataframe(df, featurizer_type)
 
             # Decorate with oxidstates
             if featurizer_type == "structure" and self.guess_oxistates:
+                self.logger.info("Guessing oxidation states of structures, as "
+                                 "they were not present in input.")
                 sto = StructureToOxidStructure(target_col_id=featurizer_type,
                                                overwrite_data=True)
                 df = sto.featurize_dataframe(df, featurizer_type,
@@ -274,6 +288,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Contains composition column if desired
         """
+        self.logger.debug("Adding compositions from structures.")
         if self.featurizers["composition"]:
             if "structure" in df.columns and "composition" not in df.columns:
                 df = self._tidy_column(df, "structure")
