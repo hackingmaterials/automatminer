@@ -22,6 +22,7 @@ __author__ = ['Alireza Faghaninia <alireza.faghaninia@gmail.com>,',
              'Alex Dunn <ardunn@lbl.gov']
 
 
+#todo: condense these tests
 # class TestTpotAutoml(unittest.TestCase):
 #
 #     def setUp(self):
@@ -170,22 +171,22 @@ class TestTPOTAdaptor(unittest.TestCase):
         self.validation_df = pd.read_csv("mini_validation_df_automl.csv")
 
     def test_customized_configs(self):
-        pass
+        self.assertTrue(True)
 
     def test_defaults(self):
-        pass
+        self.assertTrue(True)
 
     def test_regression(self):
-        pass
+        self.assertTrue(True)
 
     def test_classification(self):
-        pass
+        self.assertTrue(True)
 
     def test_transferability(self):
-        pass
+        self.assertTrue(True)
 
     def test_feature_mismatching(self):
-        pass
+        self.assertTrue(True)
 
 
 
