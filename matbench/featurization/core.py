@@ -6,9 +6,11 @@ from matbench.utils.utils import MatbenchError
 from matbench.base import DataframeTransformer, LoggableMixin
 from matbench.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
+from matbench.featurization.metaselection.core import FeaturizerMetaSelector
 
-__author__ = ["Alex Dunn <ardunn@lbl.gov>", "Alireza Faghaninia <alireza@lbl.gov>"]
-
+__author__ = ["Alex Dunn <ardunn@lbl.gov>",
+              "Alireza Faghaninia <alireza@lbl.gov>",
+              "Qi Wang <wqthu11@gmail.com>"]
 
 _composition_aliases = ["comp", "Composition", "composition", "COMPOSITION",
                         "comp.", "formula", "chemical composition", "compositions"]
@@ -92,6 +94,7 @@ class CompositionToOxidComposition(ConversionFeaturizer):
     def implementors(self):
         return ["Anubhav Jain", "Alex Ganose", "Alex Dunn"]
 
+
 class AutoFeaturizer(DataframeTransformer, LoggableMixin):
     """
     Automatically featurize a dataframe.
@@ -145,11 +148,16 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
     """
 
-    def __init__(self, featurizers=None, ignore_cols=None, ignore_errors=True,
-                 drop_inputs=True, exclude=None, guess_oxistates=True,
-                 multiindex=False, n_jobs=None, logger=True):
+    def __init__(self, featurizers=None, exclude=None, use_metaselector=True,
+                 max_na_percent=0.05, ignore_cols=None, ignore_errors=True,
+                 drop_inputs=True, guess_oxistates=True, multiindex=False,
+                 n_jobs=None, logger=True):
 
         self._logger = self.get_logger(logger)
+        self.featurizers = featurizers
+        self.exclude = exclude
+        self.use_metaselector = use_metaselector
+        self.max_na_percent = max_na_percent
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
         self.ignore_errors = ignore_errors
@@ -158,44 +166,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.n_jobs = n_jobs
         self.guess_oxistates = guess_oxistates
         self.features = []
-
-        # Set featurizers
-        if not featurizers:
-            cfset = CompositionFeaturizers(exclude=exclude).best
-            sfset = StructureFeaturizers(exclude=exclude).best
-            bsfset = BSFeaturizers(exclude=exclude).best
-            dosfset = DOSFeaturizers(exclude=exclude).best
-            self.featurizers = {"composition": cfset,
-                                "structure": sfset,
-                                "bandstructure": bsfset,
-                                "dos": dosfset}
-        else:
-            if not isinstance(featurizers, dict):
-                raise TypeError("Featurizers must be a dictionary with keys"
-                                "of 'composition', 'structure', 'bandstructure', "
-                                "and 'dos' and values of corresponding lists of "
-                                "featurizers.")
-            else:
-                for ftype in featurizers:
-                    # Normalize the names from the aliases
-                    if ftype in _composition_aliases:
-                        featurizers["composition"] = featurizers.pop(ftype)
-                    elif ftype in _structure_aliases:
-                        featurizers["structure"] = featurizers.pop(ftype)
-                    elif ftype in _bandstructure_aliases:
-                        featurizers["bandstructure"] = featurizers.pop(ftype)
-                    elif ftype in _dos_aliases:
-                        featurizers["dos"] = featurizers.pop(ftype)
-                    else:
-                        raise ValueError(
-                            "The featurizers dict key {} is not a valid "
-                            "featurizer type. Please choose from {}".format(
-                                ftype, _aliases))
-                # Assign empty featurizer list to featurizers not specified by type
-                for ftype in ["composition", "structure", "bandstructure", "dos"]:
-                    if ftype not in featurizers:
-                        featurizers[ftype] = []
-                self.featurizers = featurizers
 
     def fit(self, df, target):
         """
@@ -222,6 +192,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.is_fit = False
         df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
+        self._customize_featurizers(df)
+
         for featurizer_type, featurizers in self.featurizers.items():
             if not featurizers:
                 self.logger.info("No {} featurizers being used."
@@ -265,7 +237,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                                multiindex=self.multiindex)
                 df = df.drop(columns=[featurizer_type])
             else:
-                self.logger.info("Featurizer type {} not in the dataframe. Skipping...".format(featurizer_type))
+                self.logger.info("Featurizer type {} not in the dataframe. "
+                                 "Skipping...".format(featurizer_type))
         return df
 
     def _prescreen_df(self, df, inplace=True):
@@ -287,6 +260,53 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 if col in df:
                     df = df.drop([col], axis=1)
         return df
+
+    def _customize_featurizers(self, df):
+        # Set featurizers
+        if not self.featurizers:
+            if self.use_metaselector:
+                self.metaselector = FeaturizerMetaSelector(self.max_na_percent)
+                auto_exclude = self.metaselector.auto_excludes(df)
+                self.exclude = auto_exclude.extend(self.exclude) \
+                    if self.exclude is None else auto_exclude
+                self.logger.info("Based on metafeatures of the given dataset, "
+                                 "these featurizers are excluded for returning "
+                                 "nans more than the max_na_percent of {}: {}".
+                                 format(self.max_na_percent, auto_exclude))
+            cfset = CompositionFeaturizers(exclude=self.exclude).best
+            sfset = StructureFeaturizers(exclude=self.exclude).best
+            bsfset = BSFeaturizers(exclude=self.exclude).best
+            dosfset = DOSFeaturizers(exclude=self.exclude).best
+            self.featurizers = {"composition": cfset,
+                                "structure": sfset,
+                                "bandstructure": bsfset,
+                                "dos": dosfset}
+        else:
+            if not isinstance(self.featurizers, dict):
+                raise TypeError("Featurizers must be a dictionary with keys"
+                                "of 'composition', 'structure', 'bandstructure', "
+                                "and 'dos' and values of corresponding lists of "
+                                "featurizers.")
+            else:
+                for ftype in self.featurizers:
+                    # Normalize the names from the aliases
+                    if ftype in _composition_aliases:
+                        self.featurizers["composition"] = self.featurizers.pop(ftype)
+                    elif ftype in _structure_aliases:
+                        self.featurizers["structure"] = self.featurizers.pop(ftype)
+                    elif ftype in _bandstructure_aliases:
+                        self.featurizers["bandstructure"] = self.featurizers.pop(ftype)
+                    elif ftype in _dos_aliases:
+                        self.featurizers["dos"] = self.featurizers.pop(ftype)
+                    else:
+                        raise ValueError(
+                            "The featurizers dict key {} is not a valid "
+                            "featurizer type. Please choose from {}".format(
+                                ftype, _aliases))
+                # Assign empty featurizer list to featurizers not specified by type
+                for ftype in ["composition", "structure", "bandstructure", "dos"]:
+                    if ftype not in self.featurizers:
+                        self.featurizers[ftype] = []
 
     def _tidy_column(self, df, featurizer_type):
         """
@@ -368,6 +388,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     target_col_id="composition", overwrite_data=False)
                 df = struct2comp.featurize_dataframe(df, "structure")
         return df
+
 
 if __name__ == "__main__":
     from matminer.datasets.dataset_retrieval import load_dataset

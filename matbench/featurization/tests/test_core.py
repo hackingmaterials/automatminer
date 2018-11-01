@@ -15,6 +15,7 @@ test_dir = os.path.dirname(__file__)
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>", "Alireza Faghaninia <alireza@lbl.gov>"]
 
+
 class TestAutoFeaturizer(unittest.TestCase):
 
     def setUp(self, limit=5):
@@ -53,7 +54,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
         self.assertTrue("composition" not in df.columns)
 
-
     def test_featurize_structure(self):
         """
         Test automatic featurization while only considering structure.
@@ -86,7 +86,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("composition" not in df.columns)
         self.assertTrue("structure" not in df.columns)
 
-    def test_exclusions(self):
+    def test_exclude(self):
         """
         Test custom args for featurizers to use.
         """
@@ -104,7 +104,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         ao_feats = ao.feature_labels()
 
         # Test to make sure excluded does not show up
-        af = AutoFeaturizer(exclude=exclude)
+        af = AutoFeaturizer(exclude=exclude, use_metaselector=False)
         af.fit(df, target)
         print(af.features)
         df = af.fit_transform(df, target)
@@ -119,7 +119,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         df = af.fit_transform(df, target)
         for flabels in [ep_feats, ef_feats, ao_feats]:
             self.assertFalse(any([f in df.columns for f in flabels]))
-
 
     def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
         """
