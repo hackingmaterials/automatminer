@@ -4,8 +4,8 @@ from functools import lru_cache
 from pymatgen.core.composition import Composition
 from pymatgen.core.structure import Structure, IStructure
 from abc import ABCMeta, abstractmethod
-from matbench.featurization.metaselection.utils import FormulaStatistics,\
-    StructureStatistics
+from matbench.featurization.metaselection.utils import composition_statistics,\
+    structure_statistics
 
 
 """
@@ -29,8 +29,8 @@ an estimation of computational budget, and finally taking all these factors
 together to make a final recommendation of featurizers)
 
 Current meta-feat ures to be considered (many can be further added):
-(i) formula-related:
-    - Number of formulas:
+(i) Composition-related:
+    - Number of compositions:
     - Percent of all-metallic alloys:
     - Percent of metallic-nonmetallic compounds:
     - Percent of nonmetallic compounds:
@@ -118,42 +118,42 @@ class Helper(AbstractMetaFeature):
 
 
 #######################################################
-# formula-related metafeatures
+# composition-related metafeatures
 #######################################################
 
-def formula_stats(X):
+def composition_stats(X):
     """
     Transform the input X to immutable tuple to use caching and call
-    _formula_stats .
+    _composition_stats .
     Args:
         X: list, np.ndarray, pd.Series or pd.DataFrame,
 
     Returns:
-        _formula_stats
+        _composition_stats
     """
     if isinstance(X, (pd.Series, pd.DataFrame)):
-        return _formula_stats(tuple(X.values))
+        return _composition_stats(tuple(X.values))
     if isinstance(X, (list, np.ndarray)):
-        return _formula_stats(tuple(X))
+        return _composition_stats(tuple(X))
 
 
 @lru_cache()
-def _formula_stats(X):
+def _composition_stats(X):
     """
-    Calculate the FormulaStatistics for the input X. (see ..utils for more
+    Calculate the CompositionStatistics for the input X. (see ..utils for more
     details).
     This is cached to avoid recalculation for the same input.
     Args:
         X: tuple
 
     Returns:
-        (dict): formula_stats
+        (dict): composition_stats
     """
-    stats = FormulaStatistics(X).calc()
+    stats = composition_statistics(X)
     return stats
 
 
-class NumberOfFormulas(MetaFeature):
+class NumberOfCompositions(MetaFeature):
     """
     Number of formulas in the input dataset.
     """
@@ -163,43 +163,43 @@ class NumberOfFormulas(MetaFeature):
 
 class PercentOfAllMetal(MetaFeature):
     """
-    Percent of all_metal formulas in the input dataset.
+    Percent of all_metal compositions in the input dataset.
     """
     def calc(self, X, y=None):
-        stats = formula_stats(X)
-        num = sum([1 if stat["major_formula_category"] == 1 else 0
+        stats = composition_stats(X)
+        num = sum([1 if stat["major_composition_category"] == 1 else 0
                   for stat in stats.values()])
         return num / len(stats)
 
 
 class PercentOfMetalNonmetal(MetaFeature):
     """
-    Percent of metal_nonmetal formulas in the input dataset.
+    Percent of metal_nonmetal compositions in the input dataset.
     """
     def calc(self, X, y=None):
-        stats = formula_stats(X)
-        num = sum([1 if stat["major_formula_category"] == 2 else 0
+        stats = composition_stats(X)
+        num = sum([1 if stat["major_composition_category"] == 2 else 0
                   for stat in stats.values()])
         return num / len(stats)
 
 
 class PercentOfAllNonmetal(MetaFeature):
     """
-    Percent of all_nonmetal formulas in the input dataset.
+    Percent of all_nonmetal compositions in the input dataset.
     """
     def calc(self, X, y=None):
-        stats = formula_stats(X)
-        num = sum([1 if stat["major_formula_category"] == 3 else 0
+        stats = composition_stats(X)
+        num = sum([1 if stat["major_composition_category"] == 3 else 0
                   for stat in stats.values()])
         return num / len(stats)
 
 
 class PercentOfContainTransMetal(MetaFeature):
     """
-    Percent of formulas containing transition_metal in the input dataset.
+    Percent of compositions containing transition_metal in the input dataset.
     """
     def calc(self, X, y=None):
-        stats = formula_stats(X)
+        stats = composition_stats(X)
         num = sum([1 if 1 in stat["el_types_reduced"] else 0
                   for stat in stats.values()])
         return num / len(stats)
@@ -210,7 +210,7 @@ class NumberOfDifferentElements(MetaFeature):
     Number of different elements present in the input dataset.
     """
     def calc(self, X, y=None):
-        stats = formula_stats(X)
+        stats = composition_stats(X)
         elements = set()
         for stat in stats.values():
             elements = elements.union(set(stat["elements"]))
@@ -219,30 +219,30 @@ class NumberOfDifferentElements(MetaFeature):
 
 class AvgNumberOfElements(MetaFeature):
     """
-    Average number of element of all formulas in the input dataset.
+    Average number of element of all compositions in the input dataset.
     """
     def calc(self, X, y=None):
-        stats = formula_stats(X)
+        stats = composition_stats(X)
         nelements_sum = sum([stat["n_elements"] for stat in stats.values()])
         return nelements_sum / len(stats)
 
 
 class MaxNumberOfElements(MetaFeature):
     """
-    Maximum number of element number of all formulas in the input dataset.
+    Maximum number of element number of all compositions in the input dataset.
     """
     def calc(self, X, y=None):
-        stats = formula_stats(X)
+        stats = composition_stats(X)
         nelements_max = max([stat["n_elements"] for stat in stats.values()])
         return nelements_max
 
 
 class MinNumberOfElements(MetaFeature):
     """
-    Minimum number of element number of all formulas in the input dataset.
+    Minimum number of element number of all compositions in the input dataset.
     """
     def calc(self, X, y=None):
-        stats = formula_stats(X)
+        stats = composition_stats(X)
         nelements_min = min([stat["n_elements"] for stat in stats.values()])
         return nelements_min
 
@@ -282,7 +282,7 @@ def _structure_stats(X):
     Returns:
         (dict): structure_stats
     """
-    stats = StructureStatistics(X).calc()
+    stats = structure_statistics(X)
     return stats
 
 
@@ -337,8 +337,8 @@ class NumberOfDifferentElementsInStructure(MetaFeature):
         return len(elements)
 
 
-formula_mfs_dict = \
-    {"number_of_formulas": NumberOfFormulas(),
+composition_mfs_dict = \
+    {"number_of_compositions": NumberOfCompositions(),
      "percent_of_all_metal": PercentOfAllMetal(),
      "percent_of_metal_nonmetal": PercentOfMetalNonmetal(),
      "percent_of_all_nonmetal": PercentOfAllNonmetal(),

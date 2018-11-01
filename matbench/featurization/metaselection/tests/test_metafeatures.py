@@ -6,42 +6,44 @@ from matbench.data.load import load_castelli_perovskites, load_glass_binary
 class TestFormulaMetafeatures(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.df_glass = load_glass_binary()
+        cls.df_glass = load_glass_binary().rename(
+            columns={"formula": "composition"})
 
-    def test_NumberOfFormulas(self):
-        nf = NumberOfFormulas().calc(self.df_glass["formula"])
+    def test_NumberOfCompositions(self):
+        nf = NumberOfCompositions().calc(self.df_glass["composition"])
+        print(nf)
         self.assertEqual(nf, 5959)
 
     def test_PercentOfAllMetal(self):
-        pm = PercentOfAllMetal().calc(self.df_glass["formula"])
+        pm = PercentOfAllMetal().calc(self.df_glass["composition"])
         self.assertAlmostEqual(pm, 0.6578, 4)
 
     def test_PercentOfMetalNonmetal(self):
-        pmnc = PercentOfMetalNonmetal().calc(self.df_glass["formula"])
+        pmnc = PercentOfMetalNonmetal().calc(self.df_glass["composition"])
         self.assertAlmostEqual(pmnc, 0.3208, 4)
 
     def test_PercentOfAllNonmetal(self):
-        pan = PercentOfAllNonmetal().calc(self.df_glass["formula"])
+        pan = PercentOfAllNonmetal().calc(self.df_glass["composition"])
         self.assertAlmostEqual(pan, 0.0214, 4)
 
     def test_PercentOfContainTransMetal(self):
-        pctm = PercentOfContainTransMetal().calc(self.df_glass["formula"])
+        pctm = PercentOfContainTransMetal().calc(self.df_glass["composition"])
         self.assertAlmostEqual(pctm, 0.6877, 4)
 
     def test_NumberOfDifferentElements(self):
-        nde = NumberOfDifferentElements().calc(self.df_glass["formula"])
+        nde = NumberOfDifferentElements().calc(self.df_glass["composition"])
         self.assertEqual(nde, 38)
 
     def test_AvgNumberOfElements(self):
-        ane = AvgNumberOfElements().calc(self.df_glass["formula"])
+        ane = AvgNumberOfElements().calc(self.df_glass["composition"])
         self.assertAlmostEqual(ane, 1.9802, 4)
 
     def test_MaxNumberOfElements(self):
-        mne = MaxNumberOfElements().calc(self.df_glass["formula"])
+        mne = MaxNumberOfElements().calc(self.df_glass["composition"])
         self.assertEqual(mne, 2)
 
     def test_MinNumberOfElements(self):
-        mne = MinNumberOfElements().calc(self.df_glass["formula"])
+        mne = MinNumberOfElements().calc(self.df_glass["composition"])
         self.assertEqual(mne, 1)
 
 

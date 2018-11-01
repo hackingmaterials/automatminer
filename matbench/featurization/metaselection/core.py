@@ -1,14 +1,14 @@
 import sys
 import warnings
 
-from matbench.featurization.metaselection.metafeatures import formula_mfs_dict, \
-    structure_mfs_dict
+from matbench.featurization.metaselection.metafeatures import \
+    composition_mfs_dict, structure_mfs_dict
 
 """
 Automatically filter some featurizers based on metafeatures calculated for
 the dataset. 
 """
-_supported_mfs_types = ("formula", "structure")
+_supported_mfs_types = ("composition", "structure")
 
 
 def dataset_metafeatures(df, **mfs_kwargs):
@@ -16,7 +16,7 @@ def dataset_metafeatures(df, **mfs_kwargs):
     Given a dataset as a dataframe, calculate pre-defined metafeatures.
     (see ..metafeatures for more details).
     Return metafeatures of the dataset organized in a dict:
-        {"formula_metafeatures": {"number_of_formulas": 2024,
+        {"composition_metafeatures": {"number_of_compositions": 2024,
                                   "percent_of_all_metal": 0.81,
                                   ...},
          "structure_metafeatures": {"number_of_structures": 2024,
@@ -29,10 +29,10 @@ def dataset_metafeatures(df, **mfs_kwargs):
     nans more than the allowed max_na_percent).
     Args:
         df: input dataset as pd.DataFrame
-        mfs_kwargs: kwargs for _formula/structure_metafeatures
+        mfs_kwargs: kwargs for _composition/structure_metafeatures
 
     Returns:
-        (dict): {"formula_metafeatures": formula_mfs/None,
+        (dict): {"composition_metafeatures": composition_mfs/None,
                  "structure_metafeatures": structure_mfs/None}
         """
     auto_mfs = dict()
@@ -45,23 +45,23 @@ def dataset_metafeatures(df, **mfs_kwargs):
     return auto_mfs
 
 
-def _formula_metafeatures(df, formula_col="formula"):
+def _composition_metafeatures(df, composition_col="composition"):
     """
-    Calculate formula-based metafeatures of the dataset.
+    Calculate composition-based metafeatures of the dataset.
     Args:
         df: input dataset as pd.DataFrame
-        formula_col(str): column name for formulas
+        composition_col(str): column name for compositions
 
     Returns:
-        (dict): {"formula_metafeatures": mfs/None}
+        (dict): {"composition_metafeatures": mfs/None}
     """
-    if formula_col in df.columns:
+    if composition_col in df.columns:
         mfs = dict()
-        for mf, mf_class in formula_mfs_dict.items():
-            mfs[mf] = mf_class.calc(df[formula_col])
-        return {"formula_metafeatures": mfs}
+        for mf, mf_class in composition_mfs_dict.items():
+            mfs[mf] = mf_class.calc(df[composition_col])
+        return {"composition_metafeatures": mfs}
     else:
-        return {"formula_metafeatures": None}
+        return {"composition_metafeatures": None}
 
 
 def _structure_metafeatures(df, structure_col="structure"):
@@ -93,12 +93,12 @@ class FeaturizerAutoFilter:
         self.max_na_percent = max_na_percent
 
     @staticmethod
-    def formula_featurizer_excludes(mfs, max_na_percent=0.05):
+    def composition_featurizer_excludes(mfs, max_na_percent=0.05):
         """
         Determine the composition featurizers that are definitely do not work
         for this dataset (returning nans more than the allowed max_na_percent).
         Args:
-            mfs: formula_metafeatures
+            mfs: composition_metafeatures
             max_na_percent: max percent of nans allowed for the feature columns
 
         Returns:
@@ -124,7 +124,7 @@ class FeaturizerAutoFilter:
         except KeyError:
             warnings.warn("The metafeature dict does not contain all the "
                           "metafeatures for filtering featurizers for the "
-                          "formula! Please call DatasetMetaFeatures first"
+                          "compositions! Please call DatasetMetaFeatures first"
                           "to derive the metafeature dict.")
 
         return list(set(excludes))
@@ -149,7 +149,7 @@ class FeaturizerAutoFilter:
         except KeyError:
             warnings.warn("The metafeature dict does not contain all the"
                           "metafeatures for filtering featurizers for the "
-                          "structure! Please call DatasetMetaFeatures first"
+                          "structures! Please call DatasetMetaFeatures first"
                           "to derive the metafeature dict.")
         return list(set(excludes))
 

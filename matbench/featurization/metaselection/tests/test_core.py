@@ -1,7 +1,7 @@
 import unittest
 
 from matbench.data.load import load_castelli_perovskites, load_glass_binary
-from matbench.featurization.metaselection.core import _formula_metafeatures, \
+from matbench.featurization.metaselection.core import _composition_metafeatures, \
     _structure_metafeatures, dataset_metafeatures, FeaturizerAutoFilter
 from pymatgen.core.structure import Structure
 
@@ -9,13 +9,14 @@ from pymatgen.core.structure import Structure
 class TestDatasetMetaFeatures(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.df_glass = load_glass_binary()
+        cls.df_glass = load_glass_binary().rename(
+            columns={"formula": "composition"})
         cls.df_castelli = load_castelli_perovskites()
         cls.df_castelli["structure"] = cls.df_castelli["structure"].\
             apply(lambda x: Structure.from_dict(x))
 
     def test_formula_metafeatures(self):
-        mfs = _formula_metafeatures(self.df_glass)
+        mfs = _composition_metafeatures(self.df_glass)
         mfs_values = mfs["formula_metafeatures"]
         self.assertEqual(mfs_values["number_of_formulas"], 5959)
         self.assertAlmostEqual(mfs_values["percent_of_all_metal"], 0.6578, 4)
