@@ -35,7 +35,7 @@ class DatasetMetaFeatures:
         """
         Calculate formula-based metafeatures of the dataset.
         Args:
-            formula_col(str): column name for formula
+            formula_col(str): column name for formulas
 
         Returns:
             (dict): {"formula_metafeatures": mfs/None}
@@ -69,7 +69,7 @@ class DatasetMetaFeatures:
         """
         Automatically calculate metafeatures for all _supported_mfs_types.
         Args:
-            kwargs: column names for formula/structures
+            kwargs: column names for formulas/structures
 
         Returns:
             (dict): {"formula_metafeatures": formula_mfs/None,
