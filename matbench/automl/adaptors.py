@@ -235,20 +235,23 @@ if __name__ == "__main__":
     traindf = df.iloc[:500]
     target = "K_VRH"
 
-    # Make top-lvel transformers
+    # Get top-lvel transformers
     autofeater = AutoFeaturizer()
     cleaner = DataCleaner()
     reducer = FeatureReducer()
+    learner = TPOTAdaptor("regression", max_time_mins=5)
 
-    tpotw = TPOTAdaptor("regression", max_time_mins=5)
-
-
+    # Fit transformers on training data
     traindf = autofeater.fit_transform(traindf, target)
     traindf = cleaner.fit_transform(traindf, target)
+    traindf = reducer.fit_transform(traindf, target)
 
+    # Use transformers on testing data
     testdf = autofeater.transform(testdf, target)
     testdf = cleaner.transform(testdf, target)
+    testdf = reducer.transform(testdf, target)
 
-    tpotw.fit(traindf, target)
-    dfp = tpotw.predict(testdf, target)
+    # Use training data to predict testing data
+    learner.fit(traindf, target)
+    testdf = learner.predict(testdf, target)
     print(testdf)
