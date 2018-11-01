@@ -1,161 +1,125 @@
 # coding: utf-8
 import os
-import pandas as pd
 import unittest
 
+import pandas as pd
+from pymatgen import Composition
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
+from matminer.datasets.dataset_retrieval import load_dataset
+from matminer.featurizers.composition import ElectronAffinity, ElementProperty, AtomicOrbitals
+from matminer.featurizers.structure import GlobalSymmetryFeatures, DensityFeatures
 
-import matminer.featurizers.composition as cf
-
-from matbench.data.load import load_double_perovskites_gap, \
-    load_castelli_perovskites
-from matbench.featurization.core import Featurization
-from matbench.data.load import load_phonon_dielectric_mp
+from matbench.featurization.core import AutoFeaturizer
 
 test_dir = os.path.dirname(__file__)
 
+__author__ = ["Alex Dunn <ardunn@lbl.gov>", "Alireza Faghaninia <alireza@lbl.gov>"]
 
-class TestFeaturization(unittest.TestCase):
+class TestAutoFeaturizer(unittest.TestCase):
 
-    def test_featurize_formula(self, limit=5):
-        df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
-        ignore_cols = ['a_1', 'a_2', 'b_1', 'b_2']
-        featurizer = Featurization(ignore_cols=ignore_cols,
-                               ignore_errors=False,
-                               exclude=['CohesiveEnergy'],
-                               multiindex=False)
+    def setUp(self, limit=5):
+        self.test_df = load_dataset('elastic_tensor_2015').rename(columns={"formula": "composition"})
+        self.limit = limit
 
-        df = featurizer.featurize_formula(df_init,
-                                          featurizers="all",
-                                          compcol=None,
-                                          asindex=False,
-                                          guess_oxidstates=True)
-
+    def test_sanity(self):
+        df = self.test_df
         # sanity checks
-        self.assertTrue(len(df), limit)
-        self.assertGreaterEqual(len(df.columns), 70)
-        self.assertAlmostEqual(
-            df[df["formula"] == "AgNbSnTiO6"]["gap gllbsc"].values[0], 2.881, 3)
+        self.assertTrue(df['composition'].iloc[0], "Nb4CoSi")
+        self.assertTrue(df["composition"].iloc[1179], "Al2Cu")
+        self.assertEqual(df.shape[0], 1181)
 
-        # BandCenter:
-        self.assertAlmostEqual(
-            df[df["formula"] == "AgNbSnTiO6"]["band center"].values[0], -2.623,
-            3)
+    def test_featurize_composition(self):
+        """
+        Test automatic featurization while only considering formula/composition.
+        """
+        target = "K_VRH"
 
-        # AtomicOrbitals:
-        self.assertAlmostEqual(
-            df[df["formula"] == "AgNbSnTiO6"]["gap_AO"].values[0], 0.129, 3)
+        # When compositions are strings
+        df = self.test_df[['composition', target]].iloc[:self.limit]
+        af = AutoFeaturizer()
+        df = af.fit_transform(df, target)
+        self.assertAlmostEqual(df["frac f valence electrons"].iloc[2],
+                               0.5384615384615384)
+        self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
+        self.assertTrue("composition" not in df.columns)
 
-        # Stoichiometry:
-        self.assertTrue((df["0-norm"].isin([4, 5])).all())  # all 4- or 5-specie
-        self.assertTrue((df["2-norm"] < 1).all())
+        # When compositions are Composition objects
+        df = self.test_df[["composition", target]].iloc[:self.limit]
+        df["composition"] = [Composition(s) for s in df["composition"]]
+        af = AutoFeaturizer()
+        df = af.fit_transform(df, target)
+        self.assertAlmostEqual(df["frac f valence electrons"].iloc[2],
+                               0.5384615384615384)
+        self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
+        self.assertTrue("composition" not in df.columns)
 
-        # ValenceOrbital:
-        self.assertAlmostEqual(
-            df[df["formula"] == "AgNbLaAlO6"][
-                "frac p valence electrons"].values[0], 0.431, 3)
 
-        # TMetalFraction:
-        self.assertTrue((df["transition metal fraction"] < 0.45).all())
+    def test_featurize_structure(self):
+        """
+        Test automatic featurization while only considering structure.
+        May automatically infer composition features.
+        """
+        target = "K_VRH"
 
-        # YangSolidSolution:
-        self.assertAlmostEqual(
-            df[df["formula"] == "AgNbSnTiO6"]["Yang delta"].values[0], 0.416, 3)
+        # When structures are Structure objects
+        df = self.test_df[['structure', target]].iloc[:self.limit]
+        af = AutoFeaturizer()
+        df = af.fit_transform(df, target)
+        # Ensure there are some structure features created
+        self.assertTrue("dimensionality" in df.columns)
+        # Ensure that composition features are automatically added without
+        # explicit column
+        self.assertTrue("HOMO_character" in df.columns)
+        self.assertTrue("composition" not in df.columns)
+        self.assertTrue("structure" not in df.columns)
 
-        # ElectronegativityDiff:
-        self.assertAlmostEqual(
-            df[df["formula"] == "AgNbLaGaO6"]["std_dev EN difference"].values[
-                0], 0.366, 3)
+        # When structures are dictionaries
+        df = self.test_df[['structure', target]].iloc[:self.limit]
+        df["structure"] = [s.as_dict() for s in df["structure"]]
+        af = AutoFeaturizer()
+        df = af.fit_transform(df, target)
+        # Ensure there are some structure features created
+        self.assertTrue("dimensionality" in df.columns)
+        # Ensure that composition features are automatically added without
+        # explicit column
+        self.assertTrue("HOMO_character" in df.columns)
+        self.assertTrue("composition" not in df.columns)
+        self.assertTrue("structure" not in df.columns)
 
-        # making sure:
-        # featurize_formula works with only composition and not formula
-        # featurize_formula works with a given list of featurizers
-        df = featurizer.featurize_formula(df_init, featurizers=[
-            cf.ElementProperty.from_preset(preset_name="matminer"),
-            cf.IonProperty()
-        ])
-        self.assertGreaterEqual(len(df.columns), 69)
+    def test_exclusions(self):
+        """
+        Test custom args for featurizers to use.
+        """
+        df = self.test_df[:self.limit]
+        target = "K_VRH"
+        exclude = ["ElementProperty"]
 
-    def test_featurize_structure(self, limit=5):
-        df_init = load_castelli_perovskites()[:limit]
-        featurizer = Featurization(ignore_errors=False, multiindex=False)
-        df = featurizer.featurize_structure(df_init, inplace=False,
-                                            featurizers="all")
+        dn = DensityFeatures()
+        gsf = GlobalSymmetryFeatures()
+        ep = ElementProperty.from_preset("matminer")
+        ef = ElectronAffinity()
+        ao = AtomicOrbitals()
+        ep_feats = ep.feature_labels()
+        ef_feats = ef.feature_labels()
+        ao_feats = ao.feature_labels()
 
-        # sanity checks
-        self.assertTrue(len(df), limit)
-        self.assertGreater(len(df.columns), len(df_init.columns))
+        # Test to make sure excluded does not show up
+        af = AutoFeaturizer(exclude=exclude)
+        af.fit(df, target)
+        print(af.features)
+        df = af.fit_transform(df, target)
+        self.assertFalse(any([f in df.columns for f in ep_feats]))
 
-        # DensityFeatures:
-        self.assertTrue((df["packing fraction"] < 0.45).all())
-        self.assertAlmostEqual(
-            df[df["formula"] == "RhTeN3"]["density"].values[0], 7.3176, 4)
+        # Test to make sure composition features are not automatically
+        # created if explicitly not included in featurizers dict
+        # Also make sure no errors when excluding non-present featurizers
+        df = self.test_df[:self.limit]
+        featurizers = {"structure": [gsf, dn]}
+        af = AutoFeaturizer(featurizers=featurizers)
+        df = af.fit_transform(df, target)
+        for flabels in [ep_feats, ef_feats, ao_feats]:
+            self.assertFalse(any([f in df.columns for f in flabels]))
 
-        # GlobalSymmetryFeatures:
-        self.assertEqual(
-            df[df["formula"] == "HfTeO3"]["spacegroup_num"].values[0], 99)
-        self.assertEqual(
-            df[df["formula"] == "HfTeO3"]["crystal_system"].values[0],
-            "tetragonal")
-        self.assertTrue(
-            not df[df["formula"] == "HfTeO3"]["is_centrosymmetric"].values[0])
-
-        # Dimensionality:
-        self.assertEqual(
-            df[df["formula"] == "ReAsO2F"]["dimensionality"].values[0], 2)
-
-        # RadialDistributionFunction:
-        # TODO: add this test after it returns numbers and not dict!
-
-        # TODO: add tests for the following once they return features not matrixes:
-        # CoulombMatrix, SineCoulombMatrix, OrbitalFieldMatrix, MinimumRelativeDistances
-
-        # TODO what are the other presets for SiteStatsFingerprint? need implementation and test?
-        # SiteStatsFingerprint with preset==CrystalNNFingerprint_ops:
-        self.assertEqual(
-            df[df["formula"] == "RhTeN3"]["mean wt CN_1"].values[0], 0)
-        self.assertAlmostEqual(
-            df[df["formula"] == "RhTeN3"]["mean wt CN_2"].values[0], 0.412, 3)
-
-        # EwaldEnergy:
-        self.assertAlmostEqual(
-            df[df["formula"] == "RhTeN3"]["ewald_energy"].values[0], -405.64, 2)
-        self.assertEqual(
-            df[df["formula"] == "HfTeO3"]["ewald_energy"].values[0], 0.0)
-
-        # StructuralHeterogeneity:
-        self.assertAlmostEqual(
-            df[df["formula"] == "RhTeN3"]["min relative bond length"].values[0],
-            0.7896, 4)
-        self.assertAlmostEqual(
-            df[df["formula"] == "RhTeN3"][
-                "maximum neighbor distance variation"].values[0],
-            0.1224, 4)
-
-        # MaximumPackingEfficiency:
-        self.assertAlmostEqual(
-            df[df["formula"] == "ReAsO2F"]["max packing efficiency"].values[0],
-            0.295, 3)
-
-        # ChemicalOrdering:
-        self.assertAlmostEqual(
-            df[df["formula"] == "HfTeO3"][
-                "mean ordering parameter shell 1"].values[0], 0.599, 3)
-        # TODO: umm, make a PR for shorter feature_labels for some structure featurizers?
-
-        # XRDPowderPattern:
-        self.assertAlmostEqual(
-            df[df["formula"] == "BiHfO2F"]["xrd_127"].values[0], 0.0011, 4)
-
-        # BondFractions:
-        self.assertAlmostEqual(
-            df[df["formula"] == "WReO2S"]["S2- - W3+ bond frac."].values[0],
-            0.1667, 4)
-
-        # BagofBonds:
-        self.assertAlmostEqual(
-            df[df["formula"] == "HfTeO3"]["O - O bond #1"].values[0], 11.1658,
-            4)
 
     def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
         """
@@ -169,25 +133,31 @@ class TestFeaturization(unittest.TestCase):
 
         Returns (None):
         """
+        target = "color"
         df_bsdos_pickled = "mp_data_with_dos_bandstructure.pickle"
         if refresh_df_init:
             mpdr = MPDataRetrieval()
-            df_init = mpdr.get_dataframe(criteria={"material_id": "mp-149"},
+            df = mpdr.get_dataframe(criteria={"material_id": "mp-149"},
                                          properties=["pretty_formula",
                                                      "dos",
                                                      "bandstructure",
                                                      "bandstructure_uniform"]
                                          )
-            df_init.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
+            df.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
         else:
-            df_init = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
-        df_init = df_init.dropna(axis=0)
-        featurizer = Featurization(ignore_errors=False, multiindex=False)
-        df = featurizer.featurize_dos(df_init, inplace=False)
+            df = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
+        df = df.dropna(axis=0)
+        df = df.rename(columns={"bandstructure_uniform": "bandstructure",
+                                "bandstructure": "line bandstructure"})
+        df[target] = [["red"]]
+        n_cols_init = df.shape[1]
+
+        featurizer = AutoFeaturizer(ignore_errors=False, multiindex=False)
+        df = featurizer.fit_transform(df, target)
 
         # sanity checks
         self.assertTrue(len(df), limit)
-        self.assertGreater(len(df.columns), len(df_init.columns))
+        self.assertGreater(len(df.columns), n_cols_init)
 
         # DOSFeaturizer:
         self.assertEqual(df["cbm_character_1"][0], "p")
@@ -200,13 +170,6 @@ class TestFeaturization(unittest.TestCase):
         self.assertAlmostEqual(df["cbm_s"][0], 0.4416, 3)
         self.assertAlmostEqual(df["cbm_sp"][0], 0.9864, 3)
 
-        df = featurizer.featurize_bandstructure(df_init,
-                                                inplace=False,
-                                                col_id="bandstructure_uniform")
-        # sanity checks
-        self.assertTrue("bandstructure" in df)
-        self.assertGreater(len(df.columns), len(df_init.columns))
-
         # BandFeaturizer:
         self.assertAlmostEqual(df["direct_gap"][0], 2.556, 3)
         self.assertAlmostEqual(df["n_ex1_norm"][0], 0.6285, 4)
@@ -214,25 +177,23 @@ class TestFeaturization(unittest.TestCase):
         # BranchPointEnergy:
         self.assertAlmostEqual(df["branch_point_energy"][0], 5.7677, 4)
 
-    def test_auto_featurize(self, limit=5):
-        df_init = load_phonon_dielectric_mp()[:limit]
-        print(df_init.structure)
-        featurizer = Featurization(ignore_errors=False, multiindex=True)
-        df = featurizer.auto_featurize(df_init,
-                                       input_cols=('formula', 'structure'))
+    def test_transferability(self):
+        """
+        Test that an autofeaturizer object is able to be fit on one dataset
+        and applied to another.
+        """
+        target = "K_VRH"
+        cols = ["composition", target]
+        df1 = self.test_df[cols].iloc[:self.limit]
+        df2 = self.test_df[cols].iloc[-1 * self.limit:]
 
-        # sanity checks
-        self.assertTrue(len(df), limit)
-        self.assertGreater(len(df.columns), len(df_init.columns))
+        af = AutoFeaturizer()
+        af.fit(df1, target)
 
-        # DensityFeatures:
-        self.assertEqual(df[('ElementProperty', 'mode SpaceGroupNumber')][1],
-                         194)
-
-        self.assertAlmostEqual(  # making sure structure is also featurized
-            df[('SiteStatsFingerprint', 'mean trigonal pyramidal CN_4')][1],
-            0.243648, 3)
-        self.assertEqual(df.index.name, ('Input Data', 'formula'))
+        df2 = af.transform(df2, target)
+        print(df2)
+        self.assertAlmostEqual(df2[target].iloc[0], 111.788114, places=5)
+        self.assertAlmostEqual(df2["minimum X"].iloc[1], 1.36, places=2)
 
 
 if __name__ == '__main__':

@@ -1,1 +1,1 @@
-from .core import Featurization
+from .core import AutoFeaturizer
