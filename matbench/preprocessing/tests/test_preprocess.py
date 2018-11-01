@@ -52,7 +52,8 @@ class TestPreprocess(unittest.TestCase):
         df2 = self.test_df
         df2 = df2.drop(columns=[target])
         df2 = dc.transform(df2, target)
-        self.assertFalse(compare_columns(df, df2)["mismatch"])
+        self.assertTrue(compare_columns(df, df2, ignore=target)["mismatch"])
+        self.assertTrue(target not in df2.columns)
 
     def test_FeatureReducer(self):
         df = self.test_df

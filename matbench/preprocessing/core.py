@@ -132,20 +132,22 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             raise MatbenchError("The transformation target {} is not the same as the fitted target {}".format(target, self.fitted_target))
 
         # We assume the two targets are the same from here on out
+        print("1", target in df.columns)
         df = self.to_numerical(df, target)
+        print("2", target in df.columns)
         df = self.handle_na(df, target, coerce_mismatch=True)
+        print("3", target in df.columns)
         # df = self.scale_df(df, target)
 
         # Ensure the order of columns is identical
         if target in df.columns:
             df = df[self.fitted_df.columns]
         else:
-            print(self.fitted_df.drop(columns=[target]).columns.tolist())
             colstodrop = self.fitted_df.drop(columns=[target]).columns.tolist()
-            for c in colstodrop:
-                if c not in df:
-                    print("BAD: {}".format(c))
             df = df[colstodrop]
+
+        print("4", target in df.columns)
+
         return df
 
     def fit_transform(self, df, target):
@@ -202,10 +204,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                         n_feats, napercent, feat_names))
         else:
             mismatch = compare_columns(self.fitted_df, df, ignore=target)
-            print("jhere1")
-            print(mismatch)
             if mismatch["mismatch"]:
-                print("in mismatc")
                 self.logger.warning("Mismatched columns found in dataframe "
                                     "used for fitting and argument dataframe.")
                 if not coerce_mismatch:
@@ -221,8 +220,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                                             "following new columns:\n{}"
                                             "".format(mismatch["df1_not_in_df2"]))
                         for c in self.fitted_df.columns:
-                            if c not in df:
-                                print("SETTING: {}".format(c))
+                            if c not in df and c is not target:
                                 # Interpret as one-hot problems...
                                 df[c] = np.zeros((df.shape[0]))
                     elif mismatch["df2_not_in_df1"]: # arg cols not in fitted
