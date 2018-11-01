@@ -11,7 +11,6 @@ class TestFormulaMetafeatures(unittest.TestCase):
 
     def test_NumberOfCompositions(self):
         nf = NumberOfCompositions().calc(self.df_glass["composition"])
-        print(nf)
         self.assertEqual(nf, 5959)
 
     def test_PercentOfAllMetal(self):

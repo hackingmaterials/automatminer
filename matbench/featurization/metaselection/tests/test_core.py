@@ -2,7 +2,7 @@ import unittest
 
 from matbench.data.load import load_castelli_perovskites, load_glass_binary
 from matbench.featurization.metaselection.core import _composition_metafeatures, \
-    _structure_metafeatures, dataset_metafeatures, FeaturizerAutoFilter
+    _structure_metafeatures, dataset_metafeatures, FeaturizerMetaSelector
 from pymatgen.core.structure import Structure
 
 
@@ -57,7 +57,7 @@ class TestFeaturizerAutoFilter(unittest.TestCase):
 
     def test_auto_excludes(self):
         glass_ftz_excludes = \
-            FeaturizerAutoFilter(max_na_percent=0.05).\
+            FeaturizerMetaSelector(max_na_percent=0.05).\
                 auto_excludes(self.df_glass)
         self.assertIn("IonProperty", glass_ftz_excludes)
         self.assertIn("ElectronAffinity", glass_ftz_excludes)
@@ -68,7 +68,7 @@ class TestFeaturizerAutoFilter(unittest.TestCase):
         self.assertIn("Miedema", glass_ftz_excludes)
 
         glass_ftz_excludes = \
-            FeaturizerAutoFilter(max_na_percent=0.40).\
+            FeaturizerMetaSelector(max_na_percent=0.40).\
                 auto_excludes(self.df_glass)
         self.assertIn("IonProperty", glass_ftz_excludes)
         self.assertIn("ElectronAffinity", glass_ftz_excludes)
@@ -77,7 +77,7 @@ class TestFeaturizerAutoFilter(unittest.TestCase):
         self.assertIn("CationProperty", glass_ftz_excludes)
 
         castelli_ftz_excludes = \
-            FeaturizerAutoFilter(max_na_percent=0.05).\
+            FeaturizerMetaSelector(max_na_percent=0.05).\
                 auto_excludes(self.df_castelli)
         self.assertIn("YangSolidSolution", castelli_ftz_excludes)
         self.assertIn("Miedema", castelli_ftz_excludes)

@@ -83,7 +83,7 @@ def _structure_metafeatures(df, structure_col="structure"):
         return {"structure_metafeatures": None}
 
 
-class FeaturizerAutoFilter:
+class FeaturizerMetaSelector:
     """
     Given a dataset as a dataframe, return a list of featurizer names.
     Currently only support removing definitely useless featurizers.
@@ -91,6 +91,7 @@ class FeaturizerAutoFilter:
     """
     def __init__(self, max_na_percent=0.05):
         self.max_na_percent = max_na_percent
+        self.excludes = list()
 
     @staticmethod
     def composition_featurizer_excludes(mfs, max_na_percent=0.05):
@@ -174,4 +175,6 @@ class FeaturizerAutoFilter:
                 auto_excludes.extend(exclude_fts(mfs, self.max_na_percent)
                                      if exclude_fts is not None else [])
 
-        return list(set(auto_excludes))
+        self.excludes = list(set(auto_excludes))
+
+        return self.excludes
