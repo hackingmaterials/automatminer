@@ -188,7 +188,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         # Remove features failing the max_na_frac limit
         feats0 = set(df.columns)
         if not self.is_fit:
-            self.logger.info("Handling na by max na threshold.")
+            self.logger.info("Handling na by max na threshold of {}."
+                             "".format(self.max_na_frac))
             df = df.dropna(axis=1,
                            thresh=int((1 - self.max_na_frac) * len(df)))
             if len(df.columns) < len(feats0):
