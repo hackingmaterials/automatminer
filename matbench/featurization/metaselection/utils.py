@@ -126,8 +126,8 @@ def _composition_prototype(composition):
 
     """
     c = Composition(composition)
-    c_int = Composition(c.get_integer_composition_and_factor()[0])
-    f_int_anynomous = c_int.anonymized_composition
+    c_int = Composition(c.get_integer_formula_and_factor()[0])
+    f_int_anynomous = c_int.anonymized_formula
     prototype = 0
     if f_int_anynomous is "ABCDE6" and Element("O") in Composition(
             composition).elements:

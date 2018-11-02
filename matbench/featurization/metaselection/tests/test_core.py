@@ -15,18 +15,19 @@ class TestDatasetMetaFeatures(unittest.TestCase):
         cls.df_castelli["structure"] = cls.df_castelli["structure"].\
             apply(lambda x: Structure.from_dict(x))
 
-    def test_formula_metafeatures(self):
+    def test_composition_metafeatures(self):
         mfs = _composition_metafeatures(self.df_glass)
-        mfs_values = mfs["formula_metafeatures"]
-        self.assertEqual(mfs_values["number_of_formulas"], 5959)
-        self.assertAlmostEqual(mfs_values["percent_of_all_metal"], 0.6578, 4)
+        mfs_values = mfs["composition_metafeatures"]
+        print(mfs_values)
+        self.assertEqual(mfs_values["number_of_compositions"], 5483)
+        self.assertAlmostEqual(mfs_values["percent_of_all_metal"], 0.6544, 4)
         self.assertAlmostEqual(
-            mfs_values["percent_of_metal_nonmetal"], 0.3208, 4)
-        self.assertAlmostEqual(mfs_values["percent_of_all_nonmetal"], 0.0214, 4)
+            mfs_values["percent_of_metal_nonmetal"], 0.3250, 4)
+        self.assertAlmostEqual(mfs_values["percent_of_all_nonmetal"], 0.0206, 4)
         self.assertAlmostEqual(
-            mfs_values["percent_of_contain_trans_metal"], 0.6877, 4)
+            mfs_values["percent_of_contain_trans_metal"], 0.6894, 4)
         self.assertEqual(mfs_values["number_of_different_elements"], 38)
-        self.assertAlmostEqual(mfs_values["avg_number_of_elements"], 1.9802, 4)
+        self.assertAlmostEqual(mfs_values["avg_number_of_elements"], 1.9931, 4)
         self.assertEqual(mfs_values["max_number_of_elements"], 2)
         self.assertEqual(mfs_values["min_number_of_elements"], 1)
 
@@ -40,9 +41,9 @@ class TestDatasetMetaFeatures(unittest.TestCase):
         self.assertEqual(
             mfs_values["number_of_different_elements_in_structures"], 56)
 
-    def test_auto_metafeatures(self):
+    def test_dataset_metafeatures(self):
         mfs = dataset_metafeatures(self.df_glass)
-        self.assertIn("formula_metafeatures", mfs.keys())
+        self.assertIn("composition_metafeatures", mfs.keys())
         self.assertIn("structure_metafeatures", mfs.keys())
         self.assertIsNone(mfs["structure_metafeatures"])
 
@@ -50,15 +51,16 @@ class TestDatasetMetaFeatures(unittest.TestCase):
 class TestFeaturizerAutoFilter(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.df_glass = load_glass_binary()
-        cls.df_castelli = load_castelli_perovskites()
+        cls.df_glass = load_glass_binary().rename(
+            columns={"formula": "composition"})
+        cls.df_castelli = load_castelli_perovskites().rename(
+            columns={"formula": "composition"})
         cls.df_castelli["structure"] = cls.df_castelli["structure"].\
             apply(lambda x: Structure.from_dict(x))
 
     def test_auto_excludes(self):
-        glass_ftz_excludes = \
-            FeaturizerMetaSelector(max_na_percent=0.05).\
-                auto_excludes(self.df_glass)
+        glass_ftz_excludes = FeaturizerMetaSelector(max_na_percent=0.05).\
+            auto_excludes(self.df_glass)
         self.assertIn("IonProperty", glass_ftz_excludes)
         self.assertIn("ElectronAffinity", glass_ftz_excludes)
         self.assertIn("ElectronegativityDiff", glass_ftz_excludes)
@@ -76,9 +78,8 @@ class TestFeaturizerAutoFilter(unittest.TestCase):
         self.assertIn("OxidationStates", glass_ftz_excludes)
         self.assertIn("CationProperty", glass_ftz_excludes)
 
-        castelli_ftz_excludes = \
-            FeaturizerMetaSelector(max_na_percent=0.05).\
-                auto_excludes(self.df_castelli)
+        castelli_ftz_excludes = FeaturizerMetaSelector(max_na_percent=0.05).\
+            auto_excludes(self.df_castelli)
         self.assertIn("YangSolidSolution", castelli_ftz_excludes)
         self.assertIn("Miedema", castelli_ftz_excludes)
         self.assertIn("TMetalFraction", castelli_ftz_excludes)

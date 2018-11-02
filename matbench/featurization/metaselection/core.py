@@ -91,7 +91,8 @@ class FeaturizerMetaSelector:
     """
     def __init__(self, max_na_percent=0.05):
         self.max_na_percent = max_na_percent
-        self.excludes = list()
+        self.dataset_mfs = None
+        self.excludes = None
 
     @staticmethod
     def composition_featurizer_excludes(mfs, max_na_percent=0.05):
@@ -165,9 +166,9 @@ class FeaturizerMetaSelector:
             ([str]): list of removable featurizers
         """
         auto_excludes = list()
-        auto_mfs = dataset_metafeatures(df, **mfs_kwargs)
+        self.dataset_mfs = dataset_metafeatures(df, **mfs_kwargs)
         for mfs_type in _supported_mfs_types:
-            mfs = auto_mfs.get("{}_metafeatures".format(mfs_type))
+            mfs = self.dataset_mfs.get("{}_metafeatures".format(mfs_type))
             if mfs is not None:
                 exclude_fts = getattr(self,
                                       "{}_featurizer_excludes".format(mfs_type),

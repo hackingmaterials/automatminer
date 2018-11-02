@@ -155,7 +155,7 @@ def _composition_stats(X):
 
 class NumberOfCompositions(MetaFeature):
     """
-    Number of formulas in the input dataset.
+    Number of compositions in the input dataset.
     """
     def calc(self, X, y=None):
         return len(X)
