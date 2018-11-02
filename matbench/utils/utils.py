@@ -3,6 +3,7 @@ import os
 import sys
 import warnings
 
+import pandas as pd
 
 class MatbenchError(BaseException):
     """
@@ -120,3 +121,25 @@ def compare_columns(df1, df2, ignore=None):
             "df1_not_in_df2": df1_not_in_df2,
             "mismatch": not matched}
 
+
+def regression_or_classification(series):
+    """
+    Determine if a series (target column) is numeric or categorical, to
+    decide on the problem as regression or classification.
+
+    Args:
+        series (pandas.Series): The target column.
+
+    Returns:
+        (str): "regression" or "classification"
+    """
+    try:
+        pd.to_numeric(series, errors="raise")
+        return "regression"
+    except (ValueError, TypeError):
+        return "classification"
+
+
+if __name__ == "__main__":
+    s = pd.Series(data=["4", "5", "6"])
+    print(regression_or_classification(s))
