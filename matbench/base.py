@@ -3,6 +3,7 @@ Base classes, mixins, and other inheritables.
 """
 
 import logging
+
 from matbench.utils.utils import initialize_logger, initialize_null_logger
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
