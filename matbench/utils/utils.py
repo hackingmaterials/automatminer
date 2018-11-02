@@ -6,6 +6,7 @@ import warnings
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 
+
 class MatbenchError(BaseException):
     """
     Exception specific to matbench methods.
@@ -18,21 +19,20 @@ class MatbenchError(BaseException):
         return "MatbenchError : " + self.msg
 
 
-def initialize_logger(filepath='.', filename=None, level=None):
+def initialize_logger(name, filepath='.', filename=None, level=None):
     """Initialize the default logger with stdout and file handlers.
     Args:
+        name (str): The logger name.
         filepath (str): Path to the folder where the log file will be written.
         filename (str): The log filename.
         level (int): The log level. For example logging.DEBUG.
     Returns:
         (Logger): A logging instance with customized formatter and handlers.
     """
-    package_name = MatbenchError.__module__.split('.')[0]
-
     level = level or logging.INFO
-    filename = filename or package_name + ".log"
+    filename = filename or name + ".log"
 
-    logger = logging.getLogger(package_name)
+    logger = logging.getLogger(name)
     formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
                                   datefmt='%Y-%m-%d %H:%M:%S')
 

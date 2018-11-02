@@ -8,6 +8,8 @@ from matbench.utils.utils import initialize_logger, initialize_null_logger
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
 
+logger_name = "matbench"
+
 
 class LoggableMixin(object):
     """A mixin class for easy logging (or absence of it)."""
@@ -32,16 +34,16 @@ class LoggableMixin(object):
         """
         # need comparison to True and False to avoid overwriting Logger objects
         if logger is True:
-            logger = logging.getLogger(self.__module__.split('.')[0])
+            logger = logging.getLogger(logger_name)
 
             if not logger.handlers:
-                initialize_logger()
+                initialize_logger(logger_name)
 
         elif logger is False:
-            logger = logging.getLogger(self.__module__.split('.')[0] + "_null")
+            logger = logging.getLogger(logger_name)
 
             if not logger.handlers:
-                initialize_null_logger()
+                initialize_null_logger(logger_name)
 
         return logger
 
