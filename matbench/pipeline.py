@@ -7,7 +7,7 @@ from matbench.base import LoggableMixin, DataframeTransformer
 from matbench.featurization import AutoFeaturizer
 from matbench.preprocessing import DataCleaner, FeatureReducer
 from matbench.automl.adaptors import TPOTAdaptor
-from matbench.utils.utils import regression_or_classification
+from matbench.utils.utils import regression_or_classification, check_fitted, set_fitted
 
 #todo: needs tests - alex
 #todo: tests should include using custom (user speficied) features as well
@@ -77,6 +77,9 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.ml_type = None
         self.common_kwargs = {"logger": self.logger}
 
+        #todo: implement persistence level
+
+    @set_fitted
     def fit(self, df, target):
         """
         Fit a matpipe to a dataframe. Once fit, can be used to predict out of
@@ -100,7 +103,6 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             MatPipe (self)
 
         """
-        self.is_fit = False
         self.pre_fit_df = df
         self.ml_type = regression_or_classification(df[target])
 
@@ -108,9 +110,9 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.autofeater = AutoFeaturizer(**self.common_kwargs)
         self.cleaner = DataCleaner(**self.common_kwargs)
         self.reducer = FeatureReducer(**self.common_kwargs)
-        self.learner = TPOTAdaptor("regression",
+        self.learner = TPOTAdaptor(self.ml_type,
                                    **self.common_kwargs,
-                                   max_time_mins=5)
+                                   max_time_mins=self.time_limit_mins)
 
         # Fit transformers on training data
         self.logger.info("Fitting MatPipe pipeline to data.")
@@ -120,9 +122,9 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.learner.fit(df, target)
         self.logger.info("MatPipe successfully fit.")
         self.post_fit_df = df
-        self.is_fit = True
         return self
 
+    @check_fitted
     def predict(self, df, target):
         """
         Predict a target property of a set of materials.
@@ -152,12 +154,27 @@ class MatPipe(DataframeTransformer, LoggableMixin):
     def benchmark(self, df, target, validation_fraction=0.2):
         """
 
+        If the target property is known for all data, perform an ML benchmark
+        using MatPipe. Used for getting an idea of how well AutoML can predict
+        a certain target property.
+
+        This method featurizes and cleans the entire dataframe, then splits
+        the data for training and testing. FeatureReducer and TPOT models are
+        fit on the training data. Finally, these fitted models are used to
+        predict the properties of the test df. This scheme allows for rigorous
+        ML model evaluation, as the feature selection and model fitting are
+        determined without any knowledge of the validation/test set.
+
         Args:
-            df:
-            target:
-            validation_fraction:
+            df (pandas.DataFrame): The dataframe for benchmarking. Must contain
+            target (str): The column name to use as the ml target property.
+            validation_fraction (float): Value between 0 and 1 indicating
+                the validation fraction desired. If set to 0, a cross-validation
+                only benchmarking is performed.
 
         Returns:
+            testdf (pandas.DataFrame): A dataframe containing validation data
+                and predicted data.
 
         """
         self.ml_type = regression_or_classification(df[target])
@@ -166,10 +183,12 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.autofeater = AutoFeaturizer()
         self.cleaner = DataCleaner()
         self.reducer = FeatureReducer()
-        self.learner = TPOTAdaptor("regression",
+        self.learner = TPOTAdaptor(self.ml_type,
                                    max_time_mins=self.time_limit_mins)
 
         # Fit transformers on all data
+        self.logger.info("Featurizing and cleaning {} samples from the entire"
+                         " dataframe.".format(df.shape[0]))
         df = self.autofeater.fit_transform(df, target)
         df = self.cleaner.fit_transform(df, target)
 
@@ -178,14 +197,29 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         msk = np.random.rand(len(df)) < validation_fraction
         traindf = df[~msk]
         testdf = df[msk]
+        self.logger.info("Dataframe split into training and testing fractions"
+                         " having {} and {} samples.".format(traindf.shape[0],
+                                                             testdf.shape[1]))
 
         # Use transformers on separate training and testing dfs
+        self.logger.info("Perforing feature reduction and model selection on "
+                         "the {}-sample training set.".format(traindf.shape[0]))
         traindf = self.reducer.fit_transform(traindf, target)
         self.learner.fit(traindf, target)
-        testdf = self.reducer.transform(testdf, target)
-        testdf = self.learner.predict(testdf, target)
-        return testdf
 
+
+        if validation_fraction != 0:
+            self.logger.info(
+                "Using pipe fitted on training data to predict target {} on "
+                "{}-sample validation dataset".format(target, testdf.shape[0]))
+            testdf = self.reducer.transform(testdf, target)
+            testdf = self.learner.predict(testdf, target)
+            return testdf
+        else:
+            self.logger.warning("Validation fraction set to zero. Using "
+                                "cross-validation-only benchmarking...")
+
+    @check_fitted
     def digest(self, filename, fmt="json"):
         """
         Save a text digest (summary) of the fitted pipeline. Similar to the log
