@@ -11,23 +11,23 @@ class TestFormulaMetafeatures(unittest.TestCase):
 
     def test_NumberOfCompositions(self):
         nf = NumberOfCompositions().calc(self.df_glass["composition"])
-        self.assertEqual(nf, 5959)
+        self.assertEqual(nf, 5483)
 
     def test_PercentOfAllMetal(self):
         pm = PercentOfAllMetal().calc(self.df_glass["composition"])
-        self.assertAlmostEqual(pm, 0.6578, 4)
+        self.assertAlmostEqual(pm, 0.6544, 4)
 
     def test_PercentOfMetalNonmetal(self):
         pmnc = PercentOfMetalNonmetal().calc(self.df_glass["composition"])
-        self.assertAlmostEqual(pmnc, 0.3208, 4)
+        self.assertAlmostEqual(pmnc, 0.3250, 4)
 
     def test_PercentOfAllNonmetal(self):
         pan = PercentOfAllNonmetal().calc(self.df_glass["composition"])
-        self.assertAlmostEqual(pan, 0.0214, 4)
+        self.assertAlmostEqual(pan, 0.0206, 4)
 
     def test_PercentOfContainTransMetal(self):
         pctm = PercentOfContainTransMetal().calc(self.df_glass["composition"])
-        self.assertAlmostEqual(pctm, 0.6877, 4)
+        self.assertAlmostEqual(pctm, 0.6894, 4)
 
     def test_NumberOfDifferentElements(self):
         nde = NumberOfDifferentElements().calc(self.df_glass["composition"])
@@ -35,7 +35,7 @@ class TestFormulaMetafeatures(unittest.TestCase):
 
     def test_AvgNumberOfElements(self):
         ane = AvgNumberOfElements().calc(self.df_glass["composition"])
-        self.assertAlmostEqual(ane, 1.9802, 4)
+        self.assertAlmostEqual(ane, 1.9931, 4)
 
     def test_MaxNumberOfElements(self):
         mne = MaxNumberOfElements().calc(self.df_glass["composition"])
