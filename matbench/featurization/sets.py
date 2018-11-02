@@ -225,7 +225,7 @@ class StructureFeaturizers(FeaturizerSet):
             sf.MaximumPackingEfficiency(),
             sf.XRDPowderPattern(),
             sf.Dimensionality(),
-            sf.OrbitalFieldMatrix(flatten=True)
+            # sf.OrbitalFieldMatrix(flatten=True)
         ]
 
         self._need_fitting_featurizers = [
