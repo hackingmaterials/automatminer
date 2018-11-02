@@ -86,7 +86,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("composition" not in df.columns)
         self.assertTrue("structure" not in df.columns)
 
-    def test_exclude(self):
+    def test_exclusions(self):
         """
         Test custom args for featurizers to use.
         """
@@ -105,6 +105,13 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         # Test to make sure excluded does not show up
         af = AutoFeaturizer(exclude=exclude, use_metaselector=False)
+        af.fit(df, target)
+        print(af.features)
+        df = af.fit_transform(df, target)
+        self.assertFalse(any([f in df.columns for f in ep_feats]))
+
+        # Test to see if metaselector works for this dataset
+        af = AutoFeaturizer(exclude=exclude, use_metaselector=True)
         af.fit(df, target)
         print(af.features)
         df = af.fit_transform(df, target)

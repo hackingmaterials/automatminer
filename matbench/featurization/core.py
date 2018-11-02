@@ -12,6 +12,11 @@ __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
               "Qi Wang <wqthu11@gmail.com>"]
 
+_supported_featurizer_types = {"composition": CompositionFeaturizers,
+                               "structure": StructureFeaturizers,
+                               "bandstructure": BSFeaturizers,
+                               "dos": DOSFeaturizers}
+
 _composition_aliases = ["comp", "Composition", "composition", "COMPOSITION",
                         "comp.", "formula", "chemical composition", "compositions"]
 _structure_aliases = ["structure", "struct", "struc", "struct.", "structures",
@@ -273,14 +278,16 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                  "these featurizers are excluded for returning "
                                  "nans more than the max_na_percent of {}: {}".
                                  format(self.max_na_percent, auto_exclude))
-            cfset = CompositionFeaturizers(exclude=self.exclude).best
-            sfset = StructureFeaturizers(exclude=self.exclude).best
-            bsfset = BSFeaturizers(exclude=self.exclude).best
-            dosfset = DOSFeaturizers(exclude=self.exclude).best
-            self.featurizers = {"composition": cfset,
-                                "structure": sfset,
-                                "bandstructure": bsfset,
-                                "dos": dosfset}
+            for featurizer_type in _supported_featurizer_types.keys():
+                if featurizer_type in df.columns:
+                    featurizer_set = _supported_featurizer_types[featurizer_type]
+                    self.featurizers[featurizer_type] = \
+                        featurizer_set(exclude=self.exclude).best
+                else:
+                    self.logger.info("Featurizer type {} not in the dataframe"
+                                     "to be fitted. Skipping...".
+                                     format(featurizer_type))
+
         else:
             if not isinstance(self.featurizers, dict):
                 raise TypeError("Featurizers must be a dictionary with keys"
