@@ -24,21 +24,26 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         - ml-preprocessing
         - automl model fitting and creation
 
-    Use the pipeline by fitting it on a training dataframe using the fit method.
-    Then predict the properties of new materials by passing a dataframe to the
-    transform method.
+    If you are using MatPipe for benchmarking, use the "benchmark" method.
+
+    If you have some training data and want to use MatPipe for production
+    predictions (e.g., predicting material properties for which you have
+    no data) use "fit" and "predict".
 
     The pipeline is transferrable. So it can be fit on one dataset and used
-    to predict the properties of another. In a rigorous validation experiment,
-    this is how validation can be conducted, to avoid overfitting by, for
-    example, running feature reduction on a mixture of validation and training
-    data.
+    to predict the properties of another. Furthermore, the entire pipeline and
+    all constituent objects can be summarized in text with "digest".
 
     Examples:
-        pipe = MatPipe()                                          # make a pipe
-        pipe.fit(training_df, "target_property")                  # fit it (can be used for benchmarking)
-        predictions = pipe.predict(other_df, "target_property")   # use it to predict properties
-        pipe.to("json")                                           # save how the pipe was constructed
+        # A benchmarking experiment, where all property values are known
+        pipe = MatPipe()
+        validation_predictions = pipe.benchmark(df, "target_property")
+
+        # Creating a pipe with data containing known properties, then predicting
+        # on new materials
+        pipe = MatPipe()
+        pipe.fit(training_df, "target_property")
+        predictions = pipe.predict(unknown_df, "target_property")
 
     Args:
         persistence_lvl (int): Persistence level of 0 saves nothing. 1 saves
