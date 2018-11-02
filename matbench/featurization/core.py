@@ -1,6 +1,7 @@
 from sklearn.exceptions import NotFittedError
 from pymatgen import Composition
-from matminer.featurizers.conversions import StructureToOxidStructure, StrToComposition, DictToObject, StructureToComposition
+from matminer.featurizers.conversions import StructureToOxidStructure, \
+    StrToComposition, DictToObject, StructureToComposition
 
 from matbench.utils.utils import MatbenchError, check_fitted, set_fitted
 from matbench.base import DataframeTransformer, LoggableMixin
@@ -163,6 +164,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.exclude = exclude
         self.use_metaselector = use_metaselector
         self.max_na_percent = max_na_percent
+        self.auto_featurizer = True if self.featurizers is None else False
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
         self.ignore_errors = ignore_errors
@@ -171,7 +173,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.n_jobs = n_jobs
         self.guess_oxistates = guess_oxistates
         self.features = []
-
 
     @set_fitted
     def fit(self, df, target):
@@ -265,17 +266,24 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         return df
 
     def _customize_featurizers(self, df):
-        # Set featurizers
+        # auto_set featurizers
         if not self.featurizers:
+            self.auto_featurizer = True
+            self.featurizers = dict()
+            # use FeaturizerMetaSelector to get removable featurizers
             if self.use_metaselector:
                 self.metaselector = FeaturizerMetaSelector(self.max_na_percent)
                 auto_exclude = self.metaselector.auto_excludes(df)
-                self.exclude = auto_exclude.extend(self.exclude) \
-                    if self.exclude is None else auto_exclude
-                self.logger.info("Based on metafeatures of the given dataset, "
-                                 "these featurizers are excluded for returning "
-                                 "nans more than the max_na_percent of {}: {}".
-                                 format(self.max_na_percent, auto_exclude))
+                if auto_exclude:
+                    self.logger.info("Based on metafeatures of the dataset, "
+                                     "these featurizers are excluded for "
+                                     "returning nans more than the "
+                                     "max_na_percent of {}: {}".
+                                     format(self.max_na_percent, auto_exclude))
+                    if self.exclude:
+                        auto_exclude.extend(self.exclude)
+                    self.exclude = auto_exclude
+
             for featurizer_type in _supported_featurizer_types.keys():
                 if featurizer_type in df.columns:
                     featurizer_set = _supported_featurizer_types[featurizer_type]
@@ -285,7 +293,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     self.logger.info("Featurizer type {} not in the dataframe"
                                      "to be fitted. Skipping...".
                                      format(featurizer_type))
-
+        # user_set featurizers
         else:
             if not isinstance(self.featurizers, dict):
                 raise TypeError("Featurizers must be a dictionary with keys"
@@ -308,10 +316,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                             "The featurizers dict key {} is not a valid "
                             "featurizer type. Please choose from {}".format(
                                 ftype, _aliases))
-                # Assign empty featurizer list to featurizers not specified by type
-                for ftype in ["composition", "structure", "bandstructure", "dos"]:
-                    if ftype not in self.featurizers:
-                        self.featurizers[ftype] = []
 
     def _tidy_column(self, df, featurizer_type):
         """
@@ -385,13 +389,14 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Contains composition column if desired
         """
-        self.logger.debug("Adding compositions from structures.")
-        if self.featurizers["composition"]:
-            if "structure" in df.columns and "composition" not in df.columns:
+        if "structure" in df.columns and "composition" not in df.columns:
+            if self.auto_featurizer or (set(_composition_aliases)
+                                        & set(self.featurizers.keys())):
                 df = self._tidy_column(df, "structure")
                 struct2comp = StructureToComposition(
                     target_col_id="composition", overwrite_data=False)
                 df = struct2comp.featurize_dataframe(df, "structure")
+                self.logger.debug("Adding compositions from structures.")
         return df
 
 
