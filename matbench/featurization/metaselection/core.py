@@ -24,7 +24,7 @@ def dataset_metafeatures(df, **mfs_kwargs):
                                   ...}}
     if there is no corresponding column in the dataset, the value is None.
 
-    These dataset metafeatures will be used in FeaturizerAutoFilter to remove
+    These dataset metafeatures will be used in FeaturizerMetaSelector to remove
     some featurizers that definitely do not work for this dataset (returning
     nans more than the allowed max_na_percent).
     Args:
@@ -35,14 +35,14 @@ def dataset_metafeatures(df, **mfs_kwargs):
         (dict): {"composition_metafeatures": composition_mfs/None,
                  "structure_metafeatures": structure_mfs/None}
         """
-    auto_mfs = dict()
+    dataset_mfs = dict()
     for mfs_type in _supported_mfs_types:
         input_col = mfs_kwargs.get("{}_col".format(mfs_type), mfs_type)
         mfs_func = getattr(sys.modules[__name__],
                            "_{}_metafeatures".format(mfs_type), None)
-        auto_mfs.update(mfs_func(df, input_col) if mfs_func is not None else {})
+        dataset_mfs.update(mfs_func(df, input_col) if mfs_func is not None else {})
 
-    return auto_mfs
+    return dataset_mfs
 
 
 def _composition_metafeatures(df, composition_col="composition"):
