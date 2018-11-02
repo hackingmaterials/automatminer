@@ -9,7 +9,7 @@ from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 from matbench.utils.utils import MatbenchError, compare_columns, check_fitted, \
-    set_fitted
+    set_fitted, regression_or_classification
 from matbench.base import LoggableMixin, DataframeTransformer
 from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, \
     rebate
@@ -258,7 +258,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Returns:
             (pandas.DataFrame) The numerical df
         """
-
+        self.logger.info("Replacing infinite values with nan for easier screening.")
+        df = df.replace([np.inf, -np.inf], np.nan)
         self.number_cols = []
         self.object_cols = []
         for c in df.columns.values:
@@ -409,14 +410,11 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             else:
                 X = df.drop(columns=[target])
                 y = df[target]
+
                 if r == "tree":
-                    mode = "regression"
-                    try:
-                        pd.to_numeric(df[target])
-                    except BaseException:
-                        mode = "classification"
-                    tbfr = TreeBasedFeatureReduction(mode=mode,
-                                                     logger=self.logger)
+                    tbfr = TreeBasedFeatureReduction(
+                        mode=regression_or_classification(df[target]),
+                        logger=self.logger)
                     reduced_df = tbfr.fit_transform(X, y)
                     self.reducer_params[r] = {
                         "importance_percentile": tbfr.importance_percentile,

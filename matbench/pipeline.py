@@ -7,7 +7,8 @@ from matbench.base import LoggableMixin, DataframeTransformer
 from matbench.featurization import AutoFeaturizer
 from matbench.preprocessing import DataCleaner, FeatureReducer
 from matbench.automl.adaptors import TPOTAdaptor
-from matbench.utils.utils import regression_or_classification, check_fitted, set_fitted
+from matbench.utils.utils import regression_or_classification, check_fitted, \
+    set_fitted
 
 #todo: needs tests - alex
 #todo: tests should include using custom (user speficied) features as well
@@ -44,6 +45,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             intermediate dataframes and final dataframes. 2 saves all dataframes
             and all objects used to create the pipeline, and auto-saves a digest
         time_limit_mins (int): The approximate time limit, in minutes.
+        # todo: add the new attrs
 
 
     Attributes:
@@ -78,6 +80,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.common_kwargs = {"logger": self.logger}
 
         #todo: implement persistence level
+        #todo: implement scoring selection
 
     @set_fitted
     def fit(self, df, target):
@@ -165,6 +168,17 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         ML model evaluation, as the feature selection and model fitting are
         determined without any knowledge of the validation/test set.
 
+        To use a random validation set for model validation, pass in a nonzero
+        validation fraction. The returned df will have the validation
+        predictions.
+
+        To use a CV-only validation, use a validation frac. of 0. The original
+        df will be returned having predictions made on all training data. This
+        should ONLY be used to evaluate the training error!
+
+        Whether using CV-only or validation, both will create CV information
+        in the MatPipe.learner.best_models variable.
+
         Args:
             df (pandas.DataFrame): The dataframe for benchmarking. Must contain
             target (str): The column name to use as the ml target property.
@@ -174,17 +188,20 @@ class MatPipe(DataframeTransformer, LoggableMixin):
 
         Returns:
             testdf (pandas.DataFrame): A dataframe containing validation data
-                and predicted data.
+                and predicted data. If validation_fraction is set to 0, test df
+                will contain PREDICTIONS MADE ON TRAINING DATA. This should be
+                used to evaluate the training error only.
 
         """
         self.ml_type = regression_or_classification(df[target])
 
         # Get top-lvel transformers
-        self.autofeater = AutoFeaturizer()
-        self.cleaner = DataCleaner()
-        self.reducer = FeatureReducer()
+        self.autofeater = AutoFeaturizer(**self.common_kwargs)
+        self.cleaner = DataCleaner(**self.common_kwargs)
+        self.reducer = FeatureReducer(**self.common_kwargs)
         self.learner = TPOTAdaptor(self.ml_type,
-                                   max_time_mins=self.time_limit_mins)
+                                   max_time_mins=self.time_limit_mins,
+                                   **self.common_kwargs)
 
         # Fit transformers on all data
         self.logger.info("Featurizing and cleaning {} samples from the entire"
@@ -234,3 +251,26 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             None
         """
         pass
+
+
+if __name__ == "__main__":
+    from sklearn.metrics import mean_squared_error
+    from matminer.datasets.dataset_retrieval import load_dataset
+    hugedf = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"})[["composition",  "K_VRH"]]
+    df = hugedf.iloc[:100]
+    df2 = hugedf.iloc[101:150]
+    target = "K_VRH"
+
+    # mp = MatPipe()
+    # mp.fit(df, target)
+    # print(mp.predict(df2, target))
+
+    mp = MatPipe()
+    df = mp.benchmark(df, target, validation_fraction=0.2)
+    print(df)
+    print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
+    #
+    # mp = MatPipe()
+    # df = mp.benchmark(df, target, validation_fraction=0)
+    # print(df)
+    # print("CV scores: {}".format(mp.learner.best_scores))
