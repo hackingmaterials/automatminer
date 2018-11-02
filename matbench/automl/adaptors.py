@@ -13,7 +13,7 @@ from tpot import TPOTClassifier, TPOTRegressor
 
 from matbench.automl.tpot_configs.classifier import classifier_config_dict_mb
 from matbench.automl.tpot_configs.regressor import regressor_config_dict_mb
-from matbench.utils.utils import is_greater_better, MatbenchError
+from matbench.utils.utils import is_greater_better, MatbenchError, set_fitted, check_fitted
 from matbench.base import AutoMLAdaptor, LoggableMixin
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
@@ -92,7 +92,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         self.is_fit = False
         self.random_state = tpot_kwargs.get('random_state', None)
 
-
+    @set_fitted
     def fit(self, df, target, **fit_kwargs):
         """
         Train a TPOTRegressor or TPOTClassifier by fitting on a dataframe.
@@ -112,7 +112,6 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         X = df.drop(columns=target).values.tolist()
         self._features = df.drop(columns=target).columns.tolist()
         self._ml_data = {"X": X, "y": y}
-        self.is_fit = True
         self.fitted_target = target
         self.logger.info("TPOT fitting started.")
         self._backend = self._backend.fit(X, y, **fit_kwargs)
@@ -120,6 +119,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         return self
 
 
+    @check_fitted
     @property
     def _best_models(self):
         """
@@ -134,9 +134,6 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
                 best hyperparameter combination found.
 
         """
-        if not self.is_fit:
-            raise NotFittedError("Error, the model has not yet been fit")
-
         self.greater_score_is_better = is_greater_better(
             self.backend.scoring_function)
 
@@ -179,6 +176,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         self.models = models
         return best_models_and_scores
 
+    @check_fitted
     def predict(self, df, target):
         """
         Predict the target property of materials given a df of features.
@@ -231,8 +229,8 @@ if __name__ == "__main__":
 
     # Load a dataset
     df = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"})[["composition",  "K_VRH"]]
-    testdf = df.iloc[60:90]
-    traindf = df.iloc[:500]
+    testdf = df.iloc[501:550]
+    traindf = df.iloc[:100]
     target = "K_VRH"
 
     # Get top-lvel transformers
@@ -245,13 +243,11 @@ if __name__ == "__main__":
     traindf = autofeater.fit_transform(traindf, target)
     traindf = cleaner.fit_transform(traindf, target)
     traindf = reducer.fit_transform(traindf, target)
+    learner.fit(traindf, target)
 
     # Use transformers on testing data
     testdf = autofeater.transform(testdf, target)
     testdf = cleaner.transform(testdf, target)
     testdf = reducer.transform(testdf, target)
-
-    # Use training data to predict testing data
-    learner.fit(traindf, target)
     testdf = learner.predict(testdf, target)
     print(testdf)
