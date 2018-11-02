@@ -8,7 +8,8 @@ from sklearn.decomposition import PCA
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
-from matbench.utils.utils import MatbenchError, compare_columns
+from matbench.utils.utils import MatbenchError, compare_columns, check_fitted, \
+    set_fitted, regression_or_classification
 from matbench.base import LoggableMixin, DataframeTransformer
 from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, \
     rebate
@@ -87,6 +88,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
         return self.fitted_df.columns.tolist()
 
+    @set_fitted
     def fit(self, df, target):
         """
         Assign attributes before actually transforming. Useful if you want
@@ -110,9 +112,9 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         # df = self.scale_df(df, target)
         self.fitted_df = df
         self.fitted_target = target
-        self.is_fit = True
         return self
 
+    @check_fitted
     def transform(self, df, target):
         """
         A sequence of data pre-processing steps either through this class or
@@ -124,8 +126,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
         Returns (pandas.DataFrame)
         """
-        if not self.is_fit:
-            raise NotFittedError("DataCleaner has not been fit yet!")
 
         if target != self.fitted_target:
             raise MatbenchError(
@@ -188,7 +188,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         # Remove features failing the max_na_frac limit
         feats0 = set(df.columns)
         if not self.is_fit:
-            self.logger.info("Handling na by max na threshold.")
+            self.logger.info("Handling na by max na threshold of {}."
+                             "".format(self.max_na_frac))
             df = df.dropna(axis=1,
                            thresh=int((1 - self.max_na_frac) * len(df)))
             if len(df.columns) < len(feats0):
@@ -257,7 +258,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Returns:
             (pandas.DataFrame) The numerical df
         """
-
+        self.logger.info("Replacing infinite values with nan for easier screening.")
+        df = df.replace([np.inf, -np.inf], np.nan)
         self.number_cols = []
         self.object_cols = []
         for c in df.columns.values:
@@ -398,6 +400,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         self.retained_features = []
         self.reducer_params = {}
 
+    @set_fitted
     def fit(self, df, target):
         for r in self.reducers:
             if r == "corr":
@@ -407,14 +410,11 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             else:
                 X = df.drop(columns=[target])
                 y = df[target]
+
                 if r == "tree":
-                    mode = "regression"
-                    try:
-                        pd.to_numeric(df[target])
-                    except BaseException:
-                        mode = "classification"
-                    tbfr = TreeBasedFeatureReduction(mode=mode,
-                                                     logger=self.logger)
+                    tbfr = TreeBasedFeatureReduction(
+                        mode=regression_or_classification(df[target]),
+                        logger=self.logger)
                     reduced_df = tbfr.fit_transform(X, y)
                     self.reducer_params[r] = {
                         "importance_percentile": tbfr.importance_percentile,
@@ -458,7 +458,9 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         self.retained_features = [c for c in df.columns.tolist() if c != target]
         return self
 
+    @check_fitted
     def transform(self, df, target):
+        # todo: PCA will not work here...
         if target in df.columns:
             return df[self.retained_features + [target]]
         else:

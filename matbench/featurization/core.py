@@ -2,7 +2,7 @@ from sklearn.exceptions import NotFittedError
 from pymatgen import Composition
 from matminer.featurizers.conversions import StructureToOxidStructure, StrToComposition, DictToObject, StructureToComposition
 
-from matbench.utils.utils import MatbenchError
+from matbench.utils.utils import MatbenchError, check_fitted, set_fitted
 from matbench.base import DataframeTransformer, LoggableMixin
 from matbench.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
@@ -197,6 +197,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                         featurizers[ftype] = []
                 self.featurizers = featurizers
 
+    @set_fitted
     def fit(self, df, target):
         """
         Fit all featurizers to the df.
@@ -219,7 +220,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             (AutoFeaturizer): self
         """
-        self.is_fit = False
         df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
         for featurizer_type, featurizers in self.featurizers.items():
@@ -234,9 +234,9 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     self.features += f.feature_labels()
                     self.logger.info("Fit {} to {} samples in dataframe."
                                      "".format(f.__class__.__name__, df.shape[0]))
-        self.is_fit = True
         return self
 
+    @check_fitted
     def transform(self, df, target):
         """
         Decorate a dataframe containing composition, structure, bandstructure,
@@ -249,9 +249,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Transformed dataframe containing features.
         """
-        if not self.is_fit:
-            # Featurization requires featurizers already be fit...
-            raise NotFittedError("AutoFeaturizer has not been fit!")
         df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
 
@@ -368,6 +365,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     target_col_id="composition", overwrite_data=False)
                 df = struct2comp.featurize_dataframe(df, "structure")
         return df
+
 
 if __name__ == "__main__":
     from matminer.datasets.dataset_retrieval import load_dataset

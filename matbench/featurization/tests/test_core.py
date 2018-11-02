@@ -6,19 +6,24 @@ import pandas as pd
 from pymatgen import Composition
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.datasets.dataset_retrieval import load_dataset
-from matminer.featurizers.composition import ElectronAffinity, ElementProperty, AtomicOrbitals
-from matminer.featurizers.structure import GlobalSymmetryFeatures, DensityFeatures
+from matminer.featurizers.composition import ElectronAffinity, ElementProperty, \
+    AtomicOrbitals
+from matminer.featurizers.structure import GlobalSymmetryFeatures, \
+    DensityFeatures
 
 from matbench.featurization.core import AutoFeaturizer
 
 test_dir = os.path.dirname(__file__)
 
-__author__ = ["Alex Dunn <ardunn@lbl.gov>", "Alireza Faghaninia <alireza@lbl.gov>"]
+__author__ = ["Alex Dunn <ardunn@lbl.gov>",
+              "Alireza Faghaninia <alireza@lbl.gov>"]
+
 
 class TestAutoFeaturizer(unittest.TestCase):
 
     def setUp(self, limit=5):
-        self.test_df = load_dataset('elastic_tensor_2015').rename(columns={"formula": "composition"})
+        self.test_df = load_dataset('elastic_tensor_2015').rename(
+            columns={"formula": "composition"})
         self.limit = limit
 
     def test_sanity(self):
@@ -52,7 +57,6 @@ class TestAutoFeaturizer(unittest.TestCase):
                                0.5384615384615384)
         self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
         self.assertTrue("composition" not in df.columns)
-
 
     def test_featurize_structure(self):
         """
@@ -120,7 +124,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         for flabels in [ep_feats, ef_feats, ao_feats]:
             self.assertFalse(any([f in df.columns for f in flabels]))
 
-
     def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
         """
         Tests featurize_dos and featurize_bandstructure.
@@ -138,11 +141,11 @@ class TestAutoFeaturizer(unittest.TestCase):
         if refresh_df_init:
             mpdr = MPDataRetrieval()
             df = mpdr.get_dataframe(criteria={"material_id": "mp-149"},
-                                         properties=["pretty_formula",
-                                                     "dos",
-                                                     "bandstructure",
-                                                     "bandstructure_uniform"]
-                                         )
+                                    properties=["pretty_formula",
+                                                "dos",
+                                                "bandstructure",
+                                                "bandstructure_uniform"]
+                                    )
             df.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
         else:
             df = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
