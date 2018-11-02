@@ -155,7 +155,8 @@ def check_fitted(func):
             raise AttributeError("Method using check_fitted has no is_fit attr"
                                  " to check if fitted!")
         if not args[0].is_fit:
-            raise NotFittedError("DataframeTransformer has not been fit!")
+            raise NotFittedError("{} has not been fit!"
+                                 "".format(args[0].__class__.__name__))
         else:
             return func(*args, **kwargs)
     return wrapper
@@ -176,6 +177,7 @@ def set_fitted(func):
         args[0].is_fit = True
         return result
     return wrapper
+
 
 if __name__ == "__main__":
     s = pd.Series(data=["4", "5", "6"])
