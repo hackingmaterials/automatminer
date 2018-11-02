@@ -8,7 +8,8 @@ from sklearn.decomposition import PCA
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
-from matbench.utils.utils import MatbenchError, compare_columns
+from matbench.utils.utils import MatbenchError, compare_columns, check_fitted, \
+    set_fitted
 from matbench.base import LoggableMixin, DataframeTransformer
 from matbench.preprocessing.feature_selection import TreeBasedFeatureReduction, \
     rebate
@@ -87,6 +88,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
         return self.fitted_df.columns.tolist()
 
+    @set_fitted
     def fit(self, df, target):
         """
         Assign attributes before actually transforming. Useful if you want
@@ -110,9 +112,9 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         # df = self.scale_df(df, target)
         self.fitted_df = df
         self.fitted_target = target
-        self.is_fit = True
         return self
 
+    @check_fitted
     def transform(self, df, target):
         """
         A sequence of data pre-processing steps either through this class or
@@ -124,8 +126,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
         Returns (pandas.DataFrame)
         """
-        if not self.is_fit:
-            raise NotFittedError("DataCleaner has not been fit yet!")
 
         if target != self.fitted_target:
             raise MatbenchError(
@@ -399,6 +399,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         self.retained_features = []
         self.reducer_params = {}
 
+    @set_fitted
     def fit(self, df, target):
         for r in self.reducers:
             if r == "corr":
@@ -459,7 +460,9 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         self.retained_features = [c for c in df.columns.tolist() if c != target]
         return self
 
+    @check_fitted
     def transform(self, df, target):
+        # todo: PCA will not work here...
         if target in df.columns:
             return df[self.retained_features + [target]]
         else:
