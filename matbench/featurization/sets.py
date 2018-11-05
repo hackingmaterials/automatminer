@@ -224,7 +224,8 @@ class StructureFeaturizers(FeaturizerSet):
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
             sf.XRDPowderPattern(),
-            sf.Dimensionality()
+            sf.Dimensionality(),
+            sf.OrbitalFieldMatrix(flatten=True)
         ]
 
         self._need_fitting_featurizers = [
@@ -237,7 +238,7 @@ class StructureFeaturizers(FeaturizerSet):
             sf.RadialDistributionFunction(),  # returns dict
             sf.CoulombMatrix(),  # returns a matrix
             sf.SineCoulombMatrix(),  # returns a matrix
-            sf.OrbitalFieldMatrix(),  # returns a matrix
+            sf.OrbitalFieldMatrix(flatten=False),  # returns a matrix
             sf.MinimumRelativeDistances(),  # returns a list
             sf.ElectronicRadialDistributionFunction()
         ]
@@ -247,6 +248,7 @@ class StructureFeaturizers(FeaturizerSet):
             sf.PartialRadialDistributionFunction(),
             sf.BondFractions(),
             sf.BagofBonds(),
+            sf.OrbitalFieldMatrix(flatten=True)
         ]
 
     @property

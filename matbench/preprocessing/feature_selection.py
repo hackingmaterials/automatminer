@@ -129,7 +129,7 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
         all_feats = []
         for train, test in cv.split(X, y, groups=None):
             Xtrn = X.iloc[train]
-            ytrn = y[train]
+            ytrn = y.iloc[train]
             all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
         # take the union of selected features of each fold
         self.selected_features = list(set(all_feats))

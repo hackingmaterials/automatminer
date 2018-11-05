@@ -1,289 +1,379 @@
-from matminer.featurizers.conversions import (CompositionToOxidComposition,
-                                              StructureToOxidStructure)
-from pymatgen import Composition, Structure
-from pymatgen.electronic_structure.bandstructure import BandStructure
-from pymatgen.electronic_structure.dos import CompleteDos
+from sklearn.exceptions import NotFittedError
+from pymatgen import Composition
+from matminer.featurizers.conversions import StructureToOxidStructure, StrToComposition, DictToObject, StructureToComposition
 
-from matbench.base import LoggableMixin
-from matbench.utils.utils import MatbenchError
+from matbench.utils.utils import MatbenchError, check_fitted, set_fitted
+from matbench.base import DataframeTransformer, LoggableMixin
 from matbench.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 
+__author__ = ["Alex Dunn <ardunn@lbl.gov>", "Alireza Faghaninia <alireza@lbl.gov>"]
 
-class Featurization(LoggableMixin):
-    """
-    Takes in a dataframe and generate features from preset columns such as
-    "formula", "structure", "bandstructure", "dos", etc. One may use
-    the auto_featurize method to featurize via all available featurizers
-    with default setting or selectively call featurizer methods.
-    Usage examples:
-        featurizer = Featurize()
-            df = featurizer.auto_featurize(df) # all features of all types
-        or:
-            df = featurizer.featurize_formula(df) # all formula-related feature
-        or:
-            df = featurizer.featurize_dos(df, featurizers=[Hybridization()])
+
+_composition_aliases = ["comp", "Composition", "composition", "COMPOSITION",
+                        "comp.", "formula", "chemical composition", "compositions"]
+_structure_aliases = ["structure", "struct", "struc", "struct.", "structures",
+                      "STRUCTURES", "Structure", "structures", "structs"]
+_bandstructure_aliases = ["bandstructure", "bs", "bsdos", "BS", "BSDOS",
+                          "Bandstructure"]
+_dos_aliases = ["density of states", "dos", "DOS", "Density of States"]
+_aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases + _dos_aliases
+
+
+# todo: use the matminer version once its fixed and pushed
+from matminer.featurizers.conversions import ConversionFeaturizer
+class CompositionToOxidComposition(ConversionFeaturizer):
+    """Utility featurizer to add oxidation states to a pymatgen Composition.
+
+    Oxidation states are determined using pymatgen's guessing routines.
+    The expected input is a `pymatgen.core.composition.Composition` object.
+
+    Note that this Featurizer does not produce machine learning-ready features
+    but instead can be applied to pre-process data or as part of a Pipeline.
 
     Args:
-        ignore_cols ([str]): if set, these columns are excluded
-        preset_name (str): some featurizers (w/ from_preset) take in this arg
-        ignore_errors (bool): whether to ignore exceptions raised when
-            featurize_dataframe is called
-        drop_featurized_col (bool): whether to drop the featurized column after
-            the corresponding featurize_* method is called
-        exclude ([str]): list of the featurizer names to be excluded. Note
-            that these names are str (e.g. "ElementProperty") and not the class
-        multiindex (bool): a matminer featurizer argument that transforms
-            feature label to tuples that makes it easier to track them back to
-            which featurizer they come from.
-            * Note: if you set to True and your target is "gap", you need to
-            pass target = ("Input Data", "gap") in classes such as PreProcess.
-        n_jobs (int): number of CPUs/workers used in featurization. Default
-            behavior is matminer's default behavior.
+        **kwargs: Parameters to control the settings for
+            `pymatgen.io.structure.Structure.add_oxidation_state_by_guess()`.
+        target_col_id (str or None): The column in which the converted data will
+            be written. If the column already exists then an error will be
+            thrown unless `overwrite_data` is set to `True`. If `target_col_id`
+            begins with an underscore the data will be written to the column:
+            `"{}_{}".format(col_id, target_col_id[1:])`, where `col_id` is the
+            column being featurized. If `target_col_id` is set to None then
+            the data will be written "in place" to the `col_id` column (this
+            will only work if `overwrite_data=True`).
+        overwrite_data (bool): Overwrite any data in `target_column` if it
+            exists.
+        coerce_mixed (bool): If a composition has both species containing
+            oxid states and not containing oxid states, strips all of the
+            oxid states and guesses the entire composition's oxid states.
+
+    """
+
+    def __init__(self, target_col_id='composition_oxid', overwrite_data=False,
+                 coerce_mixed=True, **kwargs):
+        super().__init__(target_col_id, overwrite_data)
+        self.oxi_guess_params = kwargs
+        self.coerce_mixed = coerce_mixed
+
+    def featurize(self, comp):
+        """Add oxidation states to a Structure using pymatgen's guessing routines.
+
+        Args:
+            comp (`pymatgen.core.composition.Composition`): A composition.
+
+        Returns:
+            (`pymatgen.core.composition.Composition`): A Composition object
+                decorated with oxidation states.
+        """
+        els_have_oxi_states = [hasattr(s, "oxi_state") for s in comp.elements]
+        if all(els_have_oxi_states):
+            return [comp]
+        elif any(els_have_oxi_states):
+            if self.coerce_mixed:
+                comp = comp.element_composition
+            else:
+                raise ValueError("Composition {} has a mix of species with "
+                                 "and without oxidation states. Please enable "
+                                 "coercion to all oxidation states with "
+                                 "coerce_mixed.".format(comp))
+        return [comp.add_charges_from_oxi_state_guesses(
+            **self.oxi_guess_params)]
+
+    def citations(self):
+        return [(
+            "@article{ward_agrawal_choudary_wolverton_2016, title={A "
+            "general-purpose machine learning framework for predicting "
+            "properties of inorganic materials}, volume={2}, "
+            "DOI={10.1038/npjcompumats.2017.28}, number={1}, journal={npj "
+            "Computational Materials}, author={Ward, Logan and Agrawal, Ankit "
+            "and Choudhary, Alok and Wolverton, Christopher}, year={2016}}")]
+
+    def implementors(self):
+        return ["Anubhav Jain", "Alex Ganose", "Alex Dunn"]
+
+class AutoFeaturizer(DataframeTransformer, LoggableMixin):
+    """
+    Automatically featurize a dataframe.
+
+    Use this object first by calling fit, then by calling transform.
+
+    AutoFeaturizer works with a fixed set of possible column names.
+        "composition": To use composition features
+        "structure": To use structure features
+        "bandstructure": To use bandstructure features
+        "dos": To use density of states features
+
+    The featurizers corresponding to each featurizer type cannot be used if
+    the correct column name is not present.
+
+    Args:
+        featurizers (dict): Values are the featurizer types you want applied
+            (e.g., "structure", "composition"). The corresponding values
+            are lists of featurizer objects you want applied for each featurizer
+            type.
+
+            Example:
+                 {"composition": [ElementProperty.from_preset("matminer"),
+                                  EwaldEnergy()]
+                  "structure": [BagofBonds(), GlobalSymmetryFeatures()]}
+            Valid keys for each featurizer type are given in the *_aliases
+            constants above.
+        ignore_cols ([str]): Column names to be ignored/removed from any
+            dataframe undergoing fitting or transformation.
+        ignore_errors (bool): If True, each featurizer will ignore all errors
+            during featurization.
+        drop_inputs (bool): Drop the columns containing input objects for
+            featurization (e.g., drop composition column folllowing featurization).
+        exclude ([str]): Class names of featurizers to exclude. Only used if
+            your own featurizer dict is NOT passed.
+        guess_oxistates (bool): If True, try to decorate sites with oxidation state.
+        multiiindex (bool): If True, returns a multiindexed dataframe.
+        n_jobs (int): The number of parallel jobs to use during featurization
+            for each featurizer. -1 sets n_jobs = n_cores
         logger (Logger, bool): A custom logger object to use for logging.
             Alternatively, if set to True, the default matbench logger will be
             used. If set to False, then no logging will occur.
+
+    Attributes:
+        These attributes are set during fitting
+
+        featurizers (dict): Same format as input dictionary in Args. Values
+            contain the actual objects being used for featurization.
+        features (dict): The features generated from the application of all
+            featurizers.
+
     """
 
-    def __init__(self, ignore_cols=None, ignore_errors=True,
-                 drop_featurized_col=True, exclude=None, multiindex=False,
-                 n_jobs=None, logger=True):
+    def __init__(self, featurizers=None, ignore_cols=None, ignore_errors=True,
+                 drop_inputs=True, exclude=None, guess_oxistates=True,
+                 multiindex=False, n_jobs=None, logger=True):
+
         self._logger = self.get_logger(logger)
         self.ignore_cols = ignore_cols or []
-        self.cfset = CompositionFeaturizers(exclude=exclude)
-        self.sfset = StructureFeaturizers(exclude=exclude)
-        self.bsfset = BSFeaturizers(exclude=exclude)
-        self.dosfset = DOSFeaturizers(exclude=exclude)
+        self.is_fit = False
         self.ignore_errors = ignore_errors
-        self.drop_featurized_col = drop_featurized_col
+        self.drop_inputs = drop_inputs
         self.multiindex = multiindex
         self.n_jobs = n_jobs
+        self.guess_oxistates = guess_oxistates
+        self.features = []
 
-    def _prescreen_df(self, df, inplace=True, col_id=None):
+        # Set featurizers
+        if not featurizers:
+            cfset = CompositionFeaturizers(exclude=exclude).best
+            sfset = StructureFeaturizers(exclude=exclude).best
+            bsfset = BSFeaturizers(exclude=exclude).best
+            dosfset = DOSFeaturizers(exclude=exclude).best
+            self.featurizers = {"composition": cfset,
+                                "structure": sfset,
+                                "bandstructure": bsfset,
+                                "dos": dosfset}
+        else:
+            if not isinstance(featurizers, dict):
+                raise TypeError("Featurizers must be a dictionary with keys"
+                                "of 'composition', 'structure', 'bandstructure', "
+                                "and 'dos' and values of corresponding lists of "
+                                "featurizers.")
+            else:
+                for ftype in featurizers:
+                    # Normalize the names from the aliases
+                    if ftype in _composition_aliases:
+                        featurizers["composition"] = featurizers.pop(ftype)
+                    elif ftype in _structure_aliases:
+                        featurizers["structure"] = featurizers.pop(ftype)
+                    elif ftype in _bandstructure_aliases:
+                        featurizers["bandstructure"] = featurizers.pop(ftype)
+                    elif ftype in _dos_aliases:
+                        featurizers["dos"] = featurizers.pop(ftype)
+                    else:
+                        raise ValueError(
+                            "The featurizers dict key {} is not a valid "
+                            "featurizer type. Please choose from {}".format(
+                                ftype, _aliases))
+                # Assign empty featurizer list to featurizers not specified by type
+                for ftype in ["composition", "structure", "bandstructure", "dos"]:
+                    if ftype not in featurizers:
+                        featurizers[ftype] = []
+                self.featurizers = featurizers
+
+    @set_fitted
+    def fit(self, df, target):
+        """
+        Fit all featurizers to the df.
+
+        WARNING: for fitting to work, the dataframe must contain the following
+        keys and column value types for each kind of featurization:
+
+            Composition features: "composition" - strings or pymatgen
+                Composition objects
+            Structure features: "structure" - pymatgen Structure objects
+            Bandstructure features: "bandstructure" - pymatgen BandStructure objects
+            DOS features: "dos" - pymatgen DOS objects
+
+        Args:
+            df (pandas.DataFrame): A dataframe containing at least one of the keys
+                listed above. The column defined by that key should have the corresponding
+                types of objects in it.
+            target (str): The ML target key in the dataframe.
+
+        Returns:
+            (AutoFeaturizer): self
+        """
+        df = self._prescreen_df(df, inplace=True)
+        df = self._add_composition_from_structure(df)
+        for featurizer_type, featurizers in self.featurizers.items():
+            if not featurizers:
+                self.logger.info("No {} featurizers being used."
+                                 "".format(featurizer_type))
+            if featurizer_type in df.columns:
+                df = self._tidy_column(df, featurizer_type)
+                for f in featurizers:
+                    f.fit(df[featurizer_type].tolist())
+                    f.set_n_jobs(self.n_jobs)
+                    self.features += f.feature_labels()
+                    self.logger.info("Fit {} to {} samples in dataframe."
+                                     "".format(f.__class__.__name__, df.shape[0]))
+        return self
+
+    @check_fitted
+    def transform(self, df, target):
+        """
+        Decorate a dataframe containing composition, structure, bandstructure,
+        and/or DOS objects with descriptors.
+
+        Args:
+            df (pandas.DataFrame): The dataframe not containing features.
+            target (str): The ML-target property contained in the df.
+
+        Returns:
+            df (pandas.DataFrame): Transformed dataframe containing features.
+        """
+        df = self._prescreen_df(df, inplace=True)
+        df = self._add_composition_from_structure(df)
+
+        for featurizer_type, featurizers in self.featurizers.items():
+            if featurizer_type in df.columns:
+                df = self._tidy_column(df, featurizer_type)
+
+                for f in featurizers:
+                    df = f.featurize_dataframe(df, featurizer_type,
+                                               ignore_errors=self.ignore_errors,
+                                               multiindex=self.multiindex)
+                df = df.drop(columns=[featurizer_type])
+            else:
+                self.logger.info("Featurizer type {} not in the dataframe. Skipping...".format(featurizer_type))
+        return df
+
+    def _prescreen_df(self, df, inplace=True):
+        """
+        Pre-screen a dataframe.
+
+        Args:
+            df (pandas.DataFrame): The dataframe to be screened.
+            inplace (bool): Manipulate the df in-place in memory
+
+        Returns:
+            df (pandas.DataFrame) The screened dataframe.
+
+        """
         if not inplace:
             df = df.copy(deep=True)
-        if col_id and col_id not in df:
-            raise MatbenchError("'{}' column must be in data!".format(col_id))
         if self.ignore_errors is not None:
             for col in self.ignore_cols:
                 if col in df:
                     df = df.drop([col], axis=1)
         return df
 
-    def _pre_screen_col(self, col_id, prefix='Input Data', multiindex=None):
-        multiindex = multiindex or self.multiindex
-        if multiindex and isinstance(col_id, str):
-            return (prefix, col_id)
+    def _tidy_column(self, df, featurizer_type):
+        """
+        Various conversions to homogenize columns for featurization input.
+        For example, take a column of compositions and ensure they are decorated
+        with oxidation states, are not strings, etc.
+
+        Args:
+            df (pandas.DataFrame)
+            featurizer_type: The key defining the featurizer input. For example,
+                composition featurizers should have featurizer_type of
+                "composition".
+
+        Returns:
+            df (pandas.DataFrame): DataFrame with featurizer_type column
+                ready for featurization.
+        """
+        # todo: Make the following conversions more robust (no lazy [0] type checking)
+        if featurizer_type == "composition":
+            # Convert formulas to composition objects
+            if isinstance(df[featurizer_type].iloc[0], str):
+                self.logger.info("Compositions detected as strings. Attempting "
+                                 "conversion to Composition objects...")
+                stc = StrToComposition(overwrite_data=True,
+                                       target_col_id=featurizer_type)
+                df = stc.featurize_dataframe(df, featurizer_type,
+                                             multiindex=self.multiindex)
+
+            elif isinstance(df[featurizer_type].iloc[0], dict):
+                self.logger.info("Compositions detected as dicts. Attempting "
+                                 "conversion to Composition objects...")
+                df[featurizer_type] = [Composition.from_dict(d) for d in df[featurizer_type]]
+
+            # Convert non-oxidstate containing comps to oxidstate comps
+            if self.guess_oxistates:
+                self.logger.info("Guessing oxidation states of compositions, as"
+                                 " they were not present in input.")
+                cto = CompositionToOxidComposition(
+                    target_col_id=featurizer_type,
+                    overwrite_data=True)
+                df = cto.featurize_dataframe(df, featurizer_type,
+                                             multiindex=self.multiindex)
+
         else:
-            return col_id
+            # Convert structure/bs/dos dicts to objects (robust already)
+            self.logger.info("{} detected as strings. Attempting "
+                             "conversion to Composition objects..."
+                             "".format(featurizer_type))
+            dto = DictToObject(overwrite_data=True, target_col_id=featurizer_type)
+            df = dto.featurize_dataframe(df, featurizer_type)
 
-    # todo: Remove once MultipleFeaturizer is fixed
-    def _featurize_sequentially(self, df, fset, col_id, **kwargs):
-        for idx, f in enumerate(fset):
-            if idx > 0:
-                col_id = self._pre_screen_col(col_id)
-            f.set_n_jobs(n_jobs=self.n_jobs)
-            df = f.fit_featurize_dataframe(df, col_id, **kwargs)
-        return df
-
-    def auto_featurize(self, df, input_cols=("formula", "structure"),
-                       **kwargs):
-        """
-        Featurizes the dataframe based on input_columns.
-
-        **Note: use only if you want call featurize_* methods with the default
-        arguments or when **kwargs are shared between these methods.
-
-        Args:
-            df (pandas.DataFrame):
-            input_cols ([str]): columns used for featurization (e.g. "structure"),
-                set to None to try all preset columns.
-            kwargs: other keywords arguments related to featurize_* methods
-
-        Returns (pandas.DataFrame):
-            self.df w/ new features added via featurizering input_cols
-        """
-        df_cols_init = df.columns.values
-        df = self._prescreen_df(df)
-        for idx, column in enumerate(input_cols):
-            featurizer = getattr(self, "featurize_{}".format(column), None)
-            if column in df_cols_init:
-                if featurizer is not None:
-                    if idx > 0:
-                        col_id = self._pre_screen_col(column)
-                    else:
-                        col_id = column
-                    df = featurizer(df, col_id=col_id, **kwargs)
-                else:
-                    self.logger.warning(
-                        'No method available to featurize "{}"'.format(column))
-            else:
-                self.logger.warning(
-                    "{} not found in the dataframe! Skipping...".format(column))
-        return df
-
-    def featurize_formula(self, df, featurizers="best", col_id="formula",
-                          compcol="composition", guess_oxidstates=False,
-                          inplace=True, asindex=True):
-        """
-        Featurizes based on formula or composition (pymatgen Composition).
-
-        Args:
-            df (pandas.DataFrame): input data
-            featurizers ([matminer.Featurizer] or str): Either a list of
-                featurizers or a set from CompositionFeaturizers. For example,
-                "best" will use the CompositionFeaturizers.best featurizers.
-                Default is None, which uses only the best featurizers.
-            col_id (str): actual column name to be used as composition
-            compcol (str): default or final column name for composition
-            guess_oxidstates (bool): whether to guess elements oxidation states
-                which is required for some featurizers such as CationProperty,
-                OxidationStates, ElectronAffinity and ElectronegativityDiff.
-                Set to False if oxidation states already available in composition.
-            asindex (bool): whether to set formula col_id as df index
-            kwargs: keyword args that are accepted by AllFeaturizers.composition
-                may be accepted by other featurize_* methods
-
-        Returns (pandas.DataFrame):
-            Dataframe with compositional features added.
-        """
-        df = self._prescreen_df(df=df, inplace=inplace)
-        if compcol not in df:
-            df[compcol] = df[col_id].apply(Composition)
-        if guess_oxidstates:
-            cto = CompositionToOxidComposition(target_col_id=compcol,
+            # Decorate with oxidstates
+            if featurizer_type == "structure" and self.guess_oxistates:
+                self.logger.info("Guessing oxidation states of structures, as "
+                                 "they were not present in input.")
+                sto = StructureToOxidStructure(target_col_id=featurizer_type,
                                                overwrite_data=True)
-            df = cto.featurize_dataframe(df, compcol,
-                                         multiindex=self.multiindex)
+                df = sto.featurize_dataframe(df, featurizer_type,
+                                             multiindex=self.multiindex)
+        return df
 
-        if isinstance(featurizers, str):
-            featurizers = getattr(self.cfset, featurizers)
-
-        # Multiple featurizer has issues, just use this bc we get pbar!
-        df = self._featurize_sequentially(df, featurizers, compcol,
-                                          ignore_errors=self.ignore_errors,
-                                          multiindex=self.multiindex)
-        if asindex:
-            df = df.set_index(self._pre_screen_col(col_id))
-        if self.drop_featurized_col:
-            return df.drop([self._pre_screen_col(compcol)], axis=1)
-        else:
-            return df
-
-    def featurize_structure(self, df, featurizers="best",
-                            col_id="structure",
-                            inplace=True, guess_oxidstates=True):
+    def _add_composition_from_structure(self, df):
         """
-        Featurizes based on crystal structure (pymatgen Structure object)
-
+        Automatically deduce compositions from structures if:
+            1. structures are available
+            2. composition features are actually desired. (deduced from whether
+                composition featurizers are present in self.featurizers).
         Args:
-            df (pandas.DataFrame):
-            col_id (str): column name containing pymatgen Structure
-        Args:
-            df (pandas.DataFrame): input data
-            featurizers ([matminer.Featurizer] or str): Either a list of
-                featurizers or a set from StructureFeaturizers. For example,
-                "best" will use the StructureFeaturizers.best featurizers.
-                Default is None, which uses only the best featurizers.
-            col_id (str): actual column name to be used as structure
-            inplace (bool): whether to modify the input df
-            guess_oxidstates (bool): whether to guess elements oxidation states
-                in the structure which is required for some featurizers such as
-                EwaldEnergy, ElectronicRadialDistributionFunction. Set to
-                False if oxidation states already available in the structure.
-            kwargs: keyword args that are accepted by AllFeaturizers.structure
-                may be accepted by other featurize_* methods
+            df (pandas.DataFrame): May or may not contain composition column.
 
-        Returns (pandas.DataFrame):
-            Dataframe with structure features added.
+        Returns:
+            df (pandas.DataFrame): Contains composition column if desired
         """
-        df = self._prescreen_df(df=df, inplace=inplace, col_id=col_id)
-        if isinstance(df[col_id][0], dict):
-            df[col_id] = df[col_id].apply(Structure.from_dict)
-        if guess_oxidstates:
-            sto = StructureToOxidStructure(target_col_id=col_id,
-                                           overwrite_data=True)
-            df = sto.featurize_dataframe(df, col_id,
-                                         multiindex=self.multiindex)
-        if isinstance(featurizers, str):
-            featurizers = getattr(self.sfset, featurizers)
+        self.logger.debug("Adding compositions from structures.")
+        if self.featurizers["composition"]:
+            if "structure" in df.columns and "composition" not in df.columns:
+                df = self._tidy_column(df, "structure")
+                struct2comp = StructureToComposition(
+                    target_col_id="composition", overwrite_data=False)
+                df = struct2comp.featurize_dataframe(df, "structure")
+        return df
 
-        # Multiple featurizer has issues, just use this bc we get pbar!
-        df = self._featurize_sequentially(df, featurizers, col_id,
-                                          ignore_errors=self.ignore_errors,
-                                          multiindex=self.multiindex)
 
-        if self.drop_featurized_col:
-            return df.drop([self._pre_screen_col(col_id)], axis=1)
-        else:
-            return df
-
-    def featurize_dos(self, df, featurizers="best", col_id="dos",
-                      inplace=True):
-        """
-        Featurizes based on density of state (pymatgen CompleteDos object)
-
-        Args:
-            df (pandas.DataFrame):
-            col_id (str): column name containing pymatgen Dos (or CompleteDos)
-        Args:
-            df (pandas.DataFrame): input data
-            featurizers ([matminer.Featurizer] or str): Either a list of
-                featurizers or a set from DOSFeaturizers. For example,
-                "best" will use the DOSFeaturizers.best featurizers.
-                Default is None, which uses only the best featurizers.
-            col_id (str): actual column name to be used as dos
-            inplace (bool): whether to modify the input df
-            kwargs: keyword arguments that may be accepted by other featurize_*
-                methods passed through auto_featurize
-
-        Returns (pandas.DataFrame):
-            Dataframe with dos features added.
-        """
-        df = self._prescreen_df(df=df, inplace=inplace, col_id=col_id)
-        if isinstance(df[col_id][0], dict):
-            df[col_id] = df[col_id].apply(CompleteDos.from_dict)
-        if isinstance(featurizers, str):
-            featurizers = getattr(self.dosfset, featurizers)
-
-        # Multiple featurizer has issues, just use this bc we get pbar!
-        df = self._featurize_sequentially(df, featurizers, col_id,
-                                          ignore_errors=self.ignore_errors,
-                                          multiindex=self.multiindex)
-        if self.drop_featurized_col:
-            return df.drop([self._pre_screen_col(col_id)], axis=1)
-        else:
-            return df
-
-    def featurize_bandstructure(self, df, featurizers="all",
-                                col_id="bandstructure", inplace=True):
-        """
-        Featurizes based on density of state (pymatgen BandStructure object)
-
-        Args:
-            df (pandas.DataFrame): input data
-            featurizers ([matminer.Featurizer] or str): Either a list of
-                featurizers or a set from BSFeaturizers. For example,
-                "best" will use the BSFeaturizers.best featurizers.
-                Default is None, which uses only the best featurizers.
-            col_id (str): actual column name containing the bandstructure data
-            inplace (bool): whether to modify the input df
-            kwargs: keyword arguments that may be accepted by other featurize_*
-                methods passed through auto_featurize
-
-        Returns (pandas.DataFrame):
-            Dataframe with bandstructure features added.
-        """
-        df = self._prescreen_df(df=df, inplace=inplace, col_id=col_id)
-        if isinstance(df[col_id][0], dict):
-            df[col_id] = df[col_id].apply(BandStructure.from_dict)
-        if isinstance(featurizers, str):
-            featurizers = getattr(self.bsfset, featurizers)
-        # Multiple featurizer has issues, just use this bc we get pbar!
-        df = self._featurize_sequentially(df, featurizers, col_id,
-                                          ignore_errors=self.ignore_errors,
-                                          multiindex=self.multiindex)
-        if self.drop_featurized_col:
-            return df.drop([self._pre_screen_col(col_id)], axis=1)
-        else:
-            return df
+if __name__ == "__main__":
+    from matminer.datasets.dataset_retrieval import load_dataset
+    df = load_dataset("flla")
+    df = df.iloc[:100]
+    df = df[["structure",  "e_above_hull"]]
+    print(df)
+    af = AutoFeaturizer()
+    af.fit(df, "e_above_hull")
+    df = af.transform(df, "e_above_hull")
+    print(df.columns.tolist())

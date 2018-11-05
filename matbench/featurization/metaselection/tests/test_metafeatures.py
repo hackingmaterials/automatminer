@@ -60,7 +60,7 @@ class TestStructureMetafeatures(unittest.TestCase):
         pos = PercentOfOrderedStructures().calc(self.df_castelli["structure"])
         self.assertAlmostEqual(pos, 1.0)
 
-    def test_AvgNumberOfSitess(self):
+    def test_AvgNumberOfSites(self):
         ans = AvgNumberOfSites().calc(self.df_castelli["structure"])
         self.assertAlmostEqual(ans, 5.0)
 
