@@ -6,6 +6,7 @@ import warnings
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 
+
 class MatbenchError(BaseException):
     """
     Exception specific to matbench methods.
