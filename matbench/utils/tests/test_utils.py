@@ -1,12 +1,16 @@
 import unittest
+import os
 
 import pandas as pd
+import logging
 from sklearn.exceptions import NotFittedError
 
 from matbench.utils.utils import initialize_logger, initialize_null_logger, \
     is_greater_better, compare_columns, regression_or_classification, \
     check_fitted, set_fitted
-from matbench.base import DataframeTransformer
+from matbench.base import DataframeTransformer, logger_base_name
+
+test_dir = os.path.dirname(__file__)
 
 
 class MyTransformer(DataframeTransformer):
@@ -25,15 +29,28 @@ class MyTransformer(DataframeTransformer):
 class TestUtils(unittest.TestCase):
 
     def test_logger_initialization(self):
-        log = initialize_logger()
+        log = initialize_logger(logger_base_name, level=logging.DEBUG)
         log.info("Test logging.")
         log.debug("Test debug.")
         log.warning("Test warning.")
 
-        null = initialize_null_logger()
+        log_file = os.path.join(test_dir, logger_base_name + ".log")
+        self.assertTrue(os.path.isfile(log_file))
+
+        with open(log_file, 'r') as f:
+            lines = f.readlines()
+
+        self.assertTrue("logging" in lines[0])
+        self.assertTrue("debug" in lines[1])
+        self.assertTrue("warning" in lines[2])
+
+        null = initialize_null_logger("matbench_null")
         null.info("Test null log 1.")
         null.debug("Test null log 2.")
         null.warning("Test null log 3.")
+
+        null_log_file = os.path.join(test_dir, logger_base_name + "_null.log")
+        self.assertFalse(os.path.isfile(null_log_file))
 
     def test_is_greater_better(self):
         self.assertTrue(is_greater_better('accuracy'))
