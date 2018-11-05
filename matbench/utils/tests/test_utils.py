@@ -10,7 +10,7 @@ from matbench.utils.utils import initialize_logger, initialize_null_logger, \
     check_fitted, set_fitted
 from matbench.base import DataframeTransformer, logger_base_name
 
-test_dir = os.path.dirname(__file__)
+run_dir = os.getcwd()
 
 
 class MyTransformer(DataframeTransformer):
@@ -34,7 +34,9 @@ class TestUtils(unittest.TestCase):
         log.debug("Test debug.")
         log.warning("Test warning.")
 
-        log_file = os.path.join(test_dir, logger_base_name + ".log")
+        # test the log is written to run dir (e.g. where the script was called
+        # from and not the location of this test file
+        log_file = os.path.join(run_dir, logger_base_name + ".log")
         self.assertTrue(os.path.isfile(log_file))
 
         with open(log_file, 'r') as f:
@@ -49,7 +51,7 @@ class TestUtils(unittest.TestCase):
         null.debug("Test null log 2.")
         null.warning("Test null log 3.")
 
-        null_log_file = os.path.join(test_dir, logger_base_name + "_null.log")
+        null_log_file = os.path.join(run_dir, logger_base_name + "_null.log")
         self.assertFalse(os.path.isfile(null_log_file))
 
     def test_is_greater_better(self):
