@@ -228,8 +228,8 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             msk = validation
         else:
             msk = np.random.rand(len(df)) < validation
-        traindf = df[~msk]
-        testdf = df[msk]
+        traindf = df.iloc[~np.asarray(msk)]
+        testdf = df.iloc[msk]
         self.logger.info("Dataframe split into training and testing fractions"
                          " having {} and {} samples.".format(traindf.shape[0],
                                                              testdf.shape[1]))
@@ -273,6 +273,8 @@ if __name__ == "__main__":
     from sklearn.metrics import mean_squared_error
     from matminer.datasets.dataset_retrieval import load_dataset
     hugedf = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"})[["composition",  "K_VRH"]]
+
+    validation_ix = [1, 2, 3, 4, 5, 7, 12]
     df = hugedf.iloc[:100]
     df2 = hugedf.iloc[101:150]
     target = "K_VRH"
@@ -281,15 +283,21 @@ if __name__ == "__main__":
     # mp.fit(df, target)
     # print(mp.predict(df2, target))
 
-    mp = MatPipe()
-    df = mp.benchmark(df, target, validation_fraction=0.2)
+    # mp = MatPipe(time_limit_mins=10)
+    # df = mp.benchmark(df, target, validation=0.2)
+    # print(df)
+    # print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
+
+    mp = MatPipe(time_limit_mins=10)
+    df = mp.benchmark(df, target, validation=validation_ix)
     print(df)
     print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
+
     #
     # mp = MatPipe()
     # df = mp.benchmark(df, target, validation_fraction=0)
     # print(df)
     # print("CV scores: {}".format(mp.learner.best_scores))
 
-    from sklearn.metrics import mean_squared_error
+    # from sklearn.metrics import mean_squared_error
 
