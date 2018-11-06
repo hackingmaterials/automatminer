@@ -1,6 +1,8 @@
 """
 The highest level classes for pipelines.
 """
+from collections import Iterable
+
 import numpy as np
 
 from matbench.base import LoggableMixin, DataframeTransformer
@@ -30,7 +32,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
     predictions (e.g., predicting material properties for which you have
     no data) use "fit" and "predict".
 
-    The pipeline is transferrable. So it can be fit on one dataset and used
+    The pipeline is transferable. So it can be fit on one dataset and used
     to predict the properties of another. Furthermore, the entire pipeline and
     all constituent objects can be summarized in text with "digest".
 
@@ -159,7 +161,8 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.logger.info("MatPipe prediction completed.")
         return predictions
 
-    def benchmark(self, df, target, validation_fraction=0.2):
+    @set_fitted
+    def benchmark(self, df, target, validation=0.2):
         """
 
         If the target property is known for all data, perform an ML benchmark
@@ -187,9 +190,14 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         Args:
             df (pandas.DataFrame): The dataframe for benchmarking. Must contain
             target (str): The column name to use as the ml target property.
-            validation_fraction (float): Value between 0 and 1 indicating
-                the validation fraction desired. If set to 0, a cross-validation
-                only benchmarking is performed.
+            validation (float or listlike): Specifies how to do validation. If
+                the validation is a float, it specifies the fraction of the
+                dataframe to be randomly selected for validation (must be a
+                number between 0-1). validation=0 means a CV-only validation.
+                If it is a list/ndarray, it is the indexes of the dataframe to
+                use for validation - this option is useful if you are comparing
+                multiple techniques and want to  use the same validation
+                fraction across benchmarks.
 
         Returns:
             testdf (pandas.DataFrame): A dataframe containing validation data
@@ -216,7 +224,10 @@ class MatPipe(DataframeTransformer, LoggableMixin):
 
         # Split data for steps where combined transform could otherwise over-fit
         # or leak data from validation set into training set.
-        msk = np.random.rand(len(df)) < validation_fraction
+        if isinstance(validation, Iterable):
+            msk = validation
+        else:
+            msk = np.random.rand(len(df)) < validation
         traindf = df[~msk]
         testdf = df[msk]
         self.logger.info("Dataframe split into training and testing fractions"
@@ -229,8 +240,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         traindf = self.reducer.fit_transform(traindf, target)
         self.learner.fit(traindf, target)
 
-
-        if validation_fraction != 0:
+        if isinstance(validation, Iterable) or validation != 0:
             self.logger.info(
                 "Using pipe fitted on training data to predict target {} on "
                 "{}-sample validation dataset".format(target, testdf.shape[0]))
@@ -240,6 +250,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         else:
             self.logger.warning("Validation fraction set to zero. Using "
                                 "cross-validation-only benchmarking...")
+            # todo: figure out CV-only
 
     @check_fitted
     def digest(self, filename, fmt="json"):
@@ -279,3 +290,6 @@ if __name__ == "__main__":
     # df = mp.benchmark(df, target, validation_fraction=0)
     # print(df)
     # print("CV scores: {}".format(mp.learner.best_scores))
+
+    from sklearn.metrics import mean_squared_error
+
