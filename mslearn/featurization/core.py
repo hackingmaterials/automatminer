@@ -2,9 +2,9 @@ from sklearn.exceptions import NotFittedError
 from pymatgen import Composition
 from matminer.featurizers.conversions import StructureToOxidStructure, StrToComposition, DictToObject, StructureToComposition
 
-from matbench.utils.utils import MatbenchError, check_fitted, set_fitted
-from matbench.base import DataframeTransformer, LoggableMixin
-from matbench.featurization.sets import CompositionFeaturizers, \
+from mslearn.utils.utils import MatbenchError, check_fitted, set_fitted
+from mslearn.base import DataframeTransformer, LoggableMixin
+from mslearn.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>", "Alireza Faghaninia <alireza@lbl.gov>"]
@@ -132,7 +132,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         n_jobs (int): The number of parallel jobs to use during featurization
             for each featurizer. -1 sets n_jobs = n_cores
         logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default matbench logger will be
+            Alternatively, if set to True, the default mslearn logger will be
             used. If set to False, then no logging will occur.
 
     Attributes:

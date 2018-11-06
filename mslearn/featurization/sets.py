@@ -1,5 +1,5 @@
 """
-Defines sets of featurizers to be used by matbench during featurization.
+Defines sets of featurizers to be used by mslearn during featurization.
 
 Featurizer sets are classes with attributes containing lists of featurizers.
 For example, the set of all fast structure featurizers could be found with::

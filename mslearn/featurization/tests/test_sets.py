@@ -9,7 +9,7 @@ import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
 import matminer.featurizers.bandstructure as bf
 
-from matbench.featurization.sets import AllFeaturizers
+from mslearn.featurization.sets import AllFeaturizers
 
 
 class TestAllFeaturizers(unittest.TestCase):
@@ -57,7 +57,7 @@ class TestAllFeaturizers(unittest.TestCase):
         for featurizer_name in true_feats:
             self.assertTrue(featurizer_name in test_feats,
                             ("{} matminer featurizer not in implemented in "
-                             "matbench").format(featurizer_name))
+                             "mslearn").format(featurizer_name))
 
     def test_composition_featurizers(self):
         true_feats = TestAllFeaturizers.get_featurizers(cf)

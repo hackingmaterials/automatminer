@@ -8,13 +8,13 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 
 if __name__ == "__main__":
     setup(
-        name='matbench',
-        version='0.1.0',
-        description='benchmarking of machine learning models in material science',
+        name='mslearn',
+        version='0.1.1',
+        description='automated machine learning for materials science',
         long_description=open(os.path.join(module_dir, 'README.md')).read(),
-        url='https://github.com/hackingmaterials/matbench',
-        author=['Alireza Faghaninia', 'Alex Dunn', 'Qi Wang', 'Anubhav Jain'],
-        author_email=['alireza.faghaninia@gmail.com', 'denhaus@gmail.com', 'qwang3@lbl.gov', 'ajain@lbl.gov'],
+        url='https://github.com/hackingmaterials/mslearn',
+        author=['Alex Dunn', 'Alireza Faghaninia', 'Qi Wang', 'Anubhav Jain'],
+        author_email=['denhaus@gmail.com', 'alireza.faghaninia@gmail.com', 'qwang3@lbl.gov', 'ajain@lbl.gov'],
         license='modified BSD',
         packages=find_packages(),
         package_data={},

@@ -9,8 +9,8 @@ from sklearn.model_selection import check_cv
 from sklearn.base import BaseEstimator, TransformerMixin
 from skrebate import MultiSURF
 
-from matbench.utils.utils import MatbenchError
-from matbench.base import LoggableMixin, DataframeTransformer
+from mslearn.utils.utils import MatbenchError
+from mslearn.base import LoggableMixin, DataframeTransformer
 
 __authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
                "Alex Dunn <ardunn@lbl.gov>"]
@@ -28,7 +28,7 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
         random_state (int): relevant if non-deterministic algorithms such as
             random forest are used.
         logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default matbench logger will be
+            Alternatively, if set to True, the default mslearn logger will be
             used. If set to False, then no logging will occur.
     """
     def __init__(self, mode, importance_percentile=0.95,

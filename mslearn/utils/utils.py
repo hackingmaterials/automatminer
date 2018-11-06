@@ -9,7 +9,7 @@ from sklearn.exceptions import NotFittedError
 
 class MatbenchError(BaseException):
     """
-    Exception specific to matbench methods.
+    Exception specific to mslearn methods.
     """
 
     def __init__(self, msg):
