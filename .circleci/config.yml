@@ -2,7 +2,7 @@ version: 2
 
 jobs:
   build:
-    working_directory: ~/matbench
+    working_directory: ~/mslearn
     docker:
       - image: circleci/python:3.6.2
     steps:
