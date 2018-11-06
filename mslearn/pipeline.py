@@ -177,12 +177,15 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         determined without any knowledge of the validation/test set.
 
         To use a random validation set for model validation, pass in a nonzero
-        validation fraction. The returned df will have the validation
+        validation fraction as a float. The returned df will have the validation
         predictions.
 
         To use a CV-only validation, use a validation frac. of 0. The original
         df will be returned having predictions made on all training data. This
         should ONLY be used to evaluate the training error!
+
+        To use a fixed validation set, pass in the index (must be .iloc-able in
+        pandas) as the validation argument.
 
         Whether using CV-only or validation, both will create CV information
         in the MatPipe.learner.best_models variable.
