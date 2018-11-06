@@ -81,6 +81,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
 
         tpot_kwargs['cv'] = tpot_kwargs.get('cv', 5)
         tpot_kwargs['n_jobs'] = tpot_kwargs.get('n_jobs', -1)
+        tpot_kwargs['verbosity'] = tpot_kwargs.get('verbosity', 2)
 
         self.tpot_kwargs = tpot_kwargs
         self._backend = TPOTRegressor(**tpot_kwargs) if mode in _regressor_modes \
