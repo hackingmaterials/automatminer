@@ -5,7 +5,7 @@ from mslearn.utils.utils import MatbenchError
 from sklearn.model_selection import train_test_split
 
 
-class Analysis(object):
+class Analytics(object):
     """
     Evaluates the importance of features, errors and uncertainty of a given
     machine learning model, bias, variance and tools assisting in manual
@@ -73,8 +73,8 @@ class Analysis(object):
                              random_state=random_state)
         # re-train the model as it has been fit to part of the\ current X_test!
         self.model.fit(X_train, y_train)
-        super (Analysis, self).__init__(X_train, y_train, X_test, y_test, mode,
-            target=target, eatures=df.columns, test_samples_index=y_test.index)
+        super (Analytics, self).__init__(X_train, y_train, X_test, y_test, mode,
+                                         target=target, eatures=df.columns, test_samples_index=y_test.index)
 
     def _pre_screen_test_data(self, X_test, y_test):
         if X_test is None:

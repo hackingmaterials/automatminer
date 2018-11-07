@@ -9,7 +9,7 @@ import pandas as pd
 # # from mslearn.automl.tpot_utils import TPOTAutoML
 # from mslearn.automl.tpot_configs.classifier import classifier_config_dict_mb
 # from mslearn.automl.tpot_configs.regressor import regressor_config_dict_mb
-# from mslearn.analysis.core import Analysis
+# from mslearn.analysis.core import Analytics
 # from mslearn.data.load import load_double_perovskites_gap, \
 #     load_glass_binary
 # from mslearn.featurization.core import AutoFeaturizer
@@ -73,7 +73,7 @@ __author__ = ['Alireza Faghaninia <alireza.faghaninia@gmail.com>,',
 #         self.assertGreaterEqual(top_scores[top_scores_keys[-1]], 0)
 #
 #         # test error analysis:
-#         ea = Analysis(tpot, X_train, y_train, X_test, y_test,
+#         ea = Analytics(tpot, X_train, y_train, X_test, y_test,
 #                       mode='regression', target=target,
 #                       features=df.drop(target, axis=1).columns,
 #                       test_samples_index=y_test.index,
@@ -137,7 +137,7 @@ __author__ = ['Alireza Faghaninia <alireza.faghaninia@gmail.com>,',
 #         self.assertGreaterEqual(top_scores[top_scores_keys[-1]], 0.4)
 #
 #         # test analysis:
-#         ea = Analysis(tpot, X_train, y_train, X_test, y_test,
+#         ea = Analytics(tpot, X_train, y_train, X_test, y_test,
 #                       mode='classification', target=target,
 #                       features=df.drop(target, axis=1).columns,
 #                       test_samples_index=y_test.index,

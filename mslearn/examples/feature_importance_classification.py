@@ -1,5 +1,5 @@
 import numpy as np
-from mslearn.analysis import Analysis
+from mslearn.analytics import Analytics
 from mslearn.data.load import load_glass_formation
 from mslearn.featurize import Featurize
 from mslearn.preprocess import PreProcess
@@ -38,11 +38,11 @@ model.fit(X_train.values, y_train.values)
 print('test score:')
 print(model.score(X_test, y_test))
 
-analysis = Analysis(model, X_train, y_train, X_test, y_test, mode,
-                   target=target,
-                   features=df.drop(target, axis=1).columns,
-                   test_samples_index=X_test.index,
-                   random_state=RS)
+analysis = Analytics(model, X_train, y_train, X_test, y_test, mode,
+                     target=target,
+                     features=df.drop(target, axis=1).columns,
+                     test_samples_index=X_test.index,
+                     random_state=RS)
 
 x = list(analysis.get_feature_importance(sort=False).values())
 y = model.feature_importances_
@@ -55,7 +55,7 @@ print('p-value, p={}'.format(lr.pvalue))
 
 pf = PlotlyFig(
     title='Comparison of feature importances in predicting glass formation',
-    x_title='Analysis.feature_importance (Variance Sensitivity Analysis)',
+    x_title='Analytics.feature_importance (Variance Sensitivity Analysis)',
     y_title='RandomForestClassifier.feature_importances_')
 pf.xy([(x, y), (xreg, yreg)],
       labels=analysis.features,
