@@ -166,3 +166,17 @@ class Analytics(object):
                                           reverse=True))
         self.feature_importance = featance
         return self.feature_importance
+
+
+if __name__ == '__main__':
+    from matminer.datasets import load_dataset
+
+    from mslearn.pipeline import MatPipe
+
+    df = load_dataset('elastic_tensor_2015')
+    df = df[["formula", "K_VRH"]]
+    df = df.rename({"formula": "composition"}, axis=1)
+
+    fitted_pipeline = MatPipe(time_limit_mins=5).fit(df, "K_VRH")
+
+    print("Done fitting")
