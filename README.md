@@ -1,5 +1,7 @@
-# matbench
-bb ml ms optimization
+# matsci-learn (mslearn)
 
-We use [matminer](https://github.com/hackingmaterials/matminer) to featurize materials composition and structure.
-![alt text](http://www.thebenchfactory.com/media/catalog/product/cache/10/image/700x415/9df78eab33525d08d6e5fb8d27136e95/0/2/02sa2853_rd_1.jpg "Logo Title Text 1")
+![CircleCI](https://circleci.com/gh/hackingmaterials/matsci-learn/tree/master.svg?style=svg&circle-token=8bfcc2ed49aecea226a3611f338cc63e4ec0bc56)
+
+An automatic "black-box" yet interpretable prediction engine for materials properties.
+
+
