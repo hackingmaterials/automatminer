@@ -1,6 +1,9 @@
 import unittest
+
+from matminer.datasets.convenience_loaders import load_castelli_perovskites, \
+    load_glass_binary
+
 from mslearn.featurization.metaselection.metafeatures import *
-from mslearn.data.load import load_castelli_perovskites, load_glass_binary
 
 
 class TestFormulaMetafeatures(unittest.TestCase):

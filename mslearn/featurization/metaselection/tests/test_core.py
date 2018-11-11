@@ -1,9 +1,11 @@
 import unittest
 
-from mslearn.data.load import load_castelli_perovskites, load_glass_binary
+from pymatgen.core.structure import Structure
+from matminer.datasets.convenience_loaders import load_castelli_perovskites, \
+    load_glass_binary
+
 from mslearn.featurization.metaselection.core import DatasetMetaFeatures, \
     FeaturizerAutoFilter
-from pymatgen.core.structure import Structure
 
 
 class TestDatasetMetaFeatures(unittest.TestCase):
