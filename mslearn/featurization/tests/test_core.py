@@ -7,8 +7,7 @@ import pandas as pd
 from pymatgen import Composition
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.datasets.dataset_retrieval import load_dataset
-from matminer.featurizers.composition import ElectronAffinity, ElementProperty, \
-    AtomicOrbitals
+from matminer.featurizers.composition import ElectronAffinity, ElementProperty
 from matminer.featurizers.structure import GlobalSymmetryFeatures, \
     DensityFeatures
 
@@ -22,14 +21,14 @@ __author__ = ["Alex Dunn <ardunn@lbl.gov>",
 
 
 class TestAutoFeaturizer(unittest.TestCase):
-
-    def setUp(self, limit=5):
-        self.test_df = load_dataset('elastic_tensor_2015').rename(
+    @classmethod
+    def setUpClass(cls, limit=5):
+        cls.test_df = load_dataset('elastic_tensor_2015').rename(
             columns={"formula": "composition"})
-        self.limit = limit
+        cls.limit = limit
 
     def test_sanity(self):
-        df = self.test_df
+        df = copy.copy(self.test_df)
         # sanity checks
         self.assertTrue(df['composition'].iloc[0], "Nb4CoSi")
         self.assertTrue(df["composition"].iloc[1179], "Al2Cu")
@@ -42,7 +41,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         target = "K_VRH"
 
         # When compositions are strings
-        df = self.test_df[['composition', target]].iloc[:self.limit]
+        df = copy.copy(self.test_df[['composition', target]].iloc[:self.limit])
         af = AutoFeaturizer()
         df = af.fit_transform(df, target)
         self.assertAlmostEqual(df["frac f valence electrons"].iloc[2],
@@ -68,7 +67,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         target = "K_VRH"
 
         # When structures are Structure objects
-        df = self.test_df[['structure', target]].iloc[:self.limit]
+        df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
         af = AutoFeaturizer()
         df = af.fit_transform(df, target)
         # Ensure there are some structure features created
@@ -80,7 +79,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("structure" not in df.columns)
 
         # When structures are dictionaries
-        df = self.test_df[['structure', target]].iloc[:self.limit]
+        df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
         df["structure"] = [s.as_dict() for s in df["structure"]]
         af = AutoFeaturizer()
         df = af.fit_transform(df, target)
@@ -92,7 +91,30 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("composition" not in df.columns)
         self.assertTrue("structure" not in df.columns)
 
-    def test_exclusions(self):
+    def test_featurizers_by_users(self):
+        df = copy.copy(self.test_df.iloc[:self.limit])
+        target = "K_VRH"
+
+        dn = DensityFeatures()
+        gsf = GlobalSymmetryFeatures()
+        featurizers = {"structure": [dn, gsf]}
+
+        af = AutoFeaturizer(featurizers=featurizers)
+        df = af.fit_transform(df, target)
+
+        # Ensure that the featurizers are not set automatically, metaselection
+        # is not used, exclude is None and featurizers not passed by the users
+        # are not used.
+        self.assertFalse(af.auto_featurizer)
+        self.assertIsNone(af.metaselector)
+        self.assertIsNone(af.exclude)
+        self.assertIn(dn, af.featurizers["structure"])
+        self.assertIn(gsf, af.featurizers["structure"])
+        ep = ElementProperty.from_preset("matminer")
+        ep_feats = ep.feature_labels()
+        self.assertFalse(any([f in df.columns for f in ep_feats]))
+
+    def test_exclude_by_users(self):
         """
         Test custom args for featurizers to use.
         """
@@ -100,25 +122,28 @@ class TestAutoFeaturizer(unittest.TestCase):
         target = "K_VRH"
         exclude = ["ElementProperty"]
 
-        dn = DensityFeatures()
-        gsf = GlobalSymmetryFeatures()
         ep = ElementProperty.from_preset("matminer")
-        ef = ElectronAffinity()
-        ao = AtomicOrbitals()
         ep_feats = ep.feature_labels()
-        ef_feats = ef.feature_labels()
-        ao_feats = ao.feature_labels()
 
         # Test to make sure excluded does not show up
         af = AutoFeaturizer(exclude=exclude, use_metaselector=False)
         af.fit(df, target)
         df = af.fit_transform(df, target)
+
+        self.assertTrue(af.auto_featurizer)
+        self.assertIsNone(af.metaselector)
+        self.assertIn("ElementProperty", af.exclude)
         self.assertFalse(any([f in df.columns for f in ep_feats]))
 
+    def test_use_metaselector(self):
         # Test to see if metaselector works for this dataset
         df = copy.copy(self.test_df.iloc[:self.limit])
-        af = AutoFeaturizer(exclude=exclude, use_metaselector=True)
+        target = "K_VRH"
+
+        af = AutoFeaturizer()
         af.fit(df, target)
+
+        self.assertIsNotNone(af.metaselector)
         dataset_mfs = af.metaselector.dataset_mfs
         self.assertIn("composition_metafeatures", dataset_mfs.keys())
         self.assertIn("structure_metafeatures", dataset_mfs.keys())
@@ -147,7 +172,6 @@ class TestAutoFeaturizer(unittest.TestCase):
             struct_mfs["number_of_different_elements_in_structures"], 7)
 
         excludes = af.metaselector.excludes
-        self.assertIn("ElementProperty", excludes)
         self.assertIn("IonProperty", excludes)
         self.assertIn("Miedema", excludes)
         self.assertIn("OxidationStates", excludes)
@@ -158,17 +182,10 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertIn("ElectronAffinity", excludes)
 
         df = af.fit_transform(df, target)
-        self.assertFalse(any([f in df.columns for f in ep_feats]))
-
-        # Test to make sure composition features are not automatically
-        # created if explicitly not included in featurizers dict
-        # Also make sure no errors when excluding non-present featurizers
-        df = copy.copy(self.test_df.iloc[:self.limit])
-        featurizers = {"structure": [gsf, dn]}
-        af = AutoFeaturizer(featurizers=featurizers)
-        df = af.fit_transform(df, target)
-        for flabels in [ep_feats, ef_feats, ao_feats]:
-            self.assertFalse(any([f in df.columns for f in flabels]))
+        ef = ElectronAffinity()
+        ef_feats = ef.feature_labels()
+        self.assertFalse(any([f in df.columns for f in ef_feats]))
+        self.assertFalse(any([f in df.columns for f in ef_feats]))
 
     def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
         """

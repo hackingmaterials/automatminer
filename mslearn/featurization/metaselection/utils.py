@@ -4,6 +4,7 @@ from collections import OrderedDict
 from pymatgen.core.composition import Composition, Element
 from pymatgen.core.structure import Structure, IStructure
 
+__author__ = ["Qi Wang <wqthu11@gmail.com>"]
 
 def composition_statistics(compositions):
     """

@@ -3,6 +3,8 @@ import warnings
 from mslearn.featurization.metaselection.metafeatures import \
     composition_mfs_dict, structure_mfs_dict
 
+__author__ = ["Qi Wang <wqthu11@gmail.com>"]
+
 """
 Automatically filter some featurizers based on metafeatures calculated for
 the dataset. 

@@ -7,6 +7,8 @@ from abc import ABCMeta, abstractmethod
 from mslearn.featurization.metaselection.utils import composition_statistics,\
     structure_statistics
 
+__author__ = ["Qi Wang <wqthu11@gmail.com>"]
+
 """
 Derive a list of meta-features of a given dataset to get recommendation of 
 featurizers.

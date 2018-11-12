@@ -180,7 +180,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.exclude = exclude
         self.use_metaselector = use_metaselector
         self.max_na_percent = max_na_frac
-        self.auto_featurizer = True if self.featurizers is None else False
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
         self.ignore_errors = ignore_errors
@@ -189,6 +188,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.n_jobs = n_jobs
         self.guess_oxistates = guess_oxistates
         self.features = []
+        self.auto_featurizer = True if self.featurizers is None else False
+        self.metaselector = None
 
     @set_fitted
     def fit(self, df, target):

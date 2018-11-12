@@ -3,6 +3,8 @@ from matminer.datasets.dataset_retrieval import load_dataset
 from mslearn.featurization.metaselection.core import _composition_metafeatures, \
     _structure_metafeatures, dataset_metafeatures, FeaturizerMetaSelector
 
+__author__ = ["Qi Wang <wqthu11@gmail.com>"]
+
 
 class TestDatasetMetaFeatures(unittest.TestCase):
     @classmethod
