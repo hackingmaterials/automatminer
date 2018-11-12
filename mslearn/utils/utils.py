@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.exceptions import NotFittedError
 
 
-class MatbenchError(BaseException):
+class MSLearnError(BaseException):
     """
     Exception specific to mslearn methods.
     """
@@ -16,7 +16,7 @@ class MatbenchError(BaseException):
         self.msg = msg
 
     def __str__(self):
-        return "MatbenchError : " + self.msg
+        return "MSLearnError : " + self.msg
 
 
 def initialize_logger(name, filepath='.', filename=None, level=None):
@@ -86,7 +86,7 @@ def is_greater_better(scoring_function):
 
     # Check to ensure no metrics are accidentally placed in both sets
     if desired_high_metrics.intersection(desired_low_metrics):
-        raise MatbenchError("Error, there is a metric in both desired"
+        raise MSLearnError("Error, there is a metric in both desired"
                             " high and desired low metrics")
 
     if scoring_function not in desired_high_metrics \

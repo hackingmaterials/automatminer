@@ -13,7 +13,7 @@ from tpot import TPOTClassifier, TPOTRegressor
 
 from mslearn.automl.tpot_configs.classifier import classifier_config_dict_mb
 from mslearn.automl.tpot_configs.regressor import regressor_config_dict_mb
-from mslearn.utils.utils import is_greater_better, MatbenchError, set_fitted, check_fitted
+from mslearn.utils.utils import is_greater_better, MSLearnError, set_fitted, check_fitted
 from mslearn.base import AutoMLAdaptor, LoggableMixin
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
@@ -201,7 +201,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         # todo: the top models (including one model type with mutliple
         # todo: combinations of model params).
         if target != self.fitted_target:
-            raise MatbenchError("Argument dataframe target {} is different from"
+            raise MSLearnError("Argument dataframe target {} is different from"
                                 " the fitted dataframe target! {}"
                                 "".format(target, self.fitted_target))
         elif not self.is_fit:
@@ -209,7 +209,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         elif not all([f in df.columns for f in self._features]):
             not_in_model = [f for f in self._features if f not in df.columns]
             not_in_df = [f for f in df.columns if f not in self._features]
-            raise MatbenchError("Features used to build model are different "
+            raise MSLearnError("Features used to build model are different "
                                 "from df columns! Features located in model "
                                 "not located in df: \n{} \n Features located "
                                 "in df not in model: \n{}".format(not_in_df,

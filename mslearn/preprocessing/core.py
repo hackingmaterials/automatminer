@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
-from mslearn.utils.utils import MatbenchError, compare_columns, check_fitted, \
+from mslearn.utils.utils import MSLearnError, compare_columns, check_fitted, \
     set_fitted, regression_or_classification
 from mslearn.base import LoggableMixin, DataframeTransformer
 from mslearn.preprocessing.feature_selection import TreeBasedFeatureReduction, \
@@ -103,7 +103,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
         self.logger.debug("Fitting to new dataframe...")
         if target not in df.columns:
-            raise MatbenchError(
+            raise MSLearnError(
                 "Target {} must be contained in df.".format(target))
 
         self._reset_attrs()
@@ -128,7 +128,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
 
         if target != self.fitted_target:
-            raise MatbenchError(
+            raise MSLearnError(
                 "The transformation target {} is not the same as the fitted "
                 "target {}".format(
                     target, self.fitted_target))
@@ -207,7 +207,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                 self.logger.warning("Mismatched columns found in dataframe "
                                     "used for fitting and argument dataframe.")
                 if not coerce_mismatch:
-                    raise MatbenchError("Mismatch between columns found in "
+                    raise MSLearnError("Mismatch between columns found in "
                                         "arg dataframe and dataframe used for "
                                         "fitting!")
                 else:
