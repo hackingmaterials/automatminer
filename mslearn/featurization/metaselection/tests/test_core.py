@@ -58,7 +58,7 @@ class TestFeaturizerAutoFilter(unittest.TestCase):
             apply(lambda x: Structure.from_dict(x))
 
     def test_auto_excludes(self):
-        glass_ftz_excludes = FeaturizerMetaSelector(max_na_percent=0.05).\
+        glass_ftz_excludes = FeaturizerMetaSelector(max_na_frac=0.05).\
             auto_excludes(self.df_glass)
         self.assertIn("IonProperty", glass_ftz_excludes)
         self.assertIn("ElectronAffinity", glass_ftz_excludes)
@@ -69,7 +69,7 @@ class TestFeaturizerAutoFilter(unittest.TestCase):
         self.assertIn("Miedema", glass_ftz_excludes)
 
         glass_ftz_excludes = \
-            FeaturizerMetaSelector(max_na_percent=0.40).\
+            FeaturizerMetaSelector(max_na_frac=0.40).\
                 auto_excludes(self.df_glass)
         self.assertIn("IonProperty", glass_ftz_excludes)
         self.assertIn("ElectronAffinity", glass_ftz_excludes)
@@ -77,7 +77,7 @@ class TestFeaturizerAutoFilter(unittest.TestCase):
         self.assertIn("OxidationStates", glass_ftz_excludes)
         self.assertIn("CationProperty", glass_ftz_excludes)
 
-        castelli_ftz_excludes = FeaturizerMetaSelector(max_na_percent=0.05).\
+        castelli_ftz_excludes = FeaturizerMetaSelector(max_na_frac=0.05).\
             auto_excludes(self.df_castelli)
         self.assertIn("YangSolidSolution", castelli_ftz_excludes)
         self.assertIn("Miedema", castelli_ftz_excludes)

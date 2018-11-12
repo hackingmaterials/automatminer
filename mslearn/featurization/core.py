@@ -7,7 +7,7 @@ from mslearn.utils.utils import MatbenchError, check_fitted, set_fitted
 from mslearn.base import DataframeTransformer, LoggableMixin
 from mslearn.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
-from matbench.featurization.metaselection.core import FeaturizerMetaSelector
+from mslearn.featurization.metaselection.core import FeaturizerMetaSelector
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
@@ -128,15 +128,25 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                   "structure": [BagofBonds(), GlobalSymmetryFeatures()]}
             Valid keys for each featurizer type are given in the *_aliases
             constants above.
+        exclude ([str]): Class names of featurizers to exclude. Only used if
+            your own featurizer dict is NOT passed.
+        use_metaselector (bool): Whether to use FeaturizerMetaSelector to remove
+            featurizers that will return a higher nan fraction than max_na_frac
+            (as below) for the dataset. Only used if own featurizer dict is
+            NOT passed.
+        max_na_frac (float): The maximum fraction (0.0 - 1.0) of samples for a
+            given feature allowed. Featurizers that definitely return a higher
+            nan fraction are automatically removed by FeaturizerMetaSelector.
+            Only used if own featurizer dict is NOT passed and use_metaselector
+            is True.
         ignore_cols ([str]): Column names to be ignored/removed from any
             dataframe undergoing fitting or transformation.
         ignore_errors (bool): If True, each featurizer will ignore all errors
             during featurization.
         drop_inputs (bool): Drop the columns containing input objects for
-            featurization (e.g., drop composition column folllowing featurization).
-        exclude ([str]): Class names of featurizers to exclude. Only used if
-            your own featurizer dict is NOT passed.
-        guess_oxistates (bool): If True, try to decorate sites with oxidation state.
+            featurization (e.g., drop composition column following featurization).
+        guess_oxistates (bool): If True, try to decorate sites with oxidation
+            state.
         multiiindex (bool): If True, returns a multiindexed dataframe.
         n_jobs (int): The number of parallel jobs to use during featurization
             for each featurizer. -1 sets n_jobs = n_cores
@@ -151,11 +161,17 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             contain the actual objects being used for featurization.
         features (dict): The features generated from the application of all
             featurizers.
+        auto_featurizer (bool): whether the featurizers are set automatically,
+            or passed by the users.
+        metaselector (object): the FeaturizerMetaSelector class if metaselection
+            is used during featurization. The dataset metafeatures and
+            auto-excluded featurizers can be accessed by self.metaselector.
+            dataset_mfs and self.metaselector.excludes.
 
     """
 
     def __init__(self, featurizers=None, exclude=None, use_metaselector=True,
-                 max_na_percent=0.05, ignore_cols=None, ignore_errors=True,
+                 max_na_frac=0.05, ignore_cols=None, ignore_errors=True,
                  drop_inputs=True, guess_oxistates=True, multiindex=False,
                  n_jobs=None, logger=True):
 
@@ -163,7 +179,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.featurizers = featurizers
         self.exclude = exclude
         self.use_metaselector = use_metaselector
-        self.max_na_percent = max_na_percent
+        self.max_na_percent = max_na_frac
         self.auto_featurizer = True if self.featurizers is None else False
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
@@ -266,7 +282,19 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         return df
 
     def _customize_featurizers(self, df):
-        # auto_set featurizers
+        """
+        Customize the featurizers that will be used in featurization, stored
+        in self.featurizers.
+        If users have passed the featurizers, just use them and normalize
+        the names from the aliases; If users have not passed the featurizers,
+        will auto-set the featurizers, and if use_metaselection is True, will
+        use FeaturizerMetaSelector to remove the featurizers that return a
+        higher nan fraction than self.max_na_frac for the dataset.
+        Args:
+            df (pandas.DataFrame)
+
+        """
+        # auto-set featurizers
         if not self.featurizers:
             self.auto_featurizer = True
             self.featurizers = dict()
@@ -293,7 +321,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     self.logger.info("Featurizer type {} not in the dataframe"
                                      "to be fitted. Skipping...".
                                      format(featurizer_type))
-        # user_set featurizers
+        # user-set featurizers
         else:
             if not isinstance(self.featurizers, dict):
                 raise TypeError("Featurizers must be a dictionary with keys"

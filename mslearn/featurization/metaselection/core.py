@@ -25,7 +25,7 @@ def dataset_metafeatures(df, **mfs_kwargs):
 
     These dataset metafeatures will be used in FeaturizerMetaSelector to remove
     some featurizers that definitely do not work for this dataset (returning
-    nans more than the allowed max_na_percent).
+    nans more than the allowed max_na_frac).
     Args:
         df: input dataset as pd.DataFrame
         mfs_kwargs: kwargs for _composition/structure_metafeatures
@@ -88,35 +88,35 @@ class FeaturizerMetaSelector:
     Currently only support removing definitely useless featurizers.
     Cannot recommend featurizers based on the target.
     """
-    def __init__(self, max_na_percent=0.05):
-        self.max_na_percent = max_na_percent
+    def __init__(self, max_na_frac=0.05):
+        self.max_na_frac = max_na_frac
         self.dataset_mfs = None
         self.excludes = None
 
     @staticmethod
-    def composition_featurizer_excludes(mfs, max_na_percent=0.05):
+    def composition_featurizer_excludes(mfs, max_na_frac=0.05):
         """
         Determine the composition featurizers that are definitely do not work
-        for this dataset (returning nans more than the allowed max_na_percent).
+        for this dataset (returning nans more than the allowed max_na_frac).
         Args:
             mfs: composition_metafeatures
-            max_na_percent: max percent of nans allowed for the feature columns
+            max_na_frac: max percent of nans allowed for the feature columns
 
         Returns:
             ([str]): list of removable composition featurizers
         """
         excludes = list()
         try:
-            if mfs["percent_of_all_nonmetal"] > max_na_percent:
+            if mfs["percent_of_all_nonmetal"] > max_na_frac:
                 excludes.extend(["Miedema",
                                  "YangSolidSolution"])
 
-            if mfs["percent_of_contain_trans_metal"] < (1 - max_na_percent):
+            if mfs["percent_of_contain_trans_metal"] < (1 - max_na_frac):
                 excludes.extend(["TMetalFraction",
                                  "Miedema",
                                  "YangSolidSolution"])
 
-            if mfs["percent_of_all_metal"] > max_na_percent:
+            if mfs["percent_of_all_metal"] > max_na_frac:
                 excludes.extend(["CationProperty",
                                  "OxidationStates",
                                  "ElectronAffinity",
@@ -131,20 +131,20 @@ class FeaturizerMetaSelector:
         return list(set(excludes))
 
     @staticmethod
-    def structure_featurizer_excludes(mfs, max_na_percent=0.05):
+    def structure_featurizer_excludes(mfs, max_na_frac=0.05):
         """
         Determine the structure featurizers that are definitely do not work
-        for this dataset (returning nans more than the allowed max_na_percent).
+        for this dataset (returning nans more than the allowed max_na_frac).
         Args:
             mfs: structure_metafeatures
-            max_na_percent: max percent of nans allowed for the feature columns
+            max_na_frac: max percent of nans allowed for the feature columns
 
         Returns:
             ([str]): list of removable structure featurizers
         """
         excludes = list()
         try:
-            if mfs["percent_of_ordered_structures"] < (1 - max_na_percent):
+            if mfs["percent_of_ordered_structures"] < (1 - max_na_frac):
                 excludes.extend(["GlobalSymmetryFeatures"])
 
         except KeyError:
@@ -172,7 +172,7 @@ class FeaturizerMetaSelector:
                 exclude_fts = getattr(self,
                                       "{}_featurizer_excludes".format(mfs_type),
                                       None)
-                auto_excludes.extend(exclude_fts(mfs, self.max_na_percent)
+                auto_excludes.extend(exclude_fts(mfs, self.max_na_frac)
                                      if exclude_fts is not None else [])
 
         self.excludes = list(set(auto_excludes))
