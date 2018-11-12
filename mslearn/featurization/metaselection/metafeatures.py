@@ -125,7 +125,8 @@ def composition_stats(X):
     Transform the input X to immutable tuple to use caching and call
     _composition_stats .
     Args:
-        X: list, np.ndarray, pd.Series or pd.DataFrame,
+        X: iterable compositions, can be Pymatgen Composition objects or
+            string formulas
 
     Returns:
         _composition_stats
@@ -255,7 +256,7 @@ def structure_stats(X):
     Transform the input X to immutable IStructure to use caching and call
     _structure_stats .
     Args:
-        X: iterable pymatgen Structure object
+        X: iterable structures, can be pymatgen Structure or IStructure objects
 
     Returns:
         _structure_stats

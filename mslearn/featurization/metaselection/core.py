@@ -39,7 +39,8 @@ def dataset_metafeatures(df, **mfs_kwargs):
         input_col = mfs_kwargs.get("{}_col".format(mfs_type), mfs_type)
         mfs_func = getattr(sys.modules[__name__],
                            "_{}_metafeatures".format(mfs_type), None)
-        dataset_mfs.update(mfs_func(df, input_col) if mfs_func is not None else {})
+        dataset_mfs.update(mfs_func(df, input_col)
+                           if mfs_func is not None else {})
 
     return dataset_mfs
 
@@ -68,7 +69,8 @@ def _structure_metafeatures(df, structure_col="structure"):
     Calculate structure-based metafeatures of the dataset.
     Args:
         df: input dataset as pd.DataFrame
-        structure_col(str): column name for structures
+        structure_col(str): column name in the df for structures, as pymatgen
+            IStructure or Structure
 
     Returns:
         (dict): {"structure_metafeatures": mfs/None}
@@ -84,9 +86,9 @@ def _structure_metafeatures(df, structure_col="structure"):
 
 class FeaturizerMetaSelector:
     """
-    Given a dataset as a dataframe, return a list of featurizer names.
+    Given a dataset as a dataframe, heuristically customize the featurizers.
     Currently only support removing definitely useless featurizers.
-    Cannot recommend featurizers based on the target.
+    Cannot recommend featurizers based on the target now.
     """
     def __init__(self, max_na_frac=0.05):
         self.max_na_frac = max_na_frac
