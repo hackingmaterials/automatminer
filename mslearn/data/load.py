@@ -355,7 +355,7 @@ def load_glass_binary():
     Metallic glass formation data for binary alloys, collected from various
     experimental techniques such as melt-spinning or mechanical alloying.
     This dataset covers all compositions with an interval of 5 at.% in 59
-    binary systems, containing a total of 5959 alloys in the dataset.
+    binary systems, containing a total of 5483 alloys in the dataset.
     The target property of this dataset is the glass forming ability (GFA),
     i.e. whether the composition can form monolithic glass or not, which is
     either 1 for glass forming or 0 for non-full glass forming.
