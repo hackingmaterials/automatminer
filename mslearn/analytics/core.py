@@ -9,21 +9,27 @@ class Analytics:
     def __init__(self, predictive_model, feature_labels=None, dataset=None):
         if isinstance(predictive_model, MatPipe):
             self.predictive_model = predictive_model
-            # self.feature_labels = predictive_model.feature_labels
-            # self.dataset = predictive_model.dataset
+            self.feature_labels = predictive_model.learner.features
+            self.target = predictive_model.learner.fitted_target
+            self.dataset = predictive_model.post_fit_df.drop([self.target],
+                                                             axis=1)
         if feature_labels is not None:
             self.feature_labels = feature_labels
         if dataset is not None:
             self.dataset = dataset
 
-        self.interpreter = Interpretation()
-        self.interpreter.load_data(self.dataset,
-                                   feature_names=self.feature_labels)
-        self.model = InMemoryModel(self.predictive_model.predict,
-                                   examples=self.dataset)
+        self.interpreter = Interpretation(self.dataset,
+                                          feature_names=self.feature_labels)
+
+        self.model = InMemoryModel(
+            self.predictive_model.learner._backend.predict,
+            examples=self.dataset
+        )
 
     def get_feature_importance(self):
-        return self.interpreter.feature_importance.feature_importance(self.model)
+        return self.interpreter.feature_importance.feature_importance(
+            self.model, progressbar=False
+        )
 
 
 if __name__ == '__main__':
@@ -31,7 +37,7 @@ if __name__ == '__main__':
     df = df[["formula", "K_VRH"]]
     df = df.rename({"formula": "composition"}, axis=1)
 
-    fitted_pipeline = MatPipe(time_limit_mins=5).fit(df, "K_VRH")
+    fitted_pipeline = MatPipe(time_limit_mins=600).fit(df, "K_VRH")
     print("Done fitting")
 
     analyzer = Analytics(fitted_pipeline)
