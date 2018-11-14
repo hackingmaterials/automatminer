@@ -1,7 +1,6 @@
 import unittest
-from matminer.datasets.dataset_retrieval import load_dataset
+from matminer.datasets import load_dataset
 from mslearn.featurization.metaselection.metafeatures import *
-from mslearn.data.load import load_castelli_perovskites, load_glass_binary
 
 __author__ = ["Qi Wang <wqthu11@gmail.com>"]
 

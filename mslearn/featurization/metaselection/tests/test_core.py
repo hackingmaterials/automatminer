@@ -1,5 +1,5 @@
 import unittest
-from matminer.datasets.dataset_retrieval import load_dataset
+from matminer.datasets import load_dataset
 from mslearn.featurization.metaselection.core import _composition_metafeatures, \
     _structure_metafeatures, dataset_metafeatures, FeaturizerMetaSelector
 
