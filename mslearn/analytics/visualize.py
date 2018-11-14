@@ -1,5 +1,4 @@
-from mslearn.data.load import load_double_perovskites_gap
-from mslearn.prepare import PrepareData
+from matminer.datasets.convenience_loaders import load_double_perovskites_gap
 
 
 class VisualizeData(object):
@@ -12,7 +11,6 @@ class VisualizeData(object):
         if target_df:
             df = df.concat(target_df)
         self.df = df
-
 
     def targetted_visualize(self, target, ncols=10):
         """
@@ -28,11 +26,3 @@ class VisualizeData(object):
 
 if __name__ == "__main__":
     df_init, lumos = load_double_perovskites_gap(return_lumo=True)
-    prep = PrepareData(df_init,
-                       targets=['gap gllbsc'],
-                       ignore_cols=['A1', 'A2', 'B1', 'B2'])
-    prep.auto_featurize()
-    # prep.handle_na()
-
-    vis = VisualizeData(prep.get_train_target())
-    vis.targetted_visualize(target='gap gllbsc')

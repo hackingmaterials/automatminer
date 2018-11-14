@@ -1,77 +1,79 @@
 import unittest
+from matminer.datasets import load_dataset
 from mslearn.featurization.metaselection.metafeatures import *
-from mslearn.data.load import load_castelli_perovskites, load_glass_binary
+
+__author__ = ["Qi Wang <wqthu11@gmail.com>"]
 
 
 class TestFormulaMetafeatures(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.df_glass = load_glass_binary()
+        cls.test_df = load_dataset('elastic_tensor_2015').rename(
+            columns={"formula": "composition"})
 
-    def test_NumberOfFormulas(self):
-        nf = NumberOfFormulas().calc(self.df_glass["formula"])
-        self.assertEqual(nf, 5959)
+    def test_NumberOfCompositions(self):
+        nf = NumberOfCompositions().calc(self.test_df["composition"])
+        self.assertEqual(nf, 1181)
 
     def test_PercentOfAllMetal(self):
-        pm = PercentOfAllMetal().calc(self.df_glass["formula"])
-        self.assertAlmostEqual(pm, 0.6578, 4)
+        pm = PercentOfAllMetal().calc(self.test_df["composition"])
+        self.assertAlmostEqual(pm, 0.5919, 4)
 
     def test_PercentOfMetalNonmetal(self):
-        pmnc = PercentOfMetalNonmetal().calc(self.df_glass["formula"])
-        self.assertAlmostEqual(pmnc, 0.3208, 4)
+        pmnc = PercentOfMetalNonmetal().calc(self.test_df["composition"])
+        self.assertAlmostEqual(pmnc, 0.3810, 4)
 
     def test_PercentOfAllNonmetal(self):
-        pan = PercentOfAllNonmetal().calc(self.df_glass["formula"])
-        self.assertAlmostEqual(pan, 0.0214, 4)
+        pan = PercentOfAllNonmetal().calc(self.test_df["composition"])
+        self.assertAlmostEqual(pan, 0.0271, 4)
 
     def test_PercentOfContainTransMetal(self):
-        pctm = PercentOfContainTransMetal().calc(self.df_glass["formula"])
-        self.assertAlmostEqual(pctm, 0.6877, 4)
+        pctm = PercentOfContainTransMetal().calc(self.test_df["composition"])
+        self.assertAlmostEqual(pctm, 0.8273, 4)
 
     def test_NumberOfDifferentElements(self):
-        nde = NumberOfDifferentElements().calc(self.df_glass["formula"])
-        self.assertEqual(nde, 38)
+        nde = NumberOfDifferentElements().calc(self.test_df["composition"])
+        self.assertEqual(nde, 63)
 
     def test_AvgNumberOfElements(self):
-        ane = AvgNumberOfElements().calc(self.df_glass["formula"])
-        self.assertAlmostEqual(ane, 1.9802, 4)
+        ane = AvgNumberOfElements().calc(self.test_df["composition"])
+        self.assertAlmostEqual(ane, 2.2007, 4)
 
     def test_MaxNumberOfElements(self):
-        mne = MaxNumberOfElements().calc(self.df_glass["formula"])
-        self.assertEqual(mne, 2)
+        mne = MaxNumberOfElements().calc(self.test_df["composition"])
+        self.assertEqual(mne, 4)
 
     def test_MinNumberOfElements(self):
-        mne = MinNumberOfElements().calc(self.df_glass["formula"])
+        mne = MinNumberOfElements().calc(self.test_df["composition"])
         self.assertEqual(mne, 1)
 
 
 class TestStructureMetafeatures(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.df_castelli = load_castelli_perovskites()
-        cls.df_castelli["structure"] = cls.df_castelli["structure"].\
-            apply(lambda x: Structure.from_dict(x))
+        cls.test_df = load_dataset('elastic_tensor_2015').rename(
+            columns={"formula": "composition"})
 
     def test_NumberOfStructures(self):
-        ns = NumberOfStructures().calc(self.df_castelli["structure"])
-        self.assertEqual(ns, 18928)
+        ns = NumberOfStructures().calc(self.test_df["structure"])
+        self.assertEqual(ns, 1181)
 
     def test_PercentOfOrderedStructures(self):
-        pos = PercentOfOrderedStructures().calc(self.df_castelli["structure"])
+        pos = PercentOfOrderedStructures().calc(self.test_df["structure"])
         self.assertAlmostEqual(pos, 1.0)
 
     def test_AvgNumberOfSites(self):
-        ans = AvgNumberOfSites().calc(self.df_castelli["structure"])
-        self.assertAlmostEqual(ans, 5.0)
+        ans = AvgNumberOfSites().calc(self.test_df["structure"])
+        self.assertAlmostEqual(ans, 12.4259, 4)
 
     def test_MaxNumberOfSites(self):
-        mns = MaxNumberOfSites().calc(self.df_castelli["structure"])
-        self.assertAlmostEqual(mns, 5.0)
+        mns = MaxNumberOfSites().calc(self.test_df["structure"])
+        self.assertEqual(mns, 152)
 
     def test_NumberOfDifferentElementsInStructure(self):
         mns = NumberOfDifferentElementsInStructure().calc(
-            self.df_castelli["structure"])
-        self.assertEqual(mns, 56)
+            self.test_df["structure"])
+        self.assertEqual(mns, 63)
 
 
 if __name__ == "__main__":
