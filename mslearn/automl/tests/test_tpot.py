@@ -9,7 +9,7 @@ from sklearn.metrics import r2_score, f1_score
 from mslearn.automl.adaptors import TPOTAdaptor
 from mslearn.utils.utils import MatbenchError
 
-__author__ = ['Alex Dunn <ardunn@lbl.gov']
+__author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
 
 
 class TestTPOTAdaptor(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestTPOTAdaptor(unittest.TestCase):
 
     def test_regression(self):
         target_key = "K_VRH"
-        tpot = TPOTAdaptor(mode="regression", **self.common_tpot_kwargs)
+        tpot = TPOTAdaptor(**self.common_tpot_kwargs)
         tpot.fit(self.train_df, target_key)
         test_w_predictions = tpot.predict(self.test_df, target_key)
         y_true = test_w_predictions[target_key]
@@ -31,7 +31,7 @@ class TestTPOTAdaptor(unittest.TestCase):
         self.assertTrue(r2_score(y_true, y_test) > 0.75)
 
     def test_classification(self):
-        tpot = TPOTAdaptor(mode="classification", **self.common_tpot_kwargs)
+        tpot = TPOTAdaptor(**self.common_tpot_kwargs)
         max_kvrh = 50
         classifier_key = "K_VRH > {}?".format(max_kvrh)
         train_df = self.train_df.rename(columns={"K_VRH": classifier_key})
@@ -39,13 +39,14 @@ class TestTPOTAdaptor(unittest.TestCase):
         train_df[classifier_key] = train_df[classifier_key] > max_kvrh
         test_df[classifier_key] = test_df[classifier_key] > max_kvrh
         tpot.fit(train_df, classifier_key)
+        print(tpot.mode)
         test_w_predictions = tpot.predict(test_df, classifier_key)
         y_true = test_w_predictions[classifier_key]
         y_test = test_w_predictions[classifier_key + " predicted"]
         self.assertTrue(f1_score(y_true, y_test) > 0.75)
 
     def test_training_only(self):
-        tpot = TPOTAdaptor(mode="regression", **self.common_tpot_kwargs)
+        tpot = TPOTAdaptor(**self.common_tpot_kwargs)
         target_key = "K_VRH"
         train_w_predictions = tpot.fit_transform(self.train_df, target_key)
         y_true = train_w_predictions[target_key]
@@ -53,7 +54,7 @@ class TestTPOTAdaptor(unittest.TestCase):
         self.assertTrue(r2_score(y_true, y_test) > 0.85)
 
     def test_feature_mismatching(self):
-        tpot = TPOTAdaptor(mode="regression", **self.common_tpot_kwargs)
+        tpot = TPOTAdaptor(**self.common_tpot_kwargs)
         target_key = "K_VRH"
         df1 = self.train_df
         df2 = self.test_df.rename(columns={'mean X': "some other feature"})

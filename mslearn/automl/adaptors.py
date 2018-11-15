@@ -13,7 +13,8 @@ from tpot import TPOTClassifier, TPOTRegressor
 
 from mslearn.automl.tpot_configs.classifier import classifier_config_dict_mb
 from mslearn.automl.tpot_configs.regressor import regressor_config_dict_mb
-from mslearn.utils.utils import is_greater_better, MatbenchError, set_fitted, check_fitted
+from mslearn.utils.utils import is_greater_better, MatbenchError, set_fitted, \
+    check_fitted, regression_or_classification
 from mslearn.base import AutoMLAdaptor, LoggableMixin
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
@@ -25,12 +26,12 @@ _classifier_modes = {'classifier', 'classification', 'classify'}
 
 _regressor_modes = {'regressor', 'regression', 'regress'}
 
+
 class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
     """
     A dataframe adaptor for the TPOT classifiers and regressors.
 
     Args:
-        mode (str): Either "regression" or "classification".
         tpot_kwargs: All kwargs accepted by a TPOTRegressor/TPOTClassifier
             or TPOTBase object.
 
@@ -52,10 +53,9 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
             used. If set to False, then no logging will occur.
 
     Attributes:
+        The following attributes are set during fitting.
+
         mode (str): Either "regression" or "classification"
-
-            The following attributes are set during fitting.
-
         features (list): The features labels used to develop the ml model.
         ml_data (dict): The raw ml data used for training.
         best_models (OrderedDict): The best model names and their scores.
@@ -65,27 +65,14 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         fitted_target (str): The target name in the df used for training.
     """
 
-    def __init__(self, mode, logger=True, **tpot_kwargs):
-        if mode.lower() not in _classifier_modes \
-                and mode.lower() not in _regressor_modes:
-            raise ValueError('Unsupported mode: "{}"'.format(mode))
-
-        if mode in _classifier_modes:
-            self.mode = 'classification'
-            tpot_kwargs['config_dict'] = tpot_kwargs.get('config_dict',
-                                                         classifier_config_dict_mb)
-        else:
-            self.mode = 'regression'
-            tpot_kwargs['config_dict'] = tpot_kwargs.get('config_dict',
-                                                         regressor_config_dict_mb)
-
+    def __init__(self, logger=True, **tpot_kwargs):
         tpot_kwargs['cv'] = tpot_kwargs.get('cv', 5)
         tpot_kwargs['n_jobs'] = tpot_kwargs.get('n_jobs', -1)
         tpot_kwargs['verbosity'] = tpot_kwargs.get('verbosity', 2)
 
+        self.mode = None
+        self._backend = None
         self.tpot_kwargs = tpot_kwargs
-        self._backend = TPOTRegressor(**tpot_kwargs) if mode in _regressor_modes \
-            else TPOTClassifier(**tpot_kwargs)
         self.fitted_target = None
         self._features = None
         self.models = None
@@ -111,6 +98,20 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         # Prevent goofy pandas casting by casting to native
         y = df[target].values.tolist()
         X = df.drop(columns=target).values.tolist()
+
+        # Determine learning type based on whether classification or regression
+        self.mode = regression_or_classification(df[target])
+        if self.mode == "classification":
+            self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
+                'config_dict', classifier_config_dict_mb)
+            self._backend = TPOTClassifier(**self.tpot_kwargs)
+        elif self.mode == "regression":
+            self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
+                'config_dict', regressor_config_dict_mb)
+            self._backend = TPOTRegressor(**self.tpot_kwargs)
+        else:
+            raise ValueError("Learning type {} not recognized as a valid mode "
+                             "for {}".format(self.mode, self.__class__.__name__))
         self._features = df.drop(columns=target).columns.tolist()
         self._ml_data = {"X": X, "y": y}
         self.fitted_target = target
@@ -118,7 +119,6 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         self._backend = self._backend.fit(X, y, **fit_kwargs)
         self.logger.info("TPOT fitting finished.")
         return self
-
 
     @check_fitted
     @property
@@ -215,12 +215,11 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
                                 "in df not in model: \n{}".format(not_in_df,
                                                                   not_in_model))
         else:
-            X = df[self._features].values         # rectify feature order
+            X = df[self._features].values  # rectify feature order
             y_pred = self._backend.predict(X)
             df[target + " predicted"] = y_pred
             self.logger.debug("Prediction finished successfully.")
             return df
-
 
 
 if __name__ == "__main__":
@@ -229,7 +228,8 @@ if __name__ == "__main__":
     from mslearn.preprocessing import DataCleaner, FeatureReducer
 
     # Load a dataset
-    df = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"})[["composition",  "K_VRH"]]
+    df = load_dataset("elastic_tensor_2015").rename(
+        columns={"formula": "composition"})[["composition", "K_VRH"]]
     testdf = df.iloc[501:550]
     traindf = df.iloc[:100]
     target = "K_VRH"
