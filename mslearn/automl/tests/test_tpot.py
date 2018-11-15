@@ -1,14 +1,9 @@
 import os
 import unittest
-from collections import OrderedDict
 
-import numpy as np
 import pandas as pd
-from tpot import TPOTClassifier
-from matminer.featurizers.composition import AtomicOrbitals, ElementFraction
 from mslearn.automl.tpot_configs.classifier import classifier_config_dict_mb
 from mslearn.automl.tpot_configs.regressor import regressor_config_dict_mb
-from mslearn.featurization.core import AutoFeaturizer
 from sklearn.metrics import r2_score, f1_score
 
 from mslearn.automl.adaptors import TPOTAdaptor
@@ -24,7 +19,8 @@ class TestTPOTAdaptor(unittest.TestCase):
                                     index_col=0)
         self.test_df = pd.read_csv(basedir + "/mini_test_df_automl.csv",
                                    index_col=0)
-        self.common_tpot_kwargs = {"max_time_mins": 3, "max_eval_time_mins": 1}
+        self.common_tpot_kwargs = {"max_time_mins": 5, "max_eval_time_mins": 5,
+                                   "generations": 10, "population_size": 15}
 
     def test_regression(self):
         target_key = "K_VRH"
