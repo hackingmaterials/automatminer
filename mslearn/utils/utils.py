@@ -135,11 +135,14 @@ def regression_or_classification(series):
     Returns:
         (str): "regression" or "classification"
     """
-    try:
-        pd.to_numeric(series, errors="raise")
-        return "regression"
-    except (ValueError, TypeError):
+    if series.dtypes.name == "bool":
         return "classification"
+    else:
+        try:
+            pd.to_numeric(series, errors="raise")
+            return "regression"
+        except (ValueError, TypeError):
+            return "classification"
 
 
 def check_fitted(func):
