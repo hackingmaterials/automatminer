@@ -4,192 +4,65 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
+from tpot import TPOTClassifier
+from matminer.featurizers.composition import AtomicOrbitals, ElementFraction
+from mslearn.automl.tpot_configs.classifier import classifier_config_dict_mb
+from mslearn.automl.tpot_configs.regressor import regressor_config_dict_mb
+from mslearn.featurization.core import AutoFeaturizer
+from sklearn.metrics import r2_score, f1_score
 
-# from tpot import TPOTClassifier
-# # from mslearn.automl.tpot_utils import TPOTAutoML
-# from mslearn.automl.tpot_configs.classifier import classifier_config_dict_mb
-# from mslearn.automl.tpot_configs.regressor import regressor_config_dict_mb
-# from mslearn.analysis.core import Analytics
-# from mslearn.data.load import load_double_perovskites_gap, \
-#     load_glass_binary
-# from mslearn.featurization.core import AutoFeaturizer
-# # from mslearn.preprocessing.core import Preprocesser
-# # from matminer.featurizers.composition import ElementProperty, TMetalFraction, \
-# #     Stoichiometry
-# from sklearn.model_selection import train_test_split
+from mslearn.automl.adaptors import TPOTAdaptor
+from mslearn.utils.utils import MatbenchError
 
-__author__ = ['Alireza Faghaninia <alireza.faghaninia@gmail.com>,',
-             'Qi Wang <wqthu11@gmail.com>',
-             'Alex Dunn <ardunn@lbl.gov']
-
-
-#todo: condense these tests
-# class TestTpotAutoml(unittest.TestCase):
-#
-#     def setUp(self):
-#         self.RS = 27
-#
-#     def test_tpot_regression(self, limit=500):
-#         target = 'gap gllbsc'
-#         # load and featurize:
-#         df_init = load_double_perovskites_gap(return_lumo=False)[:limit]
-#         featzer = AutoFeaturizer(ignore_cols=['a_1', 'b_1', 'a_2', 'b_2'])
-#         df_feats = featzer.featurize_formula(df_init, featurizers=[
-#             ElementProperty.from_preset(preset_name='matminer'),
-#             TMetalFraction()])
-#         # preprocessing of the data
-#         prep = Preprocesser()
-#         df = prep.handle_na(df_feats, max_na_frac=0.1)
-#         feats0 = set(df.columns)
-#         df = prep.prune_correlated_features(df, target, R_max=0.95)
-#         self.assertEqual(len(feats0 - set(df.columns)), 17)
-#         # train/test split (train/dev splot done within tpot crossvalidation)
-#         X_train, X_test, y_train, y_test = \
-#             train_test_split(df.drop(target, axis=1).values,
-#             df[target], train_size=0.75, test_size=0.25, random_state=self.RS)
-#
-#         tpot = TPOTAutoML(mode='regressor',
-#                           generations=1,
-#                           population_size=25,
-#                           scoring='r2',
-#                           random_state=self.RS,
-#                           feature_names=df.drop(target, axis=1).columns,
-#                           n_jobs=1)
-#         # self.assertTrue(tpot.scoring_function=='r2')
-#         tpot.fit(X_train, y_train)
-#         top_scores = tpot.get_top_models(return_scores=True)
-#
-#         # test customed config_dict
-#         # .config_dict is changed to ._config_dict in 0.9.5 tpot version
-#         self.assertTrue(tpot.config_dict == regressor_config_dict_mb)
-#
-#         self.assertTrue(tpot.greater_score_is_better)
-#
-#         top_scores_keys = list(top_scores.keys())
-#         config_keys = [x.split('.')[-1]
-#                        for x in regressor_config_dict_mb.keys()]
-#         self.assertEqual(set(top_scores_keys).issubset(config_keys), True)
-#         self.assertLessEqual(top_scores[top_scores_keys[0]], 1)
-#         self.assertGreaterEqual(top_scores[top_scores_keys[-1]], 0)
-#
-#         # test error analysis:
-#         ea = Analytics(tpot, X_train, y_train, X_test, y_test,
-#                       mode='regression', target=target,
-#                       features=df.drop(target, axis=1).columns,
-#                       test_samples_index=y_test.index,
-#                       random_state=self.RS)
-#         df_errors = ea.get_data_for_error_analysis()
-#         self.assertTrue((df_errors['{}_true'.format(target)]!=\
-#                          df_errors['{}_predicted'.format(target)]).all())
-#         rmse = np.sqrt(np.mean((tpot.predict(X_test) - y_test) ** 2))
-#         self.assertTrue((
-#             ea.false_positives['{}_predicted'.format(target)]>= \
-#             ea.false_positives['{}_true'.format(target)] + rmse).all())
-#
-#         self.assertTrue((
-#             ea.false_negatives['{}_predicted'.format(target)]<= \
-#             ea.false_negatives['{}_true'.format(target)] - rmse).all())
-#
-#         # test feature importance
-#         feature_importance = ea.get_feature_importance(sort=True)
-#         self.assertEqual(list(feature_importance.items())[0][0],
-#                          'transition metal fraction')
-#         self.assertAlmostEqual(feature_importance['range melting_point'], 0.1, 1)
-#
-#     def test_tpot_classification(self, limit=500):
-#         target = 'gfa'
-#         # load and featurize:
-#         df_init = load_glass_binary()[:limit]
-#         featzer = AutoFeaturizer()
-#         df_feats = featzer.featurize_formula(df_init, featurizers=[
-#             ElementProperty.from_preset(preset_name='matminer'),
-#             Stoichiometry()])
-#         # preprocessing of the data
-#         prep = Preprocesser()
-#         df = prep.handle_na(df_feats, max_na_frac=0.1)
-#         feats0 = set(df.columns)
-#         df = prep.prune_correlated_features(df, target, R_max=0.95)
-#         self.assertEqual(len(feats0 - set(df.columns)), 49)
-#         # train/test split (development is within tpot crossvalidation)
-#         X_train, X_test, y_train, y_test = \
-#             train_test_split(df.drop(target, axis=1).values,
-#             df[target], train_size=0.75, test_size=0.25, random_state=self.RS)
-#
-#         tpot = TPOTAutoML(mode='classify',
-#                           generations=1,
-#                           population_size=25,
-#                           scoring='f1_weighted',
-#                           random_state=self.RS,
-#                           feature_names=df.drop(target, axis=1).columns,
-#                           n_jobs=1)
-#         tpot.fit(X_train, y_train)
-#         top_scores = tpot.get_top_models(return_scores=True)
-#
-#         # test customed config_dict
-#         self.assertTrue(tpot.config_dict == classifier_config_dict_mb)
-#         self.assertTrue(tpot.greater_score_is_better)
-#
-#         top_scores_keys = list(top_scores.keys())
-#         config_keys = [x.split('.')[-1]
-#                        for x in classifier_config_dict_mb.keys()]
-#         self.assertEqual(set(top_scores_keys).issubset(config_keys), True)
-#         self.assertLessEqual(top_scores[top_scores_keys[0]], 1)
-#         self.assertGreaterEqual(top_scores[top_scores_keys[-1]], 0.4)
-#
-#         # test analysis:
-#         ea = Analytics(tpot, X_train, y_train, X_test, y_test,
-#                       mode='classification', target=target,
-#                       features=df.drop(target, axis=1).columns,
-#                       test_samples_index=y_test.index,
-#                       random_state=self.RS)
-#         df_errors = ea.get_data_for_error_analysis()
-#         self.assertTrue((df_errors['{}_true'.format(target)] !=\
-#                          df_errors['{}_predicted'.format(target)]).all())
-#         self.assertTrue(not ea.false_negatives['gfa_predicted'].all() and \
-#                         ea.false_negatives['gfa_true'].all())
-#         self.assertTrue(ea.false_positives['gfa_predicted'].all() and \
-#                         not ea.false_positives['gfa_true'].all())
-#
-#         # test feature importance
-#         ea.get_feature_importance(sort=True)
-#         self.assertTrue(isinstance(ea.feature_importance, OrderedDict))
-#         # feature_importance = list(ea.feature_importance.items())
-#         # self.assertEqual('mean block',  feature_importance[0][0])
-#         # self.assertAlmostEqual(feature_importance[0][1], 0.6, 1)
-#
-#     def test_customed_configs(self):
-#         tpot_obj = TPOTClassifier(config_dict=classifier_config_dict_mb)
-#         # This is not in the 0.9.3 tpot version
-#         # tpot_obj._fit_init()
-#
-#         self.assertTrue(isinstance(tpot_obj.config_dict, dict))
-#         self.assertTrue(tpot_obj.config_dict == classifier_config_dict_mb)
+__author__ = ['Alex Dunn <ardunn@lbl.gov']
 
 
 class TestTPOTAdaptor(unittest.TestCase):
     def setUp(self):
         basedir = os.path.dirname(os.path.realpath(__file__))
-        self.training_df = pd.read_csv(basedir + "/mini_training_df_automl.csv")
-        self.validation_df = pd.read_csv(basedir + "/mini_validation_df_automl.csv")
-
-    def test_customized_configs(self):
-        self.assertTrue(True)
-
-    def test_defaults(self):
-        self.assertTrue(True)
+        self.train_df = pd.read_csv(basedir + "/mini_training_df_automl.csv",
+                                    index_col=0)
+        self.test_df = pd.read_csv(basedir + "/mini_test_df_automl.csv",
+                                   index_col=0)
+        self.common_tpot_kwargs = {"max_time_mins": 3, "max_eval_time_mins": 1}
 
     def test_regression(self):
-        self.assertTrue(True)
+        target_key = "K_VRH"
+        tpot = TPOTAdaptor(mode="regression", **self.common_tpot_kwargs)
+        tpot.fit(self.train_df, target_key)
+        test_w_predictions = tpot.predict(self.test_df, target_key)
+        y_true = test_w_predictions[target_key]
+        y_test = test_w_predictions[target_key + " predicted"]
+        self.assertTrue(r2_score(y_true, y_test) > 0.75)
 
     def test_classification(self):
-        self.assertTrue(True)
+        tpot = TPOTAdaptor(mode="classification", **self.common_tpot_kwargs)
+        max_kvrh = 50
+        classifier_key = "K_VRH > {}?".format(max_kvrh)
+        train_df = self.train_df.rename(columns={"K_VRH": classifier_key})
+        train_df[classifier_key] = train_df[classifier_key] > max_kvrh
+        tpot.fit(train_df, classifier_key)
+        test_w_predictions = tpot.predict(self.test_df, classifier_key)
+        y_true = test_w_predictions[classifier_key]
+        y_test = test_w_predictions[classifier_key + " predicted"]
+        self.assertTrue(f1_score(y_true, y_test) > 0.75)
 
-    def test_transferability(self):
-        self.assertTrue(True)
+    def test_training_only(self):
+        tpot = TPOTAdaptor(mode="regression", **self.common_tpot_kwargs)
+        target_key = "K_VRH"
+        train_w_predictions = tpot.fit_transform(self.train_df, target_key)
+        y_true = train_w_predictions[target_key]
+        y_test = train_w_predictions[target_key + " predicted"]
+        self.assertTrue(f1_score(y_true, y_test) > 0.85)
 
     def test_feature_mismatching(self):
-        self.assertTrue(True)
-
+        tpot = TPOTAdaptor(mode="regression", **self.common_tpot_kwargs)
+        target_key = "K_VRH"
+        df1 = self.test_df
+        df2 = self.train_df.rename(columns={'mean X': "some other feature"})
+        tpot.fit(df1, target_key)
+        with self.assertRaises(MatbenchError):
+            tpot.predict(df2, target_key)
 
 
 if __name__ == '__main__':
