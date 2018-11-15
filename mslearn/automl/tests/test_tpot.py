@@ -7,7 +7,7 @@ from mslearn.automl.tpot_configs.regressor import regressor_config_dict_mb
 from sklearn.metrics import r2_score, f1_score
 
 from mslearn.automl.adaptors import TPOTAdaptor
-from mslearn.utils.utils import MatbenchError
+from mslearn.utils.package_tools import MatbenchError
 
 __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
 
