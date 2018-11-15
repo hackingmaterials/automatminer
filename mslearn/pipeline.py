@@ -2,7 +2,7 @@
 The highest level classes for pipelines.
 """
 from collections import Iterable
-from pprint import pprint
+from pprint import pformat
 
 import numpy as np
 
@@ -10,8 +10,9 @@ from mslearn.base import LoggableMixin, DataframeTransformer
 from mslearn.featurization import AutoFeaturizer
 from mslearn.preprocessing import DataCleaner, FeatureReducer
 from mslearn.automl.adaptors import TPOTAdaptor
-from mslearn.utils.utils import regression_or_classification, check_fitted, \
-    set_fitted
+from mslearn.utils.ml_tools import regression_or_classification
+from mslearn.utils.package_tools import check_fitted, set_fitted, \
+    return_attrs_recursively
 
 #todo: needs tests - alex
 #todo: tests should include using custom (user speficied) features as well
@@ -22,7 +23,7 @@ balanced_preset = {"learner": TPOTAdaptor(max_time_mins=120),
                    "reducer": FeatureReducer(),
                    "autofeaturizer": AutoFeaturizer(),
                    "cleaner": DataCleaner()}
-convenience_set = {"learner": TPOTAdaptor(max_time_mins=5),
+convenience_set = {"learner": TPOTAdaptor(max_time_mins=5, population_size=30),
                    "reducer": FeatureReducer(),
                    "autofeaturizer": AutoFeaturizer(),
                    "cleaner": DataCleaner()}
@@ -64,15 +65,6 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         persistence_lvl (int): Persistence level of 0 saves nothing. 1 saves
             intermediate dataframes and final dataframes. 2 saves all dataframes
             and all objects used to create the pipeline, and auto-saves a digest
-        time_limit_mins (int): The approximate time limit, in minutes.
-        # todo: fix attrs
-
-
-    Attributes:
-
-        The following attributes are set during fitting. Each has their own set
-        of attributes which defines more specifically how the pipeline works.
-
         autofeater (AutoFeaturizer): The autofeaturizer object used to
             automatically decorate the dataframe with descriptors.
         cleaner (DataCleaner): The data cleaner object used to get a
@@ -82,6 +74,11 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         learner (AutoMLAdaptor): The auto ml adaptor object used to
             actually run a auto-ml pipeline on the clean, reduced, featurized
             dataframe.
+
+    Attributes:
+        The following attributes are set during fitting. Each has their own set
+        of attributes which defines more specifically how the pipeline works.
+
         is_fit (bool): If True, the matpipe is fit. The matpipe should be
             fit before being used to predict data.
     """
@@ -90,7 +87,8 @@ class MatPipe(DataframeTransformer, LoggableMixin):
 
         self._logger = self.get_logger(logger)
         self.persistence_lvl = persistence_lvl
-        self.autofeaturizer = autofeaturizer if autofeaturizer else balanced_preset['autofeaturizer']
+        self.autofeaturizer = autofeaturizer if autofeaturizer else \
+            balanced_preset['autofeaturizer']
         self.cleaner = cleaner if cleaner else balanced_preset["cleaner"]
         self.reducer = reducer if reducer else balanced_preset["reducer"]
         self.learner = learner if learner else balanced_preset["learner"]
@@ -257,7 +255,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             return traindf
 
     @check_fitted
-    def digest(self, filename, fmt="json"):
+    def digest(self, filename=None):
         """
         Save a text digest (summary) of the fitted pipeline. Similar to the log
         but contains more detail in a structured format.
@@ -268,9 +266,14 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                 "json", "txt".
 
         Returns:
-            None
+            digeststr (str): The formatted pipeline digest.
         """
-        pass
+        digeststr = pformat(return_attrs_recursively(self))
+        if filename:
+            with open(filename, "w") as f:
+                f.write(digeststr)
+        return digeststr
+
 
 
 def MatPipePerformance(**kwargs):
@@ -304,11 +307,12 @@ if __name__ == "__main__":
     # print(df)
     # print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
 
-    mp = MatPipe()
-    print(mp.__dict__["autofeaturizer"].__module__)
-    # df = mp.benchmark(df, target, test_spec=validation_ix)
-    # print(df)
-    # print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
+    mp = MatPipeConvenience()
+    mp.digest()
+    df = mp.benchmark(df, target, test_spec=validation_ix)
+    print(df)
+    print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
+    print(mp.digest())
 
     #
     # mp = MatPipe()
