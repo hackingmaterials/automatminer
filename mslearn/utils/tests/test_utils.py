@@ -5,9 +5,9 @@ import pandas as pd
 import logging
 from sklearn.exceptions import NotFittedError
 
-from mslearn.utils.utils import initialize_logger, initialize_null_logger, \
-    is_greater_better, compare_columns, regression_or_classification, \
-    check_fitted, set_fitted
+from mslearn.utils.package_tools import compare_columns, check_fitted, set_fitted
+from mslearn.utils.ml_tools import is_greater_better, regression_or_classification
+from mslearn.utils.log_tools import initialize_logger, initialize_null_logger
 from mslearn.base import DataframeTransformer, logger_base_name
 
 run_dir = os.getcwd()
@@ -56,7 +56,7 @@ class TestUtils(unittest.TestCase):
 
     def test_is_greater_better(self):
         self.assertTrue(is_greater_better('accuracy'))
-        self.assertTrue(is_greater_better('r2'))
+        self.assertTrue(is_greater_better('r2_score'))
         self.assertTrue(is_greater_better('neg_mean_squared_error'))
         self.assertFalse(is_greater_better('mean_squared_error'))
 

@@ -1,8 +1,7 @@
 """
 Tools specific to this package.
 """
-import inspect
-
+import pandas as pd
 from sklearn.exceptions import NotFittedError
 
 
@@ -85,6 +84,10 @@ def return_attrs_recursively(obj):
         if hasattr(value, "__dict__") and hasattr(value, "__module__"):
             if "mslearn" in value.__module__:
                 attrdict[attr] = {attr: return_attrs_recursively(value)}
+            elif isinstance(value, pd.DataFrame):
+                attrdict[attr] = {"obj": value.__class__,
+                                  "columns": value.shape[1],
+                                  "samples": value.shape[0]}
             else:
                 attrdict[attr] = value
         else:

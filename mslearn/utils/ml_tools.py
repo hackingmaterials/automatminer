@@ -24,8 +24,9 @@ def is_greater_better(scoring_function):
         'f1_weighted', 'precision', 'precision_macro', 'precision_micro',
         'precision_samples', 'precision_weighted', 'recall',
         'recall_macro', 'recall_micro', 'recall_samples',
-        'recall_weighted', 'roc_auc' 'r2', 'neg_median_absolute_error',
-        'neg_mean_absolute_error', 'neg_mean_squared_error'
+        'recall_weighted', 'roc_auc', 'r2', 'r2_score',
+        'neg_median_absolute_error', 'neg_mean_absolute_error',
+        'neg_mean_squared_error'
     }
 
     desired_low_metrics = {
