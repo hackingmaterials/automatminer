@@ -235,7 +235,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         testdf = df.iloc[msk]
         self.logger.info("Dataframe split into training and testing fractions"
                          " having {} and {} samples.".format(traindf.shape[0],
-                                                             testdf.shape[1]))
+                                                             testdf.shape[0]))
 
         # Use transformers on separate training and testing dfs
         self.logger.info("Perforing feature reduction and model selection on "
