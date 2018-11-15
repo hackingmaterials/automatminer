@@ -13,8 +13,9 @@ from tpot import TPOTClassifier, TPOTRegressor
 
 from mslearn.automl.tpot_configs.classifier import classifier_config_dict_mb
 from mslearn.automl.tpot_configs.regressor import regressor_config_dict_mb
-from mslearn.utils.utils import is_greater_better, MatbenchError, set_fitted, \
-    check_fitted, regression_or_classification
+from mslearn.utils.package_tools import MatbenchError, set_fitted, check_fitted
+from mslearn.utils.ml_tools import is_greater_better, \
+    regression_or_classification
 from mslearn.base import AutoMLAdaptor, LoggableMixin
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
