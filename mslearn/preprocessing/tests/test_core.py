@@ -7,7 +7,7 @@ import pandas as pd
 from mslearn.preprocessing.core import DataCleaner, FeatureReducer
 from mslearn.preprocessing.feature_selection import TreeBasedFeatureReduction, \
     rebate
-from mslearn.utils.utils import compare_columns
+from mslearn.utils.package_tools import compare_columns
 
 test_dir = os.path.dirname(__file__)
 

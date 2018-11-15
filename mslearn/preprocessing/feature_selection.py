@@ -6,10 +6,9 @@ from sklearn.base import is_classifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
     GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.model_selection import check_cv
-from sklearn.base import BaseEstimator, TransformerMixin
 from skrebate import MultiSURF
 
-from mslearn.utils.utils import MatbenchError
+from mslearn.utils.package_tools import MatbenchError
 from mslearn.base import LoggableMixin, DataframeTransformer
 
 __authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",

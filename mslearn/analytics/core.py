@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from collections import OrderedDict
-from mslearn.utils.utils import MatbenchError
+from mslearn.utils.package_tools import MatbenchError
 from sklearn.model_selection import train_test_split
 
 

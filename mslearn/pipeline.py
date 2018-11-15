@@ -2,6 +2,7 @@
 The highest level classes for pipelines.
 """
 from collections import Iterable
+from pprint import pformat
 
 import numpy as np
 
@@ -9,11 +10,24 @@ from mslearn.base import LoggableMixin, DataframeTransformer
 from mslearn.featurization import AutoFeaturizer
 from mslearn.preprocessing import DataCleaner, FeatureReducer
 from mslearn.automl.adaptors import TPOTAdaptor
-from mslearn.utils.utils import regression_or_classification, check_fitted, \
-    set_fitted
+from mslearn.utils.ml_tools import regression_or_classification
+from mslearn.utils.package_tools import check_fitted, set_fitted, \
+    return_attrs_recursively
 
 #todo: needs tests - alex
 #todo: tests should include using custom (user speficied) features as well
+
+
+performance_preset = {}
+balanced_preset = {"learner": TPOTAdaptor(max_time_mins=120),
+                   "reducer": FeatureReducer(),
+                   "autofeaturizer": AutoFeaturizer(),
+                   "cleaner": DataCleaner()}
+convenience_set = {"learner": TPOTAdaptor(max_time_mins=5, population_size=30),
+                   "reducer": FeatureReducer(),
+                   "autofeaturizer": AutoFeaturizer(),
+                   "cleaner": DataCleaner()}
+
 
 
 class MatPipe(DataframeTransformer, LoggableMixin):
@@ -51,15 +65,6 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         persistence_lvl (int): Persistence level of 0 saves nothing. 1 saves
             intermediate dataframes and final dataframes. 2 saves all dataframes
             and all objects used to create the pipeline, and auto-saves a digest
-        time_limit_mins (int): The approximate time limit, in minutes.
-        # todo: add the new attrs
-
-
-    Attributes:
-
-        The following attributes are set during fitting. Each has their own set
-        of attributes which defines more specifically how the pipeline works.
-
         autofeater (AutoFeaturizer): The autofeaturizer object used to
             automatically decorate the dataframe with descriptors.
         cleaner (DataCleaner): The data cleaner object used to get a
@@ -69,25 +74,37 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         learner (AutoMLAdaptor): The auto ml adaptor object used to
             actually run a auto-ml pipeline on the clean, reduced, featurized
             dataframe.
+
+    Attributes:
+        The following attributes are set during fitting. Each has their own set
+        of attributes which defines more specifically how the pipeline works.
+
         is_fit (bool): If True, the matpipe is fit. The matpipe should be
             fit before being used to predict data.
     """
-    def __init__(self, persistence_lvl=2, logger=True, time_limit_mins=5):
+    def __init__(self, persistence_lvl=2, logger=True, autofeaturizer=None,
+                 cleaner=None, reducer=None, learner=None):
+
         self._logger = self.get_logger(logger)
-        self.time_limit_mins = time_limit_mins
         self.persistence_lvl = persistence_lvl
-        self.autofeater = None
-        self.cleaner = None
-        self.reducer = None
-        self.learner = None
+        self.autofeaturizer = autofeaturizer if autofeaturizer else \
+            balanced_preset['autofeaturizer']
+        self.cleaner = cleaner if cleaner else balanced_preset["cleaner"]
+        self.reducer = reducer if reducer else balanced_preset["reducer"]
+        self.learner = learner if learner else balanced_preset["learner"]
+
+        self.autofeaturizer._logger = self.get_logger(logger)
+        self.cleaner._logger = self.get_logger(logger)
+        self.reducer._logger = self.get_logger(logger)
+        self.learner._logger = self.get_logger(logger)
+
         self.pre_fit_df = None
         self.post_fit_df = None
         self.is_fit = False
-        self.ml_type = None
+        self.ml_type = self.learner.mode
         self.common_kwargs = {"logger": self.logger}
 
         #todo: implement persistence level
-        #todo: implement scoring selection
 
     @set_fitted
     def fit(self, df, target):
@@ -116,17 +133,9 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.pre_fit_df = df
         self.ml_type = regression_or_classification(df[target])
 
-        # Get top-lvel transformers
-        self.autofeater = AutoFeaturizer(**self.common_kwargs)
-        self.cleaner = DataCleaner(**self.common_kwargs)
-        self.reducer = FeatureReducer(**self.common_kwargs)
-        self.learner = TPOTAdaptor(self.ml_type,
-                                   **self.common_kwargs,
-                                   max_time_mins=self.time_limit_mins)
-
         # Fit transformers on training data
         self.logger.info("Fitting MatPipe pipeline to data.")
-        df = self.autofeater.fit_transform(df, target)
+        df = self.autofeaturizer.fit_transform(df, target)
         df = self.cleaner.fit_transform(df, target)
         df = self.reducer.fit_transform(df, target)
         self.learner.fit(df, target)
@@ -154,7 +163,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             (pandas.DataFrame): The dataframe with target property predictions.
         """
         self.logger.info("Beginning MatPipe prediction using fitted pipeline.")
-        df = self.autofeater.transform(df, target)
+        df = self.autofeaturizer.transform(df, target)
         df = self.cleaner.transform(df, target)
         df = self.reducer.transform(df, target)
         predictions = self.learner.predict(df, target)
@@ -162,9 +171,8 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return predictions
 
     @set_fitted
-    def benchmark(self, df, target, validation=0.2):
+    def benchmark(self, df, target, test_spec=0.2):
         """
-
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
         a certain target property.
@@ -193,44 +201,34 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         Args:
             df (pandas.DataFrame): The dataframe for benchmarking. Must contain
             target (str): The column name to use as the ml target property.
-            validation (float or listlike): Specifies how to do validation. If
-                the validation is a float, it specifies the fraction of the
-                dataframe to be randomly selected for validation (must be a
-                number between 0-1). validation=0 means a CV-only validation.
-                If it is a list/ndarray, it is the indexes of the dataframe to
-                use for validation - this option is useful if you are comparing
-                multiple techniques and want to  use the same validation
-                fraction across benchmarks.
+            test_spec (float or listlike): Specifies how to do test/evaluation.
+                If the test spec is a float, it specifies the fraction of the
+                dataframe to be randomly selected for testing (must be a
+                number between 0-1). test_spec=0 means a CV-only validation.
+                If test_spec is a list/ndarray, it is the indexes of the
+                dataframe to use for  - this option is useful if you
+                are comparing multiple techniques and want to use the same
+                test or validation fraction across benchmarks.
 
         Returns:
-            testdf (pandas.DataFrame): A dataframe containing validation data
-                and predicted data. If validation_fraction is set to 0, test df
+            testdf (pandas.DataFrame): A dataframe containing original test data
+                and predicted data. If test_spec is set to 0, test df
                 will contain PREDICTIONS MADE ON TRAINING DATA. This should be
-                used to evaluate the training error only.
+                used to evaluate the training error only!
 
         """
-        self.ml_type = regression_or_classification(df[target])
-
-        # Get top-lvel transformers
-        self.autofeater = AutoFeaturizer(**self.common_kwargs)
-        self.cleaner = DataCleaner(**self.common_kwargs)
-        self.reducer = FeatureReducer(**self.common_kwargs)
-        self.learner = TPOTAdaptor(self.ml_type,
-                                   max_time_mins=self.time_limit_mins,
-                                   **self.common_kwargs)
-
         # Fit transformers on all data
         self.logger.info("Featurizing and cleaning {} samples from the entire"
                          " dataframe.".format(df.shape[0]))
-        df = self.autofeater.fit_transform(df, target)
+        df = self.autofeaturizer.fit_transform(df, target)
         df = self.cleaner.fit_transform(df, target)
 
         # Split data for steps where combined transform could otherwise over-fit
         # or leak data from validation set into training set.
-        if isinstance(validation, Iterable):
-            msk = validation
+        if isinstance(test_spec, Iterable):
+            msk = test_spec
         else:
-            msk = np.random.rand(len(df)) < validation
+            msk = np.random.rand(len(df)) < test_spec
         traindf = df.iloc[~np.asarray(msk)]
         testdf = df.iloc[msk]
         self.logger.info("Dataframe split into training and testing fractions"
@@ -238,12 +236,12 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                                                              testdf.shape[0]))
 
         # Use transformers on separate training and testing dfs
-        self.logger.info("Perforing feature reduction and model selection on "
+        self.logger.info("Performing feature reduction and model selection on "
                          "the {}-sample training set.".format(traindf.shape[0]))
         traindf = self.reducer.fit_transform(traindf, target)
         self.learner.fit(traindf, target)
 
-        if isinstance(validation, Iterable) or validation != 0:
+        if isinstance(test_spec, Iterable) or test_spec != 0:
             self.logger.info(
                 "Using pipe fitted on training data to predict target {} on "
                 "{}-sample validation dataset".format(target, testdf.shape[0]))
@@ -253,10 +251,11 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         else:
             self.logger.warning("Validation fraction set to zero. Using "
                                 "cross-validation-only benchmarking...")
-            # todo: figure out CV-only
+            traindf = self.learner.predict(traindf, target)
+            return traindf
 
     @check_fitted
-    def digest(self, filename, fmt="json"):
+    def digest(self, filename=None):
         """
         Save a text digest (summary) of the fitted pipeline. Similar to the log
         but contains more detail in a structured format.
@@ -267,9 +266,26 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                 "json", "txt".
 
         Returns:
-            None
+            digeststr (str): The formatted pipeline digest.
         """
-        pass
+        digeststr = pformat(return_attrs_recursively(self))
+        if filename:
+            with open(filename, "w") as f:
+                f.write(digeststr)
+        return digeststr
+
+
+
+def MatPipePerformance(**kwargs):
+    return MatPipe(**kwargs, **performance_preset)
+
+
+def MatPipeBalanced(**kwargs):
+    return MatPipe(**kwargs, **balanced_preset)
+
+
+def MatPipeConvenience(**kwargs):
+    return MatPipe(**kwargs, **convenience_set)
 
 
 if __name__ == "__main__":
@@ -291,10 +307,12 @@ if __name__ == "__main__":
     # print(df)
     # print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
 
-    mp = MatPipe(time_limit_mins=10)
-    df = mp.benchmark(df, target, validation=validation_ix)
+    mp = MatPipeConvenience()
+    mp.digest()
+    df = mp.benchmark(df, target, test_spec=validation_ix)
     print(df)
     print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
+    print(mp.digest())
 
     #
     # mp = MatPipe()

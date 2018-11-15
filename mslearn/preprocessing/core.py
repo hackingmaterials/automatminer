@@ -8,8 +8,9 @@ from sklearn.decomposition import PCA
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
-from mslearn.utils.utils import MatbenchError, compare_columns, check_fitted, \
-    set_fitted, regression_or_classification
+from mslearn.utils.package_tools import MatbenchError, compare_columns, \
+    check_fitted, set_fitted
+from mslearn.utils.ml_tools import regression_or_classification
 from mslearn.base import LoggableMixin, DataframeTransformer
 from mslearn.preprocessing.feature_selection import TreeBasedFeatureReduction, \
     rebate
