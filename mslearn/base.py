@@ -16,7 +16,7 @@ class LoggableMixin(object):
 
     @property
     def logger(self):
-        """Get the class logger.
+        """Get the class lowgger.
         If the logger is None, the logging calls will be redirected to a dummy
         logger that has no output.
         """
@@ -53,6 +53,9 @@ class DataframeTransformer:
     """
     A base class to allow easy transformation in the same way as
     TransformerMixin and BaseEstimator in sklearn.
+
+    When implementing a base class adaptor, make sure to use @check_fitted
+    and @set_fitted if necessary!
     """
     def fit(self, df, target):
         """
@@ -101,6 +104,9 @@ class AutoMLAdaptor(DataframeTransformer):
     """
     A base class to adapt from an AutoML backend to a sklearn-style fit/predict
     scheme and add a few extensions.
+
+    When implementing a base class adaptor, make sure to use @check_fitted
+    and @set_fitted if necessary!
     """
     def transform(self, df, target):
         return self.predict(df, target)

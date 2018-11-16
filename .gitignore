@@ -45,5 +45,3 @@ nosetests.xml
 
 # Pycharm
 .idea/*
-
-matbench.log
