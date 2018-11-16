@@ -4,7 +4,7 @@ Base classes, mixins, and other inheritables.
 
 import logging
 
-from mslearn.utils.utils import initialize_logger, initialize_null_logger
+from mslearn.utils.log_tools import initialize_logger, initialize_null_logger
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
 

@@ -6,10 +6,9 @@ from sklearn.base import is_classifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
     GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.model_selection import check_cv
-from sklearn.base import BaseEstimator, TransformerMixin
 from skrebate import MultiSURF
 
-from mslearn.utils.utils import MSLearnError
+from mslearn.utils.package_tools import MatbenchError
 from mslearn.base import LoggableMixin, DataframeTransformer
 
 __authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
@@ -123,7 +122,7 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
                 else:
                     tree = GradientBoostingRegressor(random_state=self.rs)
             else:
-                raise MSLearnError('Unsupported tree_type {}!'.format(tree))
+                raise MatbenchError('Unsupported tree_type {}!'.format(tree))
 
         cv = check_cv(cv=cv, y=y, classifier=is_classifier(tree))
         all_feats = []
@@ -151,7 +150,7 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
         Returns (pandas.DataFrame): the data with reduced number of features.
         """
         if self.selected_features is None:
-            raise MSLearnError('The fit method should be called first!')
+            raise MatbenchError('The fit method should be called first!')
         return X[self.selected_features]
 
 

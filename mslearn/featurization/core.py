@@ -1,9 +1,8 @@
-from sklearn.exceptions import NotFittedError
 from pymatgen import Composition
 from matminer.featurizers.conversions import StructureToOxidStructure, \
     StrToComposition, DictToObject, StructureToComposition
 
-from mslearn.utils.utils import MSLearnError, check_fitted, set_fitted
+from mslearn.utils.package_tools import check_fitted, set_fitted
 from mslearn.base import DataframeTransformer, LoggableMixin
 from mslearn.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
