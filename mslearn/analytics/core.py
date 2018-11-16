@@ -31,13 +31,18 @@ class Analytics:
             self.model, progressbar=False
         )
 
+    def plot_partial_dependence(self, feature_ids):
+        return self.interpreter.partial_dependence.plot_partial_dependence(
+            feature_ids, self.model,
+        )
+
 
 if __name__ == '__main__':
     df = load_dataset('elastic_tensor_2015')
     df = df[["formula", "K_VRH"]]
     df = df.rename({"formula": "composition"}, axis=1)
 
-    fitted_pipeline = MatPipe(time_limit_mins=600).fit(df, "K_VRH")
+    fitted_pipeline = MatPipe().fit(df, "K_VRH")
     print("Done fitting")
 
     analyzer = Analytics(fitted_pipeline)
