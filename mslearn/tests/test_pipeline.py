@@ -1,3 +1,7 @@
+"""
+Tests for the top level interface.
+"""
+
 import unittest
 import os.path
 
