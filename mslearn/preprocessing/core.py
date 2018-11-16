@@ -367,10 +367,16 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
 
             Example: Apply tree-based feature reduction, then pca:
                 reducers = ('tree', 'pca')
-        n_pca_features (int): The number of features to be retained by PCA, if
-            PCA is present in the reducers
-        n_rebate_features (int): The number of ReBATE relief features to be
-            retained, if ReBATE is present in the reducers.
+        n_pca_features (int, float): If int, the number of features to be
+            retained by PCA. If float, the fraction of features to be retained
+            by PCA once the dataframe is passed to it (i.e., 0.5 means PCA
+            retains half of the features it is passed). PCA must be present in
+            the reducers.
+        n_rebate_features (int, float): If int, the number of ReBATE relief
+            features to be retained. If float, the fraction of features to be
+            retained by ReBATE once it is passed the dataframe (i.e., 0.5 means
+            ReBATE retains half of the features it is passed). ReBATE must be
+            present in the reducers.
         logger (Logger, bool): A custom logger object to use for logging.
             Alternatively, if set to True, the default mslearn logger will be
             used. If set to False, then no logging will occur.
@@ -386,8 +392,8 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             applied. The values are the parameters used by each feature reducer.
     """
 
-    def __init__(self, reducers=('corr', 'tree'), n_pca_features=15,
-                 n_rebate_features=15, logger=True):
+    def __init__(self, reducers=('corr', 'tree'), n_pca_features=0.3,
+                 n_rebate_features=0.3, logger=True):
         for reducer in reducers:
             if reducer not in ["corr", "tree", "rebate", "pca"]:
                 raise ValueError(
@@ -422,6 +428,12 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                         "mode": tbfr.mode,
                         "random_state": tbfr.rs}
                 elif r == "rebate":
+                    if isinstance(self.n_rebate_features, float):
+                        self.logger.info("Retaining fraction {} of current "
+                                         "{} features.".format(
+                            self.n_rebate_features, df.shape[1]))
+                        self.n_rebate_features = int(df.shape[1] *
+                                                     self.n_rebate_features)
                     self.logger.info(
                         "ReBATE MultiSURF running: retaining {} numerical "
                         "features.".format(self.n_rebate_features))
@@ -437,6 +449,12 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
 
                 # todo: PCA will not work with string columns!!!!!
                 elif r == "pca":
+                    if isinstance(self.n_pca_features, float):
+                        self.logger.info("Retaining fraction {} of current "
+                                         "{} features.".format(
+                            self.n_pca_features, df.shape[1]))
+                        self.n_pca_features = int(df.shape[1] *
+                                                  self.n_pca_features)
                     self.logger.info("PCA running: retaining {} numerical "
                                      "features.".format(self.n_rebate_features))
                     matrix = PCA(
