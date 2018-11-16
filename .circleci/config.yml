@@ -17,5 +17,7 @@ jobs:
             pip install --upgrade pip
             pip install --quiet -r requirements.txt
             pip install coverage
+            pip install codecov
             coverage run setup.py test
+            codecov
           no_output_timeout: 30m
