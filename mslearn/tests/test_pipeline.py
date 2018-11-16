@@ -7,6 +7,7 @@ from sklearn.exceptions import NotFittedError
 
 from mslearn.pipeline import MatPipe, debug_config
 
+test_dir = os.path.dirname(__file__)
 
 class TestMatPipe(unittest.TestCase):
     def setUp(self):
@@ -71,13 +72,15 @@ class TestMatPipe(unittest.TestCase):
             pipe.save()
         df = self.df[-200:]
         pipe.fit(df, self.target)
-        pipe.save(filename="test_pipe.p")
-        pipe = MatPipe.load("test_pipe.p", logger=False)
+
+        filename = os.path.join(test_dir, "test_pipe.p")
+        pipe.save(filename=filename)
+        pipe = MatPipe.load(filename, logger=False)
         df_test = pipe.predict(self.df[-220:-201], self.target)
         self.assertTrue(self.target in df_test.columns)
         self.assertTrue(self.target + " predicted" in df_test.columns)
 
-        digest_file = "test_digest.txt"
+        digest_file = os.path.join(test_dir, "matdigest.txt")
         digest = pipe.digest(filename=digest_file)
         self.assertTrue(os.path.isfile(digest_file))
         self.assertTrue(isinstance(digest, str))
