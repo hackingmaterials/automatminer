@@ -76,6 +76,11 @@ class TestPreprocess(unittest.TestCase):
         self.assertEqual(df.shape[1], 41)  # 40 features + target
         self.assertTrue(target in df.columns)
 
+        # ensure the same thing works when fraction is used
+        fr = FeatureReducer(reducers=('rebate',), n_rebate_features=0.2)
+        df = fr.fit_transform(self.test_df, target)
+        self.assertEqual(df.shape[1], 83 + 1)
+
         # test transferability
         df2 = self.test_df
         df2 = fr.transform(df2, target)

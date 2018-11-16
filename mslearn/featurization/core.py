@@ -1,7 +1,7 @@
-from sklearn.exceptions import NotFittedError
 from pymatgen import Composition
 from matminer.featurizers.conversions import StructureToOxidStructure, \
-    StrToComposition, DictToObject, StructureToComposition
+    StrToComposition, DictToObject, StructureToComposition, \
+    CompositionToOxidComposition
 
 from mslearn.utils.package_tools import check_fitted, set_fitted
 from mslearn.base import DataframeTransformer, LoggableMixin
@@ -26,79 +26,6 @@ _bandstructure_aliases = ["bandstructure", "bs", "bsdos", "BS", "BSDOS",
                           "Bandstructure"]
 _dos_aliases = ["density of states", "dos", "DOS", "Density of States"]
 _aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases + _dos_aliases
-
-
-# todo: use the matminer version once its fixed and pushed
-from matminer.featurizers.conversions import ConversionFeaturizer
-class CompositionToOxidComposition(ConversionFeaturizer):
-    """Utility featurizer to add oxidation states to a pymatgen Composition.
-
-    Oxidation states are determined using pymatgen's guessing routines.
-    The expected input is a `pymatgen.core.composition.Composition` object.
-
-    Note that this Featurizer does not produce machine learning-ready features
-    but instead can be applied to pre-process data or as part of a Pipeline.
-
-    Args:
-        **kwargs: Parameters to control the settings for
-            `pymatgen.io.structure.Structure.add_oxidation_state_by_guess()`.
-        target_col_id (str or None): The column in which the converted data will
-            be written. If the column already exists then an error will be
-            thrown unless `overwrite_data` is set to `True`. If `target_col_id`
-            begins with an underscore the data will be written to the column:
-            `"{}_{}".format(col_id, target_col_id[1:])`, where `col_id` is the
-            column being featurized. If `target_col_id` is set to None then
-            the data will be written "in place" to the `col_id` column (this
-            will only work if `overwrite_data=True`).
-        overwrite_data (bool): Overwrite any data in `target_column` if it
-            exists.
-        coerce_mixed (bool): If a composition has both species containing
-            oxid states and not containing oxid states, strips all of the
-            oxid states and guesses the entire composition's oxid states.
-
-    """
-
-    def __init__(self, target_col_id='composition_oxid', overwrite_data=False,
-                 coerce_mixed=True, **kwargs):
-        super().__init__(target_col_id, overwrite_data)
-        self.oxi_guess_params = kwargs
-        self.coerce_mixed = coerce_mixed
-
-    def featurize(self, comp):
-        """Add oxidation states to a Structure using pymatgen's guessing routines.
-
-        Args:
-            comp (`pymatgen.core.composition.Composition`): A composition.
-
-        Returns:
-            (`pymatgen.core.composition.Composition`): A Composition object
-                decorated with oxidation states.
-        """
-        els_have_oxi_states = [hasattr(s, "oxi_state") for s in comp.elements]
-        if all(els_have_oxi_states):
-            return [comp]
-        elif any(els_have_oxi_states):
-            if self.coerce_mixed:
-                comp = comp.element_composition
-            else:
-                raise ValueError("Composition {} has a mix of species with "
-                                 "and without oxidation states. Please enable "
-                                 "coercion to all oxidation states with "
-                                 "coerce_mixed.".format(comp))
-        return [comp.add_charges_from_oxi_state_guesses(
-            **self.oxi_guess_params)]
-
-    def citations(self):
-        return [(
-            "@article{ward_agrawal_choudary_wolverton_2016, title={A "
-            "general-purpose machine learning framework for predicting "
-            "properties of inorganic materials}, volume={2}, "
-            "DOI={10.1038/npjcompumats.2017.28}, number={1}, journal={npj "
-            "Computational Materials}, author={Ward, Logan and Agrawal, Ankit "
-            "and Choudhary, Alok and Wolverton, Christopher}, year={2016}}")]
-
-    def implementors(self):
-        return ["Anubhav Jain", "Alex Ganose", "Alex Dunn"]
 
 
 class AutoFeaturizer(DataframeTransformer, LoggableMixin):
