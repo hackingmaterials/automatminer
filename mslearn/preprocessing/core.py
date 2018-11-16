@@ -19,7 +19,6 @@ __authors__ = ["Alex Dunn <ardunn@lbl.gov>",
                "Alireza Faghaninia <alireza@lbl.gov>"]
 
 
-
 class DataCleaner(DataframeTransformer, LoggableMixin):
     """
     Transform a featurized dataframe into an ML-ready dataframe.
@@ -65,8 +64,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
     def __init__(self, scale=False, max_na_frac=0.01, na_method='drop',
                  encode_categories=True, encoder='one-hot',
-                 drop_na_targets=True,
-                 logger=True):
+                 drop_na_targets=True, logger=True):
         self._logger = self.get_logger(logger)
         self.scale = scale
         self.max_na_frac = max_na_frac

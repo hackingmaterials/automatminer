@@ -1,4 +1,3 @@
-from sklearn.exceptions import NotFittedError
 from pymatgen import Composition
 from matminer.featurizers.conversions import StructureToOxidStructure, \
     StrToComposition, DictToObject, StructureToComposition, \
