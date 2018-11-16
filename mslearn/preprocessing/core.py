@@ -141,12 +141,12 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
         # Ensure the order of columns is identical
         if target in df.columns:
-            self.logger.info("Target not found in df columns. Ignoring...")
+            self.logger.info("Reordering columns...")
             df = df[self.fitted_df.columns]
         else:
-            colstodrop = self.fitted_df.drop(columns=[target]).columns.tolist()
-            df = df[colstodrop]
-
+            self.logger.info("Target not found in df columns. Ignoring...")
+            reordered_cols = self.fitted_df.drop(columns=[target]).columns.tolist()
+            df = df[reordered_cols]
         return df
 
     def fit_transform(self, df, target):
