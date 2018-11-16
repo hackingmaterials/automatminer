@@ -2,7 +2,7 @@ import unittest
 import os.path
 
 from matminer.datasets.dataset_retrieval import load_dataset
-from sklearn.metrics import r2_score, f1_score
+from sklearn.metrics import r2_score
 from sklearn.exceptions import NotFittedError
 
 from mslearn.pipeline import MatPipe, debug_config
