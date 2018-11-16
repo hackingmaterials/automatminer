@@ -1,0 +1,5 @@
+[run]
+source=mslearn
+
+[report]
+ignore_errors=True
