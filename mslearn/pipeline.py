@@ -303,11 +303,15 @@ class MatPipe(DataframeTransformer, LoggableMixin):
     def load(cls, filename, logger=True):
         """
         Loads a matpipe that was saved.
+
         Args:
             filename (str): The pickled matpipe object (should have been saved
                 using save).
             logger (bool or logging.Logger): The logger to use for the loaded
                 matpipe.
+
+        Returns:
+            pipe (MatPipe): A MatPipe object.
         """
         with open(filename, 'rb') as f:
             pipe = pickle.load(f)
