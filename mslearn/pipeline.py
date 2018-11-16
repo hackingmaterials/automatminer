@@ -203,8 +203,8 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                 If the test spec is a float, it specifies the fraction of the
                 dataframe to be randomly selected for testing (must be a
                 number between 0-1). test_spec=0 means a CV-only validation.
-                If test_spec is a list/ndarray, it is the indexes of the
-                dataframe to use for  - this option is useful if you
+                If test_spec is a list/ndarray, it is the iloc indexes of the
+                dataframe to use for testing. This option is useful if you
                 are comparing multiple techniques and want to use the same
                 test or validation fraction across benchmarks.
 
@@ -224,11 +224,11 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         # Split data for steps where combined transform could otherwise over-fit
         # or leak data from validation set into training set.
         if isinstance(test_spec, Iterable):
-            msk = test_spec
+            traindf = df.iloc[~np.asarray(test_spec)]
+            testdf = df.iloc[np.asarray(test_spec)]
         else:
-            msk = np.random.rand(len(df)) < test_spec
-        traindf = df.iloc[~np.asarray(msk)]
-        testdf = df.iloc[msk]
+            testdf, traindf = np.split(df.sample(frac=1),
+                                       [int(test_spec * len(df))])
         self.logger.info("Dataframe split into training and testing fractions"
                          " having {} and {} samples.".format(traindf.shape[0],
                                                              testdf.shape[0]))
@@ -354,15 +354,17 @@ if __name__ == "__main__":
     # print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
 
     mp = MatPipe(**debug_config)
-    df = mp.benchmark(df, target, test_spec=validation_ix)
-    print(df)
-    print("Validation error is {}".format(
-        mean_squared_error(df[target], df[target + " predicted"])))
-    print(mp.digest())
-    mp.save("somepipe.p")
+    # df = mp.benchmark(df, target, test_spec=validation_ix)
 
-    mp = MatPipe.load("somepipe.p")
-    print(mp.predict(df2, target))
+    df = mp.benchmark(df, target, test_spec=0.25)
+    # print(df)
+    # print("Validation error is {}".format(
+    #     mean_squared_error(df[target], df[target + " predicted"])))
+    # print(mp.digest())
+    # mp.save("somepipe.p")
+    #
+    # mp = MatPipe.load("somepipe.p")
+    # print(mp.predict(df2, target))
 
     #
     # mp = MatPipe()

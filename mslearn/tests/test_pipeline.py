@@ -63,10 +63,9 @@ class TestMatPipe(unittest.TestCase):
 
     def test_benchmarking(self):
         pipe = MatPipe(**debug_config)
-        df = self.df[500:700]
-        df_test = pipe.benchmark(df, self.target, test_spec=0.2)
-        self.assertTrue(df_test.shape[0] > 35)
-        self.assertTrue(df_test.shape[0] < 45)
+        df = self.df.iloc[500:700]
+        df_test = pipe.benchmark(df, self.target, test_spec=0.25)
+        self.assertEqual(df_test.shape[0], 50)
         true = df_test[self.target]
         test = df_test[self.target + " predicted"]
         self.assertTrue(r2_score(true, test) > 0.5)
