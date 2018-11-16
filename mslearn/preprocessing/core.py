@@ -357,7 +357,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                     feature reduction, using ._feature_importances implemented
                     in sklearn. Retains feature names.
 
-                'relief': Perform ReliefF feature reduction using the skrebate
+                'rebate': Perform ReliefF feature reduction using the skrebate
                     package. Retains feature names.
 
                 'pca': Perform Principal Component Analysis via
