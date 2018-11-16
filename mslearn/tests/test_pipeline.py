@@ -1,17 +1,17 @@
-"""
-Tests for the top level interface.
-"""
-
-import unittest
-import os.path
-
-from matminer.datasets.dataset_retrieval import load_dataset
-from sklearn.metrics import r2_score
-from sklearn.exceptions import NotFittedError
-
-from mslearn.pipeline import MatPipe, debug_config
-
-test_dir = os.path.dirname(__file__)
+# """
+# Tests for the top level interface.
+# """
+#
+# import unittest
+# import os.path
+#
+# from matminer.datasets.dataset_retrieval import load_dataset
+# from sklearn.metrics import r2_score
+# from sklearn.exceptions import NotFittedError
+# 
+# from mslearn.pipeline import MatPipe, debug_config
+#
+# test_dir = os.path.dirname(__file__)
 
 #
 # class TestMatPipe(unittest.TestCase):
