@@ -19,8 +19,6 @@ __authors__ = ["Alex Dunn <ardunn@lbl.gov>",
                "Alireza Faghaninia <alireza@lbl.gov>"]
 
 
-# todo: Add options for scaling (only on number cols. should be relabeled as _scaled) - AD
-
 
 class DataCleaner(DataframeTransformer, LoggableMixin):
     """

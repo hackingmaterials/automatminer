@@ -15,9 +15,6 @@ from mslearn.utils.ml_tools import regression_or_classification
 from mslearn.utils.package_tools import check_fitted, set_fitted, \
     return_attrs_recursively
 
-# todo: needs tests - alex
-# todo: tests should include using custom (user speficied) features as well
-
 
 performance_config = {}
 default_config = {"learner": TPOTAdaptor(max_time_mins=120),
