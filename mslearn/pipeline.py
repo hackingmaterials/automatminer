@@ -3,6 +3,7 @@ The highest level classes for pipelines.
 """
 from collections import Iterable
 from pprint import pformat
+import pickle
 
 import numpy as np
 
@@ -14,20 +15,23 @@ from mslearn.utils.ml_tools import regression_or_classification
 from mslearn.utils.package_tools import check_fitted, set_fitted, \
     return_attrs_recursively
 
-#todo: needs tests - alex
-#todo: tests should include using custom (user speficied) features as well
+# todo: needs tests - alex
+# todo: tests should include using custom (user speficied) features as well
 
 
-performance_preset = {}
-balanced_preset = {"learner": TPOTAdaptor(max_time_mins=120),
-                   "reducer": FeatureReducer(),
-                   "autofeaturizer": AutoFeaturizer(),
-                   "cleaner": DataCleaner()}
-convenience_set = {"learner": TPOTAdaptor(max_time_mins=5, population_size=30),
-                   "reducer": FeatureReducer(),
-                   "autofeaturizer": AutoFeaturizer(),
-                   "cleaner": DataCleaner()}
-
+performance_config = {}
+default_config = {"learner": TPOTAdaptor(max_time_mins=120),
+                  "reducer": FeatureReducer(),
+                  "autofeaturizer": AutoFeaturizer(),
+                  "cleaner": DataCleaner()}
+fast_config = {"learner": TPOTAdaptor(max_time_mins=30, population_size=50),
+               "reducer": FeatureReducer(reducers=('corr', 'tree')),
+               "autofeaturizer": AutoFeaturizer(),
+               "cleaner": DataCleaner()}
+debug_config = {"learner": TPOTAdaptor(max_time_mins=1, population_size=10),
+                "reducer": FeatureReducer(reducers=('corr',)),
+                "autofeaturizer": AutoFeaturizer(),
+                "cleaner": DataCleaner()}
 
 
 class MatPipe(DataframeTransformer, LoggableMixin):
@@ -65,7 +69,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         persistence_lvl (int): Persistence level of 0 saves nothing. 1 saves
             intermediate dataframes and final dataframes. 2 saves all dataframes
             and all objects used to create the pipeline, and auto-saves a digest
-        autofeater (AutoFeaturizer): The autofeaturizer object used to
+        autofeaturizer (AutoFeaturizer): The autofeaturizer object used to
             automatically decorate the dataframe with descriptors.
         cleaner (DataCleaner): The data cleaner object used to get a
             featurized dataframe in ml-ready form.
@@ -82,16 +86,16 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         is_fit (bool): If True, the matpipe is fit. The matpipe should be
             fit before being used to predict data.
     """
-    def __init__(self, persistence_lvl=2, logger=True, autofeaturizer=None,
+
+    def __init__(self, logger=True, autofeaturizer=None,
                  cleaner=None, reducer=None, learner=None):
 
         self._logger = self.get_logger(logger)
-        self.persistence_lvl = persistence_lvl
         self.autofeaturizer = autofeaturizer if autofeaturizer else \
-            balanced_preset['autofeaturizer']
-        self.cleaner = cleaner if cleaner else balanced_preset["cleaner"]
-        self.reducer = reducer if reducer else balanced_preset["reducer"]
-        self.learner = learner if learner else balanced_preset["learner"]
+            default_config['autofeaturizer']
+        self.cleaner = cleaner if cleaner else default_config["cleaner"]
+        self.reducer = reducer if reducer else default_config["reducer"]
+        self.learner = learner if learner else default_config["learner"]
 
         self.autofeaturizer._logger = self.get_logger(logger)
         self.cleaner._logger = self.get_logger(logger)
@@ -102,9 +106,6 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.post_fit_df = None
         self.is_fit = False
         self.ml_type = self.learner.mode
-        self.common_kwargs = {"logger": self.logger}
-
-        #todo: implement persistence level
 
     @set_fitted
     def fit(self, df, target):
@@ -274,24 +275,68 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                 f.write(digeststr)
         return digeststr
 
+    @check_fitted
+    def save(self, filename):
+        """
+        Pickles and saves a pipeline. Direct pickling will not work as some
+        AutoML backends can't serialize.
+
+        Note that the saved object should only be used for prediction, and
+        should not be refit. The automl backend is removed and replaced with
+        the best pipeline, so the other evaluated pipelines may not be saved!
+
+        Args:
+            filename (str): The filename the pipe should be saved as.
+
+        Returns:
+            None
+        """
+        self.learner._backend = self.learner.backend.fitted_pipeline_
+        for obj in [self, self.learner, self.reducer, self.cleaner,
+                    self.autofeaturizer]:
+            obj._logger = None
+
+        with open(filename, 'wb') as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def load(cls, filename, logger=True):
+        """
+        Loads a matpipe that was saved.
+        Args:
+            filename (str): The pickled matpipe object (should have been saved
+                using save).
+            logger (bool or logging.Logger): The logger to use for the loaded
+                matpipe.
+        """
+        with open(filename, 'rb') as f:
+            pipe = pickle.load(f)
+
+        for obj in [pipe, pipe.learner, pipe.reducer, pipe.cleaner,
+                    pipe.autofeaturizer]:
+            obj._logger = cls.get_logger(logger)
+
+        pipe.logger.info("Loaded MatPipe from file {}.".format(filename))
+        pipe.logger.warning("Only use this model to make predictions (do not "
+                            "retrain!). Backend was serialzed as only the top "
+                            "model, not the full automl backend. ")
+        return pipe
 
 
-def MatPipePerformance(**kwargs):
-    return MatPipe(**kwargs, **performance_preset)
+def MatPipePerform(**kwargs):
+    return MatPipe(**kwargs, **performance_config)
 
 
-def MatPipeBalanced(**kwargs):
-    return MatPipe(**kwargs, **balanced_preset)
-
-
-def MatPipeConvenience(**kwargs):
-    return MatPipe(**kwargs, **convenience_set)
+def MatPipeFast(**kwargs):
+    return MatPipe(**kwargs, **fast_config)
 
 
 if __name__ == "__main__":
     from sklearn.metrics import mean_squared_error
     from matminer.datasets.dataset_retrieval import load_dataset
-    hugedf = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"})[["composition",  "K_VRH"]]
+
+    hugedf = load_dataset("elastic_tensor_2015").rename(
+        columns={"formula": "composition"})[["composition", "K_VRH"]]
 
     validation_ix = [1, 2, 3, 4, 5, 7, 12]
     df = hugedf.iloc[:100]
@@ -307,12 +352,16 @@ if __name__ == "__main__":
     # print(df)
     # print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
 
-    mp = MatPipeConvenience()
-    mp.digest()
+    mp = MatPipe(**debug_config)
     df = mp.benchmark(df, target, test_spec=validation_ix)
     print(df)
-    print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
+    print("Validation error is {}".format(
+        mean_squared_error(df[target], df[target + " predicted"])))
     print(mp.digest())
+    mp.save("somepipe.p")
+
+    mp = MatPipe.load("somepipe.p")
+    print(mp.predict(df2, target))
 
     #
     # mp = MatPipe()
@@ -321,4 +370,3 @@ if __name__ == "__main__":
     # print("CV scores: {}".format(mp.learner.best_scores))
 
     # from sklearn.metrics import mean_squared_error
-
