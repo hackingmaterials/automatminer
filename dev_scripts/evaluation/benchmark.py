@@ -3,23 +3,26 @@ import time
 import hashlib
 import pprint
 import copy
+import datetime
 
+import numpy as np
 import git
 from pymongo import MongoClient
-from fireworks import FireTaskBase, Firework, Workflow, FWAction
+from fireworks import FireTaskBase, Firework, Workflow, FWAction, LaunchPad, explicit_serialize
+from fireworks.core.rocket_launcher import launch_rocket
 from matminer.datasets.dataset_retrieval import load_dataset
 from sklearn.metrics import f1_score, r2_score
 
-import mslearn
 from mslearn.featurization import AutoFeaturizer
 from mslearn.preprocessing import DataCleaner, FeatureReducer
 from mslearn.automl.adaptors import TPOTAdaptor
 from mslearn.pipeline import MatPipe
 
+# DB_USER =
+# DB_PASSWORD =
 # DB =  MongoClient("mongodb://%s:%s@ds111244.mlab.com:11244/automatminer" % (DB_USER, DB_PASSWORD)).automatminer
 DB = MongoClient('localhost', 27017).automatminer
-DB_USER = "miner"
-DB_PASSWORD = "Materials2019"
+
 
 DATASET_SET = ["elastic_tensor_2015"]
 TARGETS = {"elastic_tensor_2015": "K_VRH"}
@@ -27,27 +30,28 @@ SCORING = {"elastic_tensor_2015": "r2"}
 REWRITE_COLS = {"elastic_tensor_2015": {"formula": "composition"}}
 RELEVANT_COLS = {"elastic_tensor_2015": ["K_VRH", "structure", "composition"]}
 
-
 # todo: eventually this should use a test_idx so ensure that for every dataset for every repetition the same test set is used!
 
+
+@explicit_serialize
 class RunPipe(FireTaskBase):
     _fw_name = 'RunPipe'
-
     def run_task(self, fw_spec):
-        if fw_spec["learner_name"] == "TPOTAdaptor":
+        pipe_config_dict = fw_spec["pipe_config"]
+
+        if pipe_config_dict["learner_name"] == "TPOTAdaptor":
             learner = TPOTAdaptor
         else:
             raise ValueError("{} is an unknown learner name!"
                              "".format(self["learner_name"]))
 
         # Set up the pipeline and data
-        pipe_config_dict = fw_spec["pipe_config"]
         pipe_config = {"learner": learner(**pipe_config_dict["learner_kwargs"]),
                        "reducer": FeatureReducer(
                            **pipe_config_dict["reducer_kwargs"]),
                        "cleaner": DataCleaner(
                            **pipe_config_dict["cleaner_kwargs"]),
-                       "autofeaturizer_kwargs":
+                       "autofeaturizer":
                            AutoFeaturizer(
                                **pipe_config_dict["autofeaturizer_kwargs"])}
         pipe = MatPipe(**pipe_config)
@@ -94,41 +98,89 @@ class RunPipe(FireTaskBase):
                            "n_train_samples_original": len(
                                df) - n_test_samples_original,
                            "n_train_samples": len(pipe.post_fit_df),
-                           "n_test_samples": len(test)
+                           "n_test_samples": len(test),
+                           "test_sample_frac_retained": len(
+                               test) / n_test_samples_original,
+                           "completion_time": datetime.datetime.utcnow()
                            }
         return FWAction(update_spec=pass_to_storage)
 
-
+@explicit_serialize
 class StorePipeResults(FireTaskBase):
     _fw_name = "StorePipeResults"
 
     def run_task(self, fw_spec):
         DB.pipes.insert_one(fw_spec)
 
-
+@explicit_serialize
 class ConsolidateRuns(FireTaskBase):
     _fw_name = "ConsolidateRuns"
 
-
     def run_task(self, fw_spec):
+        build_doc = copy.deepcopy(fw_spec)
         builds = DB.builds
         pipes = DB.pipes
         build_hash = fw_spec["build_hash"]
 
         tags_all = []
-        performance_dict = {k: [] for k in DATASET_SET}
-        features_dict = {k : [] for k in DATASET_SET}
-        time_dict = {k: [] for k in DATASET_SET}
+        template_subdict = {"all": [], "mean": None, "std": None, "max": None,
+                            "min": None}
+        performance_dict = {k: copy.deepcopy(template_subdict) for k in
+                            DATASET_SET}
+        features_dict = {k: copy.deepcopy(template_subdict) for k in
+                         DATASET_SET}
+        time_dict = {k: copy.deepcopy(template_subdict) for k in DATASET_SET}
+        samples_dict = {k: copy.deepcopy(template_subdict) for k in DATASET_SET}
 
         for doc in pipes.find({'build_hash': build_hash}):
+            dataset = doc["dataset"]
             tags_all.extend(doc["tags"])
-            performance_dict[doc["dataset"]].append(doc["score"])
-        pass
-    #todo: finish this
+            performance_dict[dataset]["all"].append(doc["score"])
+            features_dict[dataset]["all"].append(doc["n_features"])
+            samples_dict[dataset]["all"].append(
+                doc["test_sample_frac_retained"])
+            time_dict[dataset]["all"].append(doc["elapsed_time"])
+
+        build_doc["pipe_config"] = pipes.find_one({'build_hash': build_hash})[
+            "pipe_config"]
+        build_doc["completion_time"] = datetime.datetime.utcnow()
+
+        for d in [performance_dict, features_dict, samples_dict, time_dict]:
+            for ds in d.keys():
+                build_list = d[ds]["all"]
+                d[ds]["mean"] = np.mean(build_list)
+                d[ds]["std"] = np.std(build_list)
+                d[ds]["max"] = max(build_list)
+                d[ds]["min"] = min(build_list)
+
+        performance_means = [ds["mean"] for ds in performance_dict.values()]
+        build_doc["performance_mean"] = np.mean(performance_means)
+        build_doc["performance_std"] = np.std(performance_means)
+        build_doc["performance_max"] = max(performance_means)
+        build_doc["performance_min"] = min(performance_means)
+
+        features_means = [ds["mean"] for ds in features_dict.values()]
+        build_doc["features_mean"] = np.mean(features_means)
+        build_doc["features_std"] = np.std(features_means)
+        build_doc["features_max"] = max(features_means)
+        build_doc["features_min"] = min(features_means)
+
+        samples_means = [ds["mean"] for ds in samples_dict.values()]
+        build_doc["samples_mean"] = np.mean(samples_means)
+        build_doc["samples_std"] = np.std(samples_means)
+        build_doc["samples_max"] = max(samples_means)
+        build_doc["samples_min"] = min(samples_means)
+
+        time_means = [ds["mean"] for ds in time_dict.values()]
+        build_doc["time_mean"] = np.mean(time_means)
+        build_doc["time_std"] = np.std(time_means)
+        build_doc["time_max"] = max(time_means)
+        build_doc["time_min"] = min(time_means)
+
+        builds.insert_one(build_doc)
 
 
-
-def submit_build(launchpad, name, pipe_config, tags=None):
+def get_workflow_from_build(name, pipe_config, save_dir, tags=None):
     top_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../..")
     repo = git.Repo(top_dir)
     last_commit = str(repo.head.commit)
@@ -138,35 +190,47 @@ def submit_build(launchpad, name, pipe_config, tags=None):
     build_config_for_hash = str(build_config_for_hash).encode("UTF-8")
     build_hash = hashlib.sha1(build_config_for_hash).hexdigest()[:10]
 
-    fws = []
+    pipe_fws = []
     for dataset in DATASET_SET:
         spec = {"dataset": dataset,
                 "pipe_config": pipe_config,
                 "commit": last_commit,
                 "name": name,
                 "build_hash": build_hash,
-                "tags": tags if tags else []}
+                "tags": tags if tags else [],
+                "save_dir": os.path.join(save_dir, dataset)}
         for trial in range(5):
             spec["trial"] = trial
-            fws.append(Firework([RunPipe(), StorePipeResults()],
-                                spec=spec,
-                                name="{}: {} - trial {}".format(name, dataset,
-                                                                trial)))
+            pipe_fws.append(Firework([RunPipe(), StorePipeResults()],
+                                     spec=spec,
+                                     name="{}: {} - trial {}".format(name,
+                                                                     dataset,
+                                                                     trial)))
+    fw_consolidate = Firework(ConsolidateRuns(),
+                              spec={"build_hash": build_hash},
+                              name="Consolidate build {}".format(build_hash))
 
-    # todo: link fws together and test
-    wf = Workflow(fws, name="{}: build {}".format(name, build_hash))
+    links = {fw: [fw_consolidate] for fw in pipe_fws}
+    wf = Workflow(pipe_fws + [fw_consolidate],
+                  links_dict=links,
+                  name="{}: build {}".format(name, build_hash))
+    return wf
 
 
 if __name__ == "__main__":
-    # mc = MongoClient("mongodb://%s:%s@ds111244.mlab.com:11244/automatminer" % (DB_USER, DB_PASSWORD))
-    # print(mc.automatminer)
+    pipe_config = {"learner_name": "TPOTAdaptor",
+                   "learner_kwargs": {"max_time_mins": 2,
+                                      "population_size": 10},
+                   "reducer_kwargs": {},
+                   "autofeaturizer_kwargs": {},
+                   "cleaner_kwargs": {}}
 
-    submit_build("Test", {})
+    wf = get_workflow_from_build("TestName", pipe_config, "~")
 
-    # print(subprocess.check_output(["git", "describe"]).strip())
-    # build = {"learner_name": "TPOTAdaptor",
-    #          "learner_kwargs": {"max_time_mins": 2, "population_size": 10},
-    #          "reducer_kwargs": None,
-    #          "autofeaturizer_kwargs": None,
-    #          "cleaner_kwargs": None,
-    #          "build": None}
+    lp = LaunchPad(host="localhost", port=27017, name="automatminer")
+    lp.reset(password=None, require_password=False)
+    lp.add_wf(wf)
+    launch_rocket(lp)
+
+
+

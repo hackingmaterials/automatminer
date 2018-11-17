@@ -339,44 +339,24 @@ def MatPipeFast(**kwargs):
     return MatPipe(**kwargs, **fast_config)
 
 
+from fireworks import FireTaskBase, Firework, explicit_serialize, LaunchPad
+
+
 if __name__ == "__main__":
-    from sklearn.metrics import mean_squared_error
-    from matminer.datasets.dataset_retrieval import load_dataset
-
-    hugedf = load_dataset("elastic_tensor_2015").rename(
-        columns={"formula": "composition"})[["composition", "K_VRH"]]
-
-    validation_ix = [1, 2, 3, 4, 5, 7, 12]
-    df = hugedf.iloc[:100]
-    df2 = hugedf.iloc[101:150]
-    target = "K_VRH"
-
-    # mp = MatPipe()
-    # mp.fit(df, target)
-    # print(mp.predict(df2, target))
-
-    # mp = MatPipe(time_limit_mins=10)
-    # df = mp.benchmark(df, target, validation=0.2)
-    # print(df)
-    # print("Validation error is {}".format(mean_squared_error(df[target], df[target + " predicted"])))
-
-    mp = MatPipe(**debug_config)
-    # df = mp.benchmark(df, target, test_spec=validation_ix)
-
-    df = mp.benchmark(df, target, test_spec=0.25)
-    # print(df)
-    # print("Validation error is {}".format(
-    #     mean_squared_error(df[target], df[target + " predicted"])))
-    # print(mp.digest())
-    # mp.save("somepipe.p")
-    #
-    # mp = MatPipe.load("somepipe.p")
-    # print(mp.predict(df2, target))
-
-    #
-    # mp = MatPipe()
-    # df = mp.benchmark(df, target, validation_fraction=0)
-    # print(df)
-    # print("CV scores: {}".format(mp.learner.best_scores))
-
     # from sklearn.metrics import mean_squared_error
+    # from matminer.datasets.dataset_retrieval import load_dataset
+    #
+    # hugedf = load_dataset("elastic_tensor_2015").rename(
+    #     columns={"formula": "composition"})[["composition", "K_VRH"]]
+    #
+    # validation_ix = [1, 2, 3, 4, 5, 7, 12]
+    # df = hugedf.iloc[:100]
+    # df2 = hugedf.iloc[101:150]
+    # target = "K_VRH"
+    #
+    # mp = MatPipe(**debug_config)
+    # df = mp.benchmark(df, target, test_spec=0.25)
+
+    lp = LaunchPad(name="automatminer")
+    lp.add_wf(Firework(CustomTask()))
+
