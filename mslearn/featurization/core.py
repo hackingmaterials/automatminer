@@ -172,6 +172,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Transformed dataframe containing features.
         """
+
+        #todo: structure to oxidstructure + comp2oxidcomp can get called twice by _tidy_column
         df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
 
@@ -318,8 +320,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         else:
             # Convert structure/bs/dos dicts to objects (robust already)
             self.logger.info("{} detected as strings. Attempting "
-                             "conversion to Composition objects..."
-                             "".format(featurizer_type))
+                             "conversion to {} objects..."
+                             "".format(featurizer_type, featurizer_type))
             dto = DictToObject(overwrite_data=True, target_col_id=featurizer_type)
             df = dto.featurize_dataframe(df, featurizer_type)
 
