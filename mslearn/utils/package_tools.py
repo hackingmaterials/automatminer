@@ -3,6 +3,7 @@ Tools specific to this package.
 """
 import pandas as pd
 from sklearn.exceptions import NotFittedError
+from sklearn.pipeline import Pipeline
 
 
 class MatbenchError(BaseException):
@@ -88,6 +89,8 @@ def return_attrs_recursively(obj):
                 attrdict[attr] = {"obj": value.__class__,
                                   "columns": value.shape[1],
                                   "samples": value.shape[0]}
+            elif isinstance(value, Pipeline):
+                attrdict[attr] = [str(s) for s in value.steps]
             else:
                 attrdict[attr] = value
         else:
