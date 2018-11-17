@@ -244,6 +244,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.logger.info("Performing feature reduction and model selection on "
                          "the {}-sample training set.".format(traindf.shape[0]))
         traindf = self.reducer.fit_transform(traindf, target)
+        self.post_fit_df = traindf
         self.learner.fit(traindf, target)
 
         if isinstance(test_spec, Iterable) or test_spec != 0:
