@@ -2,8 +2,16 @@
 source=mslearn
 
 [report]
+exclude_lines =
+    # Ignore coverage of code that requires the module to be executed.
+    if __name__ == .__main__.:
 ignore_errors=True
 omit =
-    dev_scripts/*
-    examples/*
-    .cicleci/*
+    */dev_scripts/*
+    */examples/*
+    */.cicleci/*
+    */python?.?/*
+    */site-packages/*
+    *tests/*
+    */versioneer.py
+    */_version.py
