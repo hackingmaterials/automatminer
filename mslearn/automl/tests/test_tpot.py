@@ -12,6 +12,7 @@ from mslearn.utils.package_tools import MatbenchError
 __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
 
 
+@unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
 class TestTPOTAdaptor(unittest.TestCase):
     def setUp(self):
         basedir = os.path.dirname(os.path.realpath(__file__))

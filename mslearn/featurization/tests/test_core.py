@@ -21,11 +21,10 @@ __author__ = ["Alex Dunn <ardunn@lbl.gov>",
 
 
 class TestAutoFeaturizer(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls, limit=5):
-        cls.test_df = load_dataset('elastic_tensor_2015').rename(
+    def setUp(self, limit=5):
+        self.test_df = load_dataset('elastic_tensor_2015').rename(
             columns={"formula": "composition"})
-        cls.limit = limit
+        self.limit = limit
 
     def test_sanity(self):
         df = copy.copy(self.test_df)

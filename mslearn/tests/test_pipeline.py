@@ -14,6 +14,7 @@ from mslearn.pipeline import MatPipe, debug_config
 test_dir = os.path.dirname(__file__)
 
 
+@unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
 class TestMatPipe(unittest.TestCase):
     def setUp(self):
         df = load_dataset("elastic_tensor_2015").rename(
