@@ -51,10 +51,17 @@ class MatPipe(DataframeTransformer, LoggableMixin):
     to predict the properties of another. Furthermore, the entire pipeline and
     all constituent objects can be summarized in text with "digest".
 
+    ----------------------------------------------------------------------------
+    Note: This pipeline should function the same regardless of which
+    "component" classes it is made out of. E.g., he steps for each method should
+    remain the same whether using the TPOTAdaptor class as the learner or
+    using an AutoKerasAdaptor class as the learner.
+    ----------------------------------------------------------------------------
+
     Examples:
         # A benchmarking experiment, where all property values are known
         pipe = MatPipe()
-        validation_predictions = pipe.benchmark(df, "target_property")
+        test_predictions = pipe.benchmark(df, "target_property")
 
         # Creating a pipe with data containing known properties, then predicting
         # on new materials
