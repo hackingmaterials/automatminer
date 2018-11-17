@@ -3,3 +3,7 @@ source=mslearn
 
 [report]
 ignore_errors=True
+omit =
+    dev_scripts/*
+    examples/*
+    .cicleci/*
