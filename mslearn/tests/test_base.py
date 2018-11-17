@@ -215,7 +215,7 @@ class TestMatPipe(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             tab.transform(self.df, 'a')
 
-        for attr in ["backend", "best_models", "ml_data", "features"]:
+        for attr in ["backend", "best_pipeline", "ml_data", "features"]:
             with self.assertRaises(NotImplementedError):
                 thisatte = getattr(tab, attr)
 

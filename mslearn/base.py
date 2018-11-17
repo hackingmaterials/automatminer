@@ -158,17 +158,17 @@ class AutoMLAdaptor(DataframeTransformer):
         except AttributeError:
             raise NotImplementedError("{} has no ML data attr implemented!".format(self.__class__.__name__))
 
-
     @property
-    def best_models(self):
+    def best_pipeline(self):
         """
-        The best models returned by the AutoML backend.
+        The best pipeline returned by the automl backend. Should implement fit
+        and predict methods and be able to make predictions.
 
         Returns:
-            (list or OrderedDict}: The best models as determined by the AutoML package.
+            sklearn.pipeline.Pipeline or BaseEstimator:
         """
         try:
-            return self._best_models
+            return self._best_pipeline
         except AttributeError:
             raise NotImplementedError("{} has no best models attr implemented!".format(self.__class__.__name__))
 
