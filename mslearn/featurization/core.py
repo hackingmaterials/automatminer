@@ -1,3 +1,5 @@
+from multiprocessing import cpu_count
+
 from pymatgen import Composition
 from matminer.featurizers.conversions import StructureToOxidStructure, \
     StrToComposition, DictToObject, StructureToComposition, \
@@ -76,7 +78,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             state.
         multiiindex (bool): If True, returns a multiindexed dataframe.
         n_jobs (int): The number of parallel jobs to use during featurization
-            for each featurizer. -1 sets n_jobs = n_cores
+            for each featurizer. Default is n_cores
         logger (Logger, bool): A custom logger object to use for logging.
             Alternatively, if set to True, the default mslearn logger will be
             used. If set to False, then no logging will occur.
@@ -104,7 +106,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
         self._logger = self.get_logger(logger)
         self.featurizers = featurizers
-        self.exclude = exclude
+        self.exclude = exclude if exclude else []
         self.use_metaselector = use_metaselector
         self.max_na_percent = max_na_frac
         self.ignore_cols = ignore_cols or []
@@ -238,9 +240,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                      "returning nans more than the "
                                      "max_na_percent of {}: {}".
                                      format(self.max_na_percent, auto_exclude))
-                    if self.exclude:
-                        auto_exclude.extend(self.exclude)
-                    self.exclude = auto_exclude
+                    self.exclude.extend(auto_exclude)
 
             for featurizer_type in _supported_featurizer_types.keys():
                 if featurizer_type in df.columns:
@@ -300,7 +300,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 stc = StrToComposition(overwrite_data=True,
                                        target_col_id=featurizer_type)
                 df = stc.featurize_dataframe(df, featurizer_type,
-                                             multiindex=self.multiindex)
+                                             multiindex=self.multiindex,
+                                             ignore_errors=True)
 
             elif isinstance(df[featurizer_type].iloc[0], dict):
                 self.logger.info("Compositions detected as dicts. Attempting "
@@ -314,8 +315,16 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 cto = CompositionToOxidComposition(
                     target_col_id=featurizer_type,
                     overwrite_data=True)
-                df = cto.featurize_dataframe(df, featurizer_type,
-                                             multiindex=self.multiindex)
+                try:
+                    df = cto.featurize_dataframe(df, featurizer_type,
+                                                 multiindex=self.multiindex)
+                except Exception as e:
+                    self.logger.info("Could not decorate oxidation states due "
+                                     "to {}. Excluding featurizers based on "
+                                     "composition oxistates".format(e))
+                    classes_require_oxi = [c.__class__.__name__ for c in
+                                           CompositionFeaturizers().need_oxi]
+                    self.exclude.extend(classes_require_oxi)
 
         else:
             # Convert structure/bs/dos dicts to objects (robust already)
@@ -331,8 +340,12 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                  "they were not present in input.")
                 sto = StructureToOxidStructure(target_col_id=featurizer_type,
                                                overwrite_data=True)
-                df = sto.featurize_dataframe(df, featurizer_type,
+                try:
+                    df = sto.featurize_dataframe(df, featurizer_type,
                                              multiindex=self.multiindex)
+                except Exception as e:
+                    self.logger.info("Could not decorate oxidation states on"
+                                        " structures due to {}.".format(e))
         return df
 
     def _add_composition_from_structure(self, df):
@@ -360,11 +373,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
 if __name__ == "__main__":
     from matminer.datasets.dataset_retrieval import load_dataset
-    df = load_dataset("flla")
-    df = df.iloc[:100]
-    df = df[["structure",  "e_above_hull"]]
-    print(df)
+    df = load_dataset("steel_strength").rename(columns={"formula": "composition"})[["yield strength", "composition"]]
     af = AutoFeaturizer()
-    af.fit(df, "e_above_hull")
-    df = af.transform(df, "e_above_hull")
-    print(df.columns.tolist())
+    print(df)
+    df = af.fit_transform(df, "yield strength")

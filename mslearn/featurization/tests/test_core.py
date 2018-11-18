@@ -106,7 +106,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         # are not used.
         self.assertFalse(af.auto_featurizer)
         self.assertIsNone(af.metaselector)
-        self.assertIsNone(af.exclude)
+        self.assertTrue(af.exclude == [])
         self.assertIn(dn, af.featurizers["structure"])
         self.assertIn(gsf, af.featurizers["structure"])
         ep = ElementProperty.from_preset("matminer")

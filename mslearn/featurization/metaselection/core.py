@@ -180,5 +180,4 @@ class FeaturizerMetaSelector:
                                      if exclude_fts is not None else [])
 
         self.excludes = list(set(auto_excludes))
-
         return self.excludes
