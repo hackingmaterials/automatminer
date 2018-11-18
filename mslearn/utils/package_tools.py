@@ -80,6 +80,17 @@ def set_fitted(func):
 
 
 def return_attrs_recursively(obj):
+    """
+    Returns attributes of an object recursively. Stops recursion when
+    attrs go outside of the mslearn library.
+
+    Args:
+        obj (object): The object with attrs
+
+    Returns:
+        attrdict (dict): The dictionary containing attributes which can
+            be pretty-printed.
+    """
     attrdict = {}
     for attr, value in obj.__dict__.items():
         if hasattr(value, "__dict__") and hasattr(value, "__module__"):
