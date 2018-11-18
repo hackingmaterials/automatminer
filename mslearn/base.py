@@ -66,7 +66,7 @@ class DataframeTransformer:
             target (str): the target string specifying the ML target.
 
         Returns:
-            (AutoMLAdaptor) This object (self)
+            (DataFrameTransformer) This object (self)
 
         """
         raise NotImplementedError("{} has no fit method implemented!".format(self.__class__.__name__))
