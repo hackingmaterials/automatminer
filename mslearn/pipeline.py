@@ -200,8 +200,8 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         To use a fixed validation set, pass in the index (must be .iloc-able in
         pandas) as the validation argument.
 
-        Whether using CV-only or validation, both will create CV information
-        in the MatPipe.learner.best_models variable.
+        Depending on the automl adaptor used, the CV information may be stored
+        in the best_models attribute (look at the adaptor class for more info).
 
         Args:
             df (pandas.DataFrame): The dataframe for benchmarking. Must contain
@@ -296,13 +296,14 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         Returns:
             None
         """
+        temp_backend = self.learner.backend
         self.learner._backend = self.learner.backend.fitted_pipeline_
         for obj in [self, self.learner, self.reducer, self.cleaner,
                     self.autofeaturizer]:
             obj._logger = None
-
         with open(filename, 'wb') as f:
             pickle.dump(self, f)
+        self.learner._backend = temp_backend
 
     @classmethod
     def load(cls, filename, logger=True):
