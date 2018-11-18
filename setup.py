@@ -29,6 +29,7 @@ if __name__ == "__main__":
                      'Operating System :: OS Independent',
                      'Topic :: Other/Nonlisted Topic',
                      'Topic :: Scientific/Engineering'],
-        test_suite="tests",
+        test_suite='nose.collector',
+        tests_require=['nose'],
         scripts=[]
     )
