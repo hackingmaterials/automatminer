@@ -94,7 +94,7 @@ class TestAdaptorGood(AutoMLAdaptor):
         self.target = None
         self.is_fit = False
         self._ml_data = None
-        self._best_models = None
+        self._best_pipeline = None
         self._backend = None
         self._features = None
 
@@ -115,7 +115,7 @@ class TestAdaptorGood(AutoMLAdaptor):
         else:
             raise ValueError("Target {} not in dataframe.".format(target))
 
-        self._best_models = ["model1", "model2"]
+        self._best_pipeline = "pipeline1"
         self._ml_data = {"y": df[target], "X": df.drop(columns=[target])}
         self._backend = "mybackend"
         self._features = self._ml_data["X"].columns.tolist()
@@ -187,11 +187,11 @@ class TestMatPipe(unittest.TestCase):
         tag.fit(self.df, 'a')
         self.assertTrue(hasattr(tag, "features"))
         self.assertTrue(hasattr(tag, "ml_data"))
-        self.assertTrue(hasattr(tag, "best_models"))
+        self.assertTrue(hasattr(tag, "best_pipeline"))
         self.assertTrue(hasattr(tag, "backend"))
         self.assertTrue(tag.is_fit)
         self.assertTrue(tag.ml_data["X"].shape[1] == 2)
-        self.assertTrue(tag.best_models[0] == "model1")
+        self.assertTrue(tag.best_pipeline == "pipeline1")
         self.assertTrue(tag.backend == "mybackend")
         self.assertTrue(tag.features[0] == "b")
 
@@ -220,3 +220,5 @@ class TestMatPipe(unittest.TestCase):
                 thisatte = getattr(tab, attr)
 
 
+if __name__ == "__main__":
+    unittest.main()
