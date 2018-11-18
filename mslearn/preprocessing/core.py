@@ -261,7 +261,10 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.object_cols = []
         for c in df.columns.values:
             try:
-                df[c] = pd.to_numeric(df[c])
+                if df[c].dtype == bool:
+                    df[c] = df[c].astype(int)
+                else:
+                    df[c] = pd.to_numeric(df[c])
                 if c != target:
                     self.number_cols.append(c)
             except (TypeError, ValueError):
@@ -405,6 +408,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
 
     @set_fitted
     def fit(self, df, target):
+        reduced_df = df
         for r in self.reducers:
             if r == "corr":
                 reduced_df = self.rm_correlated(df, target)
@@ -532,4 +536,11 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
 
 
 if __name__ == "__main__":
-    pass
+    from matminer.datasets.dataset_retrieval import load_dataset
+    from mslearn.pipeline import MatPipe, debug_config
+    target = "eij_max"
+    df = load_dataset("piezoelectric_tensor").rename(columns={"formula": "composition"})[[target, "composition", "structure"]]
+
+    mp = MatPipe(**debug_config)
+    df2 = mp.benchmark(df, target, test_spec=0.2)
+    print(df2)

@@ -3,6 +3,7 @@ Tools specific to this package.
 """
 import pandas as pd
 from sklearn.exceptions import NotFittedError
+from sklearn.pipeline import Pipeline
 
 
 class MatbenchError(BaseException):
@@ -79,6 +80,17 @@ def set_fitted(func):
 
 
 def return_attrs_recursively(obj):
+    """
+    Returns attributes of an object recursively. Stops recursion when
+    attrs go outside of the mslearn library.
+
+    Args:
+        obj (object): The object with attrs
+
+    Returns:
+        attrdict (dict): The dictionary containing attributes which can
+            be pretty-printed.
+    """
     attrdict = {}
     for attr, value in obj.__dict__.items():
         if hasattr(value, "__dict__") and hasattr(value, "__module__"):
@@ -88,10 +100,14 @@ def return_attrs_recursively(obj):
                 attrdict[attr] = {"obj": value.__class__,
                                   "columns": value.shape[1],
                                   "samples": value.shape[0]}
+            elif isinstance(value, Pipeline):
+                attrdict[attr] = [str(s) for s in value.steps]
             else:
                 attrdict[attr] = value
         else:
-            attrdict[attr] = value
+            # Prevent huge matrices being spammed to the digest
+            if "ml_data" not in attr:
+                attrdict[attr] = value
     return attrdict
 
 

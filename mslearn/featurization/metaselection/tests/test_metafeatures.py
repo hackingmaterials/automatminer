@@ -6,9 +6,8 @@ __author__ = ["Qi Wang <wqthu11@gmail.com>"]
 
 
 class TestFormulaMetafeatures(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.test_df = load_dataset('elastic_tensor_2015').rename(
+    def setUp(self):
+        self.test_df = load_dataset('elastic_tensor_2015').rename(
             columns={"formula": "composition"})
 
     def test_NumberOfCompositions(self):
@@ -49,9 +48,8 @@ class TestFormulaMetafeatures(unittest.TestCase):
 
 
 class TestStructureMetafeatures(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.test_df = load_dataset('elastic_tensor_2015').rename(
+    def setUp(self):
+        self.test_df = load_dataset('elastic_tensor_2015').rename(
             columns={"formula": "composition"})
 
     def test_NumberOfStructures(self):

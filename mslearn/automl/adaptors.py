@@ -59,6 +59,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         mode (str): Either "regression" or "classification"
         features (list): The features labels used to develop the ml model.
         ml_data (dict): The raw ml data used for training.
+        best_pipeline (sklearn.Pipeline): The best fitted pipeline found.
         best_models (OrderedDict): The best model names and their scores.
         backend (TPOTBase): The TPOT object interface used for ML training.
         is_fit (bool): If True, the adaptor and backend are fit to a dataset.
@@ -121,9 +122,9 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         self.logger.info("TPOT fitting finished.")
         return self
 
-    @check_fitted
     @property
-    def _best_models(self):
+    @check_fitted
+    def best_models(self):
         """
         The best models found by TPOT, in order of descending performance.
 
@@ -168,15 +169,18 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         # Mapping of top models to just their score
         scores = {model: best_models[model]['internal_cv_score']
                   for model in best_models}
-
         # Sorted dict of top models just mapped to their top scores
         best_models_and_scores = OrderedDict(
             sorted(scores.items(),
                    key=lambda x: x[1],
                    reverse=self.greater_score_is_better))
-
         self.models = models
         return best_models_and_scores
+
+    @property
+    @check_fitted
+    def _best_pipeline(self):
+        return self._backend.fitted_pipeline_
 
     @check_fitted
     def predict(self, df, target):

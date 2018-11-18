@@ -21,11 +21,10 @@ __author__ = ["Alex Dunn <ardunn@lbl.gov>",
 
 
 class TestAutoFeaturizer(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls, limit=5):
-        cls.test_df = load_dataset('elastic_tensor_2015').rename(
+    def setUp(self, limit=5):
+        self.test_df = load_dataset('elastic_tensor_2015').rename(
             columns={"formula": "composition"})
-        cls.limit = limit
+        self.limit = limit
 
     def test_sanity(self):
         df = copy.copy(self.test_df)
@@ -107,7 +106,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         # are not used.
         self.assertFalse(af.auto_featurizer)
         self.assertIsNone(af.metaselector)
-        self.assertIsNone(af.exclude)
+        self.assertTrue(af.exclude == [])
         self.assertIn(dn, af.featurizers["structure"])
         self.assertIn(gsf, af.featurizers["structure"])
         ep = ElementProperty.from_preset("matminer")
