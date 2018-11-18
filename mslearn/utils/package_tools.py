@@ -94,7 +94,9 @@ def return_attrs_recursively(obj):
             else:
                 attrdict[attr] = value
         else:
-            attrdict[attr] = value
+            # Prevent huge matrices being spammed to the digest
+            if "ml_data" not in attr:
+                attrdict[attr] = value
     return attrdict
 
 
