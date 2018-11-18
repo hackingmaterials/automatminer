@@ -342,6 +342,8 @@ def MatPipeFast(**kwargs):
 
 
 if __name__ == "__main__":
+    pass
+
     # from sklearn.metrics import mean_squared_error
     # from matminer.datasets.dataset_retrieval import load_dataset
     #
