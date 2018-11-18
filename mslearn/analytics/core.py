@@ -37,7 +37,21 @@ class Analytics:
             self.model, progressbar=False
         )
 
-    def plot_partial_dependence(self, feature_ids):
+    def plot_partial_dependence(self, feature_ids, save_plot=False,
+                                show_plot=True):
+        fig, ax = self.get_partial_dependence(feature_ids)
+
+        fig.suptitle("Model dependance on {}".format(feature_ids[0]))
+        ax.set_ylabel("Average predicited {}".format(self.target))
+        plt.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
+
+        if save_plot:
+            plt.savefig(feature_ids[0] + "_pdp.png")
+
+        if show_plot:
+            plt.show()
+
+    def get_partial_dependence(self, feature_ids):
         if not isinstance(feature_ids, list):
             feature_ids = [feature_ids]
 
@@ -50,10 +64,8 @@ class Analytics:
             feature_ids, self.model, sample=False, progressbar=False,
             with_variance=True
         )
-        axs[0][0].suptitle("Model dependance on {}".format(feature_ids[0]))
-        axs[0][1].set_ylabel("Average predicited {}".format(self.target))
-        plt.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
-        plt.savefig(feature_ids[0] + "_pdp.png")
+
+        return axs[0][0], axs[0][1]
 
 
 if __name__ == '__main__':
