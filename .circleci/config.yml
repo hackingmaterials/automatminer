@@ -7,6 +7,7 @@ jobs:
       - image: circleci/python:3.6.2
         environment:
           CODECOV_TOKEN: "01e2fb87-6d43-44bd-837e-c783d98a1ee4"
+          CI: "CIRCLE"
     steps:
       - checkout
       - run:

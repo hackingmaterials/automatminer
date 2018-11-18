@@ -23,7 +23,7 @@ from mslearn.pipeline import MatPipe
 # DB =  MongoClient("mongodb://%s:%s@ds111244.mlab.com:11244/automatminer" % (DB_USER, DB_PASSWORD)).automatminer
 DB = MongoClient('localhost', 27017).automatminer
 
-
+N_TRIALS = 5
 DATASET_SET = ["elastic_tensor_2015"]
 TARGETS = {"elastic_tensor_2015": "K_VRH"}
 SCORING = {"elastic_tensor_2015": "r2"}
@@ -56,7 +56,7 @@ class RunPipe(FireTaskBase):
                                **pipe_config_dict["autofeaturizer_kwargs"])}
         pipe = MatPipe(**pipe_config)
         dataset = fw_spec["dataset"]
-        df = load_dataset(dataset)
+        df = load_dataset(dataset).iloc[:100]
         df = df.rename(columns=REWRITE_COLS[dataset])[RELEVANT_COLS[dataset]]
         target = TARGETS[dataset]
 
@@ -67,6 +67,8 @@ class RunPipe(FireTaskBase):
 
         # Save everything
         savedir = fw_spec["save_dir"]
+        if not os.path.exists(savedir):
+            os.makedirs(savedir)
         pipe.save(os.path.join(savedir, "pipe.p"))
         pipe.digest(os.path.join(savedir, "digest.txt"))
         predicted_test_df.to_csv(os.path.join(savedir, "test_df.csv"))
@@ -84,13 +86,16 @@ class RunPipe(FireTaskBase):
         score = scorer(true, test)
 
         # Extract important details for storage
-        best_model = pipe.learner.best_models[0]
+        if pipe_config_dict["learner_name"] == "TPOTAdaptor":
+            best_pipeline = [str(step) for step in pipe.learner.backend.fitted_pipeline_.steps]
+        else:
+            raise ValueError("Other backends are not supported yet!!")
         features = pipe.learner.features
         n_features = len(features)
-        n_test_samples_original = len(df[fw_spec["test_idx"]])
+        n_test_samples_original = len(df) * 0.2
 
         pass_to_storage = {"score": score, "target": target,
-                           "best_model": best_model,
+                           "best_pipeline": best_pipeline,
                            "elapsed_time": elapsed_time,
                            "features": features,
                            "n_features": n_features,
@@ -176,11 +181,10 @@ class ConsolidateRuns(FireTaskBase):
         build_doc["time_std"] = np.std(time_means)
         build_doc["time_max"] = max(time_means)
         build_doc["time_min"] = min(time_means)
-
         builds.insert_one(build_doc)
 
 
-def get_workflow_from_build(name, pipe_config, save_dir, tags=None):
+def get_workflow_from_build(name, pipe_config, base_save_dir, tags=None):
     top_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../..")
     repo = git.Repo(top_dir)
     last_commit = str(repo.head.commit)
@@ -189,6 +193,8 @@ def get_workflow_from_build(name, pipe_config, save_dir, tags=None):
     build_config_for_hash["last_commit"] = last_commit
     build_config_for_hash = str(build_config_for_hash).encode("UTF-8")
     build_hash = hashlib.sha1(build_config_for_hash).hexdigest()[:10]
+    save_dir = os.path.join(base_save_dir,
+                            str(datetime.datetime.utcnow()).replace(" ", "_") + "_" + build_hash)
 
     pipe_fws = []
     for dataset in DATASET_SET:
@@ -199,7 +205,7 @@ def get_workflow_from_build(name, pipe_config, save_dir, tags=None):
                 "build_hash": build_hash,
                 "tags": tags if tags else [],
                 "save_dir": os.path.join(save_dir, dataset)}
-        for trial in range(5):
+        for trial in range(N_TRIALS):
             spec["trial"] = trial
             pipe_fws.append(Firework([RunPipe(), StorePipeResults()],
                                      spec=spec,
@@ -218,19 +224,20 @@ def get_workflow_from_build(name, pipe_config, save_dir, tags=None):
 
 
 if __name__ == "__main__":
-    pipe_config = {"learner_name": "TPOTAdaptor",
-                   "learner_kwargs": {"max_time_mins": 2,
-                                      "population_size": 10},
-                   "reducer_kwargs": {},
-                   "autofeaturizer_kwargs": {},
-                   "cleaner_kwargs": {}}
-
-    wf = get_workflow_from_build("TestName", pipe_config, "~")
-
+    # pipe_config = {"learner_name": "TPOTAdaptor",
+    #                "learner_kwargs": {"max_time_mins": 2,
+    #                                   "population_size": 10},
+    #                "reducer_kwargs": {},
+    #                "autofeaturizer_kwargs": {},
+    #                "cleaner_kwargs": {}}
+    #
+    # wf = get_workflow_from_build("TestName", pipe_config, "/Users/ardunn/MSLEARNTEST/")
+    #
     lp = LaunchPad(host="localhost", port=27017, name="automatminer")
-    lp.reset(password=None, require_password=False)
-    lp.add_wf(wf)
+    # lp.reset(password=None, require_password=False)
+    # lp.add_wf(wf)
     launch_rocket(lp)
+
 
 
 
