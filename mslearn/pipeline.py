@@ -341,9 +341,6 @@ def MatPipeFast(**kwargs):
     return MatPipe(**kwargs, **fast_config)
 
 
-from fireworks import FireTaskBase, Firework, explicit_serialize, LaunchPad
-
-
 if __name__ == "__main__":
     # from sklearn.metrics import mean_squared_error
     # from matminer.datasets.dataset_retrieval import load_dataset
@@ -358,7 +355,3 @@ if __name__ == "__main__":
     #
     # mp = MatPipe(**debug_config)
     # df = mp.benchmark(df, target, test_spec=0.25)
-
-    lp = LaunchPad(name="automatminer")
-    lp.add_wf(Firework(CustomTask()))
-
