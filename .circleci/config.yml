@@ -6,7 +6,7 @@ jobs:
     docker:
       - image: circleci/python:3.6.2
         environment:
-          CODECOV_TOKEN: "01e2fb87-6d43-44bd-837e-c783d98a1ee4"
+          CODACY_PROJECT_TOKEN: "0cdf090f6d5f4f8783fcf3ce04c6a1d6
           CI: "CIRCLE"
     steps:
       - checkout
@@ -18,7 +18,8 @@ jobs:
             pip install --upgrade pip
             pip install --quiet -r requirements.txt
             pip install coverage
-            pip install codecov
+            pip install codacy-coverage
             coverage run setup.py test
-            codecov
+            coverage xml
+            python-codacy-coverage -r coverage.xml
           no_output_timeout: 120m
