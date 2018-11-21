@@ -1,7 +1,7 @@
-from mslearn.automl.tpot_utils import TPOTAutoML
+from automatminer.automl.tpot_utils import TPOTAutoML
 from matminer.datasets.convenience_loaders import load_glass_ternary_landolt
-from mslearn.featurize import Featurize
-from mslearn.preprocess import PreProcess
+from automatminer.featurize import Featurize
+from automatminer.preprocess import PreProcess
 from sklearn.model_selection import train_test_split
 from time import time
 

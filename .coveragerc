@@ -1,5 +1,5 @@
 [run]
-source=mslearn
+source=automatminer
 
 [report]
 exclude_lines =

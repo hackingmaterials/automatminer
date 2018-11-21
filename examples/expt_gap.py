@@ -1,14 +1,14 @@
 import json
-import mslearn.data.load as loader
+import automatminer.data.load as loader
 import numpy as np
 import os
 import pandas as pd
 import pickle
 from time import time
-from mslearn.core.analysis import Analysis
-from mslearn.automl.tpot_utils import TPOTAutoML
-from mslearn.core.featurize import Featurize
-from mslearn.core.preprocess import Preprocess
+from automatminer.core.analysis import Analysis
+from automatminer.automl.tpot_utils import TPOTAutoML
+from automatminer.core.featurize import Featurize
+from automatminer.core.preprocess import Preprocess
 from sklearn.model_selection import train_test_split
 
 

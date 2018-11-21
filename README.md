@@ -1,4 +1,4 @@
-# matsci-learn (mslearn) 
+# matsci-learn (automatminer) 
 An automatic "black-box" yet interpretable prediction engine for materials properties.
 
 ###### Current code coverage:

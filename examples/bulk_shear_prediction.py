@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from matminer.datasets.convenience_loaders import load_tehrani_superhard_mat
-from mslearn.featurization import AutoFeaturizer
-from mslearn.preprocessing import DataCleaner, FeatureReducer
-from mslearn.automl.adaptors import TPOTAdaptor
+from automatminer.featurization import AutoFeaturizer
+from automatminer.preprocessing import DataCleaner, FeatureReducer
+from automatminer.automl.adaptors import TPOTAdaptor
 
 """
 This script reproduces the results found by Tehrani et al in the following:

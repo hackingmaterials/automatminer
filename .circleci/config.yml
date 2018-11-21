@@ -2,7 +2,7 @@ version: 2
 
 jobs:
   build:
-    working_directory: ~/mslearn
+    working_directory: ~/automatminer
     docker:
       - image: circleci/python:3.6.2
         environment:

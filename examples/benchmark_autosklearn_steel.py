@@ -4,10 +4,10 @@ from time import time
 from cProfile import Profile
 
 import pandas as pd
-from mslearn.automl.autosklearn_utils import AutoSklearnML
+from automatminer.automl.autosklearn_utils import AutoSklearnML
 from matminer.datasets.convenience_loaders import load_steel_strength
-from mslearn.featurize import Featurize
-from mslearn.preprocess import PreProcess
+from automatminer.featurize import Featurize
+from automatminer.preprocess import PreProcess
 
 data_name = "steel"
 target = "yield strength"

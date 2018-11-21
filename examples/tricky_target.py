@@ -1,10 +1,10 @@
 from matminer.datasets.convenience_loaders import load_castelli_perovskites
 import numpy as np
 from time import time
-from mslearn.analytics import Analytics
-from mslearn.automl.tpot_utils import TPOTAutoML
-from mslearn.featurize import Featurize
-from mslearn.preprocess import PreProcess
+from automatminer.analytics import Analytics
+from automatminer.automl.tpot_utils import TPOTAutoML
+from automatminer.featurize import Featurize
+from automatminer.preprocess import PreProcess
 from sklearn.model_selection import train_test_split
 
 # inputs

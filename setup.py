@@ -8,11 +8,11 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 
 if __name__ == "__main__":
     setup(
-        name='mslearn',
+        name='automatminer',
         version='0.1.1',
         description='automated machine learning for materials science',
         long_description=open(os.path.join(module_dir, 'README.md')).read(),
-        url='https://github.com/hackingmaterials/mslearn',
+        url='https://github.com/hackingmaterials/automatminer',
         author=['Alex Dunn', 'Alireza Faghaninia', 'Qi Wang', 'Anubhav Jain'],
         author_email=['denhaus@gmail.com', 'alireza.faghaninia@gmail.com', 'qwang3@lbl.gov', 'ajain@lbl.gov'],
         license='modified BSD',
