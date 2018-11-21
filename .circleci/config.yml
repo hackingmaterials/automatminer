@@ -6,7 +6,7 @@ jobs:
     docker:
       - image: circleci/python:3.6.2
         environment:
-          CODACY_PROJECT_TOKEN: "0cdf090f6d5f4f8783fcf3ce04c6a1d6
+          CODACY_PROJECT_TOKEN: "0cdf090f6d5f4f8783fcf3ce04c6a1d6"
           CI: "CIRCLE"
     steps:
       - checkout
