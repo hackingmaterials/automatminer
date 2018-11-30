@@ -1,9 +1,7 @@
-from multiprocessing import cpu_count
-
 from pymatgen import Composition
-from matminer.featurizers.conversions import StructureToOxidStructure, \
-    StrToComposition, DictToObject, StructureToComposition, \
-    CompositionToOxidComposition
+from matminer.featurizers.conversions import StrToComposition, DictToObject, \
+    StructureToComposition
+from matminer.featurizers.conversions import ConversionFeaturizer
 
 from automatminer.utils.package_tools import check_fitted, set_fitted
 from automatminer.base import DataframeTransformer, LoggableMixin
@@ -28,6 +26,118 @@ _bandstructure_aliases = ["bandstructure", "bs", "bsdos", "BS", "BSDOS",
                           "Bandstructure"]
 _dos_aliases = ["density of states", "dos", "DOS", "Density of States"]
 _aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases + _dos_aliases
+
+
+class StructureToOxidStructure(ConversionFeaturizer):
+    """Utility featurizer to add oxidation states to a pymatgen Structure.
+
+    Oxidation states are determined using pymatgen's guessing routines.
+    The expected input is a `pymatgen.core.structure.Structure` object.
+
+    Note that this Featurizer does not produce machine learning-ready features
+    but instead can be applied to pre-process data or as part of a Pipeline.
+
+    Args:
+        **kwargs: Parameters to control the settings for
+            `pymatgen.io.structure.Structure.add_oxidation_state_by_guess()`.
+        target_col_id (str or None): The column in which the converted data will
+            be written. If the column already exists then an error will be
+            thrown unless `overwrite_data` is set to `True`. If `target_col_id`
+            begins with an underscore the data will be written to the column:
+            `"{}_{}".format(col_id, target_col_id[1:])`, where `col_id` is the
+            column being featurized. If `target_col_id` is set to None then
+            the data will be written "in place" to the `col_id` column (this
+            will only work if `overwrite_data=True`).
+        overwrite_data (bool): Overwrite any data in `target_column` if it
+            exists.
+    """
+
+    def __init__(self, target_col_id='structure_oxid', overwrite_data=False,
+                 **kwargs):
+        super().__init__(target_col_id, overwrite_data)
+        self.oxi_guess_params = kwargs
+
+    def featurize(self, structure):
+        """Add oxidation states to a Structure using pymatgen's guessing routines.
+
+        Args:
+            structure (`pymatgen.core.structure.Structure`): A structure.
+
+        Returns:
+            (`pymatgen.core.structure.Structure`): A Structure object decorated
+                with oxidation states.
+        """
+        if structure.num_sites < 50:
+            structure.add_oxidation_state_by_guess(**self.oxi_guess_params)
+        return [structure]
+
+    def citations(self):
+        return [(
+            "@article{ward_agrawal_choudary_wolverton_2016, title={A "
+            "general-purpose machine learning framework for predicting "
+            "properties of inorganic materials}, volume={2}, "
+            "DOI={10.1038/npjcompumats.2017.28}, number={1}, journal={npj "
+            "Computational Materials}, author={Ward, Logan and Agrawal, Ankit "
+            "and Choudhary, Alok and Wolverton, Christopher}, year={2016}}")]
+
+    def implementors(self):
+        return ["Anubhav Jain", "Alex Ganose"]
+
+
+class CompositionToOxidComposition(ConversionFeaturizer):
+    """Utility featurizer to add oxidation states to a pymatgen Composition.
+
+    Oxidation states are determined using pymatgen's guessing routines.
+    The expected input is a `pymatgen.core.composition.Composition` object.
+
+    Note that this Featurizer does not produce machine learning-ready features
+    but instead can be applied to pre-process data or as part of a Pipeline.
+
+    Args:
+        **kwargs: Parameters to control the settings for
+            `pymatgen.io.structure.Structure.add_oxidation_state_by_guess()`.
+        target_col_id (str or None): The column in which the converted data will
+            be written. If the column already exists then an error will be
+            thrown unless `overwrite_data` is set to `True`. If `target_col_id`
+            begins with an underscore the data will be written to the column:
+            `"{}_{}".format(col_id, target_col_id[1:])`, where `col_id` is the
+            column being featurized. If `target_col_id` is set to None then
+            the data will be written "in place" to the `col_id` column (this
+            will only work if `overwrite_data=True`).
+        overwrite_data (bool): Overwrite any data in `target_column` if it
+            exists.
+    """
+
+    def __init__(self, target_col_id='composition_oxid', overwrite_data=False,
+                 **kwargs):
+        super().__init__(target_col_id, overwrite_data)
+        self.oxi_guess_params = kwargs
+
+    def featurize(self, comp):
+        """Add oxidation states to a Structure using pymatgen's guessing routines.
+
+        Args:
+            comp (`pymatgen.core.composition.Composition`): A composition.
+
+        Returns:
+            (`pymatgen.core.composition.Composition`): A Composition object
+                decorated with oxidation states.
+        """
+        if comp.num_atoms < 50:
+            comp.add_charges_from_oxi_state_guesses(**self.oxi_guess_params)
+        return [comp]
+
+    def citations(self):
+        return [(
+            "@article{ward_agrawal_choudary_wolverton_2016, title={A "
+            "general-purpose machine learning framework for predicting "
+            "properties of inorganic materials}, volume={2}, "
+            "DOI={10.1038/npjcompumats.2017.28}, number={1}, journal={npj "
+            "Computational Materials}, author={Ward, Logan and Agrawal, Ankit "
+            "and Choudhary, Alok and Wolverton, Christopher}, year={2016}}")]
+
+    def implementors(self):
+        return ["Anubhav Jain", "Alex Ganose"]
 
 
 class AutoFeaturizer(DataframeTransformer, LoggableMixin):
@@ -377,3 +487,7 @@ if __name__ == "__main__":
     af = AutoFeaturizer()
     print(df)
     df = af.fit_transform(df, "yield strength")
+
+    from pymatgen import Structure
+    # s = Structure()
+    # s.
