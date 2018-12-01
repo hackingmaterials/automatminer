@@ -2,6 +2,7 @@ from pymatgen import Composition
 from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     StructureToComposition
 from matminer.featurizers.conversions import ConversionFeaturizer
+from matminer.featurizers.base import BaseFeaturizer
 
 from automatminer.utils.package_tools import check_fitted, set_fitted
 from automatminer.base import DataframeTransformer, LoggableMixin
@@ -272,7 +273,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         return self
 
     @check_fitted
-    def transform(self, df, target):
+    def transform(self, df, target, tidy_column=True):
         """
         Decorate a dataframe containing composition, structure, bandstructure,
         and/or DOS objects with descriptors.
@@ -285,13 +286,14 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             df (pandas.DataFrame): Transformed dataframe containing features.
         """
 
-        #todo: structure to oxidstructure + comp2oxidcomp can get called twice by _tidy_column
+        #todo: structure to oxidstructure + comp2oxidcomp can get called twice by _tidy_column, can be fixed with overriding fit_transform
         df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
 
         for featurizer_type, featurizers in self.featurizers.items():
             if featurizer_type in df.columns:
-                df = self._tidy_column(df, featurizer_type)
+                if tidy_column:
+                    df = self._tidy_column(df, featurizer_type)
 
                 for f in featurizers:
                     df = f.featurize_dataframe(df, featurizer_type,
@@ -302,6 +304,21 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 self.logger.info("Featurizer type {} not in the dataframe. "
                                  "Skipping...".format(featurizer_type))
         return df
+
+    @set_fitted
+    def fit_transform(self, df, target):
+        """
+        Fit and transform the dataframe all as one, without reassigning
+        oxidation states (if valid).
+
+        Args:
+            df (pandas.DataFrame): The dataframe not containing features.
+            target (str): The ML-target property contained in the df.
+
+        Returns:
+            df (pandas.DataFrame): Transformed dataframe containing features.
+        """
+        return self.fit(df, target).transform(df, target, tidy_column=False)
 
     def _prescreen_df(self, df, inplace=True):
         """
@@ -342,6 +359,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             self.featurizers = dict()
             # use FeaturizerMetaSelector to get removable featurizers
             if self.use_metaselector:
+                self.logger.info("Running metaselector.")
                 self.metaselector = FeaturizerMetaSelector(self.max_na_percent)
                 auto_exclude = self.metaselector.auto_excludes(df)
                 if auto_exclude:
@@ -482,11 +500,13 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
 
 if __name__ == "__main__":
-    from matminer.datasets.dataset_retrieval import load_dataset
-    df = load_dataset("steel_strength").rename(columns={"formula": "composition"})[["yield strength", "composition"]]
-    af = AutoFeaturizer()
-    print(df)
-    df = af.fit_transform(df, "yield strength")
+    from matminer.datasets.dataset_retrieval import load_dataset, get_available_datasets
+
+    print(get_available_datasets())
+    # df = load_dataset("steel_strength").rename(columns={"formula": "composition"})[["yield strength", "composition"]]
+    # af = AutoFeaturizer()
+    # print(df)
+    # df = af.fit_transform(df, "yield strength")
 
     from pymatgen import Structure
     # s = Structure()
