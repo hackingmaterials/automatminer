@@ -70,9 +70,10 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         predictions = pipe.predict(unknown_df, "target_property")
 
     Args:
-        persistence_lvl (int): Persistence level of 0 saves nothing. 1 saves
-            intermediate dataframes and final dataframes. 2 saves all dataframes
-            and all objects used to create the pipeline, and auto-saves a digest
+        logger (Logger, bool): A custom logger object to use for logging.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
+        log_level (int): The log level. For example logging.DEBUG.
         autofeaturizer (AutoFeaturizer): The autofeaturizer object used to
             automatically decorate the dataframe with descriptors.
         cleaner (DataCleaner): The data cleaner object used to get a
@@ -91,10 +92,10 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             fit before being used to predict data.
     """
 
-    def __init__(self, logger=True, autofeaturizer=None,
+    def __init__(self, logger=True, log_level=None, autofeaturizer=None,
                  cleaner=None, reducer=None, learner=None):
 
-        self._logger = self.get_logger(logger)
+        self._logger = self.get_logger(logger, level=log_level)
         self.autofeaturizer = autofeaturizer if autofeaturizer else \
             default_config['autofeaturizer']
         self.cleaner = cleaner if cleaner else default_config["cleaner"]

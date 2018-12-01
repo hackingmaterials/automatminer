@@ -26,19 +26,20 @@ class LoggableMixin(object):
             raise AttributeError("Loggable object has no _logger attribute!")
 
     @staticmethod
-    def get_logger(logger):
+    def get_logger(logger, level=None):
         """Set the class logger.
         Args:
             logger (Logger, bool): A custom logger object to use for logging.
-                Alternatively, if set to True, the default automatminer logger will
-                be used. If set to False, then no logging will occur.
+                Alternatively, if set to True, the default automatminer logger
+                will be used. If set to False, then no logging will occur.
+            level (int): The log level. For example logging.DEBUG.
         """
         # need comparison to True and False to avoid overwriting Logger objects
         if logger is True:
             logger = logging.getLogger(logger_base_name)
 
             if not logger.handlers:
-                initialize_logger(logger_base_name)
+                initialize_logger(logger_base_name, level=level)
 
         elif logger is False:
             logger = logging.getLogger(logger_base_name + "_null")
