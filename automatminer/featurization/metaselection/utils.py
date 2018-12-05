@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 from pymatgen.core.composition import Composition, Element
 from pymatgen.core.structure import Structure, IStructure
+from pymatgen.core.periodic_table import DummySpecie
 
 __author__ = ["Qi Wang <wqthu11@gmail.com>"]
 
@@ -164,7 +165,9 @@ def _element_category(element):
     if not isinstance(element, Element) and isinstance(element,
                                                        six.string_types):
         element = Element(element)
-    if element.is_transition_metal:
+    if isinstance(element, DummySpecie):
+        return 11
+    elif element.is_transition_metal:
         if element.is_lanthanoid or element.symbol in {"Y", "Sc"}:
             return 2
         elif element.is_actinoid:
