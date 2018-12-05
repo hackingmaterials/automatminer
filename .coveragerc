@@ -15,3 +15,8 @@ omit =
     *tests/*
     */versioneer.py
     */_version.py
+    */*.md
+    */*.gitignore
+    */*.txt
+    */setup.py
+    */__init__.py
