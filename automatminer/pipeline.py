@@ -333,14 +333,6 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return pipe
 
 
-def MatPipePerform(**kwargs):
-    return MatPipe(**kwargs, **performance_config)
-
-
-def MatPipeFast(**kwargs):
-    return MatPipe(**kwargs, **fast_config)
-
-
 if __name__ == "__main__":
     pass
 
