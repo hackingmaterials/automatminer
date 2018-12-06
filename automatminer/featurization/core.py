@@ -1,6 +1,7 @@
 from pymatgen import Composition
 from matminer.featurizers.conversions import StrToComposition, DictToObject, \
-    StructureToComposition
+    StructureToComposition, StructureToOxidStructure, \
+    CompositionToOxidComposition
 from matminer.featurizers.conversions import ConversionFeaturizer
 from matminer.featurizers.base import BaseFeaturizer
 
@@ -27,118 +28,6 @@ _bandstructure_aliases = ["bandstructure", "bs", "bsdos", "BS", "BSDOS",
                           "Bandstructure"]
 _dos_aliases = ["density of states", "dos", "DOS", "Density of States"]
 _aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases + _dos_aliases
-
-
-class StructureToOxidStructure(ConversionFeaturizer):
-    """Utility featurizer to add oxidation states to a pymatgen Structure.
-
-    Oxidation states are determined using pymatgen's guessing routines.
-    The expected input is a `pymatgen.core.structure.Structure` object.
-
-    Note that this Featurizer does not produce machine learning-ready features
-    but instead can be applied to pre-process data or as part of a Pipeline.
-
-    Args:
-        **kwargs: Parameters to control the settings for
-            `pymatgen.io.structure.Structure.add_oxidation_state_by_guess()`.
-        target_col_id (str or None): The column in which the converted data will
-            be written. If the column already exists then an error will be
-            thrown unless `overwrite_data` is set to `True`. If `target_col_id`
-            begins with an underscore the data will be written to the column:
-            `"{}_{}".format(col_id, target_col_id[1:])`, where `col_id` is the
-            column being featurized. If `target_col_id` is set to None then
-            the data will be written "in place" to the `col_id` column (this
-            will only work if `overwrite_data=True`).
-        overwrite_data (bool): Overwrite any data in `target_column` if it
-            exists.
-    """
-
-    def __init__(self, target_col_id='structure_oxid', overwrite_data=False,
-                 **kwargs):
-        super().__init__(target_col_id, overwrite_data)
-        self.oxi_guess_params = kwargs
-
-    def featurize(self, structure):
-        """Add oxidation states to a Structure using pymatgen's guessing routines.
-
-        Args:
-            structure (`pymatgen.core.structure.Structure`): A structure.
-
-        Returns:
-            (`pymatgen.core.structure.Structure`): A Structure object decorated
-                with oxidation states.
-        """
-        if structure.num_sites < 50:
-            structure.add_oxidation_state_by_guess(**self.oxi_guess_params)
-        return [structure]
-
-    def citations(self):
-        return [(
-            "@article{ward_agrawal_choudary_wolverton_2016, title={A "
-            "general-purpose machine learning framework for predicting "
-            "properties of inorganic materials}, volume={2}, "
-            "DOI={10.1038/npjcompumats.2017.28}, number={1}, journal={npj "
-            "Computational Materials}, author={Ward, Logan and Agrawal, Ankit "
-            "and Choudhary, Alok and Wolverton, Christopher}, year={2016}}")]
-
-    def implementors(self):
-        return ["Anubhav Jain", "Alex Ganose"]
-
-
-class CompositionToOxidComposition(ConversionFeaturizer):
-    """Utility featurizer to add oxidation states to a pymatgen Composition.
-
-    Oxidation states are determined using pymatgen's guessing routines.
-    The expected input is a `pymatgen.core.composition.Composition` object.
-
-    Note that this Featurizer does not produce machine learning-ready features
-    but instead can be applied to pre-process data or as part of a Pipeline.
-
-    Args:
-        **kwargs: Parameters to control the settings for
-            `pymatgen.io.structure.Structure.add_oxidation_state_by_guess()`.
-        target_col_id (str or None): The column in which the converted data will
-            be written. If the column already exists then an error will be
-            thrown unless `overwrite_data` is set to `True`. If `target_col_id`
-            begins with an underscore the data will be written to the column:
-            `"{}_{}".format(col_id, target_col_id[1:])`, where `col_id` is the
-            column being featurized. If `target_col_id` is set to None then
-            the data will be written "in place" to the `col_id` column (this
-            will only work if `overwrite_data=True`).
-        overwrite_data (bool): Overwrite any data in `target_column` if it
-            exists.
-    """
-
-    def __init__(self, target_col_id='composition_oxid', overwrite_data=False,
-                 **kwargs):
-        super().__init__(target_col_id, overwrite_data)
-        self.oxi_guess_params = kwargs
-
-    def featurize(self, comp):
-        """Add oxidation states to a Structure using pymatgen's guessing routines.
-
-        Args:
-            comp (`pymatgen.core.composition.Composition`): A composition.
-
-        Returns:
-            (`pymatgen.core.composition.Composition`): A Composition object
-                decorated with oxidation states.
-        """
-        if comp.num_atoms < 50:
-            comp.add_charges_from_oxi_state_guesses(**self.oxi_guess_params)
-        return [comp]
-
-    def citations(self):
-        return [(
-            "@article{ward_agrawal_choudary_wolverton_2016, title={A "
-            "general-purpose machine learning framework for predicting "
-            "properties of inorganic materials}, volume={2}, "
-            "DOI={10.1038/npjcompumats.2017.28}, number={1}, journal={npj "
-            "Computational Materials}, author={Ward, Logan and Agrawal, Ankit "
-            "and Choudhary, Alok and Wolverton, Christopher}, year={2016}}")]
-
-    def implementors(self):
-        return ["Anubhav Jain", "Alex Ganose"]
 
 
 class AutoFeaturizer(DataframeTransformer, LoggableMixin):
@@ -441,8 +330,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 self.logger.info("Guessing oxidation states of compositions, as"
                                  " they were not present in input.")
                 cto = CompositionToOxidComposition(
-                    target_col_id=featurizer_type,
-                    overwrite_data=True)
+                    target_col_id=featurizer_type, overwrite_data=True,
+                    return_composition_on_error=True, max_sites=-50)
                 try:
                     df = cto.featurize_dataframe(df, featurizer_type,
                                                  multiindex=self.multiindex)
@@ -466,8 +355,9 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             if featurizer_type == "structure" and self.guess_oxistates:
                 self.logger.info("Guessing oxidation states of structures, as "
                                  "they were not present in input.")
-                sto = StructureToOxidStructure(target_col_id=featurizer_type,
-                                               overwrite_data=True)
+                sto = StructureToOxidStructure(
+                    target_col_id=featurizer_type, overwrite_data=True,
+                    return_structure_on_error=True, max_sites=-50)
                 try:
                     df = sto.featurize_dataframe(df, featurizer_type,
                                              multiindex=self.multiindex)
@@ -476,7 +366,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                         " structures due to {}.".format(e))
         return df
 
-    def _add_composition_from_structure(self, df):
+    def _add_composition_from_structure(self, df, overwrite=True):
         """
         Automatically deduce compositions from structures if:
             1. structures are available
@@ -484,18 +374,30 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 composition featurizers are present in self.featurizers).
         Args:
             df (pandas.DataFrame): May or may not contain composition column.
+            overwrite (bool): Whether to overwrite the composition column if it
+                already exists.
 
         Returns:
             df (pandas.DataFrame): Contains composition column if desired
         """
-        if "structure" in df.columns and "composition" not in df.columns:
-            if self.auto_featurizer or (set(_composition_aliases)
-                                        & set(self.featurizers.keys())):
-                df = self._tidy_column(df, "structure")
-                struct2comp = StructureToComposition(
-                    target_col_id="composition", overwrite_data=False)
-                df = struct2comp.featurize_dataframe(df, "structure")
+        if ("structure" in df.columns and
+                (self.auto_featurizer or (set(_composition_aliases) and
+                                          set(self.featurizers.keys())))
+                and ("composition" not in df.columns or overwrite)):
+
+            if "composition" in df.columns:
+                self.logger.info("composition column already exists, "
+                                 "overwriting with composition from structure.")
+            else:
                 self.logger.debug("Adding compositions from structures.")
+
+            df = self._tidy_column(df, "structure")
+
+            # above tidy column will add oxidation states, these oxidation
+            # states will then be transferred to composition.
+            struct2comp = StructureToComposition(
+                target_col_id="composition", overwrite_data=False)
+            df = struct2comp.featurize_dataframe(df, "structure")
         return df
 
 
