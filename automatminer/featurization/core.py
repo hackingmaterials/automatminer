@@ -331,7 +331,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                  " they were not present in input.")
                 cto = CompositionToOxidComposition(
                     target_col_id=featurizer_type, overwrite_data=True,
-                    return_composition_on_error=True, max_sites=-50)
+                    return_original_on_error=True, max_sites=-50)
                 try:
                     df = cto.featurize_dataframe(df, featurizer_type,
                                                  multiindex=self.multiindex)
@@ -357,7 +357,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                  "they were not present in input.")
                 sto = StructureToOxidStructure(
                     target_col_id=featurizer_type, overwrite_data=True,
-                    return_structure_on_error=True, max_sites=-50)
+                    return_original_on_error=True, max_sites=-50)
                 try:
                     df = sto.featurize_dataframe(df, featurizer_type,
                                              multiindex=self.multiindex)
