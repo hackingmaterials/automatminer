@@ -52,5 +52,4 @@ We are in the process of writing a paper for automatminer. In the meantime, plea
 
 
 ## Contributing 
-Interested in contributing? See our [contribution guidelines](https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md) and make a pull request!
-* Please submit questions, issues / bug reports, and all other communication through the [matminer Google Group](https://groups.google.com/forum/#!forum/matminer).
+Interested in contributing? See our [contribution guidelines](https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md) and make a pull request! Please submit questions, issues / bug reports, and all other communication through the [matminer Google Group](https://groups.google.com/forum/#!forum/matminer).
