@@ -58,7 +58,7 @@ See area of the code which can be improved? Have an idea for a new feature? We w
 
 * Help us improve the documentation - tell us where you got ‘stuck’ and improve the install process for everyone.
 * Found a bug in the code? Raise a Github issue, or submit a pull request (according to our contribution guidelines) to fix it!
-* Have an idea for a new feature? **Contribute code!** Please see our contribution guidelines and make a pull request!
+* Have an idea for a new feature? **Contribute code!** Please see our [contribution guidelines](https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md) and make a pull request!
 * Please submit questions, issues / bug reports, and all other communication through the Matminer Google Groups.
 
 The list of contributors to FireWorks can be found here.
