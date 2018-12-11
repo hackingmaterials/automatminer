@@ -500,7 +500,9 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             the dataframe with the highly cross-correlated features removed.
         """
         corr = abs(df.corr())
-        corr = corr.sort_values(by=target_key)
+        #todo: needs test for classification when target key not in corr matrix
+        if target_key in corr:
+            corr = corr.sort_values(by=target_key)
         rm_feats = []
         for feature in corr.columns:
             if feature == target_key:

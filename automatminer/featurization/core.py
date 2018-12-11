@@ -376,7 +376,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     self.featurizers[featurizer_type] = \
                         featurizer_set(exclude=self.exclude).best
                 else:
-                    self.logger.info("Featurizer type {} not in the dataframe"
+                    self.logger.info("Featurizer type {} not in the dataframe "
                                      "to be fitted. Skipping...".
                                      format(featurizer_type))
         # user-set featurizers
