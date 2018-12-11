@@ -11,7 +11,7 @@ __authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
 logger_base_name = "automatminer"
 
 
-class LoggableMixin(object):
+class LoggableMixin:
     """A mixin class for easy logging (or absence of it)."""
 
     @property
