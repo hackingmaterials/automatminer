@@ -1,4 +1,4 @@
-![logo](./docs/logo.png | width=400x)
+![logo](./docs/logo_med.png)
 
 An automatic "black-box" yet interpretable prediction engine for materials properties.
 
