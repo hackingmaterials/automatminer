@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
-from automatminer.utils.package_tools import MatbenchError, compare_columns, \
+from automatminer.utils.package_tools import AutomatminerError, compare_columns, \
     check_fitted, set_fitted
 from automatminer.utils.ml_tools import regression_or_classification
 from automatminer.base import LoggableMixin, DataframeTransformer
@@ -100,7 +100,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
         self.logger.debug("Fitting to new dataframe...")
         if target not in df.columns:
-            raise MatbenchError(
+            raise AutomatminerError(
                 "Target {} must be contained in df.".format(target))
 
         self._reset_attrs()
@@ -125,7 +125,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
 
         if target != self.fitted_target:
-            raise MatbenchError(
+            raise AutomatminerError(
                 "The transformation target {} is not the same as the fitted "
                 "target {}".format(
                     target, self.fitted_target))
@@ -204,7 +204,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                 self.logger.warning("Mismatched columns found in dataframe "
                                     "used for fitting and argument dataframe.")
                 if not coerce_mismatch:
-                    raise MatbenchError("Mismatch between columns found in "
+                    raise AutomatminerError("Mismatch between columns found in "
                                         "arg dataframe and dataframe used for "
                                         "fitting!")
                 else:

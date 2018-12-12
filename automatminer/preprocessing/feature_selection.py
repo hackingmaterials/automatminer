@@ -8,7 +8,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
 from sklearn.model_selection import check_cv
 from skrebate import MultiSURF
 
-from automatminer.utils.package_tools import MatbenchError
+from automatminer.utils.package_tools import AutomatminerError
 from automatminer.base import LoggableMixin, DataframeTransformer
 
 __authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
@@ -122,7 +122,7 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
                 else:
                     tree = GradientBoostingRegressor(random_state=self.rs)
             else:
-                raise MatbenchError('Unsupported tree_type {}!'.format(tree))
+                raise AutomatminerError('Unsupported tree_type {}!'.format(tree))
 
         cv = check_cv(cv=cv, y=y, classifier=is_classifier(tree))
         all_feats = []
@@ -150,7 +150,7 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
         Returns (pandas.DataFrame): the data with reduced number of features.
         """
         if self.selected_features is None:
-            raise MatbenchError('The fit method should be called first!')
+            raise AutomatminerError('The fit method should be called first!')
         return X[self.selected_features]
 
 
