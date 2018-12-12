@@ -235,7 +235,8 @@ class StructureFeaturizers(FeaturizerSet):
         self._need_fitting_featurizers = [
             sf.PartialRadialDistributionFunction(),
             sf.BondFractions(),
-            sf.BagofBonds(coulomb_matrix=Cou)
+            sf.BagofBonds(coulomb_matrix=sf.CoulombMatrix()),
+            sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix())
         ]
 
         self._matrix_featurizers = [
