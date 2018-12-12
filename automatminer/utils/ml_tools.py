@@ -6,7 +6,7 @@ import warnings
 
 import pandas as pd
 
-from .package_tools import MatbenchError
+from .package_tools import AutomatminerError
 
 
 def is_greater_better(scoring_function):
@@ -37,7 +37,7 @@ def is_greater_better(scoring_function):
 
     # Check to ensure no metrics are accidentally placed in both sets
     if desired_high_metrics.intersection(desired_low_metrics):
-        raise MatbenchError("Error, there is a metric in both desired"
+        raise AutomatminerError("Error, there is a metric in both desired"
                             " high and desired low metrics")
 
     if scoring_function not in desired_high_metrics \

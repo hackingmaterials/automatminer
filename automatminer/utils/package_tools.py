@@ -6,7 +6,7 @@ from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 
 
-class MatbenchError(BaseException):
+class AutomatminerError(BaseException):
     """
     Exception specific to automatminer methods.
     """
@@ -15,7 +15,7 @@ class MatbenchError(BaseException):
         self.msg = msg
 
     def __str__(self):
-        return "MatbenchError : " + self.msg
+        return "AutomatminerError : " + self.msg
 
 
 def compare_columns(df1, df2, ignore=None):
