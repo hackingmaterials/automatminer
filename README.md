@@ -8,8 +8,8 @@ An automatic "black-box" yet interpretable prediction engine for materials prope
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/aa63dd7aa85e480bbe0e924a02ad1540)](https://www.codacy.com/app/ardunn/automatminer?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=hackingmaterials/automatminer&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/aa63dd7aa85e480bbe0e924a02ad1540)](https://www.codacy.com/app/ardunn/automatminer?utm_source=github.com&utm_medium=referral&utm_content=hackingmaterials/automatminer&utm_campaign=Badge_Coverage)
  
-### automatminer is AutoML for materials
-Automatminer is a tool for automatically creating machine learning pipelines. Automatminer's pipelines include automatic featurization with matminer, feature reduction, and AutoML backend handling. Put in a materials dataset, get out a machine that predicts materials properties.
+### automatminer = autoML for materials
+Automatminer is a tool for automatically creating machine learning pipelines. Automatminer's pipelines include automatic featurization with [matminer](https://github.com/hackingmaterials/matminer), feature reduction, and AutoML backend handling. Put in a materials dataset, get out a machine that predicts materials properties.
  
 ### automatminer works on many kinds of data
 Automatminer can make pipelines to accurately predict the properties from many kinds of materials data:
