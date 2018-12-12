@@ -7,28 +7,11 @@ import pickle
 
 import numpy as np
 
+from automatminer.configs import default_config
 from automatminer.base import LoggableMixin, DataframeTransformer
-from automatminer.featurization import AutoFeaturizer
-from automatminer.preprocessing import DataCleaner, FeatureReducer
-from automatminer.automl.adaptors import TPOTAdaptor
 from automatminer.utils.ml_tools import regression_or_classification
 from automatminer.utils.package_tools import check_fitted, set_fitted, \
     return_attrs_recursively
-
-
-performance_config = {}
-default_config = {"learner": TPOTAdaptor(max_time_mins=120),
-                  "reducer": FeatureReducer(),
-                  "autofeaturizer": AutoFeaturizer(),
-                  "cleaner": DataCleaner()}
-fast_config = {"learner": TPOTAdaptor(max_time_mins=30, population_size=50),
-               "reducer": FeatureReducer(reducers=('corr', 'tree')),
-               "autofeaturizer": AutoFeaturizer(),
-               "cleaner": DataCleaner()}
-debug_config = {"learner": TPOTAdaptor(max_time_mins=1, population_size=10),
-                "reducer": FeatureReducer(reducers=('corr',)),
-                "autofeaturizer": AutoFeaturizer(),
-                "cleaner": DataCleaner()}
 
 
 class MatPipe(DataframeTransformer, LoggableMixin):
@@ -55,7 +38,8 @@ class MatPipe(DataframeTransformer, LoggableMixin):
     Note: This pipeline should function the same regardless of which
     "component" classes it is made out of. E.g., he steps for each method should
     remain the same whether using the TPOTAdaptor class as the learner or
-    using an AutoKerasAdaptor class as the learner.
+    using an AutoKerasAdaptor class as the learner. To use a preset config,
+    import a config from automatminer.configs and do MatPipe(**config).
     ----------------------------------------------------------------------------
 
     Examples:
@@ -269,8 +253,6 @@ class MatPipe(DataframeTransformer, LoggableMixin):
 
         Args:
             filename (str): The filename.
-            fmt (str): The format to save the pipeline in. Valid choices are
-                "json", "txt".
 
         Returns:
             digeststr (str): The formatted pipeline digest.
