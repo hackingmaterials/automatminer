@@ -225,7 +225,6 @@ class StructureFeaturizers(FeaturizerSet):
             sf.SiteStatsFingerprint.from_preset("BondAngle-dejong2016"),
             sf.SiteStatsFingerprint.from_preset("Composition-dejong2016_SD"),
             sf.SiteStatsFingerprint.from_preset("OPSiteFingerprint"),
-
             sf.ChemicalOrdering(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
