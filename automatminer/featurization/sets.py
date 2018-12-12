@@ -223,6 +223,7 @@ class StructureFeaturizers(FeaturizerSet):
             sf.SiteStatsFingerprint.from_preset("BondLength-dejong2016"),
             sf.SiteStatsFingerprint.from_preset("BondAngle-dejong2016"),
             sf.SiteStatsFingerprint.from_preset("Composition-dejong2016_SD"),
+            sf.SiteStatsFingerprint.from_preset("Composition-dejong2016_SD"),
             sf.ChemicalOrdering(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
@@ -234,7 +235,7 @@ class StructureFeaturizers(FeaturizerSet):
         self._need_fitting_featurizers = [
             sf.PartialRadialDistributionFunction(),
             sf.BondFractions(),
-            sf.BagofBonds()
+            sf.BagofBonds(coulomb_matrix=Cou)
         ]
 
         self._matrix_featurizers = [
@@ -249,8 +250,9 @@ class StructureFeaturizers(FeaturizerSet):
         # these are the same as _need_fitting_featurizers
         self._many_features_featurizers = [
             sf.PartialRadialDistributionFunction(),
-            sf.BondFractions(),
-            sf.BagofBonds(),
+            sf.BondFractions(approx_bonds=False),
+            sf.BagofBonds(coulomb_matrix=sf.CoulombMatrix()),
+            sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix()),
             sf.OrbitalFieldMatrix(flatten=True)
         ]
 
