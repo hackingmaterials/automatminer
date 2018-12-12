@@ -9,6 +9,7 @@ from automatminer.base import DataframeTransformer, LoggableMixin
 from automatminer.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 from automatminer.featurization.metaselection.core import FeaturizerMetaSelector
+from automatminer.utils.package_tools import AutomatminerError
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
@@ -157,6 +158,10 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
     the correct column name is not present.
 
     Args:
+        preset (str): "best" or "fast" or "all". Determines by preset the
+            featurizers that should be applied. See the Featurizer sets for
+            specifics of best/fast/all. Default is "best". Incompatible with
+            the featurizers arg.
         featurizers (dict): Values are the featurizer types you want applied
             (e.g., "structure", "composition"). The corresponding values
             are lists of featurizer objects you want applied for each featurizer
@@ -210,11 +215,18 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
     """
 
-    def __init__(self, featurizers=None, exclude=None, use_metaselector=False,
-                 max_na_frac=0.05, ignore_cols=None, ignore_errors=True,
-                 drop_inputs=True, guess_oxistates=True, multiindex=False,
-                 n_jobs=None, logger=True):
+    def __init__(self, preset=None, featurizers=None, exclude=None,
+                 use_metaselector=False, max_na_frac=0.05,
+                 ignore_cols=None, ignore_errors=True, drop_inputs=True,
+                 guess_oxistates=True, multiindex=False, n_jobs=None,
+                 logger=True):
 
+        if featurizers and preset:
+            raise AutomatminerError("Featurizers and preset were both set. "
+                                    "Please either use a preset ('best', 'all',"
+                                    " 'fast') or set featurizers manually.")
+
+        self.preset = "best" if preset is None else preset
         self._logger = self.get_logger(logger)
         self.featurizers = featurizers
         self.exclude = exclude if exclude else []
@@ -374,7 +386,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 if featurizer_type in df.columns:
                     featurizer_set = _supported_featurizer_types[featurizer_type]
                     self.featurizers[featurizer_type] = \
-                        featurizer_set(exclude=self.exclude).best
+                        getattr(featurizer_set(exclude=self.exclude),
+                                self.preset)
                 else:
                     self.logger.info("Featurizer type {} not in the dataframe "
                                      "to be fitted. Skipping...".

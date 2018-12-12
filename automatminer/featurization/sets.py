@@ -53,6 +53,12 @@ class FeaturizerSet:
         raise NotImplementedError("This featurizer set must return a set of "
                                   "all featurizers")
 
+    @property
+    def fast(self):
+        """Fast featurizers available for this featurization type."""
+        raise NotImplementedError("This featurizer set must return a set of "
+                                  "fast featurizers")
+
     def _get_featurizers(self, featurizers):
         """Utility function for getting featurizers not in the ignore list."""
         return [f for f in featurizers
@@ -114,6 +120,12 @@ class AllFeaturizers(FeaturizerSet):
     def best(self):
         featurizers = [f.best for f in self._featurizer_sets.values()]
         return self._get_featurizers(featurizers)
+
+    @property
+    def fast(self):
+        featurizers = [f.fast for f in self._featurizer_sets.values()]
+        return self._get_featurizers(featurizers)
+
 
 
 class CompositionFeaturizers(FeaturizerSet):
@@ -325,6 +337,7 @@ class DOSFeaturizers(FeaturizerSet):
             dosf.Hybridization()
         ]
 
+
     @property
     def all(self):
         """List of all density of states based featurizers."""
@@ -332,6 +345,10 @@ class DOSFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
+        return self._get_featurizers(self._best_featurizers)
+
+    @property
+    def fast(self):
         return self._get_featurizers(self._best_featurizers)
 
 
@@ -363,4 +380,8 @@ class BSFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
+        return self._get_featurizers(self._best_featurizers)
+
+    @property
+    def fast(self):
         return self._get_featurizers(self._best_featurizers)

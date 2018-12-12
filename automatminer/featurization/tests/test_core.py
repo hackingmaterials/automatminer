@@ -12,6 +12,8 @@ from matminer.featurizers.structure import GlobalSymmetryFeatures, \
     DensityFeatures
 
 from automatminer.featurization.core import AutoFeaturizer
+from automatminer.featurization.sets import StructureFeaturizers, \
+    CompositionFeaturizers
 
 test_dir = os.path.dirname(__file__)
 
@@ -241,6 +243,16 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         # BranchPointEnergy:
         self.assertAlmostEqual(df["branch_point_energy"][0], 5.7677, 4)
+
+    def test_presets(self):
+        target = "K_VRH"
+        df = copy.copy(self.test_df)
+        af = AutoFeaturizer(preset="fast")
+        df = af.fit_transform(df, target)
+        known_feats = CompositionFeaturizers().fast + \
+                      StructureFeaturizers().fast
+        n_featurizers_total = sum([len(fl) for fl in af.featurizers.values()])
+        self.assertEqual(n_featurizers_total, len(known_feats))
 
     def test_transferability(self):
         """
