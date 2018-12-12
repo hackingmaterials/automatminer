@@ -139,7 +139,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         df = copy.copy(self.test_df.iloc[:self.limit])
         target = "K_VRH"
 
-        af = AutoFeaturizer()
+        af = AutoFeaturizer(use_metaselector=True)
         af.fit(df, target)
 
         self.assertIsNotNone(af.metaselector)
