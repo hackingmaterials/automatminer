@@ -140,6 +140,7 @@ class CompositionFeaturizers(FeaturizerSet):
             cf.AtomicOrbitals(),
             cf.ElementProperty.from_preset("matminer"),
             cf.ElementProperty.from_preset("magpie"),
+            cf.ElementProperty.from_preset("deml"),
             cf.ElementFraction(),
             cf.Stoichiometry(),
             cf.TMetalFraction(),
@@ -220,6 +221,11 @@ class StructureFeaturizers(FeaturizerSet):
 
         self._slow_featurizers = [
             sf.SiteStatsFingerprint.from_preset('CrystalNNFingerprint_ops'),
+            sf.SiteStatsFingerprint.from_preset("BondLength-dejong2016"),
+            sf.SiteStatsFingerprint.from_preset("BondAngle-dejong2016"),
+            sf.SiteStatsFingerprint.from_preset("Composition-dejong2016_SD"),
+            sf.SiteStatsFingerprint.from_preset("OPSiteFingerprint"),
+
             sf.ChemicalOrdering(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
