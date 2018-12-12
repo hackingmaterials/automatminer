@@ -20,3 +20,5 @@ omit =
     */*.txt
     */setup.py
     */__init__.py
+    */automatminer.egg-info/*
+    */docs/*
