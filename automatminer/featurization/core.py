@@ -210,7 +210,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
     """
 
-    def __init__(self, featurizers=None, exclude=None, use_metaselector=True,
+    def __init__(self, featurizers=None, exclude=None, use_metaselector=False,
                  max_na_frac=0.05, ignore_cols=None, ignore_errors=True,
                  drop_inputs=True, guess_oxistates=True, multiindex=False,
                  n_jobs=None, logger=True):
