@@ -47,6 +47,7 @@ class LoggableMixin:
             if not logger.handlers:
                 initialize_null_logger(logger_base_name)
 
+        logger.setLevel(logging.INFO)
         return logger
 
 

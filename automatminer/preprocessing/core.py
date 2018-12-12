@@ -501,6 +501,8 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         """
         if regression_or_classification(df[target_key]) == "classification":
             # Can't calculate correlation matrix for categorical variables
+            self.logger.info("Correlation matrix for categorical target is "
+                             "invalid. Skipping removing correlated features.")
             return df
         else:
             # We can remove correlated features

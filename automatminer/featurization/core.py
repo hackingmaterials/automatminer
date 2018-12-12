@@ -3,6 +3,7 @@ from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     StructureToComposition
 from matminer.featurizers.conversions import ConversionFeaturizer
 from matminer.featurizers.base import BaseFeaturizer
+from matminer.featurizers.function import FunctionFeaturizer
 
 from automatminer.utils.package_tools import check_fitted, set_fitted
 from automatminer.base import DataframeTransformer, LoggableMixin
@@ -216,7 +217,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
     """
 
     def __init__(self, preset=None, featurizers=None, exclude=None,
-                 use_metaselector=False, max_na_frac=0.05,
+                 use_metaselector=False, functionalize=False, max_na_frac=0.05,
                  ignore_cols=None, ignore_errors=True, drop_inputs=True,
                  guess_oxistates=True, multiindex=False, n_jobs=None,
                  logger=True):
@@ -231,6 +232,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.featurizers = featurizers
         self.exclude = exclude if exclude else []
         self.use_metaselector = use_metaselector
+        self.functionalize = functionalize
         self.max_na_percent = max_na_frac
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
@@ -315,6 +317,16 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             else:
                 self.logger.info("Featurizer type {} not in the dataframe. "
                                  "Skipping...".format(featurizer_type))
+        if self.functionalize:
+            ff = FunctionFeaturizer()
+            cols = df.columns.tolist()
+            for ft in self.featurizers.keys():
+                if ft in cols:
+                    cols.pop(ft)
+            df = ff.fit_featurize_dataframe(df, cols,
+                                            ignore_errors=self.ignore_errors,
+                                            multiindex=self.multiindex)
+
         return df
 
     @set_fitted
@@ -517,7 +529,7 @@ if __name__ == "__main__":
 
     print(get_available_datasets())
     df = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"}).iloc[:20]
-    af = AutoFeaturizer()
+    af = AutoFeaturizer(functionalize=True)
     print(df)
     df = af.fit_transform(df, "K_VRH")
     print(df.describe())
