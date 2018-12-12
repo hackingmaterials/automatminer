@@ -503,11 +503,8 @@ if __name__ == "__main__":
     from matminer.datasets.dataset_retrieval import load_dataset, get_available_datasets
 
     print(get_available_datasets())
-    # df = load_dataset("steel_strength").rename(columns={"formula": "composition"})[["yield strength", "composition"]]
-    # af = AutoFeaturizer()
-    # print(df)
-    # df = af.fit_transform(df, "yield strength")
-
-    from pymatgen import Structure
-    # s = Structure()
-    # s.
+    df = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"}).iloc[:20]
+    af = AutoFeaturizer()
+    print(df)
+    df = af.fit_transform(df, "K_VRH")
+    print(df.describe())

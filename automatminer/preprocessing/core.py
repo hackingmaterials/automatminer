@@ -499,42 +499,45 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         Returns (pandas.DataFrame):
             the dataframe with the highly cross-correlated features removed.
         """
-        corr = abs(df.corr())
-        #todo: needs test for classification when target key not in corr matrix
-        if target_key in corr:
+        if regression_or_classification(df[target_key]) == "classification":
+            # Can't calculate correlation matrix for categorical variables
+            return df
+        else:
+            # We can remove correlated features
+            corr = abs(df.corr())
             corr = corr.sort_values(by=target_key)
-        rm_feats = []
-        for feature in corr.columns:
-            if feature == target_key:
-                continue
-            for idx, corval in zip(corr.index, corr[feature]):
-                if np.isnan(corval):
-                    break
-                if idx == feature or idx in rm_feats:
+            rm_feats = []
+            for feature in corr.columns:
+                if feature == target_key:
                     continue
-                else:
-                    if corval >= R_max:
-                        if corr.loc[idx, target_key] > corr.loc[
-                            feature, target_key]:
-                            removed_feat = feature
-                        else:
-                            removed_feat = idx
-                        if removed_feat not in rm_feats:
-                            rm_feats.append(removed_feat)
-                            self.logger.debug(
-                                '"{}" correlates strongly with '
-                                '"{}"'.format(feature, idx))
-                            self.logger.debug(
-                                'removing "{}"...'.format(removed_feat))
-                        if removed_feat == feature:
-                            break
-        if len(rm_feats) > 0:
-            df = df.drop(rm_feats, axis=1)
-            self.logger.info(
-                'These {} features were removed due to cross '
-                'correlation with the current features more than '
-                '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
-        return df
+                for idx, corval in zip(corr.index, corr[feature]):
+                    if np.isnan(corval):
+                        break
+                    if idx == feature or idx in rm_feats:
+                        continue
+                    else:
+                        if corval >= R_max:
+                            if corr.loc[idx, target_key] > corr.loc[
+                                feature, target_key]:
+                                removed_feat = feature
+                            else:
+                                removed_feat = idx
+                            if removed_feat not in rm_feats:
+                                rm_feats.append(removed_feat)
+                                self.logger.debug(
+                                    '"{}" correlates strongly with '
+                                    '"{}"'.format(feature, idx))
+                                self.logger.debug(
+                                    'removing "{}"...'.format(removed_feat))
+                            if removed_feat == feature:
+                                break
+            if len(rm_feats) > 0:
+                df = df.drop(rm_feats, axis=1)
+                self.logger.info(
+                    'These {} features were removed due to cross '
+                    'correlation with the current features more than '
+                    '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
+            return df
 
 
 if __name__ == "__main__":
