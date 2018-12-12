@@ -1,9 +1,16 @@
 import os
+import warnings
 
 import matplotlib.pyplot as plt
-from skater.core.explanations import Interpretation
-from skater.model import InMemoryModel
 from matminer.datasets import load_dataset
+try:
+    from skater.core.explanations import Interpretation
+    from skater.model import InMemoryModel
+except ImportError:
+    warnings.warn("skater package not found. Please install skater to use the "
+                  "Analytics modeule/")
+    Interpretation = None
+    InMemoryModel = None
 
 from automatminer.pipeline import MatPipe
 
