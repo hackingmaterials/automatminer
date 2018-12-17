@@ -1,6 +1,4 @@
 from __future__ import unicode_literals
-import logging
-import numpy
 import keras.models
 import keras.legacy.layers
 import keras.regularizers
@@ -21,7 +19,7 @@ _regressor_modes = {'regressor', 'regression', 'regress'}
 
 class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin, sklearn.base.ClassifierMixin):
     """Wrapper for Keras feed-forward neural network for classification to enable scikit-learn grid search"""
-    def __init__(self, hidden_layer_sizes=(100,), dropout=0.5, show_accuracy=True, batch_spec=((400, 1024), (100, -1)), activation="sigmoid", input_noise=0., use_maxout=False, use_maxnorm=False, learning_rate=0.001, stop_early=False, type="regression"):
+    def __init__(self, hidden_layer_sizes=(100,), dropout=0.5, show_accuracy=True, batch_spec=((400, 1024), (100, -1)), activation="sigmoid", input_noise=0., use_maxout=False, use_maxnorm=False, learning_rate=0.001, stop_early=False, mode="regression"):
         self.hidden_layer_sizes = hidden_layer_sizes
         self.dropout = dropout
         self.show_accuracy = show_accuracy
@@ -39,10 +37,10 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin, sklearn
         self.model_ = None
         self.estimator = None
         self.classifier = None
-        if type in _classifier_modes:
-            self.type = "classification"
+        if mode in _classifier_modes:
+            self.mode = "classification"
         else:
-            self.type = "regression"
+            self.mode = "regression"
 
     def getModel(self):
         return self.model_
@@ -86,7 +84,7 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin, sklearn
         model.add(keras.layers.Activation(self.activation))
 
         optimizer = keras.optimizers.Adam(lr=self.learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-8)
-        if self.type == "classification":
+        if self.mode == "classification":
             model.compile(loss="binary_crossentropy", optimizer="adamax")
         else:
             model.compile(loss="mse", optimizer=optimizer)
@@ -110,7 +108,7 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin, sklearn
             model.fit(X, y, nb_epoch=5, batch_size=X.shape[0], show_accuracy=self.show_accuracy)
 
         self.model_ = model
-        if self.type == "regression":
+        if self.mode == "regression":
             self.estimator = KerasRegressor(build_fn=self.getModel, epochs=self.batch_spec[0][0], batch_size=self.batch_spec[0][1], verbose=0)
             self.estimator.fit(X, y)
         else:
@@ -118,20 +116,20 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin, sklearn
             self.classifier.fit(X, y)
 
     def predict(self, X):
-        if self.type == "classification":
+        if self.mode == "classification":
             return self.classifier.predict(X)
         else:
             return self.estimator.predict(X)
 
     def predict_proba(self, X):
-        if self.type == "classification":
+        if self.mode == "classification":
             return self.classifier.predict_proba(X)
         else:
             return self.estimator.predict(X)
 
     def score(self, X, y):
         #Set score for regression and classify
-        if self.type == "classification":
+        if self.mode == "classification":
             return sklearn.metrics.accuracy_score(y, self.predict(X))
         else:
             return sklearn.metrics.r2_score(y, self.predict(X))
