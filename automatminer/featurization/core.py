@@ -220,7 +220,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                  use_metaselector=False, functionalize=False, max_na_frac=0.05,
                  ignore_cols=None, ignore_errors=True, drop_inputs=True,
                  guess_oxistates=True, multiindex=False, n_jobs=None,
-                 logger=True):
+                 logger=True, composition_col="composition", structure_col="structure",
+                 bandstructure="bandstructure", dos="dos"):
 
         if featurizers and preset:
             raise AutomatminerError("Featurizers and preset were both set. "
@@ -244,6 +245,10 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.features = []
         self.auto_featurizer = True if self.featurizers is None else False
         self.metaselector = None
+        self.composition_col = composition_col
+        self.structure_col = structure_col
+        self.bandstructure = bandstructure
+        self.dos = dos
 
     @set_fitted
     def fit(self, df, target):
@@ -415,13 +420,13 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 for ftype in self.featurizers:
                     # Normalize the names from the aliases
                     if ftype in _composition_aliases:
-                        self.featurizers["composition"] = self.featurizers.pop(ftype)
+                        self.featurizers[self.composition_col] = self.featurizers.pop(ftype)
                     elif ftype in _structure_aliases:
-                        self.featurizers["structure"] = self.featurizers.pop(ftype)
+                        self.featurizers[self.structure_col] = self.featurizers.pop(ftype)
                     elif ftype in _bandstructure_aliases:
-                        self.featurizers["bandstructure"] = self.featurizers.pop(ftype)
+                        self.featurizers[self.bandstructure] = self.featurizers.pop(ftype)
                     elif ftype in _dos_aliases:
-                        self.featurizers["dos"] = self.featurizers.pop(ftype)
+                        self.featurizers[self.dos] = self.featurizers.pop(ftype)
                     else:
                         raise ValueError(
                             "The featurizers dict key {} is not a valid "
