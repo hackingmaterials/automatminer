@@ -5,8 +5,7 @@ Top level preprocessing classes.
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
-from sklearn.exceptions import NotFittedError
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import LabelEncoder
 
 from automatminer.utils.package_tools import AutomatminerError, compare_columns, \
     check_fitted, set_fitted
@@ -312,31 +311,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.dropped_samples = None
         self.is_fit = False
         self.scaler_obj = None
-
-
-    # def scale_df(self, df, target):
-    #     print("2a", df.shape)
-    #     if target in df.columns:
-    #         y = df[target]
-    #         X = df.drop(columns=[target])
-    #     else:
-    #         X = df
-    #     print("2b", X.shape)
-    #     if not self.scaler_obj:
-    #         self.scaler_obj = StandardScaler().fit(X)
-    #     Xmatrix = self.scaler_obj.transform(X)
-    #     X = pd.DataFrame(columns=X.columns, data=Xmatrix)
-    #     print("2c", X.shape)
-    #
-    #     if target in df.columns:
-    #         df = pd.concat([y.reset_index(drop=True), X], axis=1)
-    #         print(df)
-    #         print(y.shape)
-    #         print("2da", df.shape)
-    #         return df
-    #     else:
-    #         print("2db", X.shape)
-    #         return X
 
 
 class FeatureReducer(DataframeTransformer, LoggableMixin):
