@@ -11,7 +11,7 @@ __authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
 logger_base_name = "automatminer"
 
 
-class LoggableMixin(object):
+class LoggableMixin:
     """A mixin class for easy logging (or absence of it)."""
 
     @property
@@ -26,19 +26,20 @@ class LoggableMixin(object):
             raise AttributeError("Loggable object has no _logger attribute!")
 
     @staticmethod
-    def get_logger(logger):
+    def get_logger(logger, level=None):
         """Set the class logger.
         Args:
             logger (Logger, bool): A custom logger object to use for logging.
-                Alternatively, if set to True, the default automatminer logger will
-                be used. If set to False, then no logging will occur.
+                Alternatively, if set to True, the default automatminer logger
+                will be used. If set to False, then no logging will occur.
+            level (int): The log level. For example logging.DEBUG.
         """
         # need comparison to True and False to avoid overwriting Logger objects
         if logger is True:
             logger = logging.getLogger(logger_base_name)
 
             if not logger.handlers:
-                initialize_logger(logger_base_name)
+                initialize_logger(logger_base_name, level=level)
 
         elif logger is False:
             logger = logging.getLogger(logger_base_name + "_null")
@@ -46,6 +47,7 @@ class LoggableMixin(object):
             if not logger.handlers:
                 initialize_null_logger(logger_base_name)
 
+        logger.setLevel(logging.INFO)
         return logger
 
 
@@ -69,7 +71,8 @@ class DataframeTransformer:
             (DataFrameTransformer) This object (self)
 
         """
-        raise NotImplementedError("{} has no fit method implemented!".format(self.__class__.__name__))
+        raise NotImplementedError("{} has no fit method implemented!".format(
+            self.__class__.__name__))
 
     def transform(self, df, target):
         """
@@ -83,7 +86,8 @@ class DataframeTransformer:
             (pandas.DataFrame): The transformed dataframe.
 
         """
-        raise NotImplementedError("{} has no transform method implemented!".format(self.__class__.__name__))
+        raise NotImplementedError("{} has no transform method implemented!".
+                                  format(self.__class__.__name__))
 
     def fit_transform(self, df, target):
         """
@@ -129,7 +133,8 @@ class AutoMLAdaptor(DataframeTransformer):
                 target property.
 
         """
-        raise NotImplementedError("{} has no predict method implemented!".format(self.__class__.__name__))
+        raise NotImplementedError("{} has no predict method implemented!".
+                                  format(self.__class__.__name__))
 
     @property
     def features(self):
@@ -142,7 +147,8 @@ class AutoMLAdaptor(DataframeTransformer):
         try:
             return self._features
         except AttributeError:
-            raise NotImplementedError("{} has no features attr implemented!".format(self.__class__.__name__))
+            raise NotImplementedError("{} has no features attr implemented!".
+                                      format(self.__class__.__name__))
 
     @property
     def ml_data(self):
@@ -156,7 +162,8 @@ class AutoMLAdaptor(DataframeTransformer):
         try:
             return self._ml_data
         except AttributeError:
-            raise NotImplementedError("{} has no ML data attr implemented!".format(self.__class__.__name__))
+            raise NotImplementedError("{} has no ML data attr implemented!".
+                                      format(self.__class__.__name__))
 
     @property
     def best_pipeline(self):
@@ -170,7 +177,8 @@ class AutoMLAdaptor(DataframeTransformer):
         try:
             return self._best_pipeline
         except AttributeError:
-            raise NotImplementedError("{} has no best models attr implemented!".format(self.__class__.__name__))
+            raise NotImplementedError("{} has no best models attr implemented!".
+                                      format(self.__class__.__name__))
 
     @property
     def backend(self):
@@ -184,4 +192,6 @@ class AutoMLAdaptor(DataframeTransformer):
         try:
             return self._backend
         except AttributeError:
-            raise NotImplementedError("{} has no backend object attr implemented!".format(self.__class__.__name__))
+            raise NotImplementedError(
+                "{} has no backend object attr implemented!".format(
+                    self.__class__.__name__))

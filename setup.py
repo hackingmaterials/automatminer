@@ -9,7 +9,7 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 if __name__ == "__main__":
     setup(
         name='automatminer',
-        version='2018.11.21_beta',
+        version='2018.12.11_beta',
         description='automated machine learning for materials science',
         long_description=open(os.path.join(module_dir, 'README.md')).read(),
         url='https://github.com/hackingmaterials/automatminer',
@@ -29,7 +29,7 @@ if __name__ == "__main__":
                      'Operating System :: OS Independent',
                      'Topic :: Other/Nonlisted Topic',
                      'Topic :: Scientific/Engineering'],
-        test_suite='nose.collector',
+        test_suite='',
         tests_require=['nose'],
         scripts=[]
     )

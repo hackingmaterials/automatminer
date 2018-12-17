@@ -7,28 +7,11 @@ import pickle
 
 import numpy as np
 
+from automatminer.configs import default_config
 from automatminer.base import LoggableMixin, DataframeTransformer
-from automatminer.featurization import AutoFeaturizer
-from automatminer.preprocessing import DataCleaner, FeatureReducer
-from automatminer.automl.adaptors import TPOTAdaptor
 from automatminer.utils.ml_tools import regression_or_classification
 from automatminer.utils.package_tools import check_fitted, set_fitted, \
     return_attrs_recursively
-
-
-performance_config = {}
-default_config = {"learner": TPOTAdaptor(max_time_mins=120),
-                  "reducer": FeatureReducer(),
-                  "autofeaturizer": AutoFeaturizer(),
-                  "cleaner": DataCleaner()}
-fast_config = {"learner": TPOTAdaptor(max_time_mins=30, population_size=50),
-               "reducer": FeatureReducer(reducers=('corr', 'tree')),
-               "autofeaturizer": AutoFeaturizer(),
-               "cleaner": DataCleaner()}
-debug_config = {"learner": TPOTAdaptor(max_time_mins=1, population_size=10),
-                "reducer": FeatureReducer(reducers=('corr',)),
-                "autofeaturizer": AutoFeaturizer(),
-                "cleaner": DataCleaner()}
 
 
 class MatPipe(DataframeTransformer, LoggableMixin):
@@ -55,7 +38,8 @@ class MatPipe(DataframeTransformer, LoggableMixin):
     Note: This pipeline should function the same regardless of which
     "component" classes it is made out of. E.g., he steps for each method should
     remain the same whether using the TPOTAdaptor class as the learner or
-    using an AutoKerasAdaptor class as the learner.
+    using an AutoKerasAdaptor class as the learner. To use a preset config,
+    import a config from automatminer.configs and do MatPipe(**config).
     ----------------------------------------------------------------------------
 
     Examples:
@@ -70,9 +54,10 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         predictions = pipe.predict(unknown_df, "target_property")
 
     Args:
-        persistence_lvl (int): Persistence level of 0 saves nothing. 1 saves
-            intermediate dataframes and final dataframes. 2 saves all dataframes
-            and all objects used to create the pipeline, and auto-saves a digest
+        logger (Logger, bool): A custom logger object to use for logging.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
+        log_level (int): The log level. For example logging.DEBUG.
         autofeaturizer (AutoFeaturizer): The autofeaturizer object used to
             automatically decorate the dataframe with descriptors.
         cleaner (DataCleaner): The data cleaner object used to get a
@@ -91,10 +76,10 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             fit before being used to predict data.
     """
 
-    def __init__(self, logger=True, autofeaturizer=None,
+    def __init__(self, logger=True, log_level=None, autofeaturizer=None,
                  cleaner=None, reducer=None, learner=None):
 
-        self._logger = self.get_logger(logger)
+        self._logger = self.get_logger(logger, level=log_level)
         self.autofeaturizer = autofeaturizer if autofeaturizer else \
             default_config['autofeaturizer']
         self.cleaner = cleaner if cleaner else default_config["cleaner"]
@@ -268,8 +253,6 @@ class MatPipe(DataframeTransformer, LoggableMixin):
 
         Args:
             filename (str): The filename.
-            fmt (str): The format to save the pipeline in. Valid choices are
-                "json", "txt".
 
         Returns:
             digeststr (str): The formatted pipeline digest.
@@ -331,14 +314,6 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                             "retrain!). Backend was serialzed as only the top "
                             "model, not the full automl backend. ")
         return pipe
-
-
-def MatPipePerform(**kwargs):
-    return MatPipe(**kwargs, **performance_config)
-
-
-def MatPipeFast(**kwargs):
-    return MatPipe(**kwargs, **fast_config)
 
 
 if __name__ == "__main__":

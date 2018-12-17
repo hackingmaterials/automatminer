@@ -86,6 +86,14 @@ class TestPreprocess(unittest.TestCase):
         df2 = fr.transform(df2, target)
         self.assertListEqual(df.columns.tolist(), df2.columns.tolist())
 
+        # test classification with corr matrix (no errors)
+        df_class = self.test_df
+        df_class[target] = ["semiconductor" if 0.0 < g < 3.0 else "nonmetal"
+                            for g in df_class[target]]
+        df_class = fr.fit_transform(df_class, target)
+        self.assertEqual(df_class.shape[0], 200)
+        self.assertEqual(df_class.shape[1], 84)
+
 
 class TestFeatureReduction(unittest.TestCase):
 

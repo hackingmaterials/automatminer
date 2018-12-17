@@ -3,4 +3,3 @@ xlrd==1.1.0
 xgboost==0.72.1
 tpot==0.9.5
 skrebate==0.6
-skater==1.1.2
