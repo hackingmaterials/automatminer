@@ -277,6 +277,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         structure_col, bandstruct_col, and dos_col, and checks that fit_and_transform()
         works correctly with the attributes.
         """
+        # Tests fit_transform from original unit tests
         self.test_featurize_composition()
         self.test_featurize_structure()
 
@@ -294,7 +295,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         df = af.fit_transform(df, target)
         self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
         self.assertTrue("composition" not in df.columns)
-
 
         # Modification of test_featurize_structure
         target = "K_VRH"
