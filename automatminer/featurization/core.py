@@ -247,8 +247,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.metaselector = None
         self.composition_col = composition_col
         self.structure_col = structure_col
-        self.bandstructure = bandstructure
-        self.dos = dos
+        self.bandstruct_col = bandstructure
+        self.dos_col = dos
 
     @set_fitted
     def fit(self, df, target):
@@ -424,9 +424,9 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     elif ftype in _structure_aliases:
                         self.featurizers[self.structure_col] = self.featurizers.pop(ftype)
                     elif ftype in _bandstructure_aliases:
-                        self.featurizers[self.bandstructure] = self.featurizers.pop(ftype)
+                        self.featurizers[self.bandstruct_col] = self.featurizers.pop(ftype)
                     elif ftype in _dos_aliases:
-                        self.featurizers[self.dos] = self.featurizers.pop(ftype)
+                        self.featurizers[self.dos_col] = self.featurizers.pop(ftype)
                     else:
                         raise ValueError(
                             "The featurizers dict key {} is not a valid "
@@ -450,7 +450,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 ready for featurization.
         """
         # todo: Make the following conversions more robust (no lazy [0] type checking)
-        if featurizer_type == "composition":
+        if featurizer_type == self.composition_col:
             # Convert formulas to composition objects
             if isinstance(df[featurizer_type].iloc[0], str):
                 self.logger.info("Compositions detected as strings. Attempting "
@@ -493,7 +493,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             df = dto.featurize_dataframe(df, featurizer_type)
 
             # Decorate with oxidstates
-            if featurizer_type == "structure" and self.guess_oxistates:
+            if featurizer_type == self.structure_col and self.guess_oxistates:
                 self.logger.info("Guessing oxidation states of structures, as "
                                  "they were not present in input.")
                 sto = StructureToOxidStructure(target_col_id=featurizer_type,
@@ -518,13 +518,13 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Contains composition column if desired
         """
-        if "structure" in df.columns and "composition" not in df.columns:
+        if self.structure_col in df.columns and self.composition_col not in df.columns:
             if self.auto_featurizer or (set(_composition_aliases)
                                         & set(self.featurizers.keys())):
-                df = self._tidy_column(df, "structure")
+                df = self._tidy_column(df, self.structure_col)
                 struct2comp = StructureToComposition(
-                    target_col_id="composition", overwrite_data=False)
-                df = struct2comp.featurize_dataframe(df, "structure")
+                    target_col_id=self.composition_col, overwrite_data=False)
+                df = struct2comp.featurize_dataframe(df, self.structure_col)
                 self.logger.debug("Adding compositions from structures.")
         return df
 
