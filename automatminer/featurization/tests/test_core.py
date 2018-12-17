@@ -281,7 +281,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.test_featurize_composition()
         self.test_featurize_structure()
 
-        # Modification of test_featurize_composition
+        # Modification of test_featurize_composition with AutoFeaturizer parameter
         target = "K_VRH"
         df = copy.copy(self.test_df[['composition', target]].iloc[:self.limit])
         af = AutoFeaturizer(composition_col="composition")
@@ -296,7 +296,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
         self.assertTrue("composition" not in df.columns)
 
-        # Modification of test_featurize_structure
+        # Modification of test_featurize_structure with AutoFeaturizer parameter
         target = "K_VRH"
         df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
         af = AutoFeaturizer(structure_col="structure")
@@ -314,10 +314,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("HOMO_character" in df.columns)
         self.assertTrue("composition" not in df.columns)
         self.assertTrue("structure" not in df.columns)
-
-
-
-
 
 if __name__ == '__main__':
     unittest.main()
