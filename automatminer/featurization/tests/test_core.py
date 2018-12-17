@@ -271,6 +271,53 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertAlmostEqual(df2[target].iloc[0], 111.788114, places=5)
         self.assertAlmostEqual(df2["minimum X"].iloc[1], 1.36, places=2)
 
+    def test_column_attr(self):
+        """
+        Test that the autofeaturizer object correctly takes in composition_col,
+        structure_col, bandstruct_col, and dos_col, and checks that fit_and_transform()
+        works correctly with the attributes.
+        """
+        self.test_featurize_composition()
+        self.test_featurize_structure()
+
+        # Modification of test_featurize_composition
+        target = "K_VRH"
+        df = copy.copy(self.test_df[['composition', target]].iloc[:self.limit])
+        af = AutoFeaturizer(composition_col="composition")
+        df = af.fit_transform(df, target)
+        self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
+        self.assertTrue("composition" not in df.columns)
+
+        df = self.test_df[["composition", target]].iloc[:self.limit]
+        df["composition"] = [Composition(s) for s in df["composition"]]
+        af = AutoFeaturizer(composition_col="composition")
+        df = af.fit_transform(df, target)
+        self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
+        self.assertTrue("composition" not in df.columns)
+
+
+        # Modification of test_featurize_structure
+        target = "K_VRH"
+        df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
+        af = AutoFeaturizer(structure_col="structure")
+        df = af.fit_transform(df, target)
+        self.assertTrue("dimensionality" in df.columns)
+        self.assertTrue("HOMO_character" in df.columns)
+        self.assertTrue("composition" not in df.columns)
+        self.assertTrue("structure" not in df.columns)
+
+        df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
+        df["structure"] = [s.as_dict() for s in df["structure"]]
+        af = AutoFeaturizer(structure_col="structure")
+        df = af.fit_transform(df, target)
+        self.assertTrue("dimensionality" in df.columns)
+        self.assertTrue("HOMO_character" in df.columns)
+        self.assertTrue("composition" not in df.columns)
+        self.assertTrue("structure" not in df.columns)
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
