@@ -1,0 +1,206 @@
+2018-11-30 12:17:34 INFO     Featurizer type bandstructure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:17:34 INFO     Featurizer type dos not in the dataframeto be fitted. Skipping...
+2018-11-30 12:17:34 INFO     Compositions detected as strings. Attempting conversion to Composition objects...
+2018-11-30 12:17:34 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:17:34 INFO     Fit AtomicOrbitals to 5 samples in dataframe.
+2018-11-30 12:17:34 INFO     Fit ElementFraction to 5 samples in dataframe.
+2018-11-30 12:17:34 INFO     Fit Stoichiometry to 5 samples in dataframe.
+2018-11-30 12:17:34 INFO     Fit TMetalFraction to 5 samples in dataframe.
+2018-11-30 12:17:34 INFO     Fit BandCenter to 5 samples in dataframe.
+2018-11-30 12:17:34 INFO     Fit ValenceOrbital to 5 samples in dataframe.
+2018-11-30 12:17:34 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:17:35 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:17:35 INFO     Fit DensityFeatures to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit GlobalSymmetryFeatures to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit EwaldEnergy to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit SiteStatsFingerprint to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit ChemicalOrdering to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit StructuralHeterogeneity to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit MaximumPackingEfficiency to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit XRDPowderPattern to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit Dimensionality to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit OrbitalFieldMatrix to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:17:35 INFO     Fit AtomicOrbitals to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit ElementFraction to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit Stoichiometry to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit TMetalFraction to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit BandCenter to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit ValenceOrbital to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:17:35 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:17:35 INFO     Fit DensityFeatures to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit GlobalSymmetryFeatures to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit EwaldEnergy to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit SiteStatsFingerprint to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit ChemicalOrdering to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit StructuralHeterogeneity to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit MaximumPackingEfficiency to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit XRDPowderPattern to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit Dimensionality to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Fit OrbitalFieldMatrix to 5 samples in dataframe.
+2018-11-30 12:17:35 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:17:37 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:17:37 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:17:47 INFO     Featurizer type composition not in the dataframeto be fitted. Skipping...
+2018-11-30 12:17:47 INFO     Featurizer type structure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:17:47 INFO     bandstructure detected as strings. Attempting conversion to bandstructure objects...
+2018-11-30 12:17:47 INFO     Fit BandFeaturizer to 1 samples in dataframe.
+2018-11-30 12:17:47 INFO     Fit BranchPointEnergy to 1 samples in dataframe.
+2018-11-30 12:17:47 INFO     dos detected as strings. Attempting conversion to dos objects...
+2018-11-30 12:17:48 INFO     Fit DOSFeaturizer to 1 samples in dataframe.
+2018-11-30 12:17:48 INFO     Fit DopingFermi to 1 samples in dataframe.
+2018-11-30 12:17:48 INFO     Fit Hybridization to 1 samples in dataframe.
+2018-11-30 12:17:48 INFO     bandstructure detected as strings. Attempting conversion to bandstructure objects...
+2018-11-30 12:17:51 INFO     dos detected as strings. Attempting conversion to dos objects...
+2018-11-30 12:17:55 INFO     Based on metafeatures of the dataset, these featurizers are excluded for returning nans more than the max_na_percent of 0.05: ['YangSolidSolution', 'ElectronAffinity', 'TMetalFraction', 'OxidationStates', 'ElectronegativityDiff', 'Miedema', 'CationProperty', 'IonProperty']
+2018-11-30 12:17:56 INFO     Featurizer type structure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:17:56 INFO     Featurizer type bandstructure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:17:56 INFO     Featurizer type dos not in the dataframeto be fitted. Skipping...
+2018-11-30 12:17:56 INFO     Compositions detected as strings. Attempting conversion to Composition objects...
+2018-11-30 12:17:56 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:17:56 INFO     Fit AtomicOrbitals to 5 samples in dataframe.
+2018-11-30 12:17:56 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:17:56 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:17:56 INFO     Fit ElementFraction to 5 samples in dataframe.
+2018-11-30 12:17:56 INFO     Fit Stoichiometry to 5 samples in dataframe.
+2018-11-30 12:17:56 INFO     Fit BandCenter to 5 samples in dataframe.
+2018-11-30 12:17:56 INFO     Fit ValenceOrbital to 5 samples in dataframe.
+2018-11-30 12:17:56 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:17:57 INFO     Based on metafeatures of the dataset, these featurizers are excluded for returning nans more than the max_na_percent of 0.05: ['YangSolidSolution', 'ElectronAffinity', 'TMetalFraction', 'OxidationStates', 'ElectronegativityDiff', 'Miedema', 'CationProperty', 'IonProperty']
+2018-11-30 12:17:58 INFO     Featurizer type structure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:17:58 INFO     Featurizer type bandstructure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:17:58 INFO     Featurizer type dos not in the dataframeto be fitted. Skipping...
+2018-11-30 12:17:58 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:17:58 INFO     Fit AtomicOrbitals to 5 samples in dataframe.
+2018-11-30 12:17:58 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:17:58 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:17:58 INFO     Fit ElementFraction to 5 samples in dataframe.
+2018-11-30 12:17:58 INFO     Fit Stoichiometry to 5 samples in dataframe.
+2018-11-30 12:17:58 INFO     Fit BandCenter to 5 samples in dataframe.
+2018-11-30 12:17:58 INFO     Fit ValenceOrbital to 5 samples in dataframe.
+2018-11-30 12:17:58 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:18:00 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:00 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:18:01 INFO     Based on metafeatures of the dataset, these featurizers are excluded for returning nans more than the max_na_percent of 0.05: ['YangSolidSolution', 'ElectronAffinity', 'TMetalFraction', 'OxidationStates', 'ElectronegativityDiff', 'Miedema', 'CationProperty', 'IonProperty']
+2018-11-30 12:18:01 INFO     Featurizer type bandstructure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:18:01 INFO     Featurizer type dos not in the dataframeto be fitted. Skipping...
+2018-11-30 12:18:01 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:18:01 INFO     Fit AtomicOrbitals to 5 samples in dataframe.
+2018-11-30 12:18:01 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:18:01 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:18:01 INFO     Fit ElementFraction to 5 samples in dataframe.
+2018-11-30 12:18:01 INFO     Fit Stoichiometry to 5 samples in dataframe.
+2018-11-30 12:18:01 INFO     Fit BandCenter to 5 samples in dataframe.
+2018-11-30 12:18:01 INFO     Fit ValenceOrbital to 5 samples in dataframe.
+2018-11-30 12:18:01 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:01 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:18:02 INFO     Fit DensityFeatures to 5 samples in dataframe.
+2018-11-30 12:18:02 INFO     Fit GlobalSymmetryFeatures to 5 samples in dataframe.
+2018-11-30 12:18:02 INFO     Fit EwaldEnergy to 5 samples in dataframe.
+2018-11-30 12:18:02 INFO     Fit SiteStatsFingerprint to 5 samples in dataframe.
+2018-11-30 12:18:02 INFO     Fit ChemicalOrdering to 5 samples in dataframe.
+2018-11-30 12:18:02 INFO     Fit StructuralHeterogeneity to 5 samples in dataframe.
+2018-11-30 12:18:02 INFO     Fit MaximumPackingEfficiency to 5 samples in dataframe.
+2018-11-30 12:18:02 INFO     Fit XRDPowderPattern to 5 samples in dataframe.
+2018-11-30 12:18:02 INFO     Fit Dimensionality to 5 samples in dataframe.
+2018-11-30 12:18:02 INFO     Fit OrbitalFieldMatrix to 5 samples in dataframe.
+2018-11-30 12:18:02 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:18:03 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:03 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:18:18 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:18 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:18:18 INFO     Based on metafeatures of the dataset, these featurizers are excluded for returning nans more than the max_na_percent of 0.05: ['YangSolidSolution', 'ElectronAffinity', 'TMetalFraction', 'OxidationStates', 'ElectronegativityDiff', 'Miedema', 'CationProperty', 'IonProperty']
+2018-11-30 12:18:18 INFO     Featurizer type bandstructure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:18:18 INFO     Featurizer type dos not in the dataframeto be fitted. Skipping...
+2018-11-30 12:18:18 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:18:19 INFO     Fit AtomicOrbitals to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit ElementFraction to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit Stoichiometry to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit BandCenter to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit ValenceOrbital to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:19 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:18:19 INFO     Fit DensityFeatures to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit GlobalSymmetryFeatures to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit EwaldEnergy to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit SiteStatsFingerprint to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit ChemicalOrdering to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit StructuralHeterogeneity to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit MaximumPackingEfficiency to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit XRDPowderPattern to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit Dimensionality to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Fit OrbitalFieldMatrix to 5 samples in dataframe.
+2018-11-30 12:18:19 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:18:20 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:20 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:18:33 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:33 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:18:33 INFO     Fit DensityFeatures to 5 samples in dataframe.
+2018-11-30 12:18:33 INFO     Fit GlobalSymmetryFeatures to 5 samples in dataframe.
+2018-11-30 12:18:33 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:33 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:18:36 INFO     Based on metafeatures of the dataset, these featurizers are excluded for returning nans more than the max_na_percent of 0.05: ['YangSolidSolution', 'ElectronAffinity', 'TMetalFraction', 'OxidationStates', 'ElectronegativityDiff', 'Miedema', 'CationProperty', 'IonProperty']
+2018-11-30 12:18:36 INFO     Featurizer type structure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:18:36 INFO     Featurizer type bandstructure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:18:36 INFO     Featurizer type dos not in the dataframeto be fitted. Skipping...
+2018-11-30 12:18:36 INFO     Compositions detected as strings. Attempting conversion to Composition objects...
+2018-11-30 12:18:36 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:18:37 INFO     Fit AtomicOrbitals to 5 samples in dataframe.
+2018-11-30 12:18:37 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:18:37 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:18:37 INFO     Fit ElementFraction to 5 samples in dataframe.
+2018-11-30 12:18:37 INFO     Fit Stoichiometry to 5 samples in dataframe.
+2018-11-30 12:18:37 INFO     Fit BandCenter to 5 samples in dataframe.
+2018-11-30 12:18:37 INFO     Fit ValenceOrbital to 5 samples in dataframe.
+2018-11-30 12:18:37 INFO     Compositions detected as strings. Attempting conversion to Composition objects...
+2018-11-30 12:18:37 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:18:39 INFO     Based on metafeatures of the dataset, these featurizers are excluded for returning nans more than the max_na_percent of 0.05: ['YangSolidSolution', 'ElectronAffinity', 'TMetalFraction', 'OxidationStates', 'ElectronegativityDiff', 'Miedema', 'CationProperty', 'IonProperty']
+2018-11-30 12:18:39 INFO     Featurizer type bandstructure not in the dataframeto be fitted. Skipping...
+2018-11-30 12:18:39 INFO     Featurizer type dos not in the dataframeto be fitted. Skipping...
+2018-11-30 12:18:39 INFO     Compositions detected as strings. Attempting conversion to Composition objects...
+2018-11-30 12:18:40 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:18:40 INFO     Fit AtomicOrbitals to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit ElementFraction to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit Stoichiometry to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit BandCenter to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit ValenceOrbital to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:40 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:18:40 INFO     Fit DensityFeatures to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit GlobalSymmetryFeatures to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit EwaldEnergy to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit SiteStatsFingerprint to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit ChemicalOrdering to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit StructuralHeterogeneity to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit MaximumPackingEfficiency to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit XRDPowderPattern to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit Dimensionality to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit OrbitalFieldMatrix to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:18:40 INFO     Fit AtomicOrbitals to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit ElementProperty to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit ElementFraction to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit Stoichiometry to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit BandCenter to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     Fit ValenceOrbital to 5 samples in dataframe.
+2018-11-30 12:18:40 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:40 INFO     Guessing oxidation states of structures, as they were not present in input.
+2018-11-30 12:18:41 INFO     Fit DensityFeatures to 5 samples in dataframe.
+2018-11-30 12:18:41 INFO     Fit GlobalSymmetryFeatures to 5 samples in dataframe.
+2018-11-30 12:18:41 INFO     Fit EwaldEnergy to 5 samples in dataframe.
+2018-11-30 12:18:41 INFO     Fit SiteStatsFingerprint to 5 samples in dataframe.
+2018-11-30 12:18:41 INFO     Fit ChemicalOrdering to 5 samples in dataframe.
+2018-11-30 12:18:41 INFO     Fit StructuralHeterogeneity to 5 samples in dataframe.
+2018-11-30 12:18:41 INFO     Fit MaximumPackingEfficiency to 5 samples in dataframe.
+2018-11-30 12:18:41 INFO     Fit XRDPowderPattern to 5 samples in dataframe.
+2018-11-30 12:18:41 INFO     Fit Dimensionality to 5 samples in dataframe.
+2018-11-30 12:18:41 INFO     Fit OrbitalFieldMatrix to 5 samples in dataframe.
+2018-11-30 12:18:41 INFO     Guessing oxidation states of compositions, as they were not present in input.
+2018-11-30 12:18:42 INFO     structure detected as strings. Attempting conversion to structure objects...
+2018-11-30 12:18:42 INFO     Guessing oxidation states of structures, as they were not present in input.

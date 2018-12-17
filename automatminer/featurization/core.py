@@ -102,7 +102,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
     def __init__(self, featurizers=None, exclude=None, use_metaselector=True,
                  max_na_frac=0.05, ignore_cols=None, ignore_errors=True,
                  drop_inputs=True, guess_oxistates=True, multiindex=False,
-                 n_jobs=None, logger=True):
+                 n_jobs=None, logger=True, composition_col="composition", structure_col="structure"):
 
         self._logger = self.get_logger(logger)
         self.featurizers = featurizers
@@ -119,6 +119,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.features = []
         self.auto_featurizer = True if self.featurizers is None else False
         self.metaselector = None
+        self.composition_col = composition_col
+        self.structure_col = structure_col
 
     @set_fitted
     def fit(self, df, target):
