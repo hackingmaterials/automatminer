@@ -4,12 +4,14 @@ from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     CompositionToOxidComposition
 from matminer.featurizers.conversions import ConversionFeaturizer
 from matminer.featurizers.base import BaseFeaturizer
+from matminer.featurizers.function import FunctionFeaturizer
 
 from automatminer.utils.package_tools import check_fitted, set_fitted
 from automatminer.base import DataframeTransformer, LoggableMixin
 from automatminer.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 from automatminer.featurization.metaselection.core import FeaturizerMetaSelector
+from automatminer.utils.package_tools import AutomatminerError
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
@@ -46,6 +48,10 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
     the correct column name is not present.
 
     Args:
+        preset (str): "best" or "fast" or "all". Determines by preset the
+            featurizers that should be applied. See the Featurizer sets for
+            specifics of best/fast/all. Default is "best". Incompatible with
+            the featurizers arg.
         featurizers (dict): Values are the featurizer types you want applied
             (e.g., "structure", "composition"). The corresponding values
             are lists of featurizer objects you want applied for each featurizer
@@ -99,15 +105,23 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
     """
 
-    def __init__(self, featurizers=None, exclude=None, use_metaselector=True,
-                 max_na_frac=0.05, ignore_cols=None, ignore_errors=True,
-                 drop_inputs=True, guess_oxistates=True, multiindex=False,
-                 n_jobs=None, logger=True):
+    def __init__(self, preset=None, featurizers=None, exclude=None,
+                 use_metaselector=False, functionalize=False, max_na_frac=0.05,
+                 ignore_cols=None, ignore_errors=True, drop_inputs=True,
+                 guess_oxistates=True, multiindex=False, n_jobs=None,
+                 logger=True):
 
+        if featurizers and preset:
+            raise AutomatminerError("Featurizers and preset were both set. "
+                                    "Please either use a preset ('best', 'all',"
+                                    " 'fast') or set featurizers manually.")
+
+        self.preset = "best" if preset is None else preset
         self._logger = self.get_logger(logger)
         self.featurizers = featurizers
         self.exclude = exclude if exclude else []
         self.use_metaselector = use_metaselector
+        self.functionalize = functionalize
         self.max_na_percent = max_na_frac
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
@@ -192,6 +206,16 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             else:
                 self.logger.info("Featurizer type {} not in the dataframe. "
                                  "Skipping...".format(featurizer_type))
+        if self.functionalize:
+            ff = FunctionFeaturizer()
+            cols = df.columns.tolist()
+            for ft in self.featurizers.keys():
+                if ft in cols:
+                    cols.pop(ft)
+            df = ff.fit_featurize_dataframe(df, cols,
+                                            ignore_errors=self.ignore_errors,
+                                            multiindex=self.multiindex)
+
         return df
 
     @set_fitted
@@ -263,9 +287,10 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 if featurizer_type in df.columns:
                     featurizer_set = _supported_featurizer_types[featurizer_type]
                     self.featurizers[featurizer_type] = \
-                        featurizer_set(exclude=self.exclude).best
+                        getattr(featurizer_set(exclude=self.exclude),
+                                self.preset)
                 else:
-                    self.logger.info("Featurizer type {} not in the dataframe"
+                    self.logger.info("Featurizer type {} not in the dataframe "
                                      "to be fitted. Skipping...".
                                      format(featurizer_type))
         # user-set featurizers
@@ -405,11 +430,8 @@ if __name__ == "__main__":
     from matminer.datasets.dataset_retrieval import load_dataset, get_available_datasets
 
     print(get_available_datasets())
-    # df = load_dataset("steel_strength").rename(columns={"formula": "composition"})[["yield strength", "composition"]]
-    # af = AutoFeaturizer()
-    # print(df)
-    # df = af.fit_transform(df, "yield strength")
-
-    from pymatgen import Structure
-    # s = Structure()
-    # s.
+    df = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"}).iloc[:20]
+    af = AutoFeaturizer(functionalize=True)
+    print(df)
+    df = af.fit_transform(df, "K_VRH")
+    print(df.describe())

@@ -53,6 +53,12 @@ class FeaturizerSet:
         raise NotImplementedError("This featurizer set must return a set of "
                                   "all featurizers")
 
+    @property
+    def fast(self):
+        """Fast featurizers available for this featurization type."""
+        raise NotImplementedError("This featurizer set must return a set of "
+                                  "fast featurizers")
+
     def _get_featurizers(self, featurizers):
         """Utility function for getting featurizers not in the ignore list."""
         return [f for f in featurizers
@@ -114,6 +120,12 @@ class AllFeaturizers(FeaturizerSet):
     def best(self):
         featurizers = [f.best for f in self._featurizer_sets.values()]
         return self._get_featurizers(featurizers)
+
+    @property
+    def fast(self):
+        featurizers = [f.fast for f in self._featurizer_sets.values()]
+        return self._get_featurizers(featurizers)
+
 
 
 class CompositionFeaturizers(FeaturizerSet):
@@ -220,6 +232,12 @@ class StructureFeaturizers(FeaturizerSet):
 
         self._slow_featurizers = [
             sf.SiteStatsFingerprint.from_preset('CrystalNNFingerprint_ops'),
+            sf.SiteStatsFingerprint.from_preset("BondLength-dejong2016"),
+            sf.SiteStatsFingerprint.from_preset("BondAngle-dejong2016"),
+            sf.SiteStatsFingerprint.from_preset("Composition-dejong2016_SD"),
+            sf.SiteStatsFingerprint.from_preset("Composition-dejong2016_AD"),
+            sf.SiteStatsFingerprint.from_preset("CoordinationNumber_ward-prb-2017"),
+            sf.SiteStatsFingerprint.from_preset("LocalPropertyDifference_ward-prb-2017"),
             sf.ChemicalOrdering(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
@@ -231,7 +249,8 @@ class StructureFeaturizers(FeaturizerSet):
         self._need_fitting_featurizers = [
             sf.PartialRadialDistributionFunction(),
             sf.BondFractions(),
-            sf.BagofBonds()
+            sf.BagofBonds(coulomb_matrix=sf.CoulombMatrix()),
+            sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix())
         ]
 
         self._matrix_featurizers = [
@@ -246,8 +265,9 @@ class StructureFeaturizers(FeaturizerSet):
         # these are the same as _need_fitting_featurizers
         self._many_features_featurizers = [
             sf.PartialRadialDistributionFunction(),
-            sf.BondFractions(),
-            sf.BagofBonds(),
+            sf.BondFractions(approx_bonds=False),
+            sf.BagofBonds(coulomb_matrix=sf.CoulombMatrix()),
+            sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix()),
             sf.OrbitalFieldMatrix(flatten=True)
         ]
 
@@ -317,6 +337,7 @@ class DOSFeaturizers(FeaturizerSet):
             dosf.Hybridization()
         ]
 
+
     @property
     def all(self):
         """List of all density of states based featurizers."""
@@ -324,6 +345,10 @@ class DOSFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
+        return self._get_featurizers(self._best_featurizers)
+
+    @property
+    def fast(self):
         return self._get_featurizers(self._best_featurizers)
 
 
@@ -355,4 +380,8 @@ class BSFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
+        return self._get_featurizers(self._best_featurizers)
+
+    @property
+    def fast(self):
         return self._get_featurizers(self._best_featurizers)

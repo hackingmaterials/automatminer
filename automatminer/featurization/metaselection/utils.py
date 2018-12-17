@@ -78,7 +78,17 @@ def _composition_summary(composition):
             list of the symbols of elements in the composition.
 
     """
-    c = Composition(composition)
+    try:
+        c = Composition(composition)
+    except BaseException:
+        return {"major_composition_category": np.nan,
+            "minor_composition_category": np.nan,
+            "prototype": np.nan,
+            "el_types_reduced": np.nan,
+            "n_types": np.nan,
+            "el_types": np.nan,
+            "n_elements": np.nan,
+            "elements": np.nan}
     elements = [x.symbol for x in c.elements]
     n_elements = len(c.elements)
     el_types = sorted([_element_category(x) for x in c.elements])

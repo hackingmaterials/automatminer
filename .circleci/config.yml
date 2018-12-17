@@ -17,6 +17,7 @@ jobs:
             . test_env/bin/activate
             pip install --upgrade pip
             pip install --quiet -r requirements.txt
+            pip install --quiet -r requirements-optional.txt
             pip install coverage
             pip install codacy-coverage
             coverage run setup.py test

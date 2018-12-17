@@ -7,7 +7,7 @@ from automatminer.automl.tpot_configs.regressor import regressor_config_dict_mb
 from sklearn.metrics import r2_score, f1_score
 
 from automatminer.automl.adaptors import TPOTAdaptor
-from automatminer.utils.package_tools import MatbenchError
+from automatminer.utils.package_tools import AutomatminerError
 
 __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
 
@@ -60,7 +60,7 @@ class TestTPOTAdaptor(unittest.TestCase):
         df1 = self.train_df
         df2 = self.test_df.rename(columns={'mean X': "some other feature"})
         tpot.fit(df1, target_key)
-        with self.assertRaises(MatbenchError):
+        with self.assertRaises(AutomatminerError):
             tpot.predict(df2, target_key)
 
 
