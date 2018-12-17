@@ -152,6 +152,7 @@ class CompositionFeaturizers(FeaturizerSet):
             cf.AtomicOrbitals(),
             cf.ElementProperty.from_preset("matminer"),
             cf.ElementProperty.from_preset("magpie"),
+            cf.ElementProperty.from_preset("word_embedding"),
             cf.ElementFraction(),
             cf.Stoichiometry(),
             cf.TMetalFraction(),
@@ -243,7 +244,8 @@ class StructureFeaturizers(FeaturizerSet):
             sf.MaximumPackingEfficiency(),
             sf.XRDPowderPattern(),
             sf.Dimensionality(),
-            sf.OrbitalFieldMatrix(flatten=True)
+            sf.OrbitalFieldMatrix(flatten=True),
+            sf.JarvisCFID()
         ]
 
         self._need_fitting_featurizers = [
@@ -268,7 +270,8 @@ class StructureFeaturizers(FeaturizerSet):
             sf.BondFractions(approx_bonds=False),
             sf.BagofBonds(coulomb_matrix=sf.CoulombMatrix()),
             sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix()),
-            sf.OrbitalFieldMatrix(flatten=True)
+            sf.OrbitalFieldMatrix(flatten=True),
+            sf.JarvisCFID()
         ]
 
     @property
