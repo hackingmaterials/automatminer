@@ -221,7 +221,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                  ignore_cols=None, ignore_errors=True, drop_inputs=True,
                  guess_oxistates=True, multiindex=False, n_jobs=None,
                  logger=True, composition_col="composition", structure_col="structure",
-                 bandstructure="bandstructure", dos="dos"):
+                 bandstructure_col="bandstructure", dos_col="dos"):
 
         if featurizers and preset:
             raise AutomatminerError("Featurizers and preset were both set. "
@@ -247,8 +247,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.metaselector = None
         self.composition_col = composition_col
         self.structure_col = structure_col
-        self.bandstruct_col = bandstructure
-        self.dos_col = dos
+        self.bandstruct_col = bandstructure_col
+        self.dos_col = dos_col
 
     @set_fitted
     def fit(self, df, target):
