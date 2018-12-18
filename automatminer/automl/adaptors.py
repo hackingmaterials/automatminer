@@ -6,6 +6,7 @@ Current adaptor classes are:
     TPOTAdaptor: Uses the backend from the automl project TPOT, which can be
         found at https://github.com/EpistasisLab/tpot
 """
+from collections import OrderedDict
 from sklearn.exceptions import NotFittedError
 from tpot import TPOTClassifier, TPOTRegressor
 from automatminer.automl.tpot_configs.classifier import classifier_config_dict_mb
