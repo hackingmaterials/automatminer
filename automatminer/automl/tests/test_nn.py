@@ -3,10 +3,6 @@ import unittest
 
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score
-
-import sys
-sys.path.append("/Users/scherfaoui/LBL/automatminer")
-
 from automatminer.automl.adaptors import NeuralNetworkAdaptor
 from automatminer.utils.package_tools import AutomatminerError
 
