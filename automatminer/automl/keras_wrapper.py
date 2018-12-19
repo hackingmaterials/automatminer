@@ -9,7 +9,7 @@ import keras.layers.noise
 import keras.optimizers
 import keras.callbacks
 from sklearn.datasets import load_boston
-from sklearn.model_selection import train_test_split, KFold, cross_val_score
+from sklearn.model_selection import KFold, cross_val_score
 from keras.wrappers.scikit_learn import KerasRegressor, KerasClassifier
 import pandas as pd
 import numpy as np
@@ -188,6 +188,5 @@ if __name__ == "__main__":
     bos.columns = boston.feature_names
     bos['PRICE'] = boston.target
     print(bos)
-    X_train, X_test, y_train, y_test = train_test_split(bos.drop(columns="PRICE"), bos["PRICE"], test_size=0.33, random_state=42)
-    wrapper.best_model(X_train, y_train, X_test, y_test, "regression")
+    wrapper.best_model(bos.drop(columns="PRICE"), bos["PRICE"], "regression")
     #wrapper.fit(X_train, y_train)
