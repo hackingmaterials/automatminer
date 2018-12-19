@@ -8,6 +8,7 @@ from automatminer.utils.package_tools import AutomatminerError
 
 __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>', 'Samy Cherfaoui <SCherfaoui@lbl.gov>']
 
+@unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
 class TestNNAdaptor(unittest.TestCase):
     def setUp(self):
         basedir = os.path.dirname(os.path.realpath(__file__))
