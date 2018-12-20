@@ -421,7 +421,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             # above tidy column will add oxidation states, these oxidation
             # states will then be transferred to composition.
             struct2comp = StructureToComposition(
-                target_col_id="composition", overwrite_data=False)
+                target_col_id="composition", overwrite_data=overwrite)
             df = struct2comp.featurize_dataframe(df, "structure")
         return df
 
