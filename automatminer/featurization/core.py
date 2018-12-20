@@ -109,7 +109,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                  use_metaselector=False, functionalize=False, max_na_frac=0.05,
                  ignore_cols=None, ignore_errors=True, drop_inputs=True,
                  guess_oxistates=True, multiindex=False, n_jobs=None,
-                 logger=True):
+                 logger=True, composition_col="composition", structure_col="structure",
+                 bandstructure_col="bandstructure", dos_col="dos"):
 
         if featurizers and preset:
             raise AutomatminerError("Featurizers and preset were both set. "
@@ -133,6 +134,10 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.features = []
         self.auto_featurizer = True if self.featurizers is None else False
         self.metaselector = None
+        self.composition_col = composition_col
+        self.structure_col = structure_col
+        self.bandstruct_col = bandstructure_col
+        self.dos_col = dos_col
 
     @set_fitted
     def fit(self, df, target):
@@ -304,13 +309,13 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 for ftype in self.featurizers:
                     # Normalize the names from the aliases
                     if ftype in _composition_aliases:
-                        self.featurizers["composition"] = self.featurizers.pop(ftype)
+                        self.featurizers[self.composition_col] = self.featurizers.pop(ftype)
                     elif ftype in _structure_aliases:
-                        self.featurizers["structure"] = self.featurizers.pop(ftype)
+                        self.featurizers[self.structure_col] = self.featurizers.pop(ftype)
                     elif ftype in _bandstructure_aliases:
-                        self.featurizers["bandstructure"] = self.featurizers.pop(ftype)
+                        self.featurizers[self.bandstruct_col] = self.featurizers.pop(ftype)
                     elif ftype in _dos_aliases:
-                        self.featurizers["dos"] = self.featurizers.pop(ftype)
+                        self.featurizers[self.dos_col] = self.featurizers.pop(ftype)
                     else:
                         raise ValueError(
                             "The featurizers dict key {} is not a valid "
@@ -334,7 +339,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 ready for featurization.
         """
         # todo: Make the following conversions more robust (no lazy [0] type checking)
-        if featurizer_type == "composition":
+        if featurizer_type == self.composition_col:
             # Convert formulas to composition objects
             if isinstance(df[featurizer_type].iloc[0], str):
                 self.logger.info("Compositions detected as strings. Attempting "
@@ -377,7 +382,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             df = dto.featurize_dataframe(df, featurizer_type)
 
             # Decorate with oxidstates
-            if featurizer_type == "structure" and self.guess_oxistates:
+            if featurizer_type == self.structure_col and self.guess_oxistates:
                 self.logger.info("Guessing oxidation states of structures, as "
                                  "they were not present in input.")
                 sto = StructureToOxidStructure(
@@ -405,10 +410,10 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Contains composition column if desired
         """
-        if ("structure" in df.columns and
+        if (self.structure_col in df.columns and
                 (self.auto_featurizer or (set(_composition_aliases) and
                                           set(self.featurizers.keys())))
-                and ("composition" not in df.columns or overwrite)):
+                and (self.composition_col not in df.columns or overwrite)):
 
             if "composition" in df.columns:
                 self.logger.info("composition column already exists, "
@@ -416,13 +421,13 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             else:
                 self.logger.debug("Adding compositions from structures.")
 
-            df = self._tidy_column(df, "structure")
+            df = self._tidy_column(df, self.structure_col)
 
             # above tidy column will add oxidation states, these oxidation
             # states will then be transferred to composition.
             struct2comp = StructureToComposition(
-                target_col_id="composition", overwrite_data=overwrite)
-            df = struct2comp.featurize_dataframe(df, "structure")
+                target_col_id=self.composition_col, overwrite_data=overwrite)
+            df = struct2comp.featurize_dataframe(df, self.structure_col)
         return df
 
 
