@@ -4,6 +4,7 @@ import unittest
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score
 
+from automatminer.configs import debug_config
 from automatminer.automl.adaptors import TPOTAdaptor
 from automatminer.utils.package_tools import AutomatminerError
 
@@ -17,12 +18,10 @@ class TestTPOTAdaptor(unittest.TestCase):
         df = pd.read_csv(basedir + "/mini_automl_df.csv", index_col=0)
         self.train_df = df.copy(deep=True).iloc[:450]
         self.test_df = df.copy(deep=True).iloc[451:]
-        self.common_tpot_kwargs = {"max_time_mins": 5, "max_eval_time_mins": 5,
-                                   "generations": 10, "population_size": 15}
 
     def test_regression(self):
         target_key = "K_VRH"
-        tpot = TPOTAdaptor(**self.common_tpot_kwargs)
+        tpot = TPOTAdaptor(**debug_config)
         tpot.fit(self.train_df, target_key)
         test_w_predictions = tpot.predict(self.test_df, target_key)
         y_true = test_w_predictions[target_key]
@@ -30,7 +29,7 @@ class TestTPOTAdaptor(unittest.TestCase):
         self.assertTrue(r2_score(y_true, y_test) > 0.75)
 
     def test_classification(self):
-        tpot = TPOTAdaptor(**self.common_tpot_kwargs)
+        tpot = TPOTAdaptor(**debug_config)
         max_kvrh = 50
         classifier_key = "K_VRH > {}?".format(max_kvrh)
         train_df = self.train_df.rename(columns={"K_VRH": classifier_key})
@@ -45,7 +44,7 @@ class TestTPOTAdaptor(unittest.TestCase):
         self.assertTrue(f1_score(y_true, y_test) > 0.75)
 
     def test_training_only(self):
-        tpot = TPOTAdaptor(**self.common_tpot_kwargs)
+        tpot = TPOTAdaptor(**debug_config)
         target_key = "K_VRH"
         train_w_predictions = tpot.fit_transform(self.train_df, target_key)
         y_true = train_w_predictions[target_key]
@@ -53,7 +52,7 @@ class TestTPOTAdaptor(unittest.TestCase):
         self.assertTrue(r2_score(y_true, y_test) > 0.85)
 
     def test_feature_mismatching(self):
-        tpot = TPOTAdaptor(**self.common_tpot_kwargs)
+        tpot = TPOTAdaptor(**debug_config)
         target_key = "K_VRH"
         df1 = self.train_df
         df2 = self.test_df.rename(columns={'mean X': "some other feature"})
