@@ -425,7 +425,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                     "features.".format(len(reduced_df.columns)))
                 self.logger.debug(
                     "ReBATE MultiSURF gave the following "
-                    "features".format(reduced_df.columns.tolist()))
+                    "features: {}".format(reduced_df.columns.tolist()))
                 self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
             elif r == "pca":
                 if isinstance(self.n_pca_features, float):
@@ -520,7 +520,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             df = df.drop(rm_feats, axis=1)
             self.logger.info("{} features removed due to cross correlation more"
                              " than {}".format(len(rm_feats), r_max))
-            self.logger.debug("Features removed by cross-correlation were:"
+            self.logger.debug("Features removed by cross-correlation were: {}"
                               "".format(rm_feats))
         return df
 

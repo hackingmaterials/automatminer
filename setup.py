@@ -2,7 +2,6 @@
 
 from setuptools import setup, find_packages
 import os
-import multiprocessing, logging
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 

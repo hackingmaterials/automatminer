@@ -1,5 +1,3 @@
-import numpy as np
-
 """
 This file is modified from the default config files of the TPOT library. 
 It contains a customed dict of operators that we want to optimize using 
@@ -13,8 +11,9 @@ related operators in the config_dicts (or use tpot instead of Preprocess
 to optimize some procedures).
 
 Check the TPOT documentation for information on the structure of config_dicts
-
 """
+
+import numpy as np
 
 classifier_config_dict_mb = {
 

@@ -1,16 +1,4 @@
-import numpy as np
-import pandas as pd
-from functools import lru_cache
-from pymatgen.core.composition import Composition
-from pymatgen.core.structure import Structure, IStructure
-from abc import ABCMeta, abstractmethod
-from automatminer.featurization.metaselection.utils import composition_statistics,\
-    structure_statistics
-
-__author__ = ["Qi Wang <wqthu11@gmail.com>"]
-
-"""
-Derive a list of meta-features of a given dataset to get recommendation of 
+"""Derive a list of meta-features of a given dataset to get recommendation of
 featurizers.
 
 The meta-features serve as indicators of the dataset characteristics that may
@@ -81,8 +69,19 @@ To do:
     - Regression or Classification: 
         maybe some featurizers work better for classification or better for 
         regression
-
 """
+
+import numpy as np
+import pandas as pd
+from functools import lru_cache
+from pymatgen.core.composition import Composition
+from pymatgen.core.structure import Structure, IStructure
+from abc import ABCMeta, abstractmethod
+from automatminer.featurization.metaselection.utils import \
+    composition_statistics, \
+    structure_statistics
+
+__author__ = ["Qi Wang <wqthu11@gmail.com>"]
 
 
 class AbstractMetaFeature(object):
@@ -105,6 +104,7 @@ class MetaFeature(AbstractMetaFeature):
     Metafeature class.
     The dependence can be a metafeature class for a helper class.
     """
+
     def __init__(self, dependence=None):
         self.dependence = dependence
         super(MetaFeature, self).__init__()
@@ -114,14 +114,12 @@ class Helper(AbstractMetaFeature):
     """
     Helper class.
     """
+
     def __init__(self):
         super(Helper, self).__init__()
 
 
-#######################################################
 # composition-related metafeatures
-#######################################################
-
 def composition_stats(X):
     """
     Transform the input X to immutable tuple to use caching and call
@@ -159,6 +157,7 @@ class NumberOfCompositions(MetaFeature):
     """
     Number of compositions in the input dataset.
     """
+
     def calc(self, X, y=None):
         return len(X)
 
@@ -167,10 +166,11 @@ class PercentOfAllMetal(MetaFeature):
     """
     Percent of all_metal compositions in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = composition_stats(X)
         num = sum([1 if stat["major_composition_category"] == 1 else 0
-                  for stat in stats.values()])
+                   for stat in stats.values()])
         return num / len(stats)
 
 
@@ -178,10 +178,11 @@ class PercentOfMetalNonmetal(MetaFeature):
     """
     Percent of metal_nonmetal compositions in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = composition_stats(X)
         num = sum([1 if stat["major_composition_category"] == 2 else 0
-                  for stat in stats.values()])
+                   for stat in stats.values()])
         return num / len(stats)
 
 
@@ -189,10 +190,11 @@ class PercentOfAllNonmetal(MetaFeature):
     """
     Percent of all_nonmetal compositions in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = composition_stats(X)
         num = sum([1 if stat["major_composition_category"] == 3 else 0
-                  for stat in stats.values()])
+                   for stat in stats.values()])
         return num / len(stats)
 
 
@@ -200,10 +202,11 @@ class PercentOfContainTransMetal(MetaFeature):
     """
     Percent of compositions containing transition_metal in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = composition_stats(X)
         num = sum([1 if 1 in stat["el_types_reduced"] else 0
-                  for stat in stats.values()])
+                   for stat in stats.values()])
         return num / len(stats)
 
 
@@ -211,6 +214,7 @@ class NumberOfDifferentElements(MetaFeature):
     """
     Number of different elements present in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = composition_stats(X)
         elements = set()
@@ -223,6 +227,7 @@ class AvgNumberOfElements(MetaFeature):
     """
     Average number of element of all compositions in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = composition_stats(X)
         nelements_sum = sum([stat["n_elements"] for stat in stats.values()])
@@ -233,6 +238,7 @@ class MaxNumberOfElements(MetaFeature):
     """
     Maximum number of element number of all compositions in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = composition_stats(X)
         nelements_max = max([stat["n_elements"] for stat in stats.values()])
@@ -243,16 +249,14 @@ class MinNumberOfElements(MetaFeature):
     """
     Minimum number of element number of all compositions in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = composition_stats(X)
         nelements_min = min([stat["n_elements"] for stat in stats.values()])
         return nelements_min
 
 
-#######################################################
 # structure-related metafeatures
-#######################################################
-
 def structure_stats(X):
     """
     Transform the input X to immutable IStructure to use caching and call
@@ -263,7 +267,7 @@ def structure_stats(X):
     Returns:
         _structure_stats
     """
-    X_struct= list()
+    X_struct = list()
     for structure in X:
         if isinstance(structure, Structure):
             X_struct.append(IStructure.from_sites(structure))
@@ -292,6 +296,7 @@ class NumberOfStructures(MetaFeature):
     """
     Number of structures in the input dataset.
     """
+
     def calc(self, X, y=None):
         return len(X)
 
@@ -300,16 +305,18 @@ class PercentOfOrderedStructures(MetaFeature):
     """
     Percent of ordered structures in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = structure_stats(X)
         num = sum([1 if stat["is_ordered"] else 0 for stat in stats.values()])
-        return num/len(stats)
+        return num / len(stats)
 
 
 class AvgNumberOfSites(MetaFeature):
     """
     Average number of sites of all structures in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = structure_stats(X)
         nsites_sum = sum([stat["n_sites"] for stat in stats.values()])
@@ -320,6 +327,7 @@ class MaxNumberOfSites(MetaFeature):
     """
     Maximum number of sites of all structures in the input dataset.
     """
+
     def calc(self, X, y=None):
         stats = structure_stats(X)
         nsites_max = max([stat["n_sites"] for stat in stats.values()])
@@ -330,6 +338,7 @@ class NumberOfDifferentElementsInStructure(MetaFeature):
     """
     Number of different elements present in all structures of the input dataset.
     """
+
     def calc(self, X, y=None):
         elements = set()
         for struct in X:

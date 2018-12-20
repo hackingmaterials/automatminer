@@ -1,3 +1,7 @@
+"""
+Automatically filter some featurizers based on metafeatures calculated for
+the dataset. 
+"""
 import sys
 import warnings
 from automatminer.featurization.metaselection.metafeatures import \
@@ -5,10 +9,6 @@ from automatminer.featurization.metaselection.metafeatures import \
 
 __author__ = ["Qi Wang <wqthu11@gmail.com>"]
 
-"""
-Automatically filter some featurizers based on metafeatures calculated for
-the dataset. 
-"""
 _supported_mfs_types = ("composition", "structure")
 
 
@@ -92,6 +92,7 @@ class FeaturizerMetaSelector:
     Currently only support removing definitely useless featurizers.
     Cannot recommend featurizers based on the target now.
     """
+
     def __init__(self, max_na_frac=0.05):
         self.max_na_frac = max_na_frac
         self.dataset_mfs = None

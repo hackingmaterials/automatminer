@@ -2,8 +2,6 @@ import os
 import unittest
 
 import pandas as pd
-from automatminer.automl.tpot_configs.classifier import classifier_config_dict_mb
-from automatminer.automl.tpot_configs.regressor import regressor_config_dict_mb
 from sklearn.metrics import r2_score, f1_score
 
 from automatminer.automl.adaptors import TPOTAdaptor

@@ -1,8 +1,6 @@
 """
 Various in-house feature reduction techniques.
 """
-import operator
-
 import numpy as np
 from sklearn.base import is_classifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
@@ -137,7 +135,7 @@ class TreeFeatureReducer(DataframeTransformer, LoggableMixin):
 
         cv = check_cv(cv=cv, y=y, classifier=is_classifier(tree))
         all_feats = []
-        for train, test in cv.split(X, y, groups=None):
+        for train, _ in cv.split(X, y, groups=None):
             Xtrn = X.iloc[train]
             ytrn = y.iloc[train]
             all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
