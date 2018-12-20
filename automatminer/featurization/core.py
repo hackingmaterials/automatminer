@@ -2,6 +2,8 @@ from pymatgen import Composition
 from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     StructureToComposition, StructureToOxidStructure, \
     CompositionToOxidComposition
+from matminer.featurizers.conversions import ConversionFeaturizer
+from matminer.featurizers.base import BaseFeaturizer
 from matminer.featurizers.function import FunctionFeaturizer
 
 from automatminer.utils.package_tools import check_fitted, set_fitted
@@ -358,8 +360,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 self.logger.info("Guessing oxidation states of compositions, as"
                                  " they were not present in input.")
                 cto = CompositionToOxidComposition(
-                    target_col_id=featurizer_type,
-                    overwrite_data=True)
+                    target_col_id=featurizer_type, overwrite_data=True,
+                    return_original_on_error=True, max_sites=-50)
                 try:
                     df = cto.featurize_dataframe(df, featurizer_type,
                                                  multiindex=self.multiindex)
@@ -383,8 +385,9 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             if featurizer_type == self.structure_col and self.guess_oxistates:
                 self.logger.info("Guessing oxidation states of structures, as "
                                  "they were not present in input.")
-                sto = StructureToOxidStructure(target_col_id=featurizer_type,
-                                               overwrite_data=True)
+                sto = StructureToOxidStructure(
+                    target_col_id=featurizer_type, overwrite_data=True,
+                    return_original_on_error=True, max_sites=-50)
                 try:
                     df = sto.featurize_dataframe(df, featurizer_type,
                                              multiindex=self.multiindex)
@@ -393,7 +396,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                         " structures due to {}.".format(e))
         return df
 
-    def _add_composition_from_structure(self, df):
+    def _add_composition_from_structure(self, df, overwrite=True):
         """
         Automatically deduce compositions from structures if:
             1. structures are available
@@ -401,18 +404,30 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 composition featurizers are present in self.featurizers).
         Args:
             df (pandas.DataFrame): May or may not contain composition column.
+            overwrite (bool): Whether to overwrite the composition column if it
+                already exists.
 
         Returns:
             df (pandas.DataFrame): Contains composition column if desired
         """
-        if self.structure_col in df.columns and self.composition_col not in df.columns:
-            if self.auto_featurizer or (set(_composition_aliases)
-                                        & set(self.featurizers.keys())):
-                df = self._tidy_column(df, self.structure_col)
-                struct2comp = StructureToComposition(
-                    target_col_id=self.composition_col, overwrite_data=False)
-                df = struct2comp.featurize_dataframe(df, self.structure_col)
+        if (self.structure_col in df.columns and
+                (self.auto_featurizer or (set(_composition_aliases) and
+                                          set(self.featurizers.keys())))
+                and (self.composition_col not in df.columns or overwrite)):
+
+            if "composition" in df.columns:
+                self.logger.info("composition column already exists, "
+                                 "overwriting with composition from structure.")
+            else:
                 self.logger.debug("Adding compositions from structures.")
+
+            df = self._tidy_column(df, self.structure_col)
+
+            # above tidy column will add oxidation states, these oxidation
+            # states will then be transferred to composition.
+            struct2comp = StructureToComposition(
+                target_col_id=self.composition_col, overwrite_data=overwrite)
+            df = struct2comp.featurize_dataframe(df, self.structure_col)
         return df
 
 
