@@ -127,7 +127,6 @@ class AllFeaturizers(FeaturizerSet):
         return self._get_featurizers(featurizers)
 
 
-
 class CompositionFeaturizers(FeaturizerSet):
     """Featurizer set containing composition featurizers.
 
@@ -152,7 +151,7 @@ class CompositionFeaturizers(FeaturizerSet):
             cf.AtomicOrbitals(),
             cf.ElementProperty.from_preset("matminer"),
             cf.ElementProperty.from_preset("magpie"),
-            cf.ElementProperty.from_preset("word_embedding"),
+            cf.ElementProperty.from_preset("matscholar_el"),
             cf.ElementFraction(),
             cf.Stoichiometry(),
             cf.TMetalFraction(),
@@ -231,22 +230,29 @@ class StructureFeaturizers(FeaturizerSet):
             sf.EwaldEnergy()
         ]
 
+        ssf = sf.SiteStatsFingerprint
         self._slow_featurizers = [
-            sf.SiteStatsFingerprint.from_preset('CrystalNNFingerprint_ops'),
-            sf.SiteStatsFingerprint.from_preset("BondLength-dejong2016"),
-            sf.SiteStatsFingerprint.from_preset("BondAngle-dejong2016"),
-            sf.SiteStatsFingerprint.from_preset("Composition-dejong2016_SD"),
-            sf.SiteStatsFingerprint.from_preset("Composition-dejong2016_AD"),
-            sf.SiteStatsFingerprint.from_preset("CoordinationNumber_ward-prb-2017"),
-            sf.SiteStatsFingerprint.from_preset("LocalPropertyDifference_ward-prb-2017"),
+            ssf.from_preset('CrystalNNFingerprint_ops'),
+            ssf.from_preset("BondLength-dejong2016"),
+            ssf.from_preset("BondAngle-dejong2016"),
+            ssf.from_preset("Composition-dejong2016_SD"),
+            ssf.from_preset("Composition-dejong2016_AD"),
+            ssf.from_preset("CoordinationNumber_ward-prb-2017"),
+            ssf.from_preset("LocalPropertyDifference_ward-prb-2017"),
             sf.ChemicalOrdering(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
             sf.XRDPowderPattern(),
             sf.Dimensionality(),
             sf.OrbitalFieldMatrix(flatten=True),
-            sf.JarvisCFID()
+            sf.JarvisCFID(),
         ]
+
+        # Prevent import errors from CGCNN
+        try:
+            self._require_external = [sf.CGCNNFeaturizer()]
+        except RuntimeError:
+            self._require_external = []
 
         self._need_fitting_featurizers = [
             sf.PartialRadialDistributionFunction(),
@@ -309,9 +315,18 @@ class StructureFeaturizers(FeaturizerSet):
         return self._get_featurizers(self._many_features_featurizers)
 
     @property
+    def require_external(self):
+        """Featurizers which require external software not installable via
+        Pypi
+        """
+        return self._get_featurizers(self._require_external)
+
+
+    @property
     def all(self):
         """List of all structure based featurizers."""
-        return self.fast + self.slow + self.need_fit + self.matrix
+        return self.fast + self.slow + self.need_fit + self.matrix + \
+               self.require_external
 
     @property
     def best(self):
