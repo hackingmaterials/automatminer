@@ -71,6 +71,14 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.encode_categories = encode_categories
         self.drop_na_targets = drop_na_targets
         self._reset_attrs()
+        self.dropped_features = None
+        self.object_cols = None
+        self.number_cols = None
+        self.fitted_df = None
+        self.fitted_target = None
+        self.dropped_samples = None
+        self.is_fit = False
+        self.scaler_obj = None
 
     @property
     def retained_features(self):
@@ -139,7 +147,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             df = df[self.fitted_df.columns]
         else:
             self.logger.info("Target not found in df columns. Ignoring...")
-            reordered_cols = self.fitted_df.drop(columns=[target]).columns.tolist()
+            reordered_cols = self.fitted_df.drop(columns=[target]).columns
             df = df[reordered_cols]
         return df
 
@@ -403,7 +411,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                 if isinstance(self.n_rebate_features, float):
                     self.logger.info("Retaining fraction {} of current "
                                      "{} features.".format(
-                        self.n_rebate_features, df.shape[1]))
+                        self.n_rebate_features, df.shape[1] - 1))
                     self.n_rebate_features = int(df.shape[1] *
                                                  self.n_rebate_features)
                 self.logger.info(
@@ -414,13 +422,11 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                 reduced_df = reduced_df.copy(deep=True)
                 self.logger.info(
                     "ReBATE MultiSURF completed: retained {} numerical "
-                    "features.".format(len(reduced_df.columns) - 1))
+                    "features.".format(len(reduced_df.columns)))
                 self.logger.debug(
                     "ReBATE MultiSURF gave the following "
                     "features".format(reduced_df.columns.tolist()))
                 self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
-
-            # todo: PCA will not work with string columns!!!!!
             elif r == "pca":
                 if isinstance(self.n_pca_features, float):
                     self.logger.info("Retaining fraction {} of current "
@@ -442,13 +448,11 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                 self.logger.info(
                     "PCA completed: retained {} numerical "
                     "features.".format(len(reduced_df.columns)))
-
             retained = reduced_df.columns.values.tolist()
             removed = [c for c in df.columns.values if c not in retained
                        and c != target]
             self.removed_features[r] = removed
             if target not in reduced_df:
-                # reduced_df.loc[:, target] = y.tolist()
                 reduced_df.loc[:, target] = y.tolist()
             df = reduced_df
         self.retained_features = [c for c in df.columns.tolist() if c != target]
