@@ -17,7 +17,15 @@ jobs:
             . test_env/bin/activate
             pip install --upgrade pip
             pip install --quiet -r requirements.txt
-            # pip install --quiet -r requirements-optional.txt
+
+            pip install --quiet -r requirements-optional.txt
+            
+            # temporarily avoid pip install of matminer
+            git clone https://github.com/hackingmaterials/matminer.git
+            cd matminer
+            pip install -e .
+            cd ..
+
             pip install -e .
             pip install coverage
             pip install codacy-coverage
