@@ -246,7 +246,7 @@ class TestAutoFeaturizer(unittest.TestCase):
 
     def test_presets(self):
         target = "K_VRH"
-        df = copy.copy(self.test_df)
+        df = copy.copy(self.test_df.iloc[:self.limit])
         af = AutoFeaturizer(preset="fast")
         df = af.fit_transform(df, target)
         known_feats = CompositionFeaturizers().fast + \
