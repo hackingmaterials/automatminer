@@ -136,5 +136,5 @@ class TestFeatureReduction(unittest.TestCase):
 
     def test_lower_corr_clf(self):
         df = self.test_df
-        worse_feature = lower_corr_clf(df, "gap expt", "maximum X", "range row")
+        worse_feature = lower_corr_clf(df, "gap expt", "gap expt", "range row")
         self.assertEqual("range row", worse_feature)
