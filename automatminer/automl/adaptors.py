@@ -8,12 +8,13 @@ Current adaptor classes are:
 """
 from collections import OrderedDict
 
-from sklearn.exceptions import NotFittedError
 from tpot import TPOTClassifier, TPOTRegressor
 
-from automatminer.automl.tpot_configs.classifier import classifier_config_dict_mb
+from automatminer.automl.tpot_configs.classifier import \
+    classifier_config_dict_mb
 from automatminer.automl.tpot_configs.regressor import regressor_config_dict_mb
-from automatminer.utils.package_tools import AutomatminerError, set_fitted, check_fitted
+from automatminer.utils.package_tools import AutomatminerError, set_fitted, \
+    check_fitted
 from automatminer.utils.ml_tools import is_greater_better, \
     regression_or_classification
 from automatminer.base import AutoMLAdaptor, LoggableMixin
