@@ -7,6 +7,7 @@ these variables were imported, they produced unnecessary logs. By
 placing the variables in functions, the empty log issue was resolved.
 Make sure that the function call does not occur unconditionally in
 the global frame because that will reproduce the empty log issue.
+Further information: https://www.benkuhn.net/importtime
 
 Use them like so:
 
@@ -17,8 +18,6 @@ from automatminer.configs import get_default_config
 default_config = get_default_config()
 
 pipe = MatPipe(**default_config)
-
-
 
 """
 

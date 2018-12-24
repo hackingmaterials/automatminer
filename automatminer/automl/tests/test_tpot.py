@@ -13,7 +13,6 @@ __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
 
 @unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
 class TestTPOTAdaptor(unittest.TestCase):
-
     def setUp(self):
         basedir = os.path.dirname(os.path.realpath(__file__))
         df = pd.read_csv(basedir + "/mini_automl_df.csv", index_col=0)
