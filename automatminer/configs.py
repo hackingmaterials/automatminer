@@ -10,10 +10,13 @@ from automatminer.featurization import AutoFeaturizer
 from automatminer.preprocessing import FeatureReducer, DataCleaner
 from automatminer.automl import TPOTAdaptor
 
-production_config = {"learner": TPOTAdaptor(max_time_mins=480),
+production_config = {"learner": TPOTAdaptor(generations=500,
+                                            population_size=500,
+                                            max_time_mins=720,
+                                            max_eval_time=60),
                      "reducer": FeatureReducer(),
                      "autofeaturizer": AutoFeaturizer(preset="best"),
-                     "cleaner": DataCleaner
+                     "cleaner": DataCleaner()
                       }
 default_config = {"learner": TPOTAdaptor(max_time_mins=120),
                   "reducer": FeatureReducer(),
@@ -25,7 +28,9 @@ fast_config = {"learner": TPOTAdaptor(max_time_mins=30, population_size=50),
                "autofeaturizer": AutoFeaturizer(preset="fast"),
                "cleaner": DataCleaner()}
 
-debug_config = {"learner": TPOTAdaptor(max_time_mins=1, population_size=10),
+debug_config = {"learner": TPOTAdaptor(max_time_mins=2,
+                                       max_eval_time=1,
+                                       population_size=10),
                 "reducer": FeatureReducer(reducers=('corr',)),
                 "autofeaturizer": AutoFeaturizer(preset="fast"),
                 "cleaner": DataCleaner()}

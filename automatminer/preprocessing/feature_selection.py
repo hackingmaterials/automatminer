@@ -5,7 +5,10 @@ import numpy as np
 from sklearn.base import is_classifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
     GradientBoostingClassifier, GradientBoostingRegressor
-from sklearn.model_selection import check_cv
+from sklearn.model_selection import check_cv, train_test_split
+from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.linear_model import SGDClassifier
+from sklearn.preprocessing import LabelEncoder
 from skrebate import MultiSURF
 
 from automatminer.utils.package_tools import AutomatminerError
@@ -14,8 +17,11 @@ from automatminer.base import LoggableMixin, DataframeTransformer
 __authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
                "Alex Dunn <ardunn@lbl.gov>"]
 
+# Used in compare_coff_clf, declared here to prevent repeated obj creation
+COMMON_CLF = SGDClassifier()
 
-class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
+
+class TreeFeatureReducer(DataframeTransformer, LoggableMixin):
     """
     Tree-based feature reduction tools based on sklearn models that have
         the .feature_importances_ attribute.
@@ -30,6 +36,7 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
             Alternatively, if set to True, the default automatminer logger will be
             used. If set to False, then no logging will occur.
     """
+
     def __init__(self, mode, importance_percentile=0.95,
                  logger=True, random_state=0):
         self._logger = self.get_logger(logger)
@@ -78,8 +85,9 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
         m_prev = len(X.columns)
         while m_curr < m_prev:
             tree_model.fit(X, y)
-            fimportance = sorted(zip(X.columns, tree_model.feature_importances_),
-                                 key=lambda x: x[1], reverse=True)
+            fimportance = sorted(
+                zip(X.columns, tree_model.feature_importances_),
+                key=lambda x: x[1], reverse=True)
             tfeats = self.get_top_features(fimportance)
             m_curr = len(tfeats)
             m_prev = len(X.columns)
@@ -122,11 +130,12 @@ class TreeBasedFeatureReduction(DataframeTransformer, LoggableMixin):
                 else:
                     tree = GradientBoostingRegressor(random_state=self.rs)
             else:
-                raise AutomatminerError('Unsupported tree_type {}!'.format(tree))
+                raise AutomatminerError(
+                    'Unsupported tree_type {}!'.format(tree))
 
         cv = check_cv(cv=cv, y=y, classifier=is_classifier(tree))
         all_feats = []
-        for train, test in cv.split(X, y, groups=None):
+        for train, _ in cv.split(X, y, groups=None):
             Xtrn = X.iloc[train]
             ytrn = y.iloc[train]
             all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
@@ -164,6 +173,7 @@ def rebate(df, target, n_features):
         n_features (int): The number of features desired to be returned.
 
     Returns:
+        pd.DataFrame The dataframe with fewer features, and no target
 
     """
     X = df.drop(target, axis=1)
@@ -176,3 +186,43 @@ def rebate(df, target, n_features):
             if np.array_equal(c, X[f].values) and f not in feats:
                 feats.append(f)
     return df[feats]
+
+
+def lower_corr_clf(df, target, f1, f2):
+    """
+    Train a simple linear model on the data to decide on the worse of two
+    features. The feature which should be dropped is returned.
+
+    Args:
+        df (pd.DataFrame): The dataframe containing the target values and
+            features in question
+        target (str): The key for the target column
+        f1 (str): The key for the first feature.
+        f2 (str): The key for the second feature.
+
+    Returns:
+        (str): The name of the feature to be dropped (worse score).
+
+    """
+    unique_names = df[target].unique()
+    x1 = df[[f1]].values
+    x2 = df[[f2]].values
+    y = LabelEncoder().fit_transform(df[target].values)
+    features = [f1, f2]
+    comparison_res = {}
+    for i, x in enumerate([x1, x2]):
+        x_tr, x_te, y_tr, y_te = train_test_split(x, y, test_size=0.3,
+                                                  random_state=0)
+        COMMON_CLF.fit(x_tr, y_tr)
+        y_pred = COMMON_CLF.predict(x_te)
+        if len(unique_names) <= 2:
+            score = roc_auc_score(y_te, y_pred)
+        else:
+            score = accuracy_score(y_te, y_pred, normalize=True)
+        comparison_res[features[i]] = score
+
+    # return the worse feature, knowing higher is better for both metrics
+    if comparison_res[f1] < comparison_res[f2]:
+        return f1
+    else:
+        return f2
