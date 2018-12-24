@@ -217,7 +217,7 @@ class TestMatPipe(unittest.TestCase):
 
         for attr in ["backend", "best_pipeline", "ml_data", "features"]:
             with self.assertRaises(NotImplementedError):
-                thisatte = getattr(tab, attr)
+                _ = getattr(tab, attr)
 
 
 if __name__ == "__main__":

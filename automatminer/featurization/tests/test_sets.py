@@ -65,7 +65,8 @@ class TestAllFeaturizers(unittest.TestCase):
         self._test_features_implemented(test_feats, true_feats)
 
     def test_structure_featurizers(self):
-        true_feats = self.get_featurizers(sf, ['StructureComposition'])
+        ignore = ['StructureComposition', 'CGCNNFeaturizer']
+        true_feats = self.get_featurizers(sf, ignore)
         test_feats = self.allfs.structure
         self._test_features_implemented(test_feats, true_feats)
 

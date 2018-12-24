@@ -8,12 +8,13 @@ Current adaptor classes are:
 """
 from collections import OrderedDict
 
-from sklearn.exceptions import NotFittedError
 from tpot import TPOTClassifier, TPOTRegressor
 
-from automatminer.automl.tpot_configs.classifier import classifier_config_dict_mb
+from automatminer.automl.tpot_configs.classifier import \
+    classifier_config_dict_mb
 from automatminer.automl.tpot_configs.regressor import regressor_config_dict_mb
-from automatminer.utils.package_tools import AutomatminerError, set_fitted, check_fitted
+from automatminer.utils.package_tools import AutomatminerError, set_fitted, \
+    check_fitted
 from automatminer.utils.ml_tools import is_greater_better, \
     regression_or_classification
 from automatminer.base import AutoMLAdaptor, LoggableMixin
@@ -202,20 +203,15 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
                 the predictions of the target.
 
         """
-        # todo: We should have the ability to ensembelize predictions based on
-        # todo: the top models (including one model type with mutliple
-        # todo: combinations of model params).
         if target != self.fitted_target:
-            raise AutomatminerError("Argument dataframe target {} is different from"
-                                " the fitted dataframe target! {}"
-                                "".format(target, self.fitted_target))
-        elif not self.is_fit:
-            raise NotFittedError("The TPOT models have not been fit!")
+            raise AutomatminerError("Argument dataframe target {} is different "
+                                    "from the fitted dataframe target! {}"
+                                    "".format(target, self.fitted_target))
         elif not all([f in df.columns for f in self._features]):
             not_in_model = [f for f in self._features if f not in df.columns]
             not_in_df = [f for f in df.columns if f not in self._features]
-            raise AutomatminerError("Features used to build model are different "
-                                "from df columns! Features located in model "
+            raise AutomatminerError("Features used to build model are different"
+                                " from df columns! Features located in model "
                                 "not located in df: \n{} \n Features located "
                                 "in df not in model: \n{}".format(not_in_df,
                                                                   not_in_model))

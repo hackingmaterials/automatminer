@@ -59,13 +59,14 @@ class DataframeTransformer:
     When implementing a base class adaptor, make sure to use @check_fitted
     and @set_fitted if necessary!
     """
-    def fit(self, df, target):
+    def fit(self, df, target, **fit_kwargs):
         """
         Fits the transformer to a dataframe, given a target.
 
         Args:
             df (pandas.DataFrame): The pandas dataframe to be fit.
             target (str): the target string specifying the ML target.
+            fit_kwargs: Keyword paramters for fitting
 
         Returns:
             (DataFrameTransformer) This object (self)
@@ -74,13 +75,14 @@ class DataframeTransformer:
         raise NotImplementedError("{} has no fit method implemented!".format(
             self.__class__.__name__))
 
-    def transform(self, df, target):
+    def transform(self, df, target, **transform_kwargs):
         """
         Transforms a dataframe.
 
         Args:
             df (pandas.DataFrame): The pandas dataframe to be fit.
             target (str): the target string specifying the ML target.
+            transform_kwargs: Keyword paramters for transforming
 
         Returns:
             (pandas.DataFrame): The transformed dataframe.

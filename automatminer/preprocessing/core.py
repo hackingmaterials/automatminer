@@ -1,19 +1,17 @@
 """
 Top level preprocessing classes.
 """
-
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
-from sklearn.exceptions import NotFittedError
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import LabelEncoder
 
 from automatminer.utils.package_tools import AutomatminerError, compare_columns, \
     check_fitted, set_fitted
 from automatminer.utils.ml_tools import regression_or_classification
 from automatminer.base import LoggableMixin, DataframeTransformer
-from automatminer.preprocessing.feature_selection import TreeBasedFeatureReduction, \
-    rebate
+from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
+    rebate, lower_corr_clf
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>",
                "Alireza Faghaninia <alireza@lbl.gov>"]
@@ -73,6 +71,14 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.encode_categories = encode_categories
         self.drop_na_targets = drop_na_targets
         self._reset_attrs()
+        self.dropped_features = None
+        self.object_cols = None
+        self.number_cols = None
+        self.fitted_df = None
+        self.fitted_target = None
+        self.dropped_samples = None
+        self.is_fit = False
+        self.scaler_obj = None
 
     @property
     def retained_features(self):
@@ -141,7 +147,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             df = df[self.fitted_df.columns]
         else:
             self.logger.info("Target not found in df columns. Ignoring...")
-            reordered_cols = self.fitted_df.drop(columns=[target]).columns.tolist()
+            reordered_cols = self.fitted_df.drop(columns=[target]).columns
             df = df[reordered_cols]
         return df
 
@@ -314,31 +320,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.scaler_obj = None
 
 
-    # def scale_df(self, df, target):
-    #     print("2a", df.shape)
-    #     if target in df.columns:
-    #         y = df[target]
-    #         X = df.drop(columns=[target])
-    #     else:
-    #         X = df
-    #     print("2b", X.shape)
-    #     if not self.scaler_obj:
-    #         self.scaler_obj = StandardScaler().fit(X)
-    #     Xmatrix = self.scaler_obj.transform(X)
-    #     X = pd.DataFrame(columns=X.columns, data=Xmatrix)
-    #     print("2c", X.shape)
-    #
-    #     if target in df.columns:
-    #         df = pd.concat([y.reset_index(drop=True), X], axis=1)
-    #         print(df)
-    #         print(y.shape)
-    #         print("2da", df.shape)
-    #         return df
-    #     else:
-    #         print("2db", X.shape)
-    #         return X
-
-
 class FeatureReducer(DataframeTransformer, LoggableMixin):
     """
     Perform feature reduction on a clean dataframe.
@@ -405,141 +386,143 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         self.removed_features = {}
         self.retained_features = []
         self.reducer_params = {}
+        self._pca = None
+        self._pca_feats = None
 
     @set_fitted
     def fit(self, df, target):
         reduced_df = df
         for r in self.reducers:
+            X = df.drop(columns=[target])
+            y = df[target]
             if r == "corr":
                 reduced_df = self.rm_correlated(df, target)
-
-            # More advanced feature reduction methods
-            else:
-                X = df.drop(columns=[target])
-                y = df[target]
-
-                if r == "tree":
-                    tbfr = TreeBasedFeatureReduction(
-                        mode=regression_or_classification(df[target]),
-                        logger=self.logger)
-                    reduced_df = tbfr.fit_transform(X, y)
-                    self.reducer_params[r] = {
-                        "importance_percentile": tbfr.importance_percentile,
-                        "mode": tbfr.mode,
-                        "random_state": tbfr.rs}
-                elif r == "rebate":
-                    if isinstance(self.n_rebate_features, float):
-                        self.logger.info("Retaining fraction {} of current "
-                                         "{} features.".format(
-                            self.n_rebate_features, df.shape[1]))
-                        self.n_rebate_features = int(df.shape[1] *
-                                                     self.n_rebate_features)
-                    self.logger.info(
-                        "ReBATE MultiSURF running: retaining {} numerical "
-                        "features.".format(self.n_rebate_features))
-                    reduced_df = rebate(df, target,
-                                        n_features=self.n_rebate_features)
-                    self.logger.info(
-                        "ReBATE MultiSURF completed: retained {} numerical "
-                        "features.".format(len(reduced_df.columns)))
-                    self.logger.debug(
-                        "ReBATE MultiSURF gave the following "
-                        "features".format(reduced_df.columns.tolist()))
-                    self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
-
-                # todo: PCA will not work with string columns!!!!!
-                elif r == "pca":
-                    if isinstance(self.n_pca_features, float):
-                        self.logger.info("Retaining fraction {} of current "
-                                         "{} features.".format(
-                            self.n_pca_features, df.shape[1]))
-                        self.n_pca_features = int(df.shape[1] *
-                                                  self.n_pca_features)
-                    self.logger.info("PCA running: retaining {} numerical "
-                                     "features.".format(self.n_rebate_features))
-                    matrix = PCA(
-                        n_components=self.n_pca_features).fit_transform(
-                        X.values, y.values)
-                    pcacols = ["PCA {}".format(i) for i in
-                               range(matrix.shape[1])]
-                    reduced_df = pd.DataFrame(columns=pcacols, data=matrix,
-                                              index=X.index)
-
-                    self.logger.info(
-                        "PCA completed: retained {} numerical "
-                        "features.".format(len(reduced_df.columns)))
-
+                reduced_df = reduced_df.drop(columns=[target])
+            if r == "tree":
+                tbfr = TreeFeatureReducer(
+                    mode=regression_or_classification(y),
+                    logger=self.logger)
+                reduced_df = tbfr.fit_transform(X, y).copy(deep=True)
+                self.reducer_params[r] = {
+                    "importance_percentile": tbfr.importance_percentile,
+                    "mode": tbfr.mode,
+                    "random_state": tbfr.rs}
+            elif r == "rebate":
+                if isinstance(self.n_rebate_features, float):
+                    self.logger.info("Retaining fraction {} of current "
+                                     "{} features.".format(
+                        self.n_rebate_features, df.shape[1] - 1))
+                    self.n_rebate_features = int(df.shape[1] *
+                                                 self.n_rebate_features)
+                self.logger.info(
+                    "ReBATE MultiSURF running: retaining {} numerical "
+                    "features.".format(self.n_rebate_features))
+                reduced_df = rebate(df, target,
+                                    n_features=self.n_rebate_features)
+                reduced_df = reduced_df.copy(deep=True)
+                self.logger.info(
+                    "ReBATE MultiSURF completed: retained {} numerical "
+                    "features.".format(len(reduced_df.columns)))
+                self.logger.debug(
+                    "ReBATE MultiSURF gave the following "
+                    "features: {}".format(reduced_df.columns.tolist()))
+                self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
+            elif r == "pca":
+                if isinstance(self.n_pca_features, float):
+                    self.logger.info("Retaining fraction {} of current "
+                                     "{} features."
+                                     "".format(self.n_pca_features,
+                                               df.shape[1]))
+                    self.n_pca_features = int(df.shape[1] *
+                                              self.n_pca_features)
+                self.logger.info("PCA running: retaining {} numerical "
+                                 "features.".format(self.n_pca_features))
+                self._pca = PCA(n_components=self.n_pca_features)
+                self._pca.fit(X.values, y.values)
+                matrix = self._pca.transform(X.values)
+                pca_feats = ["PCA {}".format(i) for i in
+                             range(matrix.shape[1])]
+                self._pca_feats = pca_feats
+                reduced_df = pd.DataFrame(columns=pca_feats, data=matrix,
+                                          index=X.index)
+                self.logger.info(
+                    "PCA completed: retained {} numerical "
+                    "features.".format(len(reduced_df.columns)))
             retained = reduced_df.columns.values.tolist()
-            removed = [c for c in df.columns.values if c not in retained]
+            removed = [c for c in df.columns.values if c not in retained
+                       and c != target]
             self.removed_features[r] = removed
+            if target not in reduced_df:
+                reduced_df.loc[:, target] = y.tolist()
             df = reduced_df
-
         self.retained_features = [c for c in df.columns.tolist() if c != target]
         return self
 
     @check_fitted
     def transform(self, df, target):
-        # todo: PCA will not work here...
-        if target in df.columns:
-            return df[self.retained_features + [target]]
-        else:
-            return df[self.retained_features]
+        X = df.drop(columns=target)
+        for r in self.reducers:
+            if r == "pca":
+                matrix = self._pca.transform(X)
+                X = pd.DataFrame(columns=self._pca_feats, data=matrix,
+                                 index=X.index)
+            else:
+                X = X.drop(columns=self.removed_features[r])
+        X.loc[:, target] = df[target].values
+        return X
 
-    def rm_correlated(self, df, target_key, R_max=0.95):
+    def rm_correlated(self, df, target, r_max=0.95):
         """
         A feature selection method that remove those that are cross correlated
         by more than threshold.
 
         Args:
             df (pandas.DataFrame): The dataframe containing features, target_key
-            target_key (str): the name of the target column/feature
-            R_max (0<float<=1): if R is greater than this value, the
+            target (str): the name of the target column/feature
+            r_max (0<float<=1): if R is greater than this value, the
                 feature that has lower correlation with the target is removed.
 
         Returns (pandas.DataFrame):
             the dataframe with the highly cross-correlated features removed.
         """
-        if regression_or_classification(df[target_key]) == "classification":
-            # Can't calculate correlation matrix for categorical variables
-            self.logger.info("Correlation matrix for categorical target is "
-                             "invalid. Skipping removing correlated features.")
-            return df
-        else:
-            # We can remove correlated features
-            corr = abs(df.corr())
-            corr = corr.sort_values(by=target_key)
-            rm_feats = []
-            for feature in corr.columns:
-                if feature == target_key:
+        mode = regression_or_classification(df[target])
+        corr = abs(df.corr())
+        if mode == "regression":
+            corr = corr.sort_values(by=target)
+        rm_feats = []
+        for feat in corr.columns:
+            if feat == target:
+                continue
+            for idx, corval in zip(corr.index, corr[feat]):
+                if np.isnan(corval):
+                    break
+                if idx == feat or idx in rm_feats:
                     continue
-                for idx, corval in zip(corr.index, corr[feature]):
-                    if np.isnan(corval):
-                        break
-                    if idx == feature or idx in rm_feats:
-                        continue
-                    else:
-                        if corval >= R_max:
-                            if corr.loc[idx, target_key] > corr.loc[
-                                feature, target_key]:
-                                removed_feat = feature
+                else:
+                    if corval >= r_max:
+                        if mode == "regression":
+                            if corr.loc[idx, target] > corr.loc[feat, target]:
+                                removed_feat = feat
                             else:
                                 removed_feat = idx
-                            if removed_feat not in rm_feats:
-                                rm_feats.append(removed_feat)
-                                self.logger.debug(
-                                    '"{}" correlates strongly with '
-                                    '"{}"'.format(feature, idx))
-                                self.logger.debug(
-                                    'removing "{}"...'.format(removed_feat))
-                            if removed_feat == feature:
-                                break
-            if len(rm_feats) > 0:
-                df = df.drop(rm_feats, axis=1)
-                self.logger.info(
-                    'These {} features were removed due to cross '
-                    'correlation with the current features more than '
-                    '{}:\n{}'.format(len(rm_feats), R_max, rm_feats))
-            return df
+                        else:  # mode == "classification"
+                            removed_feat = lower_corr_clf(df, target, feat, idx)
+                        if removed_feat not in rm_feats:
+                            rm_feats.append(removed_feat)
+                            self.logger.debug(
+                                '"{}" correlates strongly with '
+                                '"{}"'.format(feat, idx))
+                            self.logger.debug(
+                                'removing "{}"...'.format(removed_feat))
+                        if removed_feat == feat:
+                            break
+        if len(rm_feats) > 0:
+            df = df.drop(rm_feats, axis=1)
+            self.logger.info("{} features removed due to cross correlation more"
+                             " than {}".format(len(rm_feats), r_max))
+            self.logger.debug("Features removed by cross-correlation were: {}"
+                              "".format(rm_feats))
+        return df
 
 
 if __name__ == "__main__":
