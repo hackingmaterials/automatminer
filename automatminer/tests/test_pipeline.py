@@ -10,7 +10,7 @@ from sklearn.metrics import r2_score
 from sklearn.exceptions import NotFittedError
 
 from automatminer.pipeline import MatPipe
-from automatminer.configs import debug_config
+from automatminer.configs import get_debug_config
 
 test_dir = os.path.dirname(__file__)
 
@@ -27,6 +27,7 @@ class TestMatPipe(unittest.TestCase):
     def test_transferability(self):
         df_train = self.df.iloc[:200]
         df_test = self.df.iloc[201:250]
+        debug_config = get_debug_config()
         pipe = MatPipe(**debug_config)
         pipe.fit(df_train, self.target)
         df_test = pipe.predict(df_test, self.target)
@@ -46,6 +47,7 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue(r2_score(true2, test2) > 0.5)
 
     def test_user_features(self):
+        debug_config = get_debug_config()
         pipe = MatPipe(**debug_config)
         df = self.df
         df["G_VRH"] = self.extra_features
@@ -64,6 +66,7 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue(r2_score(true, test) > 0.75)
 
     def test_benchmarking(self):
+        debug_config = get_debug_config()
         pipe = MatPipe(**debug_config)
         df = self.df.iloc[500:700]
         df_test = pipe.benchmark(df, self.target, test_spec=0.25)
@@ -73,6 +76,7 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue(r2_score(true, test) > 0.5)
 
     def test_persistence_and_digest(self):
+        debug_config = get_debug_config()
         pipe = MatPipe(**debug_config)
         with self.assertRaises(NotFittedError):
             pipe.save()

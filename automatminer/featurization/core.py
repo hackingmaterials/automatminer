@@ -118,6 +118,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                     " 'fast') or set featurizers manually.")
 
         self.preset = "best" if preset is None else preset
+        print("Got to line 121 in core.py (AutoFeaturizer)")
         self._logger = self.get_logger(logger)
         self.featurizers = featurizers
         self.exclude = exclude if exclude else []

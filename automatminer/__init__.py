@@ -1,8 +1,8 @@
 from automatminer.preprocessing import DataCleaner, FeatureReducer
 from automatminer.automl import TPOTAdaptor
 from automatminer.pipeline import MatPipe
-from automatminer.configs import debug_config, default_config, \
-    production_config, fast_config
+from automatminer.configs import get_debug_config, get_default_config, \
+    get_production_config, get_fast_config
 
 __author__ = 'Alex Dunn, Qi Wang, Alex Ganose, Daniel Dopp, Anubhav Jain'
 __author_email__ = 'ardunn@lbl.gov'

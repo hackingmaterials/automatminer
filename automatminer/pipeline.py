@@ -7,7 +7,7 @@ import pickle
 
 import numpy as np
 
-from automatminer.configs import default_config
+from automatminer.configs import get_default_config
 from automatminer.base import LoggableMixin, DataframeTransformer
 from automatminer.utils.ml_tools import regression_or_classification
 from automatminer.utils.package_tools import check_fitted, set_fitted, \
@@ -78,7 +78,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
 
     def __init__(self, logger=True, log_level=None, autofeaturizer=None,
                  cleaner=None, reducer=None, learner=None):
-
+        default_config = get_default_config()
         self._logger = self.get_logger(logger, level=log_level)
         self.autofeaturizer = autofeaturizer if autofeaturizer else \
             default_config['autofeaturizer']
