@@ -29,10 +29,12 @@ jobs:
             # pip install --quiet -r requirements-optional.txt
 
             # temporarily avoid pip install of matminer
+            mkdir ~/matminer
+            cd ~/matminer
             git clone https://github.com/hackingmaterials/matminer.git
             cd matminer
             pip install -e .
-            cd ..
+            cd ~/automatminer
 
             pip install -e .
             pip install coverage
