@@ -523,4 +523,3 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             self.logger.debug("Features removed by cross-correlation were: {}"
                               "".format(rm_feats))
         return df
-
