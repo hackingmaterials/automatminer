@@ -12,6 +12,12 @@ import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
 import matminer.featurizers.bandstructure as bf
 
+try:
+    import torch
+    import cgcnn
+except:
+    torch, cgcnn = None, None
+
 __authors__ = ["Alex Dunn", "Alex Ganose"]
 
 
@@ -249,10 +255,9 @@ class StructureFeaturizers(FeaturizerSet):
         ]
 
         # Prevent import errors from CGCNN
-        try:
-            self._require_external = [sf.CGCNNFeaturizer()]
-        except RuntimeError:
-            self._require_external = []
+        self._require_external = []
+        if torch and cgcnn:
+            self._require_external.append(sf.CGCNNFeaturizer())
 
         self._need_fitting_featurizers = [
             sf.PartialRadialDistributionFunction(),
@@ -330,7 +335,7 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        return self.fast + self.slow
+        return self.fast + self.slow + self.require_external
 
 
 class DOSFeaturizers(FeaturizerSet):

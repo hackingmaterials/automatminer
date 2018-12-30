@@ -67,6 +67,7 @@ def release(ctx, nosetest=False):
     update_doc(ctx)
     release_github(ctx)
 
+#TODO: HAVE THIS PUSH A NEW BENCHMARK TO LAWRENCIUM
 
 @task
 def open_doc(ctx):

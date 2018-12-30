@@ -7,21 +7,21 @@ exclude_lines =
     if __name__ == .__main__.:
 ignore_errors=True
 omit =
-    */dev_scripts/*
-    */examples/*
-    */.cicleci/*
-    */python?.?/*
-    */site-packages/*
-    *tests/*
-    */versioneer.py
-    */_version.py
-    */*.md
-    */*.gitignore
-    */*.txt
-    */setup.py
-    */__init__.py
-    */automatminer.egg-info/*
-    */docs/*
+    *dev_scripts*
+    *examples*
+    *.cicleci*
+    *site-packages*
+    *tests*
+    *versioneer.py
+    *_version.py
+    *.md
+    *.gitignore
+    *.txt
+    *setup.py
+    *__init__*
+    *.egg-info*
+    *docs*
+    *docs_rst*
     tasks.py
     setup.py
-    */.git/*
+    *.git*

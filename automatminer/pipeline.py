@@ -7,7 +7,6 @@ import pickle
 
 import numpy as np
 
-from automatminer.configs import get_default_config
 from automatminer.base import LoggableMixin, DataframeTransformer
 from automatminer.utils.ml_tools import regression_or_classification
 from automatminer.utils.package_tools import check_fitted, set_fitted, \
@@ -76,15 +75,15 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             fit before being used to predict data.
     """
 
-    def __init__(self, logger=True, log_level=None, autofeaturizer=None,
-                 cleaner=None, reducer=None, learner=None):
-        default_config = get_default_config()
+
+    def __init__(self, autofeaturizer, cleaner, reducer, learner, logger=True,
+                 log_level=None):
+
         self._logger = self.get_logger(logger, level=log_level)
-        self.autofeaturizer = autofeaturizer if autofeaturizer else \
-            default_config['autofeaturizer']
-        self.cleaner = cleaner if cleaner else default_config["cleaner"]
-        self.reducer = reducer if reducer else default_config["reducer"]
-        self.learner = learner if learner else default_config["learner"]
+        self.autofeaturizer = autofeaturizer
+        self.cleaner = cleaner
+        self.reducer = reducer
+        self.learner = learner
 
         self.autofeaturizer._logger = self.get_logger(logger)
         self.cleaner._logger = self.get_logger(logger)
@@ -314,21 +313,3 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                             "retrain!). Backend was serialzed as only the top "
                             "model, not the full automl backend. ")
         return pipe
-
-
-if __name__ == "__main__":
-    pass
-
-    # from sklearn.metrics import mean_squared_error
-    # from matminer.datasets.dataset_retrieval import load_dataset
-    #
-    # hugedf = load_dataset("elastic_tensor_2015").rename(
-    #     columns={"formula": "composition"})[["composition", "K_VRH"]]
-    #
-    # validation_ix = [1, 2, 3, 4, 5, 7, 12]
-    # df = hugedf.iloc[:100]
-    # df2 = hugedf.iloc[101:150]
-    # target = "K_VRH"
-    #
-    # mp = MatPipe(**debug_config)
-    # df = mp.benchmark(df, target, test_spec=0.25)

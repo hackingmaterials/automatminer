@@ -10,6 +10,14 @@ jobs:
           CI: "CIRCLE"
     steps:
       - checkout
+
+    # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "requirements.txt" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
       - run:
           name: setup env and run tests
           command: |
@@ -21,10 +29,12 @@ jobs:
             # pip install --quiet -r requirements-optional.txt
 
             # temporarily avoid pip install of matminer
+            mkdir ~/matminer
+            cd ~/matminer
             git clone https://github.com/hackingmaterials/matminer.git
             cd matminer
             pip install -e .
-            cd ..
+            cd ~/automatminer
 
             pip install -e .
             pip install coverage
@@ -33,3 +43,8 @@ jobs:
             coverage xml
             python-codacy-coverage -r coverage.xml
           no_output_timeout: 120m
+
+      - save_cache:
+          paths:
+          - ./test_env
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
