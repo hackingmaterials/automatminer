@@ -523,19 +523,4 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             self.logger.debug("Features removed by cross-correlation were: {}"
                               "".format(rm_feats))
         return df
-<<<<<<< HEAD
 
-
-if __name__ == "__main__":
-    from matminer.datasets.dataset_retrieval import load_dataset
-    from automatminer.pipeline import MatPipe
-    from automatminer.configs import get_debug_config
-    target = "eij_max"
-    df = load_dataset("piezoelectric_tensor").rename(columns={"formula": "composition"})[[target, "composition", "structure"]]
-
-    debug_config = get_debug_config()
-    mp = MatPipe(**debug_config)
-    df2 = mp.benchmark(df, target, test_spec=0.2)
-    print(df2)
-=======
->>>>>>> e3e2862ae2cf03349234b56cd40c3fa545f07ea9

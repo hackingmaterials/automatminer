@@ -75,7 +75,6 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             fit before being used to predict data.
     """
 
-
     def __init__(self, autofeaturizer, cleaner, reducer, learner, logger=True,
                  log_level=None):
 
