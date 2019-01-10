@@ -24,8 +24,8 @@ class MSE_Example(unittest.TestCase):
 
     def test_mse_example(self):
         df = load_dataset("elastic_tensor_2015")
-        debug_config = get_preset_config("debug")
-        pipe = MatPipe(**debug_config)
+        default_config = get_preset_config("default")
+        pipe = MatPipe(**default_config)
         df = df.rename(columns={"formula": "composition"})[["composition", "structure", "K_VRH"]]
         predicted = pipe.benchmark(df, "K_VRH", test_spec=0.2)
         self.assertTrue(not predicted.empty)
@@ -34,7 +34,7 @@ class MSE_Example(unittest.TestCase):
         y_test = predicted["K_VRH predicted"]
         mse = mean_squared_error(y_true, y_test)
         print("MSE: " + str(mse))
-        self.assertTrue(mse < 1000)
+        self.assertTrue(mse < 500)
         self.assertTrue(mse > 0)
 
 
