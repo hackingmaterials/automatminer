@@ -17,7 +17,7 @@ class MSE_Example(unittest.TestCase):
     squared error is between 0 and 500.
 
     For debugging purposes, you can use the debug config instead. In
-    addition, make the range of the mean sqaured error be 0 - 1000 rather
+    addition, make the range of the mean squared error be 0 - 1000 rather
     than 0 - 500.
 
     """
