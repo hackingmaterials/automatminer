@@ -1,10 +1,13 @@
 import unittest
+import os
 
 from automatminer.pipeline import MatPipe
 from automatminer.presets import get_preset_config
 from matminer.datasets.dataset_retrieval import load_dataset
 from sklearn.metrics.regression import mean_squared_error
 
+
+@unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
 class MSE_Example(unittest.TestCase):
 
     """
