@@ -6,6 +6,9 @@ from automatminer.presets import get_preset_config
 from automatminer.pipeline import MatPipe
 from matminer.datasets import load_dataset
 
+Interpretation = None
+InMemoryModel = None
+
 
 @unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
 class TestAnalytics(unittest.TestCase):
