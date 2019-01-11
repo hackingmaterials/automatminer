@@ -1,13 +1,19 @@
 import unittest
 import os.path
+import warnings
 
 from automatminer.analytics.core import Analytics
 from automatminer.presets import get_preset_config
 from automatminer.pipeline import MatPipe
 from matminer.datasets import load_dataset
-
-Interpretation = None
-InMemoryModel = None
+try:
+    from skater.core.explanations import Interpretation
+    from skater.model import InMemoryModel
+except ImportError:
+    warnings.warn("skater package not found. Please install skater to use the "
+                   "Analytics modeule/")
+    Interpretation = None
+    InMemoryModel = None
 
 
 @unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
