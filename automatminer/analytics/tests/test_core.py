@@ -7,8 +7,9 @@ from automatminer.presets import get_preset_config
 from automatminer.pipeline import MatPipe
 from matminer.datasets import load_dataset
 try:
-    from skater.core.explanations import Interpretation
-    from skater.model import InMemoryModel
+    #from skater.core.explanations import Interpretation
+    #from skater.model import InMemoryModel
+    warnings.warn("")
 except ImportError:
     warnings.warn("skater package not found. Please install skater to use the "
                    "Analytics modeule/")
