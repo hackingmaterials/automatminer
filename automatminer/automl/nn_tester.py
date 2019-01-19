@@ -1,6 +1,3 @@
-import sys
-sys.path.append("/Users/scherfaoui/LBL/automatminer")
-
 from matminer.datasets.dataset_retrieval import load_dataset
 from automatminer.automl.adaptors import NeuralNetworkAdaptor
 from automatminer.pipeline import MatPipe
