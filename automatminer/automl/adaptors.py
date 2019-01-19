@@ -6,23 +6,24 @@ Current adaptor classes are:
     TPOTAdaptor: Uses the backend from the automl project TPOT, which can be
         found at https://github.com/EpistasisLab/tpot
 """
+import sys
+sys.path.append("/Users/scherfaoui/LBL/automatminer")
 from collections import OrderedDict
-
+from sklearn.exceptions import NotFittedError
 from tpot import TPOTClassifier, TPOTRegressor
-
-from automatminer.automl.tpot_configs.classifier import \
-    classifier_config_dict_mb
+from automatminer.automl.tpot_configs.classifier import classifier_config_dict_mb
 from automatminer.automl.tpot_configs.regressor import regressor_config_dict_mb
-from automatminer.utils.package_tools import AutomatminerError, set_fitted, \
-    check_fitted
+from automatminer.utils.package_tools import AutomatminerError, set_fitted, check_fitted
 from automatminer.utils.ml_tools import is_greater_better, \
     regression_or_classification
 from automatminer.base import AutoMLAdaptor, LoggableMixin
+from automatminer.automl.keras_wrapper import NnWrapper
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
                'Alireza Faghaninia <alireza.faghaninia@gmail.com>',
                'Qi Wang <wqthu11@gmail.com>',
-               'Daniel Dopp <dbdopp@lbl.gov>']
+               'Daniel Dopp <dbdopp@lbl.gov>',
+               'Samy Cherfaoui <SCherfaoui@lbl.gov>']
 
 _classifier_modes = {'classifier', 'classification', 'classify'}
 
@@ -203,15 +204,18 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
                 the predictions of the target.
 
         """
+        # todo: We should have the ability to ensembelize predictions based on
+        # todo: the top models (including one model type with mutliple
+        # todo: combinations of model params).
         if target != self.fitted_target:
-            raise AutomatminerError("Argument dataframe target {} is different "
-                                    "from the fitted dataframe target! {}"
-                                    "".format(target, self.fitted_target))
+            raise AutomatminerError("Argument dataframe target {} is different from"
+                                " the fitted dataframe target! {}"
+                                "".format(target, self.fitted_target))
         elif not all([f in df.columns for f in self._features]):
             not_in_model = [f for f in self._features if f not in df.columns]
             not_in_df = [f for f in df.columns if f not in self._features]
-            raise AutomatminerError("Features used to build model are different"
-                                " from df columns! Features located in model "
+            raise AutomatminerError("Features used to build model are different "
+                                "from df columns! Features located in model "
                                 "not located in df: \n{} \n Features located "
                                 "in df not in model: \n{}".format(not_in_df,
                                                                   not_in_model))
@@ -221,6 +225,152 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
             df[target + " predicted"] = y_pred
             self.logger.debug("Prediction finished successfully.")
             return df
+
+class NeuralNetworkAdaptor(LoggableMixin):
+    """
+        A dataframe adaptor for a Keras neural network regressor/classifier.
+
+        Args:
+            logger (Logger, bool): A custom logger object to use for logging.
+                Alternatively, if set to True, the default automatminer logger will be
+                used. If set to False, then no logging will occur.
+            hidden_layer_sizes: Number of layers in the neural network
+            init: Initialization function to use for neural network
+            optimizer: Optimizer used in neural network
+            dropout: The dropout rate (used as a form of regularization to reduce overfitting)
+            show_accuracy: Boolean to indicate whether accuracy should be shown when fitting/predicting with the model
+            batch_spec: Tuple consisting of number of epochs the neural network should go through and batch size (number
+                of training examples per epoch
+            activation: Activation function to use for neural network. By default, we use relu
+            input_noise: Any noise that must be added to the input of the system
+            use_maxout: Boolean to indicate if network should be maxout network
+            use_maxnorm: Boolean to indicate if maxnorm regularization constraints should be used
+            learning_rate: Specifies learning rate decay of ADAM optimizer
+            stop_early: True if neural network should stop training after loss starts to increases, false otherwise.
+            **kwargs: Additional (optional) args needed for neural network wrapper.
+
+        Attributes:
+            The following attributes are set during fitting.
+
+            mode (str): Either "regression" or "classification"
+            features (list): The features labels used to develop the ml model.
+            ml_data (dict): The raw ml data used for training.
+            backend (NnWrapper): The Keras neural network architecture used for ML training.
+            is_fit (bool): If True, the adaptor and backend are fit to a dataset.
+            fitted_target (str): The target name in the df used for training.
+            score (double): Internal CV score of the best model (Stored in backend)
+    """
+    def __init__(self, logger=True, init="glorot_uniform", optimizer="adam", hidden_layer_sizes=(100,), dropout=0.5, show_accuracy=True, batch_spec=((400, 1024), (100, -1)), activation="relu", input_noise=0., use_maxout=False, use_maxnorm=False, learning_rate=0.001, stop_early=False, **kwargs):
+        self.mode = None
+        self.hidden_layer_sizes = hidden_layer_sizes
+        self.dropout = dropout
+        self.show_accuracy = show_accuracy
+        self.batch_spec = batch_spec
+        self.activation = activation
+        self.input_noise = input_noise
+        self.use_maxout = use_maxout
+        self.use_maxnorm = use_maxnorm
+        self.learning_rate = learning_rate
+        self.stop_early = stop_early
+        self._backend = None
+        self.kwargs = kwargs
+        self._features = None
+        self._logger = self.get_logger(logger)
+        self.is_fit = False
+        self.init = init
+        self.optimizer = optimizer
+        self.score = 0
+        self._best_pipeline = None
+        self.backend = None
+        self.best_pipeline = None
+
+    @set_fitted
+    def fit(self, df, target, **fit_kwargs):
+        """
+        Train a neural network by fitting on a dataframe.
+
+        Args:
+            df (pandas.DataFrame): The df to be used for training.
+            target (str): The key used to identify the machine learning target.
+            **fit_kwargs: Keyword arguments to be passed to the neural network's fit method.
+                These arguments must be valid arguments to the Keras neural network fit method.
+
+        Returns:
+            NeuralNetworkAdaptor(self)
+
+        """
+        y = df[target]
+        X = df.drop(columns=target)
+
+        # Determine learning type based on whether classification or regression
+        self.mode = regression_or_classification(df[target])
+        self._features = df.drop(columns=target).columns.tolist()
+        self._ml_data = {"X": X, "y": y}
+        self.fitted_target = target
+        print(self._logger)
+        self._logger.info("Neural network fitting started.")
+        self._backend = NnWrapper(self.init, self.optimizer, self.hidden_layer_sizes, self.dropout, self.show_accuracy, self.batch_spec, self.activation, self.input_noise, self.use_maxout, self.use_maxnorm, self.learning_rate, self.stop_early, self.mode)
+        self._backend, self.score = self._backend.best_model(X, y, self.mode)
+        self._backend.fit(X, y, **fit_kwargs)
+        self._logger.info("Neural network fitting finished.")
+        #self._best_pipeline = self._backend
+        #self.best_pipeline = self._backend
+        self.backend = self._backend
+        return self
+
+    @check_fitted
+    def predict(self, df, target):
+        """
+        Predict the target property of materials given a df of features.
+
+        The predictions are appended to the dataframe in a column called:
+            "{target} predicted"
+
+        Args:
+            df (pandas.DataFrame): Contains all features needed for ML (i.e.,
+                all features contained in the training dataframe.
+            target (str): The property to be predicted. Should match the target
+                used for fitting. May or may not be present in the argument
+                dataframe.
+
+        Returns:
+            (pandas.DataFrame): The argument dataframe plus a column containing
+                the predictions of the target.
+
+        """
+        if target != self.fitted_target:
+            raise AutomatminerError("Argument dataframe target {} is different from"
+                                " the fitted dataframe target! {}"
+                                "".format(target, self.fitted_target))
+        elif not self.is_fit:
+            raise NotFittedError("The TPOT models have not been fit!")
+        elif not all([f in df.columns for f in self._features]):
+            not_in_model = [f for f in self._features if f not in df.columns]
+            not_in_df = [f for f in df.columns if f not in self._features]
+            raise AutomatminerError("Features used to build model are different "
+                                "from df columns! Features located in model "
+                                "not located in df: \n{} \n Features located "
+                                "in df not in model: \n{}".format(not_in_df,
+                                                                  not_in_model))
+        else:
+            X = df[self._features]  # rectify feature order
+            y_pred = self.backend.predict(X)
+            df[target + " predicted"] = y_pred
+            self.logger.debug("Prediction finished successfully.")
+            return df
+
+    @property
+    @check_fitted
+    def best_model(self):
+        """
+        The best model found by the wrapper. Performance is evaluated based on cross validation scores
+
+        Returns:
+            self.backend, self.score (tuple): Contains best architecture returned as well as its cross
+            validation score
+
+        """
+        return self.backend, self.score
 
 
 if __name__ == "__main__":
@@ -239,7 +389,7 @@ if __name__ == "__main__":
     autofeater = AutoFeaturizer()
     cleaner = DataCleaner()
     reducer = FeatureReducer()
-    learner = TPOTAdaptor("regression", max_time_mins=5)
+    learner = NeuralNetworkAdaptor()
 
     # Fit transformers on training data
     traindf = autofeater.fit_transform(traindf, target)
