@@ -6,6 +6,7 @@ from pprint import pformat
 import pickle
 
 import numpy as np
+from sklearn.model_selection import KFold
 
 from automatminer.base import LoggableMixin, DataframeTransformer
 from automatminer.presets import get_preset_config
@@ -170,7 +171,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return predictions
 
     @set_fitted
-    def benchmark(self, df, target, kfold=None):
+    def benchmark(self, df, target, kfold):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
@@ -187,37 +188,57 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         tl;dr: Put in a dataset and kfold scheme for nested CV, get out the
         predicted test sets.
 
+        Note: MatPipes after benchmarking have been fit on the last fold, not
+        the entire dataset. To use your entire dataset for prediction, use the
+        MatPipe fit and predict methods.
+
         Args:
             df (pandas.DataFrame): The dataframe for benchmarking. Must contain
             target (str): The column name to use as the ml target property.
+            kfold (sklearn KFold or StratifiedKFold or GroupKFold): The
+                cross validation split object to use for nested cross
+                validation. Used to index the dataframe with .iloc, NOT .loc.
 
         Returns:
-            testdf (pandas.DataFrame): A dataframe containing original test data
-                and predicted data. If test_spec is set to 0, test df
-                will contain PREDICTIONS MADE ON TRAINING DATA. This should be
-                used to evaluate the training error only!
-
+            results ([pd.DataFrame]): Dataframes containing each fold's
+                known targets, as well as their independently predicted targets.
         """
         # Fit transformers on all data
-        self.logger.info("Featurizing entire dataframe.".format(df.shape[0]))
+        self.logger.info("Featurizing entire dataframe.")
         df = self.autofeaturizer.fit_transform(df, target)
+        self.logger.info("Cleaning entire dataframe.")
+        na_method = self.cleaner.na_method
+        if na_method != 'ignore':
+            self.logger.info("Temporarily changing cleaner na_method to "
+                             "'ignore' to prevent undesired sample drops.")
+            self.cleaner.na_method = 'ignore'
+        df = self.cleaner.fit_transform(df, target)
+        self.cleaner.na_method = na_method
+
         results = []
         fold = 0
         for train_ix, test_ix in kfold.split(df):
             fold += 1
-            self.logger.info("Running MatPipe on fold {}/{}."
+            self.logger.info("Nested CV (fold {}/{}): Running MatPipe."
                              "".format(fold, kfold.n_splits))
             # Split and identify test set
             test = df.iloc[test_ix]
             train = df[~df.index.isin(test.index)]
 
+            # Drop samples left over from ignored na in total cleaning step.
+            test = test.dropna(axis=0, how='any')
+            train = train.dropna(axis=0, how='any')
+            dropped_test = len(test_ix) - test.shape[0]
+            dropped_train = len(train_ix) - train.shape[0]
+            self.logger.info("Nested CV (fold {}/{}): {} samples dropped from"
+                             "test, {} samples dropped from train."
+                             "".format(fold, kfold.n_splits, dropped_test,
+                                       dropped_train))
+
             # Use transformers on separate training and testing dfs
-            train = self.cleaner.fit_transform(train, target)
             train = self.reducer.fit_transform(train, target)
             self.post_fit_df = train
             self.learner.fit(train, target)
-
-            test = self.cleaner.transform(test, target)
             test = self.reducer.transform(test, target)
             test = self.learner.predict(test, target)
             results.append(test)
@@ -292,3 +313,19 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                             "retrain!). Backend was serialzed as only the top "
                             "model, not the full automl backend. ")
         return pipe
+
+
+if __name__ == "__main__":
+    from matminer.datasets.convenience_loaders import load_brgoch_superhard_training
+    from automatminer.presets import get_preset_config
+    from sklearn.model_selection import KFold
+
+    df = load_brgoch_superhard_training()[["structure", "bulk_modulus"]].iloc[:100]
+    config = get_preset_config("debug")
+    kfold = KFold(n_splits=5)
+    pipe = MatPipe(**config)
+    dfs = pipe.benchmark(df, "bulk_modulus", kfold)
+
+    for f, df in enumerate(dfs):
+        print("Fold: {}".format(f))
+        print(df)
