@@ -128,7 +128,6 @@ class MatPipe(DataframeTransformer, LoggableMixin):
 
         Returns:
             MatPipe (self)
-
         """
         self.pre_fit_df = df
         self.ml_type = regression_or_classification(df[target])
@@ -171,44 +170,26 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return predictions
 
     @set_fitted
-    def benchmark(self, df, target, test_spec=0.2):
+    def benchmark(self, df, target, kfold=None):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
-        a certain target property.
+        a certain target property (i.e., estimate the generalization error).
 
-        This method featurizes and cleans the entire dataframe, then splits
-        the data for training and testing. FeatureReducer and TPOT models are
-        fit on the training data. Finally, these fitted models are used to
-        predict the properties of the test df. This scheme allows for rigorous
-        ML model evaluation, as the feature selection and model fitting are
-        determined without any knowledge of the validation/test set.
+        MatPipe benchmarks with a nested cross validation, meaning it makes
+        k validation/test splits, where all model selection is done on the train
+        /validation set (a typical CV). When the model is done validating, it is
+        used to predict the previously unseen test set data. This process is
+        repeated for each of the k folds, which mitigates the benchmark from
+        biasing the model based to the selection of test set and better
+        estimates the generalization error.
 
-        To use a random validation set for model validation, pass in a nonzero
-        validation fraction as a float. The returned df will have the validation
-        predictions.
-
-        To use a CV-only validation, use a validation frac. of 0. The original
-        df will be returned having predictions made on all training data. This
-        should ONLY be used to evaluate the training error!
-
-        To use a fixed validation set, pass in the index (must be .iloc-able in
-        pandas) as the validation argument.
-
-        Depending on the automl adaptor used, the CV information may be stored
-        in the best_models attribute (look at the adaptor class for more info).
+        tl;dr: Put in a dataset and kfold scheme for nested CV, get out the
+        predicted test sets.
 
         Args:
             df (pandas.DataFrame): The dataframe for benchmarking. Must contain
             target (str): The column name to use as the ml target property.
-            test_spec (float or listlike): Specifies how to do test/evaluation.
-                If the test spec is a float, it specifies the fraction of the
-                dataframe to be randomly selected for testing (must be a
-                number between 0-1). test_spec=0 means a CV-only validation.
-                If test_spec is a list/ndarray, it is the iloc indexes of the
-                dataframe to use for testing. This option is useful if you
-                are comparing multiple techniques and want to use the same
-                test or validation fraction across benchmarks.
 
         Returns:
             testdf (pandas.DataFrame): A dataframe containing original test data
@@ -218,42 +199,29 @@ class MatPipe(DataframeTransformer, LoggableMixin):
 
         """
         # Fit transformers on all data
-        self.logger.info("Featurizing and cleaning {} samples from the entire"
-                         " dataframe.".format(df.shape[0]))
+        self.logger.info("Featurizing entire dataframe.".format(df.shape[0]))
         df = self.autofeaturizer.fit_transform(df, target)
-        df = self.cleaner.fit_transform(df, target)
+        results = []
+        fold = 0
+        for train_ix, test_ix in kfold.split(df):
+            fold += 1
+            self.logger.info("Running MatPipe on fold {}/{}."
+                             "".format(fold, kfold.n_splits))
+            # Split and identify test set
+            test = df.iloc[test_ix]
+            train = df[~df.index.isin(test.index)]
 
-        # Split data for steps where combined transform could otherwise over-fit
-        # or leak data from validation set into training set.
-        if isinstance(test_spec, Iterable):
-            traindf = df.iloc[~np.asarray(test_spec)]
-            testdf = df.iloc[np.asarray(test_spec)]
-        else:
-            testdf, traindf = np.split(df.sample(frac=1),
-                                       [int(test_spec * len(df))])
-        self.logger.info("Dataframe split into training and testing fractions"
-                         " having {} and {} samples.".format(traindf.shape[0],
-                                                             testdf.shape[0]))
+            # Use transformers on separate training and testing dfs
+            train = self.cleaner.fit_transform(train, target)
+            train = self.reducer.fit_transform(train, target)
+            self.post_fit_df = train
+            self.learner.fit(train, target)
 
-        # Use transformers on separate training and testing dfs
-        self.logger.info("Performing feature reduction and model selection on "
-                         "the {}-sample training set.".format(traindf.shape[0]))
-        traindf = self.reducer.fit_transform(traindf, target)
-        self.post_fit_df = traindf
-        self.learner.fit(traindf, target)
-
-        if isinstance(test_spec, Iterable) or test_spec != 0:
-            self.logger.info(
-                "Using pipe fitted on training data to predict target {} on "
-                "{}-sample validation dataset".format(target, testdf.shape[0]))
-            testdf = self.reducer.transform(testdf, target)
-            testdf = self.learner.predict(testdf, target)
-            return testdf
-        else:
-            self.logger.warning("Validation fraction set to zero. Using "
-                                "cross-validation-only benchmarking...")
-            traindf = self.learner.predict(traindf, target)
-            return traindf
+            test = self.cleaner.transform(test, target)
+            test = self.reducer.transform(test, target)
+            test = self.learner.predict(test, target)
+            results.append(test)
+        return results
 
     @check_fitted
     def digest(self, filename=None):
