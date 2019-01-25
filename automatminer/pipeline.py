@@ -8,9 +8,10 @@ import pickle
 import numpy as np
 
 from automatminer.base import LoggableMixin, DataframeTransformer
+from automatminer.presets import get_preset_config
 from automatminer.utils.ml_tools import regression_or_classification
 from automatminer.utils.package_tools import check_fitted, set_fitted, \
-    return_attrs_recursively
+    return_attrs_recursively, AutomatminerError
 
 
 class MatPipe(DataframeTransformer, LoggableMixin):
@@ -75,20 +76,31 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             fit before being used to predict data.
     """
 
-    def __init__(self, autofeaturizer, cleaner, reducer, learner, logger=True,
-                 log_level=None):
+    def __init__(self, autofeaturizer=None, cleaner=None, reducer=None,
+                 learner=None, logger=True, log_level=None):
+        transformers = [autofeaturizer, cleaner, reducer, learner]
+        if not all(transformers):
+            if any(transformers):
+                raise AutomatminerError("Please specify all dataframe"
+                                        "transformers (autofeaturizer, learner,"
+                                        "reducer, and cleaner), or none (to use"
+                                        "default).")
+            else:
+                config = get_preset_config("default")
+                autofeaturizer = config["autofeaturizer"]
+                cleaner = config["cleaner"]
+                reducer = config["reducer"]
+                learner = config["learner"]
 
         self._logger = self.get_logger(logger, level=log_level)
         self.autofeaturizer = autofeaturizer
         self.cleaner = cleaner
         self.reducer = reducer
         self.learner = learner
-
         self.autofeaturizer._logger = self.get_logger(logger)
         self.cleaner._logger = self.get_logger(logger)
         self.reducer._logger = self.get_logger(logger)
         self.learner._logger = self.get_logger(logger)
-
         self.pre_fit_df = None
         self.post_fit_df = None
         self.is_fit = False
