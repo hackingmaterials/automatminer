@@ -4,7 +4,6 @@ import unittest
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
 
