@@ -20,6 +20,7 @@ def make_doc(ctx):
         # ctx.run("cp _static/* ../docs/html/_static")
         ctx.run("cp -r build/html/* .")
         ctx.run("rm -r build")
+        ctx.run("touch .nojekyll")
 
 @task
 def publish(ctx):
