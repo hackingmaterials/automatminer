@@ -12,8 +12,26 @@ from sklearn.model_selection import KFold
 
 from automatminer.pipeline import MatPipe
 from automatminer.presets import get_preset_config
+from automatminer.utils.package_tools import AutomatminerError
 
 test_dir = os.path.dirname(__file__)
+
+
+class TestMatPipeSetup(unittest.TestCase):
+    def setUp(self):
+        self.config = get_preset_config('debug')
+
+    def test_instantiation(self):
+        learner = self.config['learner']
+        autofeaturizer = self.config['autofeaturizer']
+        with self.assertRaises(AutomatminerError):
+            pipe = MatPipe(learner=learner)
+        with self.assertRaises(AutomatminerError):
+            pipe = MatPipe(autofeaturizer=autofeaturizer)
+        with self.assertRaises(AutomatminerError):
+            pipe = MatPipe(autofeaturizer=autofeaturizer, learner=learner)
+        pipe = MatPipe()
+        pipe = MatPipe(**self.config)
 
 
 @unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
@@ -87,6 +105,3 @@ class TestMatPipe(unittest.TestCase):
         digest = self.pipe.digest(filename=digest_file)
         self.assertTrue(os.path.isfile(digest_file))
         self.assertTrue(isinstance(digest, str))
-
-
-
