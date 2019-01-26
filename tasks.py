@@ -71,5 +71,5 @@ def release(ctx, nosetest=False):
 
 @task
 def open_doc(ctx):
-    pth = os.path.abspath("docs/_build/html/index.html")
+    pth = os.path.abspath("docs/build/html/index.html")
     webbrowser.open("file://" + pth)
