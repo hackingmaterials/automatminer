@@ -34,7 +34,7 @@ class TestMatPipeSetup(unittest.TestCase):
         pipe = MatPipe(**self.config)
 
 
-@unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
+# todo: figure out a way to run these tests with TPOTAdaptor!
 class TestMatPipe(unittest.TestCase):
     def setUp(self):
         df = load_dataset("elastic_tensor_2015").rename(
@@ -42,7 +42,7 @@ class TestMatPipe(unittest.TestCase):
         self.df = df[["composition", "K_VRH"]]
         self.extra_features = df["G_VRH"]
         self.target = "K_VRH"
-        self.config = get_preset_config("debug")
+        self.config = get_preset_config("debug_single")
         self.pipe = MatPipe(**self.config)
 
     def test_transferability(self):
