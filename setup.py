@@ -28,7 +28,7 @@ if __name__ == "__main__":
         package_data={},
         zip_safe=False,
         install_requires=reqs_list,
-        extras_require=opt_list,
+        extras_require={"analytics": opt_list},
         classifiers=['Programming Language :: Python :: 3.6',
                      'Development Status :: 4 - Beta',
                      'Intended Audience :: Science/Research',
