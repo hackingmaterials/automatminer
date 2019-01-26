@@ -26,7 +26,7 @@ def make_doc(ctx):
 def publish(ctx):
     ctx.run("rm dist/*.*", warn=True)
     ctx.run("python3 setup.py sdist bdist_wheel")
-    ctx.run("twine upload dist/*")
+    ctx.run("twine upload dist/* --verbose")
 
 
 @task
