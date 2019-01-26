@@ -175,15 +175,15 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
-        a certain target property (i.e., estimate the generalization error).
+        a certain target property.
 
         MatPipe benchmarks with a nested cross validation, meaning it makes
         k validation/test splits, where all model selection is done on the train
         /validation set (a typical CV). When the model is done validating, it is
         used to predict the previously unseen test set data. This process is
-        repeated for each of the k folds, which mitigates the benchmark from
-        biasing the model based to the selection of test set and better
-        estimates the generalization error.
+        repeated for each of the k folds, which (1) mitigates the benchmark from
+        biasing the model based to the selection of test set and (2) better
+        estimates the generalization error than a single validation/test split.
 
         tl;dr: Put in a dataset and kfold scheme for nested CV, get out the
         predicted test sets.

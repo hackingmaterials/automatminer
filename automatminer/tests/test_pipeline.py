@@ -8,6 +8,7 @@ import os.path
 from matminer.datasets.dataset_retrieval import load_dataset
 from sklearn.metrics import r2_score
 from sklearn.exceptions import NotFittedError
+from sklearn.model_selection import KFold
 
 from automatminer.pipeline import MatPipe
 from automatminer.presets import get_preset_config
@@ -65,11 +66,9 @@ class TestMatPipe(unittest.TestCase):
 
     def test_benchmarking(self):
         df = self.df.iloc[500:700]
-        df_test = self.pipe.benchmark(df, self.target, test_spec=0.25)
-        self.assertEqual(df_test.shape[0], 50)
-        true = df_test[self.target]
-        test = df_test[self.target + " predicted"]
-        self.assertTrue(r2_score(true, test) > 0.5)
+        kfold = KFold(n_splits=5)
+        df_tests = self.pipe.benchmark(df, self.target, kfold)
+        self.assertEqual(len(df_tests), 5)
 
     def test_persistence_and_digest(self):
         with self.assertRaises(NotFittedError):
