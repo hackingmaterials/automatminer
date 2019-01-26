@@ -51,8 +51,8 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
             }
 
         logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will be
-            used. If set to False, then no logging will occur.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
 
     Attributes:
         The following attributes are set during fitting.
@@ -82,6 +82,8 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         self._logger = self.get_logger(logger)
         self.is_fit = False
         self.random_state = tpot_kwargs.get('random_state', None)
+        self._ml_data = None
+        self.greater_score_is_better = None
 
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
@@ -114,7 +116,8 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
             self._backend = TPOTRegressor(**self.tpot_kwargs)
         else:
             raise ValueError("Learning type {} not recognized as a valid mode "
-                             "for {}".format(self.mode, self.__class__.__name__))
+                             "for {}".format(self.mode,
+                                             self.__class__.__name__))
         self._features = df.drop(columns=target).columns.tolist()
         self._ml_data = {"X": X, "y": y}
         self.fitted_target = target
@@ -128,6 +131,9 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
     def best_models(self):
         """
         The best models found by TPOT, in order of descending performance.
+
+        If you want a pipeline you can use to make predtions, use the
+        best_pipeline.
 
         Performance is evaluated based on the TPOT scoring. This can be changed
         by passing a "scoring" kwarg into the __init__ method.
@@ -211,45 +217,134 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
             not_in_model = [f for f in self._features if f not in df.columns]
             not_in_df = [f for f in df.columns if f not in self._features]
             raise AutomatminerError("Features used to build model are different"
-                                " from df columns! Features located in model "
-                                "not located in df: \n{} \n Features located "
-                                "in df not in model: \n{}".format(not_in_df,
-                                                                  not_in_model))
+                                    " from df columns! Features located in "
+                                    "model not located in df: \n{} \n Features "
+                                    "located in df not in model: \n{}"
+                                    "".format(not_in_df, not_in_model))
         else:
             X = df[self._features].values  # rectify feature order
             y_pred = self._backend.predict(X)
             df[target + " predicted"] = y_pred
-            self.logger.debug("Prediction finished successfully.")
+            self.logger.info("Prediction finished successfully.")
             return df
 
 
-if __name__ == "__main__":
-    from matminer.datasets.dataset_retrieval import load_dataset
-    from automatminer.featurization import AutoFeaturizer
-    from automatminer.preprocessing import DataCleaner, FeatureReducer
+class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
+    """
+    For running single models or pipelines in a MatPipe pipeline using the same
+    syntax as the AutoML adaptors.
 
-    # Load a dataset
-    df = load_dataset("elastic_tensor_2015").rename(
-        columns={"formula": "composition"})[["composition", "K_VRH"]]
-    testdf = df.iloc[501:550]
-    traindf = df.iloc[:100]
-    target = "K_VRH"
+    This adaptor should be able to fit into a MatPipe in similar fashion to
+    TPOTAdaptor.
 
-    # Get top-lvel transformers
-    autofeater = AutoFeaturizer()
-    cleaner = DataCleaner()
-    reducer = FeatureReducer()
-    learner = TPOTAdaptor("regression", max_time_mins=5)
+    Args:
+        model (sklearn Pipeline or BaseEstimator-like): The object you want to
+            use for machine learning. Must implement fit/predict/transform
+            methods analagously to BaseEstimator, but does not need to be a
+            BaseEstimator or Pipeline.
+    """
 
-    # Fit transformers on training data
-    traindf = autofeater.fit_transform(traindf, target)
-    traindf = cleaner.fit_transform(traindf, target)
-    traindf = reducer.fit_transform(traindf, target)
-    learner.fit(traindf, target)
+    def __init__(self, model, logger=True):
+        self._logger = self.get_logger(logger)
+        self._backend = model
+        self._features = None
+        self._ml_data = None
+        self.fitted_target = None
 
-    # Use transformers on testing data
-    testdf = autofeater.transform(testdf, target)
-    testdf = cleaner.transform(testdf, target)
-    testdf = reducer.transform(testdf, target)
-    testdf = learner.predict(testdf, target)
-    print(testdf)
+    @set_fitted
+    def fit(self, df, target, **fit_kwargs):
+        # Prevent goofy pandas casting by casting to native
+        y = df[target].values.tolist()
+        X = df.drop(columns=target).values.tolist()
+        self._features = df.drop(columns=target).columns.tolist()
+        self._ml_data = {"X": X, "y": y}
+        self.fitted_target = target
+        model_name = self._backend.__class__.__name__
+        self.logger.info("{} fitting started.".format(model_name))
+        self._backend.fit(X, y)
+        self.logger.info("{} fitting finished.".format(model_name))
+
+    # todo: Remove this duplicated code section, maybe just make a parent class
+    @check_fitted
+    def predict(self, df, target):
+        """
+        Predict the target property of materials given a df of features.
+
+        The predictions are appended to the dataframe in a column called:
+            "{target} predicted"
+
+        Args:
+            df (pandas.DataFrame): Contains all features needed for ML (i.e.,
+                all features contained in the training dataframe.
+            target (str): The property to be predicted. Should match the target
+                used for fitting. May or may not be present in the argument
+                dataframe.
+
+        Returns:
+            (pandas.DataFrame): The argument dataframe plus a column containing
+                the predictions of the target.
+
+        """
+        if target != self.fitted_target:
+            raise AutomatminerError("Argument dataframe target {} is different "
+                                    "from the fitted dataframe target! {}"
+                                    "".format(target, self.fitted_target))
+        elif not all([f in df.columns for f in self._features]):
+            not_in_model = [f for f in self._features if f not in df.columns]
+            not_in_df = [f for f in df.columns if f not in self._features]
+            raise AutomatminerError("Features used to build model are different"
+                                    " from df columns! Features located in "
+                                    "model not located in df: \n{} \n Features "
+                                    "located in df not in model: \n{}"
+                                    "".format(not_in_df, not_in_model))
+        else:
+            X = df[self._features].values  # rectify feature order
+            y_pred = self._backend.predict(X)
+            df[target + " predicted"] = y_pred
+            self.logger.info("Prediction finished successfully.")
+            return df
+
+    @property
+    @check_fitted
+    def _best_pipeline(self):
+        return self._backend
+
+
+# if __name__ == "__main__":
+#     from matminer.datasets.dataset_retrieval import load_dataset
+#     from automatminer.featurization import AutoFeaturizer
+#     from automatminer.preprocessing import DataCleaner, FeatureReducer
+#     from sklearn.ensemble import RandomForestRegressor
+#     from sklearn.linear_model import SGDRegressor
+#     from sklearn.pipeline import Pipeline
+#     from sklearn.preprocessing import StandardScaler
+#
+#     # Load a dataset
+#     df = load_dataset("elastic_tensor_2015").rename(
+#         columns={"formula": "composition"})[["composition", "K_VRH"]]
+#     testdf = df.iloc[501:550]
+#     traindf = df.iloc[:100]
+#     target = "K_VRH"
+#
+#     # Get top-lvel transformers
+#     autofeater = AutoFeaturizer()
+#     cleaner = DataCleaner()
+#     reducer = FeatureReducer()
+#     # learner = TPOTAdaptor("regression", max_time_mins=5)
+#     learner = SinglePipelineAdaptor(model=RandomForestRegressor())
+#     learner = SinglePipelineAdaptor(model=
+#                                     Pipeline([('scaler', StandardScaler()),
+#                                               ('rfr', RandomForestRegressor())]))
+#
+#     # Fit transformers on training data
+#     traindf = autofeater.fit_transform(traindf, target)
+#     traindf = cleaner.fit_transform(traindf, target)
+#     traindf = reducer.fit_transform(traindf, target)
+#     learner.fit(traindf, target)
+#
+#     # Use transformers on testing data
+#     testdf = autofeater.transform(testdf, target)
+#     testdf = cleaner.transform(testdf, target)
+#     testdf = reducer.transform(testdf, target)
+#     testdf = learner.predict(testdf, target)
+#     print(testdf[["K_VRH", "K_VRH predicted"]])
