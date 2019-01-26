@@ -1,12 +1,8 @@
 """
 The highest level classes for pipelines.
 """
-from collections import Iterable
 from pprint import pformat
 import pickle
-
-import numpy as np
-from sklearn.model_selection import KFold
 
 from automatminer.base import LoggableMixin, DataframeTransformer
 from automatminer.presets import get_preset_config
@@ -313,5 +309,3 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                             "retrain!). Backend was serialzed as only the top "
                             "model, not the full automl backend. ")
         return pipe
-
-
