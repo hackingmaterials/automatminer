@@ -12,12 +12,10 @@
    :width: 400px
 
 
-automatminer = autoML for materials
------------------------------------
-Automatminer is a tool for automatically creating complete machine learning pipelines for materials science, which include automatic featurization with `matminer <https://github.com/hackingmaterials/matminer>`_, feature reduction, and an AutoML backend. Put in a materials dataset, get out a machine that predicts materials properties.
+Automatminer is a tool for automatically creating complete machine learning pipelines for materials science, which includes automatic featurization with `matminer <https://github.com/hackingmaterials/matminer>`_, feature reduction, and an AutoML backend. Put in a materials dataset, get out a machine that predicts materials properties.
 
 
-.. image:: _static/automatminer_big.png
+.. image:: _static/automatminer_big.jpg
    :alt: server
    :align: center
 

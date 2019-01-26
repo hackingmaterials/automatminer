@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>automatminer = autoML for materials &#8212; automatminer 2019.01.25_beta documentation</title>
+    <title>automatminer is applicable to many problems &#8212; automatminer 2019.01.26_beta documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -33,10 +33,8 @@
             
   <style> .red {color:#aa0060; font-weight:bold; font-size:16px} </style><p><span class="red">WARNING! These docs are incomplete. Read and use at your own risk!`</span></p>
 <a class="reference internal image-reference" href="_images/logo_med.png"><img alt="server" class="align-center" src="_images/logo_med.png" style="width: 400px;" /></a>
-<div class="section" id="automatminer-automl-for-materials">
-<h1>automatminer = autoML for materials<a class="headerlink" href="#automatminer-automl-for-materials" title="Permalink to this headline">¶</a></h1>
-<p>Automatminer is a tool for automatically creating complete machine learning pipelines for materials science, which include automatic featurization with <a class="reference external" href="https://github.com/hackingmaterials/matminer">matminer</a>, feature reduction, and an AutoML backend. Put in a materials dataset, get out a machine that predicts materials properties.</p>
-<img alt="server" class="align-center" src="_images/automatminer_big.png" />
+<p>Automatminer is a tool for automatically creating complete machine learning pipelines for materials science, which includes automatic featurization with <a class="reference external" href="https://github.com/hackingmaterials/matminer">matminer</a>, feature reduction, and an AutoML backend. Put in a materials dataset, get out a machine that predicts materials properties.</p>
+<img alt="server" class="align-center" src="_images/automatminer_big.jpg" />
 <p>Here’s an example of training on known data, and extending the model to out of sample data.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer.pipeline</span> <span class="kn">import</span> <span class="n">MatPipe</span>
 
@@ -55,7 +53,6 @@
 <span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">()</span>
 <span class="n">predictions_per_fold</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">benchmark</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;bulk modulus&quot;</span><span class="p">,</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
 </pre></div>
-</div>
 </div>
 <div class="section" id="automatminer-is-applicable-to-many-problems">
 <h1>automatminer is applicable to many problems<a class="headerlink" href="#automatminer-is-applicable-to-many-problems" title="Permalink to this headline">¶</a></h1>
