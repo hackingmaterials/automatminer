@@ -101,7 +101,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.pre_fit_df = None
         self.post_fit_df = None
         self.is_fit = False
-        self.ml_type = self.learner.mode
+        self.ml_type = None
 
     @set_fitted
     def fit(self, df, target):
@@ -227,7 +227,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             dropped_test = len(test_ix) - test.shape[0]
             dropped_train = len(train_ix) - train.shape[0]
             self.logger.info("Nested CV (fold {}/{}): {} samples dropped from"
-                             "test, {} samples dropped from train."
+                             " test, {} samples dropped from train."
                              "".format(fold, kfold.n_splits, dropped_test,
                                        dropped_train))
 
@@ -275,7 +275,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             None
         """
         temp_backend = self.learner.backend
-        self.learner._backend = self.learner.backend.fitted_pipeline_
+        self.learner._backend = self.learner.best_pipeline
         for obj in [self, self.learner, self.reducer, self.cleaner,
                     self.autofeaturizer]:
             obj._logger = None
