@@ -38,10 +38,14 @@ Now use your pipeline to predict the properties of some other data, such as a ne
 predicted_df = pipe.predict(other_df, "band gap")
 ```
 
-You can also use it to benchmark against other machine learning models with the `benchmark` method of MatPipe, which optimizes the pipeline a training data and returns predictions on a held test set. 
+You can also use it to benchmark against other machine learning models with the `benchmark` method of MatPipe, which runs a Nested Cross Validation. The Nested CV scheme
+is typically a more robust way of estimating an ML pipeline's generalizaiton error than a simple train/validation/test split. 
 ```python
+from automatminer.pipeline import MatPipe
+from sklearn.model_selection import KFold
+
 pipe = MatPipe()
-test_predictions = pipe.benchmark(df, "bulk modulus", test_spec=0.2)
+predictions_per_fold = pipe.benchmark(df, "bulk modulus", KFold(n_splits=5))
 ```
 
 Once a MatPipe has been fit, you can examine it internally to see how it works using `pipe.digest()`; or pickle it for later with `pipe.save()`.

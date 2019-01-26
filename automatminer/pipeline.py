@@ -195,9 +195,9 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         Args:
             df (pandas.DataFrame): The dataframe for benchmarking. Must contain
             target (str): The column name to use as the ml target property.
-            kfold (sklearn KFold or StratifiedKFold or GroupKFold): The
-                cross validation split object to use for nested cross
-                validation. Used to index the dataframe with .iloc, NOT .loc.
+            kfold (sklearn KFold or StratifiedKFold: The cross validation split
+                object to use for nested cross validation. Used to index the
+                dataframe with .iloc, NOT .loc.
 
         Returns:
             results ([pd.DataFrame]): Dataframes containing each fold's
