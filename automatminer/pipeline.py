@@ -31,13 +31,13 @@ class MatPipe(DataframeTransformer, LoggableMixin):
     predictions (e.g., predicting material properties for which you have
     no data) use "fit" and "predict".
 
-    The pipeline is transferable. So it can be fit on one dataset and used
+    The pipeline is transferrable. So it can be fit on one dataset and used
     to predict the properties of another. Furthermore, the entire pipeline and
     all constituent objects can be summarized in text with "digest".
 
     ----------------------------------------------------------------------------
     Note: This pipeline should function the same regardless of which
-    "component" classes it is made out of. E.g., he steps for each method should
+    "component" classes it is made out of. E.g. the steps for each method should
     remain the same whether using the TPOTAdaptor class as the learner or
     using an AutoKerasAdaptor class as the learner. To use a preset config,
     import a config from automatminer.configs and do MatPipe(**config).
@@ -315,17 +315,3 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return pipe
 
 
-if __name__ == "__main__":
-    from matminer.datasets.convenience_loaders import load_brgoch_superhard_training
-    from automatminer.presets import get_preset_config
-    from sklearn.model_selection import KFold
-
-    df = load_brgoch_superhard_training()[["structure", "bulk_modulus"]].iloc[:100]
-    config = get_preset_config("debug")
-    kfold = KFold(n_splits=5)
-    pipe = MatPipe(**config)
-    dfs = pipe.benchmark(df, "bulk_modulus", kfold)
-
-    for f, df in enumerate(dfs):
-        print("Fold: {}".format(f))
-        print(df)
