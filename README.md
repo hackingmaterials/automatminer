@@ -7,6 +7,6 @@ automatminer is an automatic prediction engine for materials properties.
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/aa63dd7aa85e480bbe0e924a02ad1540)](https://www.codacy.com/app/ardunn/automatminer?utm_source=github.com&utm_medium=referral&utm_content=hackingmaterials/automatminer&utm_campaign=Badge_Coverage)
 ![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)
 
-- **Website (including documentation):** https://hackingmaterials.github.io/automatminer
-- **Help/Support:** https://groups.google.com/forum/#!forum/matminer
-- **Source:** https://github.com/hackingmaterials/automatminer
+- **Website (including documentation):** <https://hackingmaterials.github.io/automatminer>
+- **Help/Support:** <https://groups.google.com/forum/#!forum/matminer>
+- **Source:** <https://github.com/hackingmaterials/automatminer>
