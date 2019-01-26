@@ -18,9 +18,8 @@ def make_doc(ctx):
         ctx.run("sphinx-apidoc -o . -f .")
         ctx.run("make html")
         # ctx.run("cp _static/* ../docs/html/_static")
-        ctx.run("cp -r html/* .")
-        ctx.run("rm -r html")
-        ctx.run("rm -r doctrees")
+        ctx.run("cp -r build/html/* .")
+        ctx.run("rm -r build")
 
 @task
 def publish(ctx):
@@ -54,5 +53,5 @@ def release(ctx):
 
 @task
 def open_doc(ctx):
-    pth = os.path.abspath("docs/build/html/index.html")
+    pth = os.path.abspath("docs/index.html")
     webbrowser.open("file://" + pth)

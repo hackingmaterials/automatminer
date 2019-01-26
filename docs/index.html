@@ -1,0 +1,130 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>automatminer = autoML for materials &#8212; automatminer 2019.01.25_beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <style> .red {color:#aa0060; font-weight:bold; font-size:16px} </style><p><span class="red">WARNING! These docs are incomplete. Read and use at your own risk!`</span></p>
+<a class="reference internal image-reference" href="_images/logo_med.png"><img alt="server" class="align-center" src="_images/logo_med.png" style="width: 400px;" /></a>
+<div class="section" id="automatminer-automl-for-materials">
+<h1>automatminer = autoML for materials<a class="headerlink" href="#automatminer-automl-for-materials" title="Permalink to this headline">¶</a></h1>
+<p>Automatminer is a tool for automatically creating complete machine learning pipelines for materials science, which include automatic featurization with <a class="reference external" href="https://github.com/hackingmaterials/matminer">matminer</a>, feature reduction, and an AutoML backend. Put in a materials dataset, get out a machine that predicts materials properties.</p>
+<img alt="server" class="align-center" src="_images/automatminer_big.png" />
+<p>Here’s an example of training on known data, and extending the model to out of sample data.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer.pipeline</span> <span class="kn">import</span> <span class="n">MatPipe</span>
+
+<span class="c1"># Fit a pipeline to training data to predict band gap</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">()</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_df</span><span class="p">,</span> <span class="s2">&quot;band gap&quot;</span><span class="p">)</span>
+
+<span class="c1"># Predict bandgap of some unknown materials</span>
+<span class="n">predicted_df</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">unknown_df</span><span class="p">,</span> <span class="s2">&quot;band gap&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternatively, run a nested cross validation benchmark on a known dataset, and then compare the results against your own ML models:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer.pipeline</span> <span class="kn">import</span> <span class="n">MatPipe</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">()</span>
+<span class="n">predictions_per_fold</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">benchmark</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;bulk modulus&quot;</span><span class="p">,</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="automatminer-is-applicable-to-many-problems">
+<h1>automatminer is applicable to many problems<a class="headerlink" href="#automatminer-is-applicable-to-many-problems" title="Permalink to this headline">¶</a></h1>
+<p>Automatminer can work with many kinds of data:
+*   both computational and experimental data
+*   small (~100 samples) to moderate (~100k samples) sized datasets
+*   crystalline datasets
+*   composition-only (i.e., unknown phases) datasets
+*   datasets containing electronic bandstructures or density of states</p>
+<p>…Many kinds of target properties
+*   electronic
+mechanical
+thermodynamic
+any other kind of property</p>
+<p>…And many featurization (descriptor) techniques:
+<em>list them</em></p>
+<p>Automatminer automatically decorates a dataset using hundreds of descriptor techniques from matminer’s descriptor library, picks the most useful features for learning, and runs a separate AutoML pipeline using TPOT. Once a pipeline has been fit, it can be examined with skater’s interpretability tools, summarized in a text file, saved to disk, or used to make new predictions.</p>
+<div class="section" id="code-examples">
+<h2>Code Examples<a class="headerlink" href="#code-examples" title="Permalink to this headline">¶</a></h2>
+<p>The easiest (and most automatic) way to use automatminer is through the MatPipe object. First, fit the MatPipe to a dataframe containing materials objects such as chemical compositions (or pymatgen Structures) and some material target property.
+<a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python</p>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<p>Now use your pipeline to predict the properties of some other data, such as a new composition or structure.
+<a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a>python</p>
+<p><a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
+<p>You can also use it to benchmark against other machine learning models with the <cite>benchmark</cite> method of MatPipe, which runs a Nested Cross Validation. The Nested CV scheme
+is typically a more robust way of estimating an ML pipeline’s generalizaiton error than a simple train/validation/test split.
+<a href="#id17"><span class="problematic" id="id18">``</span></a><a href="#id19"><span class="problematic" id="id20">`</span></a>python
+from automatminer.pipeline import MatPipe
+from sklearn.model_selection import KFold</p>
+<p>pipe = MatPipe()
+predictions_per_fold = pipe.benchmark(df, “bulk modulus”, KFold(n_splits=5))
+<a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p>
+<p>Once a MatPipe has been fit, you can examine it internally to see how it works using <cite>pipe.digest()</cite>; or pickle it for later with <cite>pipe.save()</cite>.</p>
+<p>### Citing automatminer
+We are in the process of writing a paper for automatminer. In the meantime, please use the citation given in the matminer repo.</p>
+<p>## Contributing
+Interested in contributing? See our [contribution guidelines](<a class="reference external" href="https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md">https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md</a>) and make a pull request! Please submit questions, issues / bug reports, and all other communication through the [matminer Google Group](<a class="reference external" href="https://groups.google.com/forum/#!forum/matminer">https://groups.google.com/forum/#!forum/matminer</a>).</p>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
