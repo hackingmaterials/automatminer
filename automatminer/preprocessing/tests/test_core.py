@@ -136,6 +136,15 @@ class TestFeatureReduction(unittest.TestCase):
 
     def test_lower_corr_clf(self):
         df = self.test_df
+        targets = []
+        for gap in df["gap expt"]:
+            if gap == 0:
+                targets.append("metal")
+            elif gap <= 3.0:
+                targets.append("semiconductor")
+            else:
+                targets.append("insulator")
+        df["gap_clf"] = targets
         # worst feature should be worse than a perfect output value...
-        worse_feature = lower_corr_clf(df, "gap expt", "gap expt", "range row")
+        worse_feature = lower_corr_clf(df, "gap_clf", "gap expt", "range row")
         self.assertEqual("range row", worse_feature)
