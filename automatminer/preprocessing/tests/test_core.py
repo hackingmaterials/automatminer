@@ -111,6 +111,21 @@ class TestPreprocess(unittest.TestCase):
         df_reduced = fr.fit_transform(df, self.target)
         self.assertEqual(df_reduced.shape[1], 15)
 
+    def test_manual_feature_reduction(self):
+        fr = FeatureReducer(reducers=[], remove_features=['LUMO_element_Th'])
+
+        # ultra-basic case: are we reducing at least 1 feature?
+        df = fr.fit_transform(self.test_df, self.target)
+        self.assertTrue('LUMO_element_Th' not in df.columns)
+        self.assertEqual(fr.removed_features['manual'], ['LUMO_element_Th'])
+
+    def test_saving_feature_from_removal(self):
+        fr = FeatureReducer(keep_features=['maximum X'])
+
+        # ultra-basic case: are we reducing at least 1 feature?
+        df = fr.fit_transform(self.test_df, self.target)
+        self.assertTrue('maximum X' in df.columns)
+
 
 class TestFeatureReduction(unittest.TestCase):
 
