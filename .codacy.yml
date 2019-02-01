@@ -1,0 +1,30 @@
+---
+engines:
+ rubocop:
+   exclude_paths:
+     - docs/**
+     - docs/*
+     - automatminer/examples/*
+ duplication:
+   exclude_paths:
+     - docs/**
+     - docs/*
+     - automatminer/examples/*
+
+ metrics:
+   exclude_paths:
+     - docs/**
+     - docs/*
+     - automatminer/examples/*
+
+ coverage:
+   exclude_paths:
+     - docs/**
+     - docs/*
+     - automatminer/examples/*
+
+exclude_paths:
+  - '.circleci/*'
+  - 'docs/**'
+  - 'docs/*'
+  - '**/docs/**'

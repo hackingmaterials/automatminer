@@ -3,12 +3,13 @@ import warnings
 
 import matplotlib.pyplot as plt
 from matminer.datasets import load_dataset
+
 try:
     from skater.core.explanations import Interpretation
     from skater.model import InMemoryModel
 except ImportError:
     warnings.warn("skater package not found. Please install skater to use the "
-                  "Analytics modeule/")
+                  "Analytics module.")
     Interpretation = None
     InMemoryModel = None
 
@@ -35,9 +36,7 @@ class Analytics:
             prediction = self.predictive_model.learner.predict(x, self.target)
             return prediction[self.target + " predicted"].values
 
-        self.model = InMemoryModel(
-            predict_func, examples=self.dataset
-        )
+        self.model = InMemoryModel(predict_func, examples=self.dataset)
 
     def get_feature_importance(self):
         return self.interpreter.feature_importance.feature_importance(

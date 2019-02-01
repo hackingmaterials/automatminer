@@ -1,9 +1,9 @@
 """
-This file is modified from the default config files of the TPOT library. 
-It contains a customed dict of operators that we want to optimize using 
+This file is modified from the default config files of the TPOT library.
+It contains a customed dict of operators that we want to optimize using
 genetic algorithm.
 
-We can add/remove Regressors/Preprocessors/Selectors-related operators 
+We can add/remove Regressors/Preprocessors/Selectors-related operators
 to custom the operators to be optimized by tpot in the future. For instance,
 the Preprocessors/Selectors-related procedures are currently taken care of
 by the Preprocess class in automatminer, so we may consider to comment out the

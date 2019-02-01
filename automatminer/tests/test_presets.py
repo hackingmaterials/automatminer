@@ -20,5 +20,3 @@ class TestMatPipe(unittest.TestCase):
 
     def test_default(self):
         default = get_preset_config("default")
-
-

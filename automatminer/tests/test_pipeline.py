@@ -8,14 +8,33 @@ import os.path
 from matminer.datasets.dataset_retrieval import load_dataset
 from sklearn.metrics import r2_score
 from sklearn.exceptions import NotFittedError
+from sklearn.model_selection import KFold
 
 from automatminer.pipeline import MatPipe
 from automatminer.presets import get_preset_config
+from automatminer.utils.package_tools import AutomatminerError
 
 test_dir = os.path.dirname(__file__)
 
 
-@unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
+class TestMatPipeSetup(unittest.TestCase):
+    def setUp(self):
+        self.config = get_preset_config('debug')
+
+    def test_instantiation(self):
+        learner = self.config['learner']
+        autofeaturizer = self.config['autofeaturizer']
+        with self.assertRaises(AutomatminerError):
+            pipe = MatPipe(learner=learner)
+        with self.assertRaises(AutomatminerError):
+            pipe = MatPipe(autofeaturizer=autofeaturizer)
+        with self.assertRaises(AutomatminerError):
+            pipe = MatPipe(autofeaturizer=autofeaturizer, learner=learner)
+        pipe = MatPipe()
+        pipe = MatPipe(**self.config)
+
+
+# todo: figure out a way to run these tests with TPOTAdaptor!
 class TestMatPipe(unittest.TestCase):
     def setUp(self):
         df = load_dataset("elastic_tensor_2015").rename(
@@ -23,7 +42,7 @@ class TestMatPipe(unittest.TestCase):
         self.df = df[["composition", "K_VRH"]]
         self.extra_features = df["G_VRH"]
         self.target = "K_VRH"
-        self.config = get_preset_config("debug")
+        self.config = get_preset_config("debug_single")
         self.pipe = MatPipe(**self.config)
 
     def test_transferability(self):
@@ -65,11 +84,9 @@ class TestMatPipe(unittest.TestCase):
 
     def test_benchmarking(self):
         df = self.df.iloc[500:700]
-        df_test = self.pipe.benchmark(df, self.target, test_spec=0.25)
-        self.assertEqual(df_test.shape[0], 50)
-        true = df_test[self.target]
-        test = df_test[self.target + " predicted"]
-        self.assertTrue(r2_score(true, test) > 0.5)
+        kfold = KFold(n_splits=5)
+        df_tests = self.pipe.benchmark(df, self.target, kfold)
+        self.assertEqual(len(df_tests), 5)
 
     def test_persistence_and_digest(self):
         with self.assertRaises(NotFittedError):
@@ -88,6 +105,3 @@ class TestMatPipe(unittest.TestCase):
         digest = self.pipe.digest(filename=digest_file)
         self.assertTrue(os.path.isfile(digest_file))
         self.assertTrue(isinstance(digest, str))
-
-
-

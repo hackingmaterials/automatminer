@@ -3,9 +3,12 @@ import unittest
 
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.pipeline import Pipeline
 
 from automatminer.presets import get_preset_config
-from automatminer.automl.adaptors import TPOTAdaptor
+from automatminer.automl.adaptors import SinglePipelineAdaptor
 from automatminer.utils.package_tools import AutomatminerError
 
 __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
@@ -55,6 +58,47 @@ class TestTPOTAdaptor(unittest.TestCase):
         self.tpot.fit(df1, target_key)
         with self.assertRaises(AutomatminerError):
             self.tpot.predict(df2, target_key)
+
+
+class TestSinglePipelineAdaptor(unittest.TestCase):
+    def setUp(self):
+        basedir = os.path.dirname(os.path.realpath(__file__))
+        df = pd.read_csv(basedir + "/mini_automl_df.csv", index_col=0)
+        self.train_df = df.copy(deep=True).iloc[:450]
+        self.test_df = df.copy(deep=True).iloc[451:]
+
+    def test_Pipeline(self):
+        model = Pipeline([('scaler', StandardScaler()),
+                          ('rfr', RandomForestRegressor())])
+        learner = SinglePipelineAdaptor(model=model)
+        target_key = "K_VRH"
+        learner.fit(self.train_df, target_key)
+        test_w_predictions = learner.predict(self.test_df, target_key)
+        y_true = test_w_predictions[target_key]
+        y_test = test_w_predictions[target_key + " predicted"]
+        print(r2_score(y_true, y_test))
+        self.assertTrue(r2_score(y_true, y_test) > 0.75)
+
+    def test_BaseEstimator(self):
+        model = RandomForestRegressor()
+        learner = SinglePipelineAdaptor(model=model)
+        target_key = "K_VRH"
+        learner.fit(self.train_df, target_key)
+        test_w_predictions = learner.predict(self.test_df, target_key)
+        y_true = test_w_predictions[target_key]
+        y_test = test_w_predictions[target_key + " predicted"]
+        print(r2_score(y_true, y_test))
+        self.assertTrue(r2_score(y_true, y_test) > 0.75)
+
+    def test_feature_mismatching(self):
+        model = RandomForestRegressor()
+        learner = SinglePipelineAdaptor(model=model)
+        target_key = "K_VRH"
+        df1 = self.train_df
+        df2 = self.test_df.rename(columns={'mean X': "some other feature"})
+        learner.fit(df1, target_key)
+        with self.assertRaises(AutomatminerError):
+            learner.predict(df2, target_key)
 
 
 if __name__ == '__main__':
