@@ -161,5 +161,5 @@ class TestFeatureReduction(unittest.TestCase):
                 targets.append("insulator")
         df["gap_clf"] = targets
         # worst feature should be worse than a perfect output value...
-        worse_feature = lower_corr_clf(df, "gap expt", "gap expt", "range row")
+        worse_feature = lower_corr_clf(df, "gap_clf", "gap expt", "range row")
         self.assertEqual("range row", worse_feature)
