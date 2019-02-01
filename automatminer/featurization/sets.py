@@ -357,7 +357,8 @@ class DOSFeaturizers(FeaturizerSet):
         self._best_featurizers = [
             dosf.DOSFeaturizer(),
             dosf.DopingFermi(),
-            dosf.Hybridization()
+            dosf.Hybridization(),
+            dosf.SiteDOS()
         ]
 
 
@@ -393,7 +394,7 @@ class BSFeaturizers(FeaturizerSet):
 
         self._best_featurizers = [
             bf.BandFeaturizer(),
-            bf.BranchPointEnergy()
+            bf.BranchPointEnergy(),
         ]
 
     @property
