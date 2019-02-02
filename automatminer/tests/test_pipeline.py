@@ -84,6 +84,8 @@ class TestMatPipe(unittest.TestCase):
         test = df_test[self.target + " predicted"]
         self.assertTrue(r2_score(true, test) > 0.75)
 
+    @unittest.skipIf("CI" in os.environ.keys(),
+                     "Test too intensive for CircleCI.")
     def test_benchmarking(self):
         # Test static, regular benchmark (no fittable featurizers)
         df = self.df.iloc[500:700]

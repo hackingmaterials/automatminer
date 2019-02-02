@@ -68,7 +68,8 @@ def get_preset_config(preset='default'):
     }
 
     debug_single_config = {
-        "learner": SinglePipelineAdaptor(model=RandomForestRegressor()),
+        "learner": SinglePipelineAdaptor(
+            model=RandomForestRegressor(n_estimators=10)),
         "reducer": FeatureReducer(reducers=('corr',)),
         "autofeaturizer": AutoFeaturizer(preset="fast"),
         "cleaner": DataCleaner()
