@@ -25,10 +25,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         max_na_frac (float): The maximum fraction (0.0 - 1.0) of samples for a
             given feature allowed. Columns containing a higher nan fraction are
             dropped.
-        na_method (str): How to deal with samples still containing nans after
-            troublesome columns are already dropped. Default is 'drop'. Other
-            options are from pandas.DataFrame.fillna: {‘backfill’, ‘bfill’,
-            ‘pad’, ‘ffill’, None}, or 'ignore' to ignore nans.
         encode_categories (bool): If True, retains features which are
             categorical (data type is string or object) and then
             one-hot encodes them. If False, drops them.
@@ -86,15 +82,18 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
     @set_fitted
     def fit(self, df, target, na_method="drop"):
         """
-        Assign attributes before actually transforming. Useful if you want
-        to see what the transformation will do before actually transforming.
+        Determine a sequence of preprocessing steps to clean a dataframe.
 
         Args:
             df (pandas.DataFrame): Contains features and the target_key
             target (str): The name of the target in the dataframe
+            na_method (str): How to deal with samples still containing nans
+                after troublesome columns are already dropped. Default is
+                'drop'. Other options are from pandas.DataFrame.fillna:
+                {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
+                Alternatively, specify a value to replace the nans, e.g. 0.
 
-        Returns:
-
+        Returns: self
         """
         self.logger.info("Cleaning (fitting) with respect to samples with "
                          "na_method '{}'".format(na_method))
@@ -112,12 +111,17 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
     @check_fitted
     def transform(self, df, target, na_method=0):
         """
-        A sequence of data pre-processing steps either through this class or
-        sklearn.
+        Apply the sequence of preprocessing steps determined by fit, with the
+        option to change the na_method for samples.
 
         Args:
             df (pandas.DataFrame): Contains features and the target_key
             target (str): The name of the target in the dataframe
+            na_method (str): How to deal with samples still containing nans
+                after troublesome columns are already dropped. Default is
+                'drop'. Other options are from pandas.DataFrame.fillna:
+                {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
+                Alternatively, specify a value to replace the nans, e.g. 0.
 
         Returns (pandas.DataFrame)
         """
@@ -157,15 +161,16 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Args:
             df (pandas.DataFrame): The dataframe containing features
             target (str): The key defining the ML target.
-            set_features (None or [str]): List of features to retain; if given
-                must return those features (this may wind up dropping many
-                samples). If None, automatically uses max_na_frac to decide
-                features.
             coerce_mismatch (bool): If there is a mismatch between the fitted
                 dataframe columns and the argument dataframe columns, create
                 and drop mismatch columns so the dataframes are matching. If
                 False, raises an error. New columns are instantiated as all
                 zeros, as most of the time this is a onehot encoding issue.
+            na_method (str): How to deal with samples still containing nans
+                after troublesome columns are already dropped. Default is
+                'drop'. Other options are from pandas.DataFrame.fillna:
+                {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
+                Alternatively, specify a value to replace the nans, e.g. 0.
 
         Returns:
             (pandas.DataFrame) The cleaned df
@@ -315,7 +320,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fitted_target = None
         self.dropped_samples = None
         self.is_fit = False
-        self.scaler_obj = None
 
 
 class FeatureReducer(DataframeTransformer, LoggableMixin):
@@ -356,8 +360,8 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             ReBATE retains half of the features it is passed). ReBATE must be
             present in the reducers.
         logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will be
-            used. If set to False, then no logging will occur.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
 
     Attributes:
         The following attrs are set during fitting.
