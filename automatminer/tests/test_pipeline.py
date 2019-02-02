@@ -109,7 +109,7 @@ class TestMatPipe(unittest.TestCase):
 
         # Make sure we retain a good amount of test samples...
         df_tests_struc_all = pd.concat(df_tests_struc)
-        self.assertGreaterEqual(len(df_tests_all), 0.95 * len(df))
+        self.assertGreaterEqual(len(df_tests_struc_all), 0.95 * len(df3))
 
     def test_persistence_and_digest(self):
         with self.assertRaises(NotFittedError):
