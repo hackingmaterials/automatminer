@@ -56,12 +56,10 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped.
     """
 
-    def __init__(self, max_na_frac=0.01, na_method='drop',
-                 encode_categories=True, encoder='one-hot',
-                 drop_na_targets=True, logger=True):
+    def __init__(self, max_na_frac=0.01, encode_categories=True,
+                 encoder='one-hot', drop_na_targets=True, logger=True):
         self._logger = self.get_logger(logger)
         self.max_na_frac = max_na_frac
-        self.na_method = na_method
         self.encoder = encoder
         self.encode_categories = encode_categories
         self.drop_na_targets = drop_na_targets
@@ -86,7 +84,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         return self.fitted_df.columns.tolist()
 
     @set_fitted
-    def fit(self, df, target):
+    def fit(self, df, target, na_method="drop"):
         """
         Assign attributes before actually transforming. Useful if you want
         to see what the transformation will do before actually transforming.
@@ -98,20 +96,21 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Returns:
 
         """
-        self.logger.debug("Fitting to new dataframe...")
+        self.logger.info("Cleaning (fitting) with respect to samples with "
+                         "na_method '{}'".format(na_method))
         if target not in df.columns:
             raise AutomatminerError(
                 "Target {} must be contained in df.".format(target))
 
         self._reset_attrs()
         df = self.to_numerical(df, target)
-        df = self.handle_na(df, target)
+        df = self.handle_na(df, target, na_method)
         self.fitted_df = df
         self.fitted_target = target
         return self
 
     @check_fitted
-    def transform(self, df, target):
+    def transform(self, df, target, na_method=0):
         """
         A sequence of data pre-processing steps either through this class or
         sklearn.
@@ -122,6 +121,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
         Returns (pandas.DataFrame)
         """
+        self.logger.info("Cleaning (transforming) with respect to samples with "
+                         "na_method '{}'".format(na_method))
 
         if target != self.fitted_target:
             raise AutomatminerError(
@@ -131,7 +132,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
         # We assume the two targets are the same from here on out
         df = self.to_numerical(df, target)
-        df = self.handle_na(df, target, coerce_mismatch=True)
+        df = self.handle_na(df, target, na_method, coerce_mismatch=True)
 
         # Ensure the order of columns is identical
         if target in df.columns:
@@ -147,7 +148,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fit(df, target)
         return self.fitted_df
 
-    def handle_na(self, df, target, coerce_mismatch=True):
+    def handle_na(self, df, target, na_method, coerce_mismatch=True):
         """
         First pass for handling cells without values (null or nan). Additional
         preprocessing may be necessary as one column may be filled with
@@ -229,16 +230,18 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                                  c not in df.columns.values]
 
         # Handle all rows that still contain any nans
-        if self.na_method == "drop":
+        if na_method == "drop":
             clean_df = df.dropna(axis=0, how='any')
             self.dropped_samples = pd.concat(
                 (df[~df.index.isin(clean_df.index)], self.dropped_samples),
                 axis=0)
             df = clean_df
-        elif self.na_method == "ignore":
+        elif na_method == "ignore":
             pass
+        elif na_method in ["ffill", "bfill"]:
+            df = df.fillna(method=na_method)
         else:
-            df = df.fillna(method=self.na_method)
+            df = df.fillna(na_method)
         self.logger.info("After handling na: {} samples, {} features".format(
             *df.shape))
         return df
@@ -255,7 +258,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Returns:
             (pandas.DataFrame) The numerical df
         """
-        self.logger.info("Replacing infinite values with nan for easier screening.")
+        self.logger.info("Replacing infinite values with nan for easier "
+                         "screening.")
         df = df.replace([np.inf, -np.inf], np.nan)
         self.number_cols = []
         self.object_cols = []
@@ -385,6 +389,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
 
     @set_fitted
     def fit(self, df, target):
+        self.logger.info("Feature reducer fitting to dataframe...")
         reduced_df = df
         for r in self.reducers:
             X = df.drop(columns=[target])
@@ -454,6 +459,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
 
     @check_fitted
     def transform(self, df, target):
+        self.logger.info("Feature reducer transforming dataframe...")
         X = df.drop(columns=target)
         for r in self.reducers:
             if r == "pca":
