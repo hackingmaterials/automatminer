@@ -15,7 +15,7 @@ import matminer.featurizers.bandstructure as bf
 try:
     import torch
     import cgcnn
-except:
+except ImportError:
     torch, cgcnn = None, None
 
 __authors__ = ["Alex Dunn", "Alex Ganose"]

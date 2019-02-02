@@ -1,8 +1,6 @@
-import os
 import warnings
 
 import matplotlib.pyplot as plt
-from matminer.datasets import load_dataset
 
 try:
     from skater.core.explanations import Interpretation

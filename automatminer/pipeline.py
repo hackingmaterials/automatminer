@@ -217,7 +217,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                                 "may be extended!")
             results = []
             fold = 0
-            for train_ix, test_ix in kfold.split(df):
+            for _, test_ix in kfold.split(df):
                 if fold in fold_subset:
                     self.logger.info("Training on fold index {}".format(fold))
                     # Split and identify test set
@@ -240,7 +240,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                              "dataframe for benchmark.")
             df = self.autofeaturizer.fit_transform(df, target)
 
-            for train_ix, test_ix in kfold.split(df):
+            for _, test_ix in kfold.split(df):
                 if fold in fold_subset:
                     self.logger.info("Training on fold index {}".format(fold))
 
