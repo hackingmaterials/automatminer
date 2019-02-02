@@ -28,3 +28,4 @@ exclude_paths:
   - 'docs/**'
   - 'docs/*'
   - '**/docs/**'
+  - '**/tests/**'
