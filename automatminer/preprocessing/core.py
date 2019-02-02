@@ -28,13 +28,13 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         encode_categories (bool): If True, retains features which are
             categorical (data type is string or object) and then
             one-hot encodes them. If False, drops them.
-        encoding_method (str): choose a method for encoding the categorical
+        encoder (str): choose a method for encoding the categorical
             variables. Current options: 'one-hot' and 'label'.
         drop_na_targets (bool): Drop samples containing target values which are
             na.
         logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will be
-            used. If set to False, then no logging will occur.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
 
     Attributes:
             The following attrs are set during fitting.
@@ -49,7 +49,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             they are only relevant to the most recent transform.
 
         dropped_features (list): The features which were dropped.
-        dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped.
+        dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped
     """
 
     def __init__(self, max_na_frac=0.01, encode_categories=True,
@@ -209,26 +209,24 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                                     "used for fitting and argument dataframe.")
                 if not coerce_mismatch:
                     raise AutomatminerError("Mismatch between columns found in "
-                                        "arg dataframe and dataframe used for "
-                                        "fitting!")
+                                            "arg dataframe and dataframe used "
+                                            "for fitting!")
                 else:
                     self.logger.warning("Coercing mismatched columns...")
                     if mismatch["df1_not_in_df2"]:  # in fitted, not in arg
-                        self.logger.warning("Assuming missing columns in "
-                                            "argument df are one-hot encoding "
-                                            "issues. Setting to zero the "
-                                            "following new columns:\n{}"
-                                            "".format(
-                            mismatch["df1_not_in_df2"]))
+                        self.logger.warning(
+                            "Assuming missing columns in argument df are "
+                            "one-hot encoding issues. Setting to zero the "
+                            "following new columns:\n{}".format(
+                                mismatch["df1_not_in_df2"]))
                         for c in self.fitted_df.columns:
                             if c not in df.columns and c != target:
                                 # Interpret as one-hot problems...
                                 df[c] = np.zeros((df.shape[0]))
                     elif mismatch["df2_not_in_df1"]:  # arg cols not in fitted
-                        self.logger.warning("Following columns are being "
-                                            "dropped:\n{}"
-                                            "".format(
-                            mismatch["df2_not_in_df1"]))
+                        self.logger.warning(
+                            "Following columns are being dropped:\n{}".format(
+                                mismatch["df2_not_in_df1"]))
                         df = df.drop(columns=mismatch["df2_not_in_df1"])
 
         self.dropped_features = [c for c in feats0 if
@@ -412,9 +410,9 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                     "random_state": tbfr.rs}
             elif r == "rebate":
                 if isinstance(self.n_rebate_features, float):
-                    self.logger.info("Retaining fraction {} of current "
-                                     "{} features.".format(
-                        self.n_rebate_features, df.shape[1] - 1))
+                    self.logger.info(
+                        "Retaining fraction {} of current {} features.".format(
+                            self.n_rebate_features, df.shape[1] - 1))
                     self.n_rebate_features = int(df.shape[1] *
                                                  self.n_rebate_features)
                 self.logger.info(
