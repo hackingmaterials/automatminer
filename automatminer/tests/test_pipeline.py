@@ -5,6 +5,7 @@ Tests for the top level interface.
 import unittest
 import os.path
 
+import pandas as pd
 from matminer.datasets.dataset_retrieval import load_dataset
 from sklearn.metrics import r2_score
 from sklearn.exceptions import NotFittedError
@@ -40,6 +41,7 @@ class TestMatPipe(unittest.TestCase):
         df = load_dataset("elastic_tensor_2015").rename(
             columns={"formula": "composition"})
         self.df = df[["composition", "K_VRH"]]
+        self.df_struc = df[["composition", "structure", "K_VRH"]]
         self.extra_features = df["G_VRH"]
         self.target = "K_VRH"
         self.config = get_preset_config("debug_single")
@@ -83,10 +85,29 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue(r2_score(true, test) > 0.75)
 
     def test_benchmarking(self):
+        # Test static, regular benchmark (no fittable featurizers)
         df = self.df.iloc[500:700]
         kfold = KFold(n_splits=5)
         df_tests = self.pipe.benchmark(df, self.target, kfold)
-        self.assertEqual(len(df_tests), 5)
+        self.assertEqual(len(df_tests), kfold.n_splits)
+
+        # Make sure we retain a good amount of test samples...
+        df_tests_all = pd.concat(df_tests)
+        self.assertGreaterEqual(len(df_tests_all), 0.95 * len(df))
+
+        # Test static subset of kfold
+        df2 = self.df.iloc[700:800]
+        df_tests2 = self.pipe.benchmark(df2, self.target, kfold,
+                                        fold_subset=[0, 3])
+        self.assertEqual(len(df_tests2), 2)
+
+        df3 = self.df_struc.iloc[:100]
+        df_tests_struc = self.pipe.benchmark(df3, self.target, kfold)
+        self.assertEqual(len(df_tests_struc), kfold.n_splits)
+
+        # Make sure we retain a good amount of test samples...
+        df_tests_struc_all = pd.concat(df_tests_struc)
+        self.assertGreaterEqual(len(df_tests_all), 0.95 * len(df))
 
     def test_persistence_and_digest(self):
         with self.assertRaises(NotFittedError):

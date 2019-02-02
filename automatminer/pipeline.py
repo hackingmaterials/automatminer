@@ -167,7 +167,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return predictions
 
     @set_fitted
-    def benchmark(self, df, target, kfold):
+    def benchmark(self, df, target, kfold, fold_subset=None):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
@@ -194,51 +194,72 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             kfold (sklearn KFold or StratifiedKFold: The cross validation split
                 object to use for nested cross validation. Used to index the
                 dataframe with .iloc, NOT .loc.
+            fold_subset ([int]): A subset of the folds in kfold to evaluate (by
+                index). For example, to run only the 3rd train/validation/test
+                split of the kfold, set fold_subset = [2]. To use the first and
+                fourth, set fold_subset = [0, 3].
 
         Returns:
             results ([pd.DataFrame]): Dataframes containing each fold's
                 known targets, as well as their independently predicted targets.
         """
-        # Fit transformers on all data
-        self.logger.info("Featurizing entire dataframe.")
-        df = self.autofeaturizer.fit_transform(df, target)
-        self.logger.info("Cleaning entire dataframe.")
-        na_method = self.cleaner.na_method
-        if na_method != 'ignore':
-            self.logger.info("Temporarily changing cleaner na_method to "
-                             "'ignore' to prevent undesired sample drops.")
-            self.cleaner.na_method = 'ignore'
-        df = self.cleaner.fit_transform(df, target)
-        self.cleaner.na_method = na_method
+        if not fold_subset:
+            fold_subset = list(range(kfold.n_splits))
 
+        self.logger.debug("Beginning benchmark")
         results = []
         fold = 0
-        for train_ix, test_ix in kfold.split(df):
-            fold += 1
-            self.logger.info("Nested CV (fold {}/{}): Running MatPipe."
-                             "".format(fold, kfold.n_splits))
-            # Split and identify test set
-            test = df.iloc[test_ix]
-            train = df[~df.index.isin(test.index)]
 
-            # Drop samples left over from ignored na in total cleaning step.
-            test = test.dropna(axis=0, how='any')
-            train = train.dropna(axis=0, how='any')
-            dropped_test = len(test_ix) - test.shape[0]
-            dropped_train = len(train_ix) - train.shape[0]
-            self.logger.info("Nested CV (fold {}/{}): {} samples dropped from"
-                             " test, {} samples dropped from train."
-                             "".format(fold, kfold.n_splits, dropped_test,
-                                       dropped_train))
+        if self.autofeaturizer.needs_fit:
+            self.logger.warning("At least one featurizer needs fitting."
+                                "Each fold of the benchmark must be "
+                                "re-featurized. Training and prediction times"
+                                "may be extended!")
+            results = []
+            fold = 0
+            for train_ix, test_ix in kfold.split(df):
+                if fold in fold_subset:
+                    self.logger.info("Training on fold index {}".format(fold))
+                    # Split and identify test set
+                    test = df.iloc[test_ix]
+                    train = df[~df.index.isin(test.index)]
+                    self.fit(train, target)
+                    self.logger.info("Predicting fold index {}".format(fold))
+                    test = self.predict(test, target)
+                    results.append(test)
+                fold += 1
+            return results
 
-            # Use transformers on separate training and testing dfs
-            train = self.reducer.fit_transform(train, target)
-            self.post_fit_df = train
-            self.learner.fit(train, target)
-            test = self.reducer.transform(test, target)
-            test = self.learner.predict(test, target)
-            results.append(test)
-        return results
+        else:
+            # We can featurize the whole dataframe once, because the features
+            # are the same regardless of the train/test split, and there will
+            # be no feature leakage of the test set into the train set.
+
+            # Featurize all data once
+            self.logger.info("Featurizers are static; featurizing entire "
+                             "dataframe for benchmark.")
+            df = self.autofeaturizer.fit_transform(df, target)
+
+            for train_ix, test_ix in kfold.split(df):
+                if fold in fold_subset:
+                    self.logger.info("Training on fold index {}".format(fold))
+
+                    # Split and identify test set
+                    test = df.iloc[test_ix]
+                    train = df[~df.index.isin(test.index)]
+
+                    # Use transformers on separate training and testing dfs
+                    train = self.cleaner.fit_transform(train, target)
+                    train = self.reducer.fit_transform(train, target)
+                    self.post_fit_df = train
+                    self.learner.fit(train, target)
+                    self.logger.info("Predicting fold index {}".format(fold))
+                    test = self.cleaner.transform(test, target)
+                    test = self.reducer.transform(test, target)
+                    test = self.learner.predict(test, target)
+                    results.append(test)
+                fold += 1
+            return results
 
     @check_fitted
     def digest(self, filename=None):
@@ -309,3 +330,5 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                             "retrain!). Backend was serialzed as only the top "
                             "model, not the full automl backend. ")
         return pipe
+
+

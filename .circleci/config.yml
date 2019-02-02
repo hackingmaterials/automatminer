@@ -23,7 +23,7 @@ jobs:
           command: |
             python3 -m venv test_env
             . test_env/bin/activate
-            pip install --upgrade pip
+            pip install -q --upgrade pip
             pip install --quiet -r requirements.txt
 
             # pip install --quiet -r requirements-optional.txt
@@ -33,12 +33,13 @@ jobs:
             cd ~/matminer
             git clone https://github.com/hackingmaterials/matminer.git
             cd matminer
-            pip install -e .
+            pip install -q -e .
             cd ~/automatminer
 
             pip install -e .
-            pip install coverage
-            pip install codacy-coverage
+            pip install -q coverage
+            pip install -q codacy-coverage
+
             coverage run setup.py test
             coverage xml
             python-codacy-coverage -r coverage.xml
