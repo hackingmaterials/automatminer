@@ -351,9 +351,14 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             retained by ReBATE once it is passed the dataframe (i.e., 0.5 means
             ReBATE retains half of the features it is passed). ReBATE must be
             present in the reducers.
+        keep_features (list, None): A list of features that will not be removed.
+            This option does nothing if PCA feature removal is present.
+        remove_features (list, None): A list of features that will be removed.
+            This option does nothing if PCA feature removal is present.
         logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will be
-            used. If set to False, then no logging will occur.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
+
 
     Attributes:
         The following attrs are set during fitting.
@@ -367,7 +372,8 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
     """
 
     def __init__(self, reducers=('corr', 'tree'), n_pca_features=0.3,
-                 n_rebate_features=0.3, logger=True):
+                 n_rebate_features=0.3, logger=True,
+                 keep_features=None, remove_features=None):
         for reducer in reducers:
             if reducer not in ["corr", "tree", "rebate", "pca"]:
                 raise ValueError(
@@ -377,6 +383,8 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         self.n_pca_features = n_pca_features
         self.n_rebate_features = n_rebate_features
         self._logger = self.get_logger(logger)
+        self._keep_features = keep_features or []
+        self._remove_features = remove_features or []
         self.removed_features = {}
         self.retained_features = []
         self.reducer_params = {}
@@ -385,6 +393,18 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
 
     @set_fitted
     def fit(self, df, target):
+        missing_remove_features = [c for c in self._remove_features
+                                   if c not in df.columns]
+        missing_keep_features = [c for c in self._keep_features
+                                 if c not in df.columns]
+        for features, name in [(missing_remove_features, 'remove'),
+                               (missing_keep_features, 'keep')]:
+            if features:
+                self.logger.warning(
+                    "Asked to {} some features that do not exist in the "
+                    "dataframe. Skipping the following features:\n{}".format(
+                        name, features))
+
         reduced_df = df
         for r in self.reducers:
             X = df.drop(columns=[target])
@@ -442,26 +462,45 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                 self.logger.info(
                     "PCA completed: retained {} numerical "
                     "features.".format(len(reduced_df.columns)))
+
             retained = reduced_df.columns.values.tolist()
             removed = [c for c in df.columns.values if c not in retained
                        and c != target]
+
             self.removed_features[r] = removed
             if target not in reduced_df:
                 reduced_df.loc[:, target] = y.tolist()
             df = reduced_df
-        self.retained_features = [c for c in df.columns.tolist() if c != target]
+
+        all_removed = [c for r, rf in self.removed_features.items() for c in rf]
+        all_kept = [c for c in df.columns.tolist() if c != target]
+        save_from_removal = [c for c in self._keep_features if c in all_removed]
+        for_force_removal = [c for c in self._remove_features if c in all_kept]
+
+        if save_from_removal:
+            self.logger.info("Saving features from removal. "
+                             "Saved features:\n{}".format(save_from_removal))
+
+        if for_force_removal:
+            self.logger.info("Forcing removal of features. "
+                             "Removed features: \n{}".format(for_force_removal))
+            self.removed_features['manual'] = for_force_removal
+
+        self.retained_features = [c for c in all_kept if c not in
+                                  self._remove_features or c != target]
         return self
 
     @check_fitted
     def transform(self, df, target):
         X = df.drop(columns=target)
-        for r in self.reducers:
+        for r, f in self.removed_features.items():
             if r == "pca":
                 matrix = self._pca.transform(X)
                 X = pd.DataFrame(columns=self._pca_feats, data=matrix,
                                  index=X.index)
             else:
-                X = X.drop(columns=self.removed_features[r])
+                X = X.drop(columns=[c for c in f
+                                    if c not in self._keep_features])
         X.loc[:, target] = df[target].values
         return X
 
