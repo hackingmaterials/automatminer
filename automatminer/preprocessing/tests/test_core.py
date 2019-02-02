@@ -5,6 +5,7 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
+from automatminer.base import logger_base_name
 from automatminer.preprocessing.core import DataCleaner, FeatureReducer
 from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
     rebate, lower_corr_clf
@@ -118,6 +119,14 @@ class TestPreprocess(unittest.TestCase):
         df = fr.fit_transform(self.test_df, self.target)
         self.assertTrue('LUMO_element_Th' not in df.columns)
         self.assertEqual(fr.removed_features['manual'], ['LUMO_element_Th'])
+
+        # test removing feature that doesn't exist
+        fr = FeatureReducer(reducers=[], remove_features=['abcdefg12345!!'])
+
+        with self.assertLogs(logger_base_name, level='INFO') as cm:
+            # should give log warning but not throw an error
+            fr.fit_transform(self.test_df, self.target)
+            self.assertTrue('abcdefg12345!!' in " ".join(cm.output))
 
     def test_saving_feature_from_removal(self):
         fr = FeatureReducer(keep_features=['maximum X'])

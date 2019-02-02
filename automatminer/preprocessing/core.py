@@ -393,6 +393,18 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
 
     @set_fitted
     def fit(self, df, target):
+        missing_remove_features = [c for c in self._remove_features
+                                   if c not in df.columns]
+        missing_keep_features = [c for c in self._keep_features
+                                 if c not in df.columns]
+        for features, name in [(missing_remove_features, 'remove'),
+                               (missing_keep_features, 'keep')]:
+            if features:
+                self.logger.warning(
+                    "Asked to {} some features that do not exist in the "
+                    "dataframe. Skipping the following features:\n{}".format(
+                        name, features))
+
         reduced_df = df
         for r in self.reducers:
             X = df.drop(columns=[target])
