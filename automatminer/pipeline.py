@@ -330,5 +330,3 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                             "retrain!). Backend was serialzed as only the top "
                             "model, not the full automl backend. ")
         return pipe
-
-
