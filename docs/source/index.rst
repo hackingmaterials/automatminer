@@ -50,8 +50,9 @@ Or, run a (relatively) rigorous nested cross validation benchmark on a known dat
 
 
 
-automatminer is widely applicable
-===========================================
+
+Scope
+=====
 
 Automatminer can work with many kinds of data:
 ----------------------------------------------
@@ -73,9 +74,36 @@ And many featurization (descriptor) techniques:
 See `matminer's Table of Featurizers <https://hackingmaterials.github.io/matminer/featurizer_summary.html>`_ for a full (and growing) list.
 
 
+Installation
+============
+
+Install from Pypi:
+
+.. code-block:: bash
+
+    pip install automatminer
+
+
+Clone latest code from github
+
+.. code-block:: bash
+
+    git clone https://github.com/hackingmaterials/automatminer
+    cd automatminer
+    pip install -e .
+
 
 Full Code Examples
 ==================
+
+This section is a work in progress; please stay tuned as we add more examples!
+
+
+Benchmarking automatminer's performance
+---------------------------------------
+
+Download matminer's Elastic Tensor Dataset from 2015.
+
 
 Citing automatminer
 ===================
