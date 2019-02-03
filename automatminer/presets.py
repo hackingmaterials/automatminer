@@ -37,8 +37,8 @@ def get_preset_config(preset='default'):
     production_config = {
         "learner": TPOTAdaptor(population_size=250,
                                max_time_mins=720,
-                               max_eval_time_mins=30),
-        "reducer": FeatureReducer(),
+                               max_eval_time_mins=20),
+        "reducer": FeatureReducer(reducers=('corr', 'pca')),
         "autofeaturizer": AutoFeaturizer(preset="best"),
         "cleaner": DataCleaner()
     }
