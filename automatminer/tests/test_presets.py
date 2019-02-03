@@ -39,3 +39,7 @@ class TestMatPipe(unittest.TestCase):
         default = get_preset_config("default")
         for k in KEYSET:
             self.assertTrue(k in default.keys())
+
+    def test_missing(self):
+        with self.assertRaises(ValueError):
+            _ = get_preset_config("QWERTYUIOP1234567890")
