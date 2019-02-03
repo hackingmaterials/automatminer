@@ -1,8 +1,7 @@
 # Change Log
 
-## [Unreleased](https://github.com/hackingmaterials/automatminer/tree/HEAD)
-
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.01.26_beta...HEAD)
+## [v2019.02.02_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.02.02_beta) (2019-02-02)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.01.26_beta...v2019.02.02_beta)
 
 **Closed issues:**
 
