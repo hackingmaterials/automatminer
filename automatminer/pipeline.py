@@ -167,7 +167,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return predictions
 
     @set_fitted
-    def benchmark(self, df, target, kfold, fold_subset=None):
+    def benchmark(self, df, target, kfold, fold_subset=None, strict=True):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
@@ -198,6 +198,17 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                 index). For example, to run only the 3rd train/validation/test
                 split of the kfold, set fold_subset = [2]. To use the first and
                 fourth, set fold_subset = [0, 3].
+            strict (bool): If True, treats each train/validation/test split
+                as completely separate problems; this prevents any possible
+                information leakage from the train set into the test set (e.g.,
+                one-hot encoding features values from the test set which do not
+                exist in the train set). However, strict benchmarks require
+                each nested CV fold be featurized separately, which is
+                expensive. Running with strict=False only featurizes the
+                dataset once. strict=True should be used for results which will
+                be reported; strict=False should be used for quick(er) informal
+                benchmarks, which may have results similar to strict
+                benchmarking. Do NOT use strict=False when reporting results!
 
         Returns:
             results ([pd.DataFrame]): Dataframes containing each fold's
@@ -210,11 +221,8 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         results = []
         fold = 0
 
-        if self.autofeaturizer.needs_fit:
-            self.logger.warning("At least one featurizer needs fitting."
-                                "Each fold of the benchmark must be "
-                                "re-featurized. Training and prediction times"
-                                "may be extended!")
+        if strict:
+            self.logger.warning("Beginning strict benchmark.")
             results = []
             fold = 0
             for _, test_ix in kfold.split(df):
@@ -229,15 +237,11 @@ class MatPipe(DataframeTransformer, LoggableMixin):
                     results.append(test)
                 fold += 1
             return results
-
         else:
-            # We can featurize the whole dataframe once, because the features
-            # are the same regardless of the train/test split, and there will
-            # be no feature leakage of the test set into the train set.
-
+            self.logger.warning("Strict benchmarking has been turned OFF! "
+                                "Please refrain from reporting these results,"
+                                "as there may be feature information leakage.")
             # Featurize all data once
-            self.logger.info("Featurizers are static; featurizing entire "
-                             "dataframe for benchmark.")
             df = self.autofeaturizer.fit_transform(df, target)
 
             for _, test_ix in kfold.split(df):
