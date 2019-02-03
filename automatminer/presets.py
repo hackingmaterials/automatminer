@@ -85,3 +85,5 @@ def get_preset_config(preset='default'):
         return debug_single_config
     elif preset == "production":
         return production_config
+    else:
+        raise ValueError("{} unknown preset.".format(preset))
