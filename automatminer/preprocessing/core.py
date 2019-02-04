@@ -33,6 +33,12 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             variables. Current options: 'one-hot' and 'label'.
         drop_na_targets (bool): Drop samples containing target values which are
             na.
+        na_method (str): Set the na_method for samples for fit and transform.
+            Will override fit and transform arguments. Default is None, where
+            fit and transform independently set their na_methods. Other options
+            are "drop", "ignore" and from pandas.DataFrame.fillna:
+            {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
+            Alternatively, specify a value to replace the nans, e.g. 0.
         logger (Logger, bool): A custom logger object to use for logging.
             Alternatively, if set to True, the default automatminer logger will
             be used. If set to False, then no logging will occur.
@@ -54,7 +60,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
     """
 
     def __init__(self, max_na_frac=0.01, encode_categories=True,
-                 encoder='one-hot', drop_na_targets=True, logger=True):
+                 encoder='one-hot', drop_na_targets=True, na_method=None,
+                 logger=True):
         self._logger = self.get_logger(logger)
         self.max_na_frac = max_na_frac
         self.encoder = encoder
@@ -68,6 +75,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fitted_target = None
         self.dropped_samples = None
         self.is_fit = False
+        self.na_method = na_method
 
     @property
     def retained_features(self):
@@ -96,6 +104,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
         Returns: self
         """
+
+        na_method = self._get_na_method(na_method)
         self.logger.info("Cleaning (fitting) with respect to samples with "
                          "na_method '{}'".format(na_method))
         if target not in df.columns:
@@ -126,6 +136,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
         Returns (pandas.DataFrame)
         """
+        na_method = self._get_na_method(na_method)
         self.logger.info("Cleaning (transforming) with respect to samples with "
                          "na_method '{}'".format(na_method))
 
@@ -149,8 +160,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             df = df[reordered_cols]
         return df
 
-    def fit_transform(self, df, target):
-        self.fit(df, target)
+    def fit_transform(self, df, target, **fit_kwargs):
+        self.fit(df, target, **fit_kwargs)
         return self.fitted_df
 
     def handle_na(self, df, target, na_method, coerce_mismatch=True):
@@ -319,6 +330,26 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fitted_target = None
         self.dropped_samples = None
         self.is_fit = False
+
+    def _get_na_method(self, na_method):
+        """
+        Get the na_method, if it is overridden.
+
+        Args:
+            na_method (str): How to deal with samples still containing nans
+                after troublesome columns are already dropped.
+
+        Returns:
+            na_method (str)
+
+        """
+        if self.na_method:
+            if self.na_method != na_method:
+                self.logger.warning(
+                    "na_method set in __init__ ({}) overriding na_method set in"
+                    " fit ({})".format(self.na_method, na_method))
+            na_method = self.na_method
+        return na_method
 
 
 class FeatureReducer(DataframeTransformer, LoggableMixin):

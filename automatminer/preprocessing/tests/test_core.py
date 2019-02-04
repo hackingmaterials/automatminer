@@ -68,6 +68,31 @@ class TestPreprocess(unittest.TestCase):
                                          ignore=self.target)["mismatch"])
         self.assertTrue(self.target not in df2.columns)
 
+    def test_DataCleaner_na_method(self):
+        dc_regular = DataCleaner(max_na_frac=0.9)
+        df_regular = self.test_df
+
+        dc_override = DataCleaner(max_na_frac=0.9, na_method="drop")
+        df_override = deepcopy(self.test_df)
+        df_override["maximum X"].iloc[0] = np.nan
+
+        target = self.target
+
+        df_regular_clean_fit = dc_regular.fit_transform(df_regular, target,
+                                                        na_method=0)
+        self.assertTupleEqual(df_regular.shape, df_regular_clean_fit.shape)
+        df_regular_clean_transform = dc_regular.transform(df_regular, target,
+                                                          na_method=0)
+        self.assertTupleEqual(df_regular.shape,
+                              df_regular_clean_transform.shape)
+
+        df_override_clean_fit = dc_override.fit_transform(df_override, target,
+                                                          na_method=0)
+        self.assertEqual(df_override_clean_fit.shape, (199, 417))
+        df_override_clean_transform = dc_override.transform(df_override, target,
+                                                            na_method=0)
+        self.assertEqual(df_override_clean_transform.shape, (199, 417))
+
     def test_FeatureReducer_basic(self):
         fr = FeatureReducer()
 
