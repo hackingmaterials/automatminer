@@ -85,47 +85,6 @@ def set_fitted(func):
     return wrapper
 
 
-def log_progress(operation):
-    """
-    Decorator to auto-log progress before and after executing a method, such
-    as fit and transform. Should only be applied to DataFrameTransformers.
-
-    For example,
-
-    INFO: Beginning AutoFeaturizer fitting.
-    ... autofeaturizer logs ...
-    INFO: Finished AutoFeaturizer fitting.
-
-    Args:
-        operation (str): Some info about the operation you want to log.
-
-    Returns:
-        A wrapper for the input method.
-    """
-
-    def decorator_wrapper(meth):
-        def wrapper(*args, **kwargs):
-            """
-            Wrapper for a method to log.
-
-            Args:
-                operation (str): The operation to be logging.
-
-            Return:
-                result: The method result.
-            """
-            self = args[0]
-            name = self.__class__.__name__
-            self.logger.info("{} starting {}.".format(name, operation))
-            result = meth(*args, **kwargs)
-            self.logger.info("{} finished {}.".format(name, operation))
-            return result
-
-        return wrapper
-
-    return decorator_wrapper
-
-
 def return_attrs_recursively(obj):
     """
     Returns attributes of an object recursively. Stops recursion when

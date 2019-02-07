@@ -5,9 +5,12 @@ import pandas as pd
 import logging
 from sklearn.exceptions import NotFittedError
 
-from automatminer.utils.package_tools import compare_columns, check_fitted, set_fitted
-from automatminer.utils.ml_tools import is_greater_better, regression_or_classification
-from automatminer.utils.log_tools import initialize_logger, initialize_null_logger
+from automatminer.utils.package_tools import compare_columns, check_fitted, \
+    set_fitted
+from automatminer.utils.ml_tools import is_greater_better, \
+    regression_or_classification
+from automatminer.utils.log_tools import initialize_logger, \
+    initialize_null_logger
 from automatminer.base import DataframeTransformer, logger_base_name
 
 run_dir = os.getcwd()
