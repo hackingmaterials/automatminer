@@ -391,16 +391,3 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 target_col_id=self.composition_col, overwrite_data=overwrite)
             df = struct2comp.featurize_dataframe(df, self.structure_col)
         return df
-
-
-if __name__ == "__main__":
-    from matminer.datasets.dataset_retrieval import load_dataset, \
-        get_available_datasets
-
-    print(get_available_datasets())
-    df = load_dataset("elastic_tensor_2015").rename(
-        columns={"formula": "composition"}).iloc[:20]
-    af = AutoFeaturizer(functionalize=True, preset="best")
-    print(df)
-    df = af.fit_transform(df, "K_VRH")
-    print(df.describe())
