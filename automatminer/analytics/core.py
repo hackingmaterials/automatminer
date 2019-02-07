@@ -3,12 +3,13 @@ import warnings
 
 import matplotlib.pyplot as plt
 from matminer.datasets import load_dataset
+
 try:
     from skater.core.explanations import Interpretation
     from skater.model import InMemoryModel
 except ImportError:
     warnings.warn("skater package not found. Please install skater to use the "
-                  "Analytics modeule/")
+                  "Analytics module.")
     Interpretation = None
     InMemoryModel = None
 
@@ -35,9 +36,7 @@ class Analytics:
             prediction = self.predictive_model.learner.predict(x, self.target)
             return prediction[self.target + " predicted"].values
 
-        self.model = InMemoryModel(
-            predict_func, examples=self.dataset
-        )
+        self.model = InMemoryModel(predict_func, examples=self.dataset)
 
     def get_feature_importance(self):
         return self.interpreter.feature_importance.feature_importance(
@@ -73,22 +72,3 @@ class Analytics:
         )
 
         return axs[0][0], axs[0][1]
-
-
-if __name__ == '__main__':
-    if not os.path.exists("tests/test_pipe.p"):
-        df = load_dataset('elastic_tensor_2015')
-        df = df[["formula", "K_VRH"]]
-        df = df.rename({"formula": "composition"}, axis=1)
-
-        fitted_pipeline = MatPipe().fit(df, "K_VRH")
-        fitted_pipeline.save("tests/test_pipe.p")
-    else:
-        fitted_pipeline = MatPipe().load("tests/test_pipe.p")
-
-    analyzer = Analytics(fitted_pipeline)
-
-    feature_importance = analyzer.get_feature_importance()
-
-    for feature in reversed(feature_importance.index):
-        analyzer.plot_partial_dependence(feature)

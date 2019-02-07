@@ -2,8 +2,6 @@ from pymatgen import Composition
 from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     StructureToComposition, StructureToOxidStructure, \
     CompositionToOxidComposition
-from matminer.featurizers.conversions import ConversionFeaturizer
-from matminer.featurizers.base import BaseFeaturizer
 from matminer.featurizers.function import FunctionFeaturizer
 
 from automatminer.utils.package_tools import check_fitted, set_fitted
@@ -29,7 +27,8 @@ _structure_aliases = ["structure", "struct", "struc", "struct.", "structures",
 _bandstructure_aliases = ["bandstructure", "bs", "bsdos", "BS", "BSDOS",
                           "Bandstructure"]
 _dos_aliases = ["density of states", "dos", "DOS", "Density of States"]
-_aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases + _dos_aliases
+_aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases +\
+           _dos_aliases
 
 
 class AutoFeaturizer(DataframeTransformer, LoggableMixin):

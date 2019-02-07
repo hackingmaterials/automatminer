@@ -22,15 +22,13 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
     Transform a featurized dataframe into an ML-ready dataframe.
 
     Args:
-        scale (bool): If True, scales the numerical feature data. Data is scaled
-            before one-hot encoding, if encoding is enabled.
         max_na_frac (float): The maximum fraction (0.0 - 1.0) of samples for a
             given feature allowed. Columns containing a higher nan fraction are
             dropped.
         na_method (str): How to deal with samples still containing nans after
             troublesome columns are already dropped. Default is 'drop'. Other
             options are from pandas.DataFrame.fillna: {‘backfill’, ‘bfill’,
-            ‘pad’, ‘ffill’, None}
+            ‘pad’, ‘ffill’, None}, or 'ignore' to ignore nans.
         encode_categories (bool): If True, retains features which are
             categorical (data type is string or object) and then
             one-hot encodes them. If False, drops them.
@@ -50,8 +48,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         number_cols (list): The features identified as numerical
         fitted_df (pd.DataFrame): The fitted dataframe
         is_fit (bool): If true, this object has been fit to a dataframe
-        scaler_obj (sklearn.BaseEstimator): The object to be used for scaling/
-            normalization.
 
             The following attrs are set during fitting and/or transformation. Ie
             they are only relevant to the most recent transform.
@@ -60,11 +56,10 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped.
     """
 
-    def __init__(self, scale=False, max_na_frac=0.01, na_method='drop',
+    def __init__(self, max_na_frac=0.01, na_method='drop',
                  encode_categories=True, encoder='one-hot',
                  drop_na_targets=True, logger=True):
         self._logger = self.get_logger(logger)
-        self.scale = scale
         self.max_na_frac = max_na_frac
         self.na_method = na_method
         self.encoder = encoder
@@ -78,7 +73,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fitted_target = None
         self.dropped_samples = None
         self.is_fit = False
-        self.scaler_obj = None
 
     @property
     def retained_features(self):
@@ -112,7 +106,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self._reset_attrs()
         df = self.to_numerical(df, target)
         df = self.handle_na(df, target)
-        # df = self.scale_df(df, target)
         self.fitted_df = df
         self.fitted_target = target
         return self
@@ -139,7 +132,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         # We assume the two targets are the same from here on out
         df = self.to_numerical(df, target)
         df = self.handle_na(df, target, coerce_mismatch=True)
-        # df = self.scale_df(df, target)
 
         # Ensure the order of columns is identical
         if target in df.columns:
@@ -243,6 +235,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                 (df[~df.index.isin(clean_df.index)], self.dropped_samples),
                 axis=0)
             df = clean_df
+        elif self.na_method == "ignore":
+            pass
         else:
             df = df.fillna(method=self.na_method)
         self.logger.info("After handling na: {} samples, {} features".format(

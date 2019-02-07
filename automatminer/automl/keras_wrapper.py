@@ -12,6 +12,7 @@ from sklearn.datasets import load_boston
 from sklearn.model_selection import KFold, cross_val_score
 from keras.wrappers.scikit_learn import KerasRegressor, KerasClassifier
 import pandas as pd
+from gen_evolve_v2 import NeuralNetOptimizer
 import numpy as np
 import random
 
@@ -21,7 +22,7 @@ _regressor_modes = {'regressor', 'regression', 'regress'}
 
 class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin, sklearn.base.ClassifierMixin):
     """Wrapper for Keras feed-forward neural network for classification to enable scikit-learn grid search"""
-    def __init__(self, init="glorot_uniform", optimizer="adam", hidden_layer_sizes=(100,), dropout=0.5, show_accuracy=True, batch_spec=((400, 1024), (100, -1)), activation="sigmoid", input_noise=0., use_maxout=False, use_maxnorm=False, learning_rate=0.001, stop_early=False, mode="regression"):
+    def __init__(self, init="glorot_uniform", optimizer="adam", hidden_layer_sizes=2, units=20, dropout=0.5, show_accuracy=True, batch_spec=((400, 1024), (100, -1)), activation="sigmoid", input_noise=0., use_maxout=False, use_maxnorm=False, learning_rate=0.001, stop_early=False, kfold_splits = 2, mode="regression"):
         self.hidden_layer_sizes = hidden_layer_sizes
         self.init = init
         self.optimizer = optimizer
@@ -34,6 +35,7 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin, sklearn
         self.use_maxnorm = use_maxnorm
         self.learning_rate = learning_rate
         self.stop_early = stop_early
+        self.units = units
 
         if self.use_maxout:
             self.use_maxnorm = True
@@ -41,6 +43,7 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin, sklearn
         self.model_ = None
         self.estimator = None
         self.classifier = None
+        self.kfold_splits = kfold_splits
         if mode in _classifier_modes:
             self.mode = "classification"
         else:
@@ -62,23 +65,23 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin, sklearn
             dense_kwargs["W_constraint"] = keras.constraints.maxnorm(2)
 
         # hidden layers
-        for layer_size in self.hidden_layer_sizes:
+        for layer_size in range(self.hidden_layer_sizes):
             if first:
                 if self.use_maxout:
-                    model.add(keras.legacy.layers.MaxoutDense(output_dim=layer_size / num_maxout_features,
+                    model.add(keras.legacy.layers.MaxoutDense(output_dim=self.hidden_layer_sizes / num_maxout_features,
                                                                 input_dim=X.shape[1], init=dense_kwargs["init"],
                                                                 nb_feature=num_maxout_features))
                 else:
-                    model.add(keras.layers.Dense(units=layer_size, input_dim=X.shape[1], kernel_initializer=dense_kwargs["init"]))
+                    model.add(keras.layers.Dense(units=self.units, input_dim=X.shape[1], kernel_initializer=dense_kwargs["init"]))
                     model.add(keras.layers.Activation(self.activation))
                     first = False
             else:
                 if self.use_maxout:
-                    model.add(keras.legacy.layers.MaxoutDense(output_dim=layer_size / num_maxout_features,
+                    model.add(keras.legacy.layers.MaxoutDense(output_dim=self.hidden_layer_sizes / num_maxout_features,
                                                                 init=dense_kwargs["init"],
                                                                 nb_feature=num_maxout_features))
                 else:
-                    model.add(keras.layers.Dense(units=layer_size, kernel_initializer=dense_kwargs["init"]))
+                    model.add(keras.layers.Dense(units=self.units, kernel_initializer=dense_kwargs["init"]))
                     model.add(keras.layers.Activation(self.activation))
             model.add(keras.layers.Dropout(self.dropout))
 
@@ -139,47 +142,8 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin, sklearn
             return sklearn.metrics.r2_score(y, self.predict(X))
 
     def best_model(self, X, y, mode):
-        OPTIMIZERS = ["sgd", "rmsprop", "adagrad", "adadelta", "nadam", "adamax"]
-        INITIALIZERS = ["glorot_uniform", "he_uniform"]
-        ACTIVATION = ["sigmoid", "tanh"]
-        kfold = KFold(n_splits=2, shuffle=True, random_state=np.random.seed(7))
-        self.fit(X, y)
-        best = cross_val_score(self.estimator, X, y, cv=kfold).mean() if mode == "regression" else cross_val_score(self.classifier, X, y, cv=kfold).mean()
-        best_wrapper = self
-        for opt in ["adam"] + random.sample(set(OPTIMIZERS), 2):
-            for ini in INITIALIZERS:
-                for act in ["relu"] + random.sample(set(ACTIVATION), 1):
-                    modelWMaxNorm = NnWrapper(optimizer=opt, init=ini, activation=act, use_maxnorm=True, hidden_layer_sizes=self.hidden_layer_sizes, dropout=self.dropout, show_accuracy=self.show_accuracy, batch_spec=self.batch_spec, input_noise=self.input_noise, use_maxout=self.use_maxout, learning_rate=self.learning_rate, stop_early=self.stop_early, mode=self.mode)
-                    modelWOMaxNorm = NnWrapper(optimizer=opt, init=ini, activation=act, use_maxnorm=False, hidden_layer_sizes=self.hidden_layer_sizes, dropout=self.dropout, show_accuracy=self.show_accuracy, batch_spec=self.batch_spec, input_noise=self.input_noise, use_maxout=self.use_maxout, learning_rate=self.learning_rate, stop_early=self.stop_early, mode=self.mode)
-                    modelWOMaxNorm.fit(X, y)
-                    modelWMaxNorm.fit(X, y)
-                    if mode == "regression":
-                        resultsNorm = cross_val_score(modelWMaxNorm.estimator, X, y, cv=kfold)
-                        resultsNoNorm = cross_val_score(modelWOMaxNorm.estimator, X, y, cv=kfold)
-                        if resultsNorm.mean() > best:
-                            best = resultsNorm.mean()
-                            self.model_ = modelWMaxNorm.model_
-                            self.estimator = modelWMaxNorm.estimator
-                            best_wrapper = modelWMaxNorm
-                        if resultsNoNorm.mean() > best:
-                            best = resultsNorm.mean()
-                            self.model_ = modelWOMaxNorm.model_
-                            self.estimator = modelWOMaxNorm.estimator
-                            best_wrapper = modelWOMaxNorm
-                    else:
-                        resultsNorm = cross_val_score(modelWMaxNorm.classifier, X, y, cv=kfold)
-                        resultsNoNorm = cross_val_score(modelWOMaxNorm.classifier, X, y, cv=kfold)
-                        if resultsNorm.mean() > best:
-                            best = resultsNorm.mean()
-                            self.model_ = modelWMaxNorm.model_
-                            self.classifier = modelWMaxNorm.classifier
-                            best_wrapper = modelWMaxNorm
-                        if resultsNoNorm.mean() > best:
-                            best = resultsNorm.mean()
-                            self.model_ = modelWOMaxNorm.model_
-                            self.classifier = modelWOMaxNorm.classifier
-                            best_wrapper = modelWOMaxNorm
-        return best_wrapper, best
+        neuralNet = NeuralNetOptimizer(X, y, NnWrapper)
+        return neuralNet.model_win
 
 
 if __name__ == "__main__":
@@ -189,5 +153,5 @@ if __name__ == "__main__":
     bos.columns = boston.feature_names
     bos['PRICE'] = boston.target
     print(bos)
-    wrapper.best_model(bos.drop(columns="PRICE"), bos["PRICE"], "regression")
+    model = wrapper.best_model(bos.drop(columns="PRICE"), bos["PRICE"], "regression")
     #wrapper.fit(X_train, y_train)

@@ -1,5 +1,5 @@
 """
-This file is modified from the default config files of the TPOT library. 
+This file is modified from the default config files of the TPOT library.
 It contains a customed dict of operators that we want to optimize using 
 genetic algorithm.
 
