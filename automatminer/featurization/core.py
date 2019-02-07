@@ -4,7 +4,8 @@ from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     CompositionToOxidComposition
 from matminer.featurizers.function import FunctionFeaturizer
 
-from automatminer.utils.package_tools import check_fitted, set_fitted
+from automatminer.utils.package_tools import check_fitted, set_fitted, \
+    log_progress
 from automatminer.base import DataframeTransformer, LoggableMixin
 from automatminer.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
@@ -157,16 +158,17 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         # Check if any featurizers need fitting (useful for MatPipe)
         needs_fit = False
         fittable_fs = StructureFeaturizers().need_fit
-        fittable_fcls = set([f.__class__.__name__ for f in fittable_fs])
+        self.fittable_fcls = set([f.__class__.__name__ for f in fittable_fs])
 
         # Currently structure featurizers are the only featurizer types which
         # can be fittable
         for f in self.featurizers[self.structure_col]:
-            if f.__class__.__name__ in fittable_fcls:
+            if f.__class__.__name__ in self.fittable_fcls:
                 needs_fit = True
                 break
         self.needs_fit = needs_fit
 
+    @log_progress("fitting")
     @set_fitted
     def fit(self, df, target):
         """
@@ -205,12 +207,22 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             if featurizer_type in df.columns:
                 df = self._tidy_column(df, featurizer_type)
                 for f in featurizers:
+                    log_fit = False
+                    if featurizer_type == self.structure_col:
+                        if f.__class__.__name__ in self.fittable_fcls:
+                            log_fit = True
+                    if log_fit:
+                        self.logger.info("Fitting {}."
+                                         "".format(f.__class__.__name__))
+
                     f.fit(df[featurizer_type].tolist())
                     f.set_n_jobs(self.n_jobs)
                     self.features += f.feature_labels()
-                    self.logger.info("Fit {} to {} samples in dataframe."
-                                     "".format(f.__class__.__name__,
-                                               df.shape[0]))
+
+                    if log_fit:
+                        self.logger.info(
+                            "Fit {} to {} samples in dataframe."
+                            "".format(f.__class__.__name__, df.shape[0]))
             else:
                 self.logger.info("Featurizer type {} not in the dataframe to be"
                                  " fitted. Skipping...".format(featurizer_type))
@@ -242,6 +254,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     df = self._tidy_column(df, featurizer_type)
 
                 for f in featurizers:
+                    self.logger.info("Featurizing with {}."
+                                     "".format(f.__class__.__name__))
                     df = f.featurize_dataframe(df, featurizer_type,
                                                ignore_errors=self.ignore_errors,
                                                multiindex=self.multiindex)

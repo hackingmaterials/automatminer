@@ -33,8 +33,10 @@ def compare_columns(df1, df2, ignore=None):
                  "mismatch": (bool)}
     """
     ignore = () if ignore is None else ignore
-    df2_not_in_df1 = [f for f in df2.columns if f not in df1.columns and f not in ignore]
-    df1_not_in_df2 = [f for f in df1.columns if f not in df2.columns and f not in ignore]
+    df2_not_in_df1 = [f for f in df2.columns if
+                      f not in df1.columns and f not in ignore]
+    df1_not_in_df2 = [f for f in df1.columns if
+                      f not in df2.columns and f not in ignore]
     matched = not (df2_not_in_df1 + df1_not_in_df2)
     return {"df2_not_in_df1": df2_not_in_df1,
             "df1_not_in_df2": df1_not_in_df2,
@@ -50,6 +52,7 @@ def check_fitted(func):
     Returns:
         A wrapper function for the input function/method.
     """
+
     def wrapper(*args, **kwargs):
         if not hasattr(args[0], "is_fit"):
             raise AttributeError("Method using check_fitted has no is_fit attr"
@@ -59,6 +62,7 @@ def check_fitted(func):
                                  "".format(args[0].__class__.__name__))
         else:
             return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -71,12 +75,55 @@ def set_fitted(func):
     Returns:
         A wrapper function for the input function/method.
     """
+
     def wrapper(*args, **kwargs):
         args[0].is_fit = False
         result = func(*args, **kwargs)
         args[0].is_fit = True
         return result
+
     return wrapper
+
+
+def log_progress(operation):
+    """
+    Decorator to auto-log progress before and after executing a method, such
+    as fit and transform. Should only be applied to DataFrameTransformers.
+
+    For example,
+
+    INFO: Beginning AutoFeaturizer fitting.
+    ... autofeaturizer logs ...
+    INFO: Finished AutoFeaturizer fitting.
+
+    Args:
+        operation (str): Some info about the operation you want to log.
+
+    Returns:
+        A wrapper for the input method.
+    """
+
+    def decorator_wrapper(meth):
+        def wrapper(*args, **kwargs):
+            """
+            Wrapper for a method to log.
+
+            Args:
+                operation (str): The operation to be logging.
+
+            Return:
+                result: The method result.
+            """
+            self = args[0]
+            name = self.__class__.__name__
+            self.logger.info("{} starting {}.".format(name, operation))
+            result = meth(*args, **kwargs)
+            self.logger.info("{} finished {}.".format(name, operation))
+            return result
+
+        return wrapper
+
+    return decorator_wrapper
 
 
 def return_attrs_recursively(obj):
@@ -114,5 +161,6 @@ def return_attrs_recursively(obj):
 if __name__ == "__main__":
     class A:
         pass
+
 
     print(isinstance(A, type))
