@@ -35,11 +35,9 @@ def get_preset_config(preset='default'):
 
     """
     production_config = {
-        "learner": TPOTAdaptor(generations=500,
-                               population_size=500,
-                               max_time_mins=720,
-                               max_eval_time_mins=60),
-        "reducer": FeatureReducer(),
+        "learner": TPOTAdaptor(max_time_mins=720,
+                               max_eval_time_mins=20),
+        "reducer": FeatureReducer(reducers=('corr', 'rebate')),
         "autofeaturizer": AutoFeaturizer(preset="best"),
         "cleaner": DataCleaner()
     }
@@ -68,7 +66,8 @@ def get_preset_config(preset='default'):
     }
 
     debug_single_config = {
-        "learner": SinglePipelineAdaptor(model=RandomForestRegressor()),
+        "learner": SinglePipelineAdaptor(
+            model=RandomForestRegressor(n_estimators=10)),
         "reducer": FeatureReducer(reducers=('corr',)),
         "autofeaturizer": AutoFeaturizer(preset="fast"),
         "cleaner": DataCleaner()
@@ -84,3 +83,5 @@ def get_preset_config(preset='default'):
         return debug_single_config
     elif preset == "production":
         return production_config
+    else:
+        raise ValueError("{} unknown preset.".format(preset))

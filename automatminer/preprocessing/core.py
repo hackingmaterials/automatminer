@@ -14,7 +14,8 @@ from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
     rebate, lower_corr_clf
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>",
-               "Alireza Faghaninia <alireza@lbl.gov>"]
+               "Alireza Faghaninia <alireza@lbl.gov>",
+               "Alex Ganose <aganose@lbl.gov>"]
 
 
 class DataCleaner(DataframeTransformer, LoggableMixin):
@@ -25,20 +26,22 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         max_na_frac (float): The maximum fraction (0.0 - 1.0) of samples for a
             given feature allowed. Columns containing a higher nan fraction are
             dropped.
-        na_method (str): How to deal with samples still containing nans after
-            troublesome columns are already dropped. Default is 'drop'. Other
-            options are from pandas.DataFrame.fillna: {‘backfill’, ‘bfill’,
-            ‘pad’, ‘ffill’, None}, or 'ignore' to ignore nans.
         encode_categories (bool): If True, retains features which are
             categorical (data type is string or object) and then
             one-hot encodes them. If False, drops them.
-        encoding_method (str): choose a method for encoding the categorical
+        encoder (str): choose a method for encoding the categorical
             variables. Current options: 'one-hot' and 'label'.
         drop_na_targets (bool): Drop samples containing target values which are
             na.
+        na_method (str): Set the na_method for samples for fit and transform.
+            Will override fit and transform arguments. Default is None, where
+            fit and transform independently set their na_methods. Other options
+            are "drop", "ignore" and from pandas.DataFrame.fillna:
+            {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
+            Alternatively, specify a value to replace the nans, e.g. 0.
         logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will be
-            used. If set to False, then no logging will occur.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
 
     Attributes:
             The following attrs are set during fitting.
@@ -53,15 +56,14 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             they are only relevant to the most recent transform.
 
         dropped_features (list): The features which were dropped.
-        dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped.
+        dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped
     """
 
-    def __init__(self, max_na_frac=0.01, na_method='drop',
-                 encode_categories=True, encoder='one-hot',
-                 drop_na_targets=True, logger=True):
+    def __init__(self, max_na_frac=0.01, encode_categories=True,
+                 encoder='one-hot', drop_na_targets=True, na_method=None,
+                 logger=True):
         self._logger = self.get_logger(logger)
         self.max_na_frac = max_na_frac
-        self.na_method = na_method
         self.encoder = encoder
         self.encode_categories = encode_categories
         self.drop_na_targets = drop_na_targets
@@ -73,6 +75,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fitted_target = None
         self.dropped_samples = None
         self.is_fit = False
+        self.na_method = na_method
 
     @property
     def retained_features(self):
@@ -86,42 +89,56 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         return self.fitted_df.columns.tolist()
 
     @set_fitted
-    def fit(self, df, target):
+    def fit(self, df, target, na_method="drop"):
         """
-        Assign attributes before actually transforming. Useful if you want
-        to see what the transformation will do before actually transforming.
+        Determine a sequence of preprocessing steps to clean a dataframe.
 
         Args:
             df (pandas.DataFrame): Contains features and the target_key
             target (str): The name of the target in the dataframe
+            na_method (str): How to deal with samples still containing nans
+                after troublesome columns are already dropped. Default is
+                'drop'. Other options are from pandas.DataFrame.fillna:
+                {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
+                Alternatively, specify a value to replace the nans, e.g. 0.
 
-        Returns:
-
+        Returns: self
         """
-        self.logger.debug("Fitting to new dataframe...")
+
+        na_method = self._get_na_method(na_method)
+        self.logger.info("Cleaning (fitting) with respect to samples with "
+                         "na_method '{}'".format(na_method))
         if target not in df.columns:
             raise AutomatminerError(
                 "Target {} must be contained in df.".format(target))
 
         self._reset_attrs()
         df = self.to_numerical(df, target)
-        df = self.handle_na(df, target)
+        df = self.handle_na(df, target, na_method)
         self.fitted_df = df
         self.fitted_target = target
         return self
 
     @check_fitted
-    def transform(self, df, target):
+    def transform(self, df, target, na_method=0):
         """
-        A sequence of data pre-processing steps either through this class or
-        sklearn.
+        Apply the sequence of preprocessing steps determined by fit, with the
+        option to change the na_method for samples.
 
         Args:
             df (pandas.DataFrame): Contains features and the target_key
             target (str): The name of the target in the dataframe
+            na_method (str): How to deal with samples still containing nans
+                after troublesome columns are already dropped. Default is
+                'drop'. Other options are from pandas.DataFrame.fillna:
+                {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
+                Alternatively, specify a value to replace the nans, e.g. 0.
 
         Returns (pandas.DataFrame)
         """
+        na_method = self._get_na_method(na_method)
+        self.logger.info("Cleaning (transforming) with respect to samples with "
+                         "na_method '{}'".format(na_method))
 
         if target != self.fitted_target:
             raise AutomatminerError(
@@ -131,7 +148,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
 
         # We assume the two targets are the same from here on out
         df = self.to_numerical(df, target)
-        df = self.handle_na(df, target, coerce_mismatch=True)
+        df = self.handle_na(df, target, na_method, coerce_mismatch=True)
 
         # Ensure the order of columns is identical
         if target in df.columns:
@@ -143,11 +160,11 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             df = df[reordered_cols]
         return df
 
-    def fit_transform(self, df, target):
-        self.fit(df, target)
+    def fit_transform(self, df, target, **fit_kwargs):
+        self.fit(df, target, **fit_kwargs)
         return self.fitted_df
 
-    def handle_na(self, df, target, coerce_mismatch=True):
+    def handle_na(self, df, target, na_method, coerce_mismatch=True):
         """
         First pass for handling cells without values (null or nan). Additional
         preprocessing may be necessary as one column may be filled with
@@ -156,15 +173,16 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Args:
             df (pandas.DataFrame): The dataframe containing features
             target (str): The key defining the ML target.
-            set_features (None or [str]): List of features to retain; if given
-                must return those features (this may wind up dropping many
-                samples). If None, automatically uses max_na_frac to decide
-                features.
             coerce_mismatch (bool): If there is a mismatch between the fitted
                 dataframe columns and the argument dataframe columns, create
                 and drop mismatch columns so the dataframes are matching. If
                 False, raises an error. New columns are instantiated as all
                 zeros, as most of the time this is a onehot encoding issue.
+            na_method (str): How to deal with samples still containing nans
+                after troublesome columns are already dropped. Default is
+                'drop'. Other options are from pandas.DataFrame.fillna:
+                {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
+                Alternatively, specify a value to replace the nans, e.g. 0.
 
         Returns:
             (pandas.DataFrame) The cleaned df
@@ -203,42 +221,42 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                                     "used for fitting and argument dataframe.")
                 if not coerce_mismatch:
                     raise AutomatminerError("Mismatch between columns found in "
-                                        "arg dataframe and dataframe used for "
-                                        "fitting!")
+                                            "arg dataframe and dataframe used "
+                                            "for fitting!")
                 else:
                     self.logger.warning("Coercing mismatched columns...")
                     if mismatch["df1_not_in_df2"]:  # in fitted, not in arg
-                        self.logger.warning("Assuming missing columns in "
-                                            "argument df are one-hot encoding "
-                                            "issues. Setting to zero the "
-                                            "following new columns:\n{}"
-                                            "".format(
-                            mismatch["df1_not_in_df2"]))
+                        self.logger.warning(
+                            "Assuming missing columns in argument df are "
+                            "one-hot encoding issues. Setting to zero the "
+                            "following new columns:\n{}".format(
+                                mismatch["df1_not_in_df2"]))
                         for c in self.fitted_df.columns:
                             if c not in df.columns and c != target:
                                 # Interpret as one-hot problems...
                                 df[c] = np.zeros((df.shape[0]))
                     elif mismatch["df2_not_in_df1"]:  # arg cols not in fitted
-                        self.logger.warning("Following columns are being "
-                                            "dropped:\n{}"
-                                            "".format(
-                            mismatch["df2_not_in_df1"]))
+                        self.logger.warning(
+                            "Following columns are being dropped:\n{}".format(
+                                mismatch["df2_not_in_df1"]))
                         df = df.drop(columns=mismatch["df2_not_in_df1"])
 
         self.dropped_features = [c for c in feats0 if
                                  c not in df.columns.values]
 
         # Handle all rows that still contain any nans
-        if self.na_method == "drop":
+        if na_method == "drop":
             clean_df = df.dropna(axis=0, how='any')
             self.dropped_samples = pd.concat(
                 (df[~df.index.isin(clean_df.index)], self.dropped_samples),
                 axis=0)
             df = clean_df
-        elif self.na_method == "ignore":
+        elif na_method == "ignore":
             pass
+        elif na_method in ["ffill", "bfill", "pad", None]:
+            df = df.fillna(method=na_method)
         else:
-            df = df.fillna(method=self.na_method)
+            df = df.fillna(na_method)
         self.logger.info("After handling na: {} samples, {} features".format(
             *df.shape))
         return df
@@ -255,7 +273,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Returns:
             (pandas.DataFrame) The numerical df
         """
-        self.logger.info("Replacing infinite values with nan for easier screening.")
+        self.logger.info("Replacing infinite values with nan for easier "
+                         "screening.")
         df = df.replace([np.inf, -np.inf], np.nan)
         self.number_cols = []
         self.object_cols = []
@@ -311,7 +330,26 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fitted_target = None
         self.dropped_samples = None
         self.is_fit = False
-        self.scaler_obj = None
+
+    def _get_na_method(self, na_method):
+        """
+        Get the na_method, if it is overridden.
+
+        Args:
+            na_method (str): How to deal with samples still containing nans
+                after troublesome columns are already dropped.
+
+        Returns:
+            na_method (str)
+
+        """
+        if self.na_method:
+            if self.na_method != na_method:
+                self.logger.warning(
+                    "na_method set in __init__ ({}) overriding na_method set in"
+                    " fit ({})".format(self.na_method, na_method))
+            na_method = self.na_method
+        return na_method
 
 
 class FeatureReducer(DataframeTransformer, LoggableMixin):
@@ -351,9 +389,13 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
             retained by ReBATE once it is passed the dataframe (i.e., 0.5 means
             ReBATE retains half of the features it is passed). ReBATE must be
             present in the reducers.
+        keep_features (list, None): A list of features that will not be removed.
+            This option does nothing if PCA feature removal is present.
+        remove_features (list, None): A list of features that will be removed.
+            This option does nothing if PCA feature removal is present.
         logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will be
-            used. If set to False, then no logging will occur.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
 
     Attributes:
         The following attrs are set during fitting.
@@ -367,7 +409,8 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
     """
 
     def __init__(self, reducers=('corr', 'tree'), n_pca_features=0.3,
-                 n_rebate_features=0.3, logger=True):
+                 n_rebate_features=0.3, logger=True,
+                 keep_features=None, remove_features=None):
         for reducer in reducers:
             if reducer not in ["corr", "tree", "rebate", "pca"]:
                 raise ValueError(
@@ -377,6 +420,8 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         self.n_pca_features = n_pca_features
         self.n_rebate_features = n_rebate_features
         self._logger = self.get_logger(logger)
+        self._keep_features = keep_features or []
+        self._remove_features = remove_features or []
         self.removed_features = {}
         self.retained_features = []
         self.reducer_params = {}
@@ -385,6 +430,19 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
 
     @set_fitted
     def fit(self, df, target):
+        self.logger.info("Feature reducer fitting to dataframe...")
+        missing_remove_features = [c for c in self._remove_features
+                                   if c not in df.columns]
+        missing_keep_features = [c for c in self._keep_features
+                                 if c not in df.columns]
+        for features, name in [(missing_remove_features, 'remove'),
+                               (missing_keep_features, 'keep')]:
+            if features:
+                self.logger.warning(
+                    "Asked to {} some features that do not exist in the "
+                    "dataframe. Skipping the following features:\n{}".format(
+                        name, features))
+
         reduced_df = df
         for r in self.reducers:
             X = df.drop(columns=[target])
@@ -403,9 +461,9 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                     "random_state": tbfr.rs}
             elif r == "rebate":
                 if isinstance(self.n_rebate_features, float):
-                    self.logger.info("Retaining fraction {} of current "
-                                     "{} features.".format(
-                        self.n_rebate_features, df.shape[1] - 1))
+                    self.logger.info(
+                        "Retaining fraction {} of current {} features.".format(
+                            self.n_rebate_features, df.shape[1] - 1))
                     self.n_rebate_features = int(df.shape[1] *
                                                  self.n_rebate_features)
                 self.logger.info(
@@ -442,26 +500,46 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                 self.logger.info(
                     "PCA completed: retained {} numerical "
                     "features.".format(len(reduced_df.columns)))
+
             retained = reduced_df.columns.values.tolist()
             removed = [c for c in df.columns.values if c not in retained
                        and c != target]
+
             self.removed_features[r] = removed
             if target not in reduced_df:
                 reduced_df.loc[:, target] = y.tolist()
             df = reduced_df
-        self.retained_features = [c for c in df.columns.tolist() if c != target]
+
+        all_removed = [c for r, rf in self.removed_features.items() for c in rf]
+        all_kept = [c for c in df.columns.tolist() if c != target]
+        save_from_removal = [c for c in self._keep_features if c in all_removed]
+        for_force_removal = [c for c in self._remove_features if c in all_kept]
+
+        if save_from_removal:
+            self.logger.info("Saving features from removal. "
+                             "Saved features:\n{}".format(save_from_removal))
+
+        if for_force_removal:
+            self.logger.info("Forcing removal of features. "
+                             "Removed features: \n{}".format(for_force_removal))
+            self.removed_features['manual'] = for_force_removal
+
+        self.retained_features = [c for c in all_kept if c not in
+                                  self._remove_features or c != target]
         return self
 
     @check_fitted
     def transform(self, df, target):
+        self.logger.info("Feature reducer transforming dataframe...")
         X = df.drop(columns=target)
-        for r in self.reducers:
+        for r, f in self.removed_features.items():
             if r == "pca":
                 matrix = self._pca.transform(X)
                 X = pd.DataFrame(columns=self._pca_feats, data=matrix,
                                  index=X.index)
             else:
-                X = X.drop(columns=self.removed_features[r])
+                X = X.drop(columns=[c for c in f
+                                    if c not in self._keep_features])
         X.loc[:, target] = df[target].values
         return X
 

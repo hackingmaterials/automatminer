@@ -1,8 +1,6 @@
-import os
 import warnings
 
 import matplotlib.pyplot as plt
-from matminer.datasets import load_dataset
 
 try:
     from skater.core.explanations import Interpretation
@@ -17,6 +15,13 @@ from automatminer.pipeline import MatPipe
 
 
 class Analytics:
+    """
+    A class for analyzing pipelines.
+
+    Args:
+
+    """
+
     def __init__(self, predictive_model, feature_labels=None, dataset=None):
         if isinstance(predictive_model, MatPipe):
             self.predictive_model = predictive_model
@@ -24,9 +29,9 @@ class Analytics:
             self.target = predictive_model.learner.fitted_target
             self.dataset = predictive_model.post_fit_df.drop([self.target],
                                                              axis=1)
-        if feature_labels is not None:
+        if not feature_labels:
             self.feature_labels = feature_labels
-        if dataset is not None:
+        if not dataset:
             self.dataset = dataset
 
         self.interpreter = Interpretation(self.dataset,

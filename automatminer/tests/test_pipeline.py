@@ -5,6 +5,7 @@ Tests for the top level interface.
 import unittest
 import os.path
 
+import pandas as pd
 from matminer.datasets.dataset_retrieval import load_dataset
 from sklearn.metrics import r2_score
 from sklearn.exceptions import NotFittedError
@@ -40,6 +41,7 @@ class TestMatPipe(unittest.TestCase):
         df = load_dataset("elastic_tensor_2015").rename(
             columns={"formula": "composition"})
         self.df = df[["composition", "K_VRH"]]
+        self.df_struc = df[["composition", "structure", "K_VRH"]]
         self.extra_features = df["G_VRH"]
         self.target = "K_VRH"
         self.config = get_preset_config("debug_single")
@@ -82,11 +84,15 @@ class TestMatPipe(unittest.TestCase):
         test = df_test[self.target + " predicted"]
         self.assertTrue(r2_score(true, test) > 0.75)
 
-    def test_benchmarking(self):
-        df = self.df.iloc[500:700]
-        kfold = KFold(n_splits=5)
-        df_tests = self.pipe.benchmark(df, self.target, kfold)
-        self.assertEqual(len(df_tests), 5)
+    @unittest.skipIf("CI" in os.environ.keys(),
+                     "Test too intensive for CircleCI.")
+    def test_benchmarking_strict(self):
+        self._run_benchmark(strict=True)
+
+    @unittest.skipIf("CI" in os.environ.keys(),
+                     "Test too intensive for CircleCI.")
+    def test_benchmarking_not_strict(self):
+        self._run_benchmark(strict=False)
 
     def test_persistence_and_digest(self):
         with self.assertRaises(NotFittedError):
@@ -105,3 +111,20 @@ class TestMatPipe(unittest.TestCase):
         digest = self.pipe.digest(filename=digest_file)
         self.assertTrue(os.path.isfile(digest_file))
         self.assertTrue(isinstance(digest, str))
+
+    def _run_benchmark(self, strict):
+        # Test static, regular benchmark (no fittable featurizers)
+        df = self.df.iloc[500:600]
+        kfold = KFold(n_splits=5)
+        df_tests = self.pipe.benchmark(df, self.target, kfold, strict=strict)
+        self.assertEqual(len(df_tests), kfold.n_splits)
+
+        # Make sure we retain a good amount of test samples...
+        df_tests_all = pd.concat(df_tests)
+        self.assertGreaterEqual(len(df_tests_all), 0.95 * len(df))
+
+        # Test static subset of kfold
+        df2 = self.df.iloc[600:700]
+        df_tests2 = self.pipe.benchmark(df2, self.target, kfold,
+                                        fold_subset=[0, 3], strict=strict)
+        self.assertEqual(len(df_tests2), 2)
