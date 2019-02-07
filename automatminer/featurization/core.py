@@ -1,5 +1,3 @@
-import copy
-
 from pymatgen import Composition
 from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     StructureToComposition, StructureToOxidStructure, \
