@@ -1,3 +1,5 @@
+import copy
+
 from pymatgen import Composition
 from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     StructureToComposition, StructureToOxidStructure, \
@@ -104,6 +106,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.max_na_percent = max_na_frac
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
+        self.fitted_input_df = None
         self.ignore_errors = ignore_errors
         self.drop_inputs = drop_inputs
         self.multiindex = multiindex
@@ -191,6 +194,9 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             (AutoFeaturizer): self
         """
+        # Prevent anything from happening to input df during featurization
+        self.fitted_input_df = df
+
         df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
 
@@ -214,7 +220,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         return self
 
     @check_fitted
-    def transform(self, df, target, tidy_column=True):
+    def transform(self, df, target):
         """
         Decorate a dataframe containing composition, structure, bandstructure,
         and/or DOS objects with descriptors.
@@ -226,15 +232,15 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Transformed dataframe containing features.
         """
-
-        # todo: structure to oxidstructure + comp2oxidcomp can get called twice
-        # todo: by _tidy_column, can be fixed with overriding fit_transform
+        transforming_on_fitted = df is self.fitted_input_df
         df = self._prescreen_df(df, inplace=True)
-        df = self._add_composition_from_structure(df)
+
+        if not transforming_on_fitted:
+            df = self._add_composition_from_structure(df)
 
         for featurizer_type, featurizers in self.featurizers.items():
             if featurizer_type in df.columns:
-                if tidy_column:
+                if not transforming_on_fitted:
                     df = self._tidy_column(df, featurizer_type)
 
                 for f in featurizers:
@@ -255,21 +261,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                             ignore_errors=self.ignore_errors,
                                             multiindex=self.multiindex)
         return df
-
-    @set_fitted
-    def fit_transform(self, df, target):
-        """
-        Fit and transform the dataframe all as one, without reassigning
-        oxidation states (if valid).
-
-        Args:
-            df (pandas.DataFrame): The dataframe not containing features.
-            target (str): The ML-target property contained in the df.
-
-        Returns:
-            df (pandas.DataFrame): Transformed dataframe containing features.
-        """
-        return self.fit(df, target).transform(df, target, tidy_column=False)
 
     def _prescreen_df(self, df, inplace=True):
         """
@@ -354,7 +345,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
             # Decorate with oxidstates
             if featurizer_type == self.structure_col and self.guess_oxistates:
-                self.logger.info("Guessing oxidation states of structures, as "
+                self.logger.info("Guessing oxidation states of structures if "
                                  "they were not present in input.")
                 sto = StructureToOxidStructure(
                     target_col_id=featurizer_type, overwrite_data=True,
@@ -392,7 +383,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 self.logger.info("composition column already exists, "
                                  "overwriting with composition from structure.")
             else:
-                self.logger.debug("Adding compositions from structures.")
+                self.logger.info("Adding compositions from structures.")
 
             df = self._tidy_column(df, self.structure_col)
 
