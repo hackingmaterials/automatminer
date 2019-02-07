@@ -17,6 +17,8 @@ from automatminer.utils.package_tools import AutomatminerError, set_fitted, \
     check_fitted
 from automatminer.utils.ml_tools import is_greater_better, \
     regression_or_classification
+from automatminer.utils.log_tools import log_progress, LOG_TRANSFORM_STR, \
+    LOG_FIT_STR
 from automatminer.base import AutoMLAdaptor, LoggableMixin
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
@@ -85,6 +87,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         self._ml_data = None
         self.greater_score_is_better = None
 
+    @log_progress(LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
         """
@@ -189,6 +192,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
     def _best_pipeline(self):
         return self._backend.fitted_pipeline_
 
+    @log_progress(LOG_TRANSFORM_STR)
     @check_fitted
     def predict(self, df, target):
         """
@@ -251,6 +255,7 @@ class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
         self._ml_data = None
         self.fitted_target = None
 
+    @log_progress(LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
         # Prevent goofy pandas casting by casting to native
@@ -265,6 +270,7 @@ class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
         self.logger.info("{} fitting finished.".format(model_name))
 
     # todo: Remove this duplicated code section, maybe just make a parent class
+    @log_progress(LOG_TRANSFORM_STR)
     @check_fitted
     def predict(self, df, target):
         """
@@ -308,7 +314,6 @@ class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
     @check_fitted
     def _best_pipeline(self):
         return self._backend
-
 
 # if __name__ == "__main__":
 #     from matminer.datasets.dataset_retrieval import load_dataset

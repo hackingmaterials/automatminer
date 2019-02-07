@@ -4,7 +4,8 @@ Base classes, mixins, and other inheritables.
 
 import logging
 
-from automatminer.utils.log_tools import initialize_logger, initialize_null_logger
+from automatminer.utils.log_tools import initialize_logger, \
+    initialize_null_logger
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
 
@@ -59,6 +60,7 @@ class DataframeTransformer:
     When implementing a base class adaptor, make sure to use @check_fitted
     and @set_fitted if necessary!
     """
+
     def fit(self, df, target, **fit_kwargs):
         """
         Fits the transformer to a dataframe, given a target.
@@ -114,6 +116,7 @@ class AutoMLAdaptor(DataframeTransformer):
     When implementing a base class adaptor, make sure to use @check_fitted
     and @set_fitted if necessary!
     """
+
     def transform(self, df, target):
         return self.predict(df, target)
 
