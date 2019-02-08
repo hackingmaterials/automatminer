@@ -1,7 +1,7 @@
 version: 2
 
 jobs:
-  build:
+  py367:
     working_directory: ~/automatminer
     docker:
       - image: circleci/python:3.6.7
@@ -28,13 +28,46 @@ jobs:
 
             # pip install --quiet -r requirements-optional.txt
 
-            # temporarily avoid pip install of matminer
-            mkdir ~/matminer
-            cd ~/matminer
-            git clone https://github.com/hackingmaterials/matminer.git
-            cd matminer
-            pip install -q -e .
-            cd ~/automatminer
+            pip install -e .
+            pip install -q coverage
+            pip install -q codacy-coverage
+
+            coverage run setup.py test
+            coverage xml
+            python-codacy-coverage -r coverage.xml
+          no_output_timeout: 120m
+
+      - save_cache:
+          paths:
+          - ./test_env
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+
+  py372:
+    working_directory: ~/matminer
+    docker:
+      - image: circleci/python:3.7.2
+        environment:
+          CI: "CIRCLE"
+    steps:
+      - checkout
+
+    # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "requirements.txt" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run:
+          name: setup env and run tests
+          command: |
+            python3 -m venv test_env
+            . test_env/bin/activate
+            pip install -q --upgrade pip
+            pip install --quiet -r requirements.txt
+
+            # pip install --quiet -r requirements-optional.txt
 
             pip install -e .
             pip install -q coverage
@@ -49,3 +82,11 @@ jobs:
           paths:
           - ./test_env
           key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - py367
+      - py372
