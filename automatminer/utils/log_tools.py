@@ -35,8 +35,6 @@ def initialize_logger(name, filepath='.', filebase=None, level=None):
         logpath += "_" + datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     logpath += ".log"
 
-    print("LOGPATH is ", logpath)
-
     handler = logging.FileHandler(logpath, mode='w')
     handler.setFormatter(formatter)
     screen_handler = logging.StreamHandler(stream=sys.stdout)
