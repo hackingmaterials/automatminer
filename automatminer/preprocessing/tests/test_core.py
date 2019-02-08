@@ -5,11 +5,11 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
-from automatminer.base import logger_base_name
+from automatminer.utils.log import AMM_LOGGER_BASENAME
 from automatminer.preprocessing.core import DataCleaner, FeatureReducer
 from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
     rebate, lower_corr_clf
-from automatminer.utils.package_tools import compare_columns
+from automatminer.utils.pkg import compare_columns
 
 test_dir = os.path.dirname(__file__)
 
@@ -148,7 +148,7 @@ class TestPreprocess(unittest.TestCase):
         # test removing feature that doesn't exist
         fr = FeatureReducer(reducers=[], remove_features=['abcdefg12345!!'])
 
-        with self.assertLogs(logger_base_name, level='INFO') as cm:
+        with self.assertLogs(AMM_LOGGER_BASENAME, level='INFO') as cm:
             # should give log warning but not throw an error
             fr.fit_transform(self.test_df, self.target)
             self.assertTrue('abcdefg12345!!' in " ".join(cm.output))

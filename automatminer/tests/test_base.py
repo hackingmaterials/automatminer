@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.exceptions import NotFittedError
 
 from automatminer.base import DataframeTransformer, AutoMLAdaptor, LoggableMixin
-from automatminer.utils.package_tools import check_fitted, set_fitted
+from automatminer.utils.pkg import check_fitted, set_fitted
 
 
 class TestTransformerGood(DataframeTransformer):

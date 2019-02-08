@@ -1,6 +1,7 @@
 """
-Tools specific to this package.
+Utils specific to this package.
 """
+
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline

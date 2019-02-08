@@ -4,13 +4,10 @@ Base classes, mixins, and other inheritables.
 
 import logging
 
-from automatminer.utils.log_tools import initialize_logger, \
-    initialize_null_logger
+from automatminer.utils.log import initialize_logger, \
+    initialize_null_logger, AMM_LOGGER_BASENAME
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
-
-logger_base_name = "automatminer"
-
 
 class LoggableMixin:
     """A mixin class for easy logging (or absence of it)."""
@@ -37,16 +34,16 @@ class LoggableMixin:
         """
         # need comparison to True and False to avoid overwriting Logger objects
         if logger is True:
-            logger = logging.getLogger(logger_base_name)
+            logger = logging.getLogger(AMM_LOGGER_BASENAME)
 
             if not logger.handlers:
-                initialize_logger(logger_base_name, level=level)
+                initialize_logger(AMM_LOGGER_BASENAME, level=level)
 
         elif logger is False:
-            logger = logging.getLogger(logger_base_name + "_null")
+            logger = logging.getLogger(AMM_LOGGER_BASENAME + "_null")
 
             if not logger.handlers:
-                initialize_null_logger(logger_base_name)
+                initialize_null_logger(AMM_LOGGER_BASENAME)
 
         logger.setLevel(logging.INFO)
         return logger

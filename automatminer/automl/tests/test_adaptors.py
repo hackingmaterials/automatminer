@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 
 from automatminer.presets import get_preset_config
 from automatminer.automl.adaptors import SinglePipelineAdaptor
-from automatminer.utils.package_tools import AutomatminerError
+from automatminer.utils.pkg import AutomatminerError
 
 __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
 

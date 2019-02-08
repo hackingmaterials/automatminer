@@ -13,7 +13,7 @@ from sklearn.model_selection import KFold
 
 from automatminer.pipeline import MatPipe
 from automatminer.presets import get_preset_config
-from automatminer.utils.package_tools import AutomatminerError
+from automatminer.utils.pkg import AutomatminerError
 
 test_dir = os.path.dirname(__file__)
 

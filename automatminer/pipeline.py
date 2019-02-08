@@ -6,8 +6,8 @@ import pickle
 
 from automatminer.base import LoggableMixin, DataframeTransformer
 from automatminer.presets import get_preset_config
-from automatminer.utils.ml_tools import regression_or_classification
-from automatminer.utils.package_tools import check_fitted, set_fitted, \
+from automatminer.utils.ml import regression_or_classification
+from automatminer.utils.pkg import check_fitted, set_fitted, \
     return_attrs_recursively, AutomatminerError
 
 

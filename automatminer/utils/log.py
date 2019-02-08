@@ -7,6 +7,7 @@ import sys
 import logging
 import datetime
 
+AMM_LOGGER_BASENAME = "automatminer"
 AMM_LOG_FIT_STR = "fitting"
 AMM_LOG_TRANSFORM_STR = "transforming"
 AMM_LOG_PREDICT_STR = "predicting"

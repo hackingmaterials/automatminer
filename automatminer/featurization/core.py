@@ -4,13 +4,13 @@ from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     CompositionToOxidComposition
 from matminer.featurizers.function import FunctionFeaturizer
 
-from automatminer.utils.log_tools import log_progress, AMM_LOG_FIT_STR, \
+from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR, \
     AMM_LOG_TRANSFORM_STR
-from automatminer.utils.package_tools import check_fitted, set_fitted
+from automatminer.utils.pkg import check_fitted, set_fitted
 from automatminer.base import DataframeTransformer, LoggableMixin
 from automatminer.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
-from automatminer.utils.package_tools import AutomatminerError
+from automatminer.utils.pkg import AutomatminerError
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",

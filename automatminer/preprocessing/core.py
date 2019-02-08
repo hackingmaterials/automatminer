@@ -6,11 +6,11 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import LabelEncoder
 
-from automatminer.utils.package_tools import AutomatminerError, \
+from automatminer.utils.pkg import AutomatminerError, \
     compare_columns, check_fitted, set_fitted
-from automatminer.utils.log_tools import log_progress, AMM_LOG_TRANSFORM_STR, \
+from automatminer.utils.log import log_progress, AMM_LOG_TRANSFORM_STR, \
     AMM_LOG_FIT_STR
-from automatminer.utils.ml_tools import regression_or_classification
+from automatminer.utils.ml import regression_or_classification
 from automatminer.base import LoggableMixin, DataframeTransformer
 from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
     rebate, lower_corr_clf

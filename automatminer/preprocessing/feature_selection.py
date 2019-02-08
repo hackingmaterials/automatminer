@@ -11,7 +11,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.preprocessing import LabelEncoder
 from skrebate import MultiSURF
 
-from automatminer.utils.package_tools import AutomatminerError
+from automatminer.utils.pkg import AutomatminerError
 from automatminer.base import LoggableMixin, DataframeTransformer
 
 __authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",

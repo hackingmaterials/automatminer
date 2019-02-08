@@ -13,11 +13,11 @@ from tpot import TPOTClassifier, TPOTRegressor
 from automatminer.automl.tpot_configs.classifier import \
     classifier_config_dict_mb
 from automatminer.automl.tpot_configs.regressor import regressor_config_dict_mb
-from automatminer.utils.package_tools import AutomatminerError, set_fitted, \
+from automatminer.utils.pkg import AutomatminerError, set_fitted, \
     check_fitted
-from automatminer.utils.ml_tools import is_greater_better, \
+from automatminer.utils.ml import is_greater_better, \
     regression_or_classification
-from automatminer.utils.log_tools import log_progress, AMM_LOG_PREDICT_STR, \
+from automatminer.utils.log import log_progress, AMM_LOG_PREDICT_STR, \
     AMM_LOG_FIT_STR
 from automatminer.base import AutoMLAdaptor, LoggableMixin
 
