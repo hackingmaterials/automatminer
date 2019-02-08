@@ -28,6 +28,15 @@ jobs:
 
             # pip install --quiet -r requirements-optional.txt
 
+
+            # temporarily avoid pip install of matminer
+            mkdir ~/matminer
+            cd ~/matminer
+            git clone https://github.com/hackingmaterials/matminer.git
+            cd matminer
+            pip install -q -e .
+            cd ~/automatminer
+
             pip install -e .
             pip install -q coverage
             pip install -q codacy-coverage
@@ -69,6 +78,14 @@ jobs:
 
             # pip install --quiet -r requirements-optional.txt
 
+            # temporarily avoid pip install of matminer
+            mkdir ~/matminer
+            cd ~/matminer
+            git clone https://github.com/hackingmaterials/matminer.git
+            cd matminer
+            pip install -q -e .
+            cd ~/automatminer
+
             pip install -e .
             pip install -q coverage
             pip install -q codacy-coverage
@@ -90,3 +107,5 @@ workflows:
     jobs:
       - py367
       - py372
+
+
