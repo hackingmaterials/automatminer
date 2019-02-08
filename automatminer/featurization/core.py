@@ -4,8 +4,8 @@ from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     CompositionToOxidComposition
 from matminer.featurizers.function import FunctionFeaturizer
 
-from automatminer.utils.log_tools import log_progress, LOG_FIT_STR, \
-    LOG_TRANSFORM_STR
+from automatminer.utils.log_tools import log_progress, AMM_LOG_FIT_STR, \
+    AMM_LOG_TRANSFORM_STR
 from automatminer.utils.package_tools import check_fitted, set_fitted
 from automatminer.base import DataframeTransformer, LoggableMixin
 from automatminer.featurization.sets import CompositionFeaturizers, \
@@ -169,7 +169,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 break
         self.needs_fit = needs_fit
 
-    @log_progress(LOG_FIT_STR)
+    @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
         """
@@ -230,7 +230,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
         return self
 
-    @log_progress(LOG_TRANSFORM_STR)
+    @log_progress(AMM_LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target):
         """

@@ -8,8 +8,8 @@ from sklearn.preprocessing import LabelEncoder
 
 from automatminer.utils.package_tools import AutomatminerError, \
     compare_columns, check_fitted, set_fitted
-from automatminer.utils.log_tools import log_progress, LOG_TRANSFORM_STR, \
-    LOG_FIT_STR
+from automatminer.utils.log_tools import log_progress, AMM_LOG_TRANSFORM_STR, \
+    AMM_LOG_FIT_STR
 from automatminer.utils.ml_tools import regression_or_classification
 from automatminer.base import LoggableMixin, DataframeTransformer
 from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
@@ -90,7 +90,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
         return self.fitted_df.columns.tolist()
 
-    @log_progress(LOG_FIT_STR)
+    @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, na_method="drop"):
         """
@@ -122,7 +122,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fitted_target = target
         return self
 
-    @log_progress(LOG_TRANSFORM_STR)
+    @log_progress(AMM_LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target, na_method=0):
         """
@@ -432,7 +432,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         self._pca = None
         self._pca_feats = None
 
-    @log_progress(LOG_FIT_STR)
+    @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
         missing_remove_features = [c for c in self._remove_features
@@ -532,7 +532,7 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                                   self._remove_features or c != target]
         return self
 
-    @log_progress(LOG_TRANSFORM_STR)
+    @log_progress(AMM_LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target):
         X = df.drop(columns=target)
