@@ -253,7 +253,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             clean_df = df.dropna(axis=0, how='any')
             self.dropped_samples = pd.concat(
                 (df[~df.index.isin(clean_df.index)], self.dropped_samples),
-                axis=0)
+                axis=0, sort=True)
             df = clean_df
         elif na_method == "ignore":
             pass
