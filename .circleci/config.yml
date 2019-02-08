@@ -2,7 +2,7 @@ version: 2
 
 jobs:
   py367:
-    working_directory: ~/automatminer
+    working_directory: ~/py367_automatminer
     docker:
       - image: circleci/python:3.6.7
         environment:
@@ -28,14 +28,13 @@ jobs:
 
             # pip install --quiet -r requirements-optional.txt
 
-
             # temporarily avoid pip install of matminer
-            mkdir ~/matminer
-            cd ~/matminer
+            mkdir matminer
+            cd matminer
             git clone https://github.com/hackingmaterials/matminer.git
             cd matminer
             pip install -q -e .
-            cd ~/automatminer
+            cd ../..
 
             pip install -e .
             pip install -q coverage
@@ -53,7 +52,7 @@ jobs:
 
 
   py372:
-    working_directory: ~/matminer
+    working_directory: ~/py372_automatminer
     docker:
       - image: circleci/python:3.7.2
         environment:
@@ -79,12 +78,12 @@ jobs:
             # pip install --quiet -r requirements-optional.txt
 
             # temporarily avoid pip install of matminer
-            mkdir ~/matminer
-            cd ~/matminer
+            mkdir matminer
+            cd matminer
             git clone https://github.com/hackingmaterials/matminer.git
             cd matminer
             pip install -q -e .
-            cd ~/automatminer
+            cd ../..
 
             pip install -e .
             pip install -q coverage
