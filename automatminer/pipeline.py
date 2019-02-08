@@ -284,7 +284,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return digeststr
 
     @check_fitted
-    def save(self, filename="matpipe.p"):
+    def save(self, filename="mat.pipe"):
         """
         Pickles and saves a pipeline. Direct pickling will not work as some
         AutoML backends can't serialize.
