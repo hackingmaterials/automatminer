@@ -8,6 +8,7 @@ import sys
 
 LOG_FIT_STR = "fitting"
 LOG_TRANSFORM_STR = "transforming"
+LOG_PREDICT_STR = "predicting"
 
 
 def initialize_logger(name, filepath='.', filename=None, level=None):

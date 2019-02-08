@@ -109,8 +109,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
 
         na_method = self._get_na_method(na_method)
-        self.logger.info("Cleaning (fitting) with respect to samples with "
-                         "na_method '{}'".format(na_method))
+        self.logger.info("Cleaning with respect to samples with na_method '{}'"
+                         "".format(na_method))
         if target not in df.columns:
             raise AutomatminerError(
                 "Target {} must be contained in df.".format(target))
@@ -141,8 +141,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Returns (pandas.DataFrame)
         """
         na_method = self._get_na_method(na_method)
-        self.logger.info("Cleaning (transforming) with respect to samples with "
-                         "na_method '{}'".format(na_method))
+        self.logger.info("Cleaning with respect to samples with na_method '{}'"
+                         "".format(na_method))
 
         if target != self.fitted_target:
             raise AutomatminerError(
@@ -216,7 +216,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                 feat_names = feats0 - feats
                 self.logger.info(
                     'These {} features were removed as they had more '
-                    'than {}% missing values:\n{}'.format(
+                    'than {}% missing values: {}'.format(
                         n_feats, napercent, feat_names))
         else:
             mismatch = compare_columns(self.fitted_df, df, ignore=target)
@@ -435,7 +435,6 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
     @log_progress(LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
-        self.logger.info("Feature reducer fitting to dataframe...")
         missing_remove_features = [c for c in self._remove_features
                                    if c not in df.columns]
         missing_keep_features = [c for c in self._keep_features
@@ -536,7 +535,6 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
     @log_progress(LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target):
-        self.logger.info("Feature reducer transforming dataframe...")
         X = df.drop(columns=target)
         for r, f in self.removed_features.items():
             if r == "pca":
