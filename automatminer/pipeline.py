@@ -34,7 +34,7 @@ class MatPipe(DFTransformer, LoggableMixin):
     ----------------------------------------------------------------------------
     Note: This pipeline should function the same regardless of which
     "component" classes it is made out of. E.g. the steps for each method should
-    remain the same whether using the TPOTPredictor class as the learner or
+    remain the same whether using the TPOTAdaptor class as the learner or
     using an AutoKerasAdaptor class as the learner. To use a preset config,
     import a config from automatminer.configs and do MatPipe(**config).
     ----------------------------------------------------------------------------

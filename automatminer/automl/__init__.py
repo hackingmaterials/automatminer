@@ -1,1 +1,1 @@
-from .adaptors import TPOTPredictor, SinglePipelinePredictor
+from .adaptors import TPOTAdaptor, SinglePipelineAdaptor

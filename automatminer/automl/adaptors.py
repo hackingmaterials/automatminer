@@ -3,7 +3,7 @@ Adaptor classes for using AutoML packages in a Matbench pipeline.
 
 Current adaptor classes are:
 
-    TPOTPredictor: Uses the backend from the automl project TPOT, which can be
+    TPOTAdaptor: Uses the backend from the automl project TPOT, which can be
         found at https://github.com/EpistasisLab/tpot
 """
 from collections import OrderedDict
@@ -31,7 +31,7 @@ _classifier_modes = {'classifier', 'classification', 'classify'}
 _regressor_modes = {'regressor', 'regression', 'regress'}
 
 
-class TPOTPredictor(DFMLAdaptor, LoggableMixin):
+class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
     """
     A dataframe adaptor for the TPOT classifiers and regressors.
 
@@ -100,7 +100,7 @@ class TPOTPredictor(DFMLAdaptor, LoggableMixin):
                 These arguments must be valid arguments to the TPOTBase class.
 
         Returns:
-            TPOTPredictor (self)
+            TPOTAdaptor (self)
 
         """
         # Prevent goofy pandas casting by casting to native
@@ -248,13 +248,13 @@ class TPOTPredictor(DFMLAdaptor, LoggableMixin):
         return self._backend
 
 
-class SinglePipelinePredictor(DFMLAdaptor, LoggableMixin):
+class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     """
     For running single models or pipelines in a MatPipe pipeline using the same
     syntax as the AutoML adaptors.
 
     This adaptor should be able to fit into a MatPipe in similar fashion to
-    TPOTPredictor.
+    TPOTAdaptor.
 
     Args:
         model (sklearn Pipeline or BaseEstimator-like): The object you want to
@@ -367,9 +367,9 @@ class SinglePipelinePredictor(DFMLAdaptor, LoggableMixin):
 #     autofeater = AutoFeaturizer()
 #     cleaner = DataCleaner()
 #     reducer = FeatureReducer()
-#     # learner = TPOTPredictor("regression", max_time_mins=5)
-#     learner = SinglePipelinePredictor(model=RandomForestRegressor())
-#     learner = SinglePipelinePredictor(model=
+#     # learner = TPOTAdaptor("regression", max_time_mins=5)
+#     learner = SinglePipelineAdaptor(model=RandomForestRegressor())
+#     learner = SinglePipelineAdaptor(model=
 #                                     Pipeline([('scaler', StandardScaler()),
 #                                               ('rfr', RandomForestRegressor())]))
 #

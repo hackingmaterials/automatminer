@@ -8,7 +8,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
 
 from automatminer.presets import get_preset_config
-from automatminer.automl.adaptors import SinglePipelinePredictor
+from automatminer.automl.adaptors import SinglePipelineAdaptor
 from automatminer.utils.pkg import AutomatminerError
 
 __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
@@ -70,7 +70,7 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
     def test_Pipeline(self):
         model = Pipeline([('scaler', StandardScaler()),
                           ('rfr', RandomForestRegressor())])
-        learner = SinglePipelinePredictor(model=model)
+        learner = SinglePipelineAdaptor(model=model)
         target_key = "K_VRH"
         learner.fit(self.train_df, target_key)
         test_w_predictions = learner.predict(self.test_df, target_key)
@@ -81,7 +81,7 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
 
     def test_BaseEstimator(self):
         model = RandomForestRegressor()
-        learner = SinglePipelinePredictor(model=model)
+        learner = SinglePipelineAdaptor(model=model)
         target_key = "K_VRH"
         learner.fit(self.train_df, target_key)
         test_w_predictions = learner.predict(self.test_df, target_key)
@@ -92,7 +92,7 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
 
     def test_feature_mismatching(self):
         model = RandomForestRegressor()
-        learner = SinglePipelinePredictor(model=model)
+        learner = SinglePipelineAdaptor(model=model)
         target_key = "K_VRH"
         df1 = self.train_df
         df2 = self.test_df.rename(columns={'mean X': "some other feature"})

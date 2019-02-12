@@ -35,7 +35,7 @@ class TestMatPipeSetup(unittest.TestCase):
         pipe = MatPipe(**self.config)
 
 
-# todo: figure out a way to run these tests with TPOTPredictor!
+# todo: figure out a way to run these tests with TPOTAdaptor!
 class TestMatPipe(unittest.TestCase):
     def setUp(self):
         df = load_dataset("elastic_tensor_2015").rename(

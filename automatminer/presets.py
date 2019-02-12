@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestRegressor
 
 from automatminer.featurization import AutoFeaturizer
 from automatminer.preprocessing import FeatureReducer, DataCleaner
-from automatminer.automl import TPOTPredictor, SinglePipelinePredictor
+from automatminer.automl import TPOTAdaptor, SinglePipelineAdaptor
 
 
 def get_preset_config(preset='default'):
@@ -35,38 +35,38 @@ def get_preset_config(preset='default'):
 
     """
     production_config = {
-        "learner": TPOTPredictor(max_time_mins=720,
-                                 max_eval_time_mins=20),
+        "learner": TPOTAdaptor(max_time_mins=720,
+                               max_eval_time_mins=20),
         "reducer": FeatureReducer(reducers=('corr', 'rebate')),
         "autofeaturizer": AutoFeaturizer(preset="best"),
         "cleaner": DataCleaner()
     }
 
     default_config = {
-        "learner": TPOTPredictor(max_time_mins=120),
+        "learner": TPOTAdaptor(max_time_mins=120),
         "reducer": FeatureReducer(),
         "autofeaturizer": AutoFeaturizer(preset="best"),
         "cleaner": DataCleaner()
     }
 
     fast_config = {
-        "learner": TPOTPredictor(max_time_mins=30, population_size=50),
+        "learner": TPOTAdaptor(max_time_mins=30, population_size=50),
         "reducer": FeatureReducer(reducers=('corr', 'tree')),
         "autofeaturizer": AutoFeaturizer(preset="fast"),
         "cleaner": DataCleaner()
     }
 
     debug_config = {
-        "learner": TPOTPredictor(max_time_mins=2,
-                                 max_eval_time_mins=1,
-                                 population_size=10),
+        "learner": TPOTAdaptor(max_time_mins=2,
+                               max_eval_time_mins=1,
+                               population_size=10),
         "reducer": FeatureReducer(reducers=('corr',)),
         "autofeaturizer": AutoFeaturizer(preset="fast"),
         "cleaner": DataCleaner()
     }
 
     debug_single_config = {
-        "learner": SinglePipelinePredictor(
+        "learner": SinglePipelineAdaptor(
             model=RandomForestRegressor(n_estimators=10)),
         "reducer": FeatureReducer(reducers=('corr',)),
         "autofeaturizer": AutoFeaturizer(preset="fast"),

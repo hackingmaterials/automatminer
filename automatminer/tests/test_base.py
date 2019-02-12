@@ -79,14 +79,14 @@ class TestLoggableMixin(LoggableMixin):
         self._logger = self.get_logger(logger)
 
 
-class TestPredictorBad(DFMLAdaptor):
+class TestAdaptorBad(DFMLAdaptor):
     """
     A test adaptor for automl backends, implemented incorrectly.
     """
     def __init__(self):
         pass
 
-class TestPredictorGood(DFMLAdaptor):
+class TestAdaptorGood(DFMLAdaptor):
     """
     A test adaptor for automl backends, implemented correctly.
     """
@@ -177,7 +177,7 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue(isinstance(tlm.logger, logging.Logger))
 
     def test_AutoMLAdaptor(self):
-        tag = TestPredictorGood(config_attr=5)
+        tag = TestAdaptorGood(config_attr=5)
 
         with self.assertRaises(NotFittedError):
             tag.transform(self.df, 'a')
@@ -206,7 +206,7 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue("a" in predicted2)
         self.assertTrue("c" not in predicted2)
 
-        tab = TestPredictorBad()
+        tab = TestAdaptorBad()
         with self.assertRaises(NotImplementedError):
             tab.fit(self.df, 'a')
 
