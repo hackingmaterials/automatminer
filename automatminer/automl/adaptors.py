@@ -14,10 +14,10 @@ from tpot import TPOTClassifier, TPOTRegressor
 from automatminer.automl.tpot_configs.classifier import classifier_config_dict_mb
 from automatminer.automl.tpot_configs.regressor import regressor_config_dict_mb
 
-from automatminer.utils.package_tools import AutomatminerError, set_fitted, check_fitted
-from automatminer.utils.ml_tools import is_greater_better, \
-    regression_or_classification
-from automatminer.base import AutoMLAdaptor, LoggableMixin
+#from automatminer.utils.package_tools import AutomatminerError, set_fitted, check_fitted
+#from automatminer.utils.ml_tools import is_greater_better, \
+    #regression_or_classification
+#from automatminer.base import AutoMLAdaptor, LoggableMixin
 from automatminer.automl.keras_wrapper import NnWrapper
 
 from automatminer.utils.pkg import AutomatminerError, set_fitted, \
@@ -437,7 +437,7 @@ _classifier_modes = {'classifier', 'classification', 'classify'}
 _regressor_modes = {'regressor', 'regression', 'regress'}
 
 
-class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
+class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
     """
     A dataframe adaptor for the TPOT classifiers and regressors.
 
@@ -827,6 +827,7 @@ if __name__ == "__main__":
     print(testdf)
     print((testdf[target] - testdf[target + " predicted"]).abs().sum())
 
+<<<<<<< HEAD
 class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
     """
     For running single models or pipelines in a MatPipe pipeline using the same
