@@ -1,7 +1,7 @@
 """
 Base classes, mixins, and other inheritables.
 """
-
+import abc
 import logging
 
 from automatminer.utils.log import initialize_logger, \
@@ -49,7 +49,7 @@ class LoggableMixin:
         return logger
 
 
-class DataframeTransformer:
+class DataframeTransformer(abc.ABC):
     """
     A base class to allow easy transformation in the same way as
     TransformerMixin and BaseEstimator in sklearn.
@@ -58,6 +58,7 @@ class DataframeTransformer:
     and @set_fitted if necessary!
     """
 
+    @abc.abstractmethod
     def fit(self, df, target, **fit_kwargs):
         """
         Fits the transformer to a dataframe, given a target.
@@ -71,9 +72,9 @@ class DataframeTransformer:
             (DataFrameTransformer) This object (self)
 
         """
-        raise NotImplementedError("{} has no fit method implemented!".format(
-            self.__class__.__name__))
+        pass
 
+    @abc.abstractmethod
     def transform(self, df, target, **transform_kwargs):
         """
         Transforms a dataframe.
@@ -87,8 +88,7 @@ class DataframeTransformer:
             (pandas.DataFrame): The transformed dataframe.
 
         """
-        raise NotImplementedError("{} has no transform method implemented!".
-                                  format(self.__class__.__name__))
+        pass
 
     def fit_transform(self, df, target):
         """
@@ -105,7 +105,7 @@ class DataframeTransformer:
         return self.fit(df, target).transform(df, target)
 
 
-class AutoMLAdaptor(DataframeTransformer):
+class DataframeMLPredictor(DataframeTransformer):
     """
     A base class to adapt from an AutoML backend to a sklearn-style fit/predict
     scheme and add a few extensions.
@@ -113,10 +113,7 @@ class AutoMLAdaptor(DataframeTransformer):
     When implementing a base class adaptor, make sure to use @check_fitted
     and @set_fitted if necessary!
     """
-
-    def transform(self, df, target):
-        return self.predict(df, target)
-
+    @abc.abstractmethod
     def predict(self, df, target):
         """
         Using a fitted object, use the best model available to transform a
@@ -135,10 +132,13 @@ class AutoMLAdaptor(DataframeTransformer):
                 target property.
 
         """
-        raise NotImplementedError("{} has no predict method implemented!".
-                                  format(self.__class__.__name__))
+        pass
+
+    def transform(self, df, target):
+        return self.predict(df, target)
 
     @property
+    @abc.abstractmethod
     def features(self):
         """
         The features being used for machine learning.
@@ -146,28 +146,22 @@ class AutoMLAdaptor(DataframeTransformer):
         Returns:
             ([str]): The feature labels
         """
-        try:
-            return self._features
-        except AttributeError:
-            raise NotImplementedError("{} has no features attr implemented!".
-                                      format(self.__class__.__name__))
+        pass
 
     @property
+    @abc.abstractmethod
     def ml_data(self):
         """
         The raw ML-data being passed to the backend.
 
         Returns:
-            (dict): At minimum, the raw X and y matrices being used for training.
+            (dict): At minimum, the raw X and y matrices being used to train.
                 May also contain other data.
         """
-        try:
-            return self._ml_data
-        except AttributeError:
-            raise NotImplementedError("{} has no ML data attr implemented!".
-                                      format(self.__class__.__name__))
+        pass
 
     @property
+    @abc.abstractmethod
     def best_pipeline(self):
         """
         The best pipeline returned by the automl backend. Should implement fit
@@ -176,13 +170,10 @@ class AutoMLAdaptor(DataframeTransformer):
         Returns:
             sklearn.pipeline.Pipeline or BaseEstimator:
         """
-        try:
-            return self._best_pipeline
-        except AttributeError:
-            raise NotImplementedError("{} has no best models attr implemented!".
-                                      format(self.__class__.__name__))
+        pass
 
     @property
+    @abc.abstractmethod
     def backend(self):
         """
         The raw, fitted backend object, if it exists.
@@ -191,9 +182,4 @@ class AutoMLAdaptor(DataframeTransformer):
             Backend object (e.g., TPOTClassifier)
 
         """
-        try:
-            return self._backend
-        except AttributeError:
-            raise NotImplementedError(
-                "{} has no backend object attr implemented!".format(
-                    self.__class__.__name__))
+        pass
