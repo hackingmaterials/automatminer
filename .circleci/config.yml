@@ -7,7 +7,7 @@ jobs:
       - image: circleci/python:3.6.7
         environment:
           CODACY_PROJECT_TOKEN: "0cdf090f6d5f4f8783fcf3ce04c6a1d6"
-          CI: "CIRCLE"
+          FULL_TESTS: false
     steps:
       - checkout
 
@@ -57,7 +57,7 @@ jobs:
       - image: circleci/python:3.7.2
         environment:
           CODACY_PROJECT_TOKEN: "0cdf090f6d5f4f8783fcf3ce04c6a1d6"
-          CI: "CIRCLE"
+          FULL_TESTS: false
     steps:
       - checkout
 
