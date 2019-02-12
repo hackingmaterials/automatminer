@@ -51,8 +51,7 @@ class LoggableMixin:
 
 
 class DFTransformer(abc.ABC):
-    """
-    A base class to allow easy transformation in the same way as
+    """ A base class to allow easy transformation in the same way as
     TransformerMixin and BaseEstimator in sklearn, but for pandas dataframes.
 
     When implementing a base class adaptor, make sure to use @check_fitted
