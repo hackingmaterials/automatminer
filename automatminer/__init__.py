@@ -1,5 +1,5 @@
 from automatminer.preprocessing import DataCleaner, FeatureReducer
-from automatminer.automl import TPOTAdaptor
+from automatminer.automl import TPOTPredictor
 from automatminer.featurization import AutoFeaturizer
 from automatminer.pipeline import MatPipe
 from automatminer.presets import get_preset_config

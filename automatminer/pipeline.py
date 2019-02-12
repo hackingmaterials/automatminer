@@ -4,14 +4,14 @@ The highest level classes for pipelines.
 from pprint import pformat
 import pickle
 
-from automatminer.base import LoggableMixin, DataframeTransformer
+from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.pkg import check_fitted, set_fitted, \
     return_attrs_recursively, AutomatminerError
 
 
-class MatPipe(DataframeTransformer, LoggableMixin):
+class MatPipe(DFTransformer, LoggableMixin):
     """
     Establish an ML pipeline for transforming compositions, structures,
     bandstructures, and DOS objects into machine-learned properties.
@@ -34,7 +34,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
     ----------------------------------------------------------------------------
     Note: This pipeline should function the same regardless of which
     "component" classes it is made out of. E.g. the steps for each method should
-    remain the same whether using the TPOTAdaptor class as the learner or
+    remain the same whether using the TPOTPredictor class as the learner or
     using an AutoKerasAdaptor class as the learner. To use a preset config,
     import a config from automatminer.configs and do MatPipe(**config).
     ----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             featurized dataframe in ml-ready form.
         reducer (FeatureReducer): The feature reducer object used to
             select the best features from a "clean" dataframe.
-        learner (AutoMLAdaptor): The auto ml adaptor object used to
+        learner (DFMLAdaptor): The auto ml adaptor object used to
             actually run a auto-ml pipeline on the clean, reduced, featurized
             dataframe.
 
@@ -138,6 +138,9 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.logger.info("MatPipe successfully fit.")
         self.post_fit_df = df
         return self
+
+    def transform(self, df, target, **transform_kwargs):
+        return self.predict(df, target, **transform_kwargs)
 
     @check_fitted
     def predict(self, df, target):

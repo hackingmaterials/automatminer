@@ -11,7 +11,7 @@ from automatminer.utils.pkg import AutomatminerError, \
 from automatminer.utils.log import log_progress, AMM_LOG_TRANSFORM_STR, \
     AMM_LOG_FIT_STR
 from automatminer.utils.ml import regression_or_classification
-from automatminer.base import LoggableMixin, DataframeTransformer
+from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
     rebate, lower_corr_clf
 
@@ -20,7 +20,7 @@ __authors__ = ["Alex Dunn <ardunn@lbl.gov>",
                "Alex Ganose <aganose@lbl.gov>"]
 
 
-class DataCleaner(DataframeTransformer, LoggableMixin):
+class DataCleaner(DFTransformer, LoggableMixin):
     """
     Transform a featurized dataframe into an ML-ready dataframe.
 
@@ -333,7 +333,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fitted_df = None
         self.fitted_target = None
         self.dropped_samples = None
-        self.is_fit = False
 
     def _get_na_method(self, na_method):
         """
@@ -356,7 +355,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         return na_method
 
 
-class FeatureReducer(DataframeTransformer, LoggableMixin):
+class FeatureReducer(DFTransformer, LoggableMixin):
     """
     Perform feature reduction on a clean dataframe.
 

@@ -9,6 +9,7 @@ from automatminer.utils.log import initialize_logger, \
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
 
+
 class LoggableMixin:
     """A mixin class for easy logging (or absence of it)."""
 
@@ -49,10 +50,10 @@ class LoggableMixin:
         return logger
 
 
-class DataframeTransformer(abc.ABC):
+class DFTransformer(abc.ABC):
     """
     A base class to allow easy transformation in the same way as
-    TransformerMixin and BaseEstimator in sklearn.
+    TransformerMixin and BaseEstimator in sklearn, but for pandas dataframes.
 
     When implementing a base class adaptor, make sure to use @check_fitted
     and @set_fitted if necessary!
@@ -105,14 +106,15 @@ class DataframeTransformer(abc.ABC):
         return self.fit(df, target).transform(df, target)
 
 
-class DataframeMLPredictor(DataframeTransformer):
+class DFMLAdaptor(DFTransformer):
     """
     A base class to adapt from an AutoML backend to a sklearn-style fit/predict
-    scheme and add a few extensions.
+    scheme and add a few extensions for pandas dataframes.
 
     When implementing a base class adaptor, make sure to use @check_fitted
     and @set_fitted if necessary!
     """
+
     @abc.abstractmethod
     def predict(self, df, target):
         """
@@ -120,7 +122,7 @@ class DataframeMLPredictor(DataframeTransformer):
         dataframe not containing the target to a dataframe containing the
         predicted target values.
 
-        Analagous to DataframeTransformer.transform
+        Analagous to DFTransformer.transform
 
         Args:
             df (pandas.DataFrame): The dataframe to-be-predicted

@@ -7,11 +7,12 @@ import logging
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 
-from automatminer.base import DataframeTransformer, AutoMLAdaptor, LoggableMixin
+from automatminer.base import DFTransformer, DFMLAdaptor, \
+    LoggableMixin
 from automatminer.utils.pkg import check_fitted, set_fitted
 
 
-class TestTransformerGood(DataframeTransformer):
+class TestTransformerGood(DFTransformer):
     """
     A test transformer and logger.
 
@@ -59,7 +60,7 @@ class TestTransformerGood(DataframeTransformer):
         return df
 
 
-class TestTransformerBad(DataframeTransformer):
+class TestTransformerBad(DFTransformer):
     """
     A test transformer, implemented incorrectly.
     """
@@ -78,14 +79,14 @@ class TestLoggableMixin(LoggableMixin):
         self._logger = self.get_logger(logger)
 
 
-class TestAdaptorBad(AutoMLAdaptor):
+class TestPredictorBad(DFMLAdaptor):
     """
     A test adaptor for automl backends, implemented incorrectly.
     """
     def __init__(self):
         pass
 
-class TestAdaptorGood(AutoMLAdaptor):
+class TestPredictorGood(DFMLAdaptor):
     """
     A test adaptor for automl backends, implemented correctly.
     """
@@ -176,7 +177,7 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue(isinstance(tlm.logger, logging.Logger))
 
     def test_AutoMLAdaptor(self):
-        tag = TestAdaptorGood(config_attr=5)
+        tag = TestPredictorGood(config_attr=5)
 
         with self.assertRaises(NotFittedError):
             tag.transform(self.df, 'a')
@@ -205,7 +206,7 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue("a" in predicted2)
         self.assertTrue("c" not in predicted2)
 
-        tab = TestAdaptorBad()
+        tab = TestPredictorBad()
         with self.assertRaises(NotImplementedError):
             tab.fit(self.df, 'a')
 

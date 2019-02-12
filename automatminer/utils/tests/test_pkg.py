@@ -9,10 +9,10 @@ from sklearn.exceptions import NotFittedError
 
 from automatminer.utils.pkg import compare_columns, check_fitted, \
     set_fitted
-from automatminer.base import DataframeTransformer
+from automatminer.base import DFTransformer
 
 
-class MyTransformer(DataframeTransformer):
+class MyTransformer(DFTransformer):
     def __init__(self):
         self.is_fit = False
 

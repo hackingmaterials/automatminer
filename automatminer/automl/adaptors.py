@@ -3,7 +3,7 @@ Adaptor classes for using AutoML packages in a Matbench pipeline.
 
 Current adaptor classes are:
 
-    TPOTAdaptor: Uses the backend from the automl project TPOT, which can be
+    TPOTPredictor: Uses the backend from the automl project TPOT, which can be
         found at https://github.com/EpistasisLab/tpot
 """
 from collections import OrderedDict
@@ -19,7 +19,7 @@ from automatminer.utils.ml import is_greater_better, \
     regression_or_classification
 from automatminer.utils.log import log_progress, AMM_LOG_PREDICT_STR, \
     AMM_LOG_FIT_STR
-from automatminer.base import AutoMLAdaptor, LoggableMixin
+from automatminer.base import DFMLAdaptor, LoggableMixin
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
                'Alireza Faghaninia <alireza.faghaninia@gmail.com>',
@@ -31,7 +31,7 @@ _classifier_modes = {'classifier', 'classification', 'classify'}
 _regressor_modes = {'regressor', 'regression', 'regress'}
 
 
-class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
+class TPOTPredictor(DFMLAdaptor, LoggableMixin):
     """
     A dataframe adaptor for the TPOT classifiers and regressors.
 
@@ -100,7 +100,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
                 These arguments must be valid arguments to the TPOTBase class.
 
         Returns:
-            TPOTAdaptor (self)
+            TPOTPredictor (self)
 
         """
         # Prevent goofy pandas casting by casting to native
@@ -187,11 +187,6 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         self.models = models
         return best_models_and_scores
 
-    @property
-    @check_fitted
-    def _best_pipeline(self):
-        return self._backend.fitted_pipeline_
-
     @log_progress(AMM_LOG_PREDICT_STR)
     @check_fitted
     def predict(self, df, target):
@@ -232,14 +227,34 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
             self.logger.info("Prediction finished successfully.")
             return df
 
+    @property
+    @check_fitted
+    def best_pipeline(self):
+        return self._backend.fitted_pipeline_
 
-class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
+    @property
+    @check_fitted
+    def features(self):
+        return self._features
+
+    @property
+    @check_fitted
+    def ml_data(self):
+        return self._ml_data
+
+    @property
+    @check_fitted
+    def backend(self):
+        return self._backend
+
+
+class SinglePipelinePredictor(DFMLAdaptor, LoggableMixin):
     """
     For running single models or pipelines in a MatPipe pipeline using the same
     syntax as the AutoML adaptors.
 
     This adaptor should be able to fit into a MatPipe in similar fashion to
-    TPOTAdaptor.
+    TPOTPredictor.
 
     Args:
         model (sklearn Pipeline or BaseEstimator-like): The object you want to
@@ -312,8 +327,25 @@ class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
 
     @property
     @check_fitted
-    def _best_pipeline(self):
+    def best_pipeline(self):
         return self._backend
+
+    @property
+    @check_fitted
+    def features(self):
+        return self._features
+
+    @property
+    @check_fitted
+    def ml_data(self):
+        return self._ml_data
+
+    @property
+    @check_fitted
+    def backend(self):
+        return self._backend
+
+
 
 # if __name__ == "__main__":
 #     from matminer.datasets.dataset_retrieval import load_dataset
@@ -335,9 +367,9 @@ class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
 #     autofeater = AutoFeaturizer()
 #     cleaner = DataCleaner()
 #     reducer = FeatureReducer()
-#     # learner = TPOTAdaptor("regression", max_time_mins=5)
-#     learner = SinglePipelineAdaptor(model=RandomForestRegressor())
-#     learner = SinglePipelineAdaptor(model=
+#     # learner = TPOTPredictor("regression", max_time_mins=5)
+#     learner = SinglePipelinePredictor(model=RandomForestRegressor())
+#     learner = SinglePipelinePredictor(model=
 #                                     Pipeline([('scaler', StandardScaler()),
 #                                               ('rfr', RandomForestRegressor())]))
 #
