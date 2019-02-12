@@ -71,7 +71,7 @@ jobs:
       - run:
           name: setup env and run tests
           command: |
-            echo $CI
+            echo "FULL TESTS: $FULL_TESTS"
             python3 -m venv test_env
             . test_env/bin/activate
             pip install -q --upgrade pip
