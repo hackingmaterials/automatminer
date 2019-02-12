@@ -4,11 +4,13 @@ from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     CompositionToOxidComposition
 from matminer.featurizers.function import FunctionFeaturizer
 
-from automatminer.utils.package_tools import check_fitted, set_fitted
-from automatminer.base import DataframeTransformer, LoggableMixin
+from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR, \
+    AMM_LOG_TRANSFORM_STR
+from automatminer.utils.pkg import check_fitted, set_fitted
+from automatminer.base import DFTransformer, LoggableMixin
 from automatminer.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
-from automatminer.utils.package_tools import AutomatminerError
+from automatminer.utils.pkg import AutomatminerError
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
@@ -17,7 +19,7 @@ __author__ = ["Alex Dunn <ardunn@lbl.gov>",
 _COMMON_COL_ERR_STR = "composition_col/structure_col/bandstructure_col/dos_col"
 
 
-class AutoFeaturizer(DataframeTransformer, LoggableMixin):
+class AutoFeaturizer(DFTransformer, LoggableMixin):
     """
     Automatically featurize a dataframe.
 
@@ -104,6 +106,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.max_na_percent = max_na_frac
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
+        self.fitted_input_df = None
         self.ignore_errors = ignore_errors
         self.drop_inputs = drop_inputs
         self.multiindex = multiindex
@@ -156,16 +159,17 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         # Check if any featurizers need fitting (useful for MatPipe)
         needs_fit = False
         fittable_fs = StructureFeaturizers().need_fit
-        fittable_fcls = set([f.__class__.__name__ for f in fittable_fs])
+        self.fittable_fcls = set([f.__class__.__name__ for f in fittable_fs])
 
         # Currently structure featurizers are the only featurizer types which
         # can be fittable
         for f in self.featurizers[self.structure_col]:
-            if f.__class__.__name__ in fittable_fcls:
+            if f.__class__.__name__ in self.fittable_fcls:
                 needs_fit = True
                 break
         self.needs_fit = needs_fit
 
+    @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
         """
@@ -191,6 +195,9 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             (AutoFeaturizer): self
         """
+        # Prevent anything from happening to input df during featurization
+        self.fitted_input_df = df
+
         df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
 
@@ -201,20 +208,31 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             if featurizer_type in df.columns:
                 df = self._tidy_column(df, featurizer_type)
                 for f in featurizers:
+                    log_fit = False
+                    if featurizer_type == self.structure_col:
+                        if f.__class__.__name__ in self.fittable_fcls:
+                            log_fit = True
+                    if log_fit:
+                        self.logger.info("Fitting {}."
+                                         "".format(f.__class__.__name__))
+
                     f.fit(df[featurizer_type].tolist())
                     f.set_n_jobs(self.n_jobs)
                     self.features += f.feature_labels()
-                    self.logger.info("Fit {} to {} samples in dataframe."
-                                     "".format(f.__class__.__name__,
-                                               df.shape[0]))
+
+                    if log_fit:
+                        self.logger.info(
+                            "Fit {} to {} samples in dataframe."
+                            "".format(f.__class__.__name__, df.shape[0]))
             else:
                 self.logger.info("Featurizer type {} not in the dataframe to be"
                                  " fitted. Skipping...".format(featurizer_type))
 
         return self
 
+    @log_progress(AMM_LOG_TRANSFORM_STR)
     @check_fitted
-    def transform(self, df, target, tidy_column=True):
+    def transform(self, df, target):
         """
         Decorate a dataframe containing composition, structure, bandstructure,
         and/or DOS objects with descriptors.
@@ -226,18 +244,20 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Transformed dataframe containing features.
         """
-
-        # todo: structure to oxidstructure + comp2oxidcomp can get called twice
-        # todo: by _tidy_column, can be fixed with overriding fit_transform
+        transforming_on_fitted = df is self.fitted_input_df
         df = self._prescreen_df(df, inplace=True)
-        df = self._add_composition_from_structure(df)
+
+        if not transforming_on_fitted:
+            df = self._add_composition_from_structure(df)
 
         for featurizer_type, featurizers in self.featurizers.items():
             if featurizer_type in df.columns:
-                if tidy_column:
+                if not transforming_on_fitted:
                     df = self._tidy_column(df, featurizer_type)
 
                 for f in featurizers:
+                    self.logger.info("Featurizing with {}."
+                                     "".format(f.__class__.__name__))
                     df = f.featurize_dataframe(df, featurizer_type,
                                                ignore_errors=self.ignore_errors,
                                                multiindex=self.multiindex)
@@ -255,21 +275,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                                             ignore_errors=self.ignore_errors,
                                             multiindex=self.multiindex)
         return df
-
-    @set_fitted
-    def fit_transform(self, df, target):
-        """
-        Fit and transform the dataframe all as one, without reassigning
-        oxidation states (if valid).
-
-        Args:
-            df (pandas.DataFrame): The dataframe not containing features.
-            target (str): The ML-target property contained in the df.
-
-        Returns:
-            df (pandas.DataFrame): Transformed dataframe containing features.
-        """
-        return self.fit(df, target).transform(df, target, tidy_column=False)
 
     def _prescreen_df(self, df, inplace=True):
         """
@@ -354,7 +359,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
 
             # Decorate with oxidstates
             if featurizer_type == self.structure_col and self.guess_oxistates:
-                self.logger.info("Guessing oxidation states of structures, as "
+                self.logger.info("Guessing oxidation states of structures if "
                                  "they were not present in input.")
                 sto = StructureToOxidStructure(
                     target_col_id=featurizer_type, overwrite_data=True,
@@ -392,7 +397,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 self.logger.info("composition column already exists, "
                                  "overwriting with composition from structure.")
             else:
-                self.logger.debug("Adding compositions from structures.")
+                self.logger.info("Adding compositions from structures.")
 
             df = self._tidy_column(df, self.structure_col)
 
@@ -402,16 +407,3 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 target_col_id=self.composition_col, overwrite_data=overwrite)
             df = struct2comp.featurize_dataframe(df, self.structure_col)
         return df
-
-
-if __name__ == "__main__":
-    from matminer.datasets.dataset_retrieval import load_dataset, \
-        get_available_datasets
-
-    print(get_available_datasets())
-    df = load_dataset("elastic_tensor_2015").rename(
-        columns={"formula": "composition"}).iloc[:20]
-    af = AutoFeaturizer(functionalize=True, preset="best")
-    print(df)
-    df = af.fit_transform(df, "K_VRH")
-    print(df.describe())

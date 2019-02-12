@@ -6,10 +6,12 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import LabelEncoder
 
-from automatminer.utils.package_tools import AutomatminerError, compare_columns, \
-    check_fitted, set_fitted
-from automatminer.utils.ml_tools import regression_or_classification
-from automatminer.base import LoggableMixin, DataframeTransformer
+from automatminer.utils.pkg import AutomatminerError, \
+    compare_columns, check_fitted, set_fitted
+from automatminer.utils.log import log_progress, AMM_LOG_TRANSFORM_STR, \
+    AMM_LOG_FIT_STR
+from automatminer.utils.ml import regression_or_classification
+from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
     rebate, lower_corr_clf
 
@@ -18,7 +20,7 @@ __authors__ = ["Alex Dunn <ardunn@lbl.gov>",
                "Alex Ganose <aganose@lbl.gov>"]
 
 
-class DataCleaner(DataframeTransformer, LoggableMixin):
+class DataCleaner(DFTransformer, LoggableMixin):
     """
     Transform a featurized dataframe into an ML-ready dataframe.
 
@@ -88,6 +90,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
         return self.fitted_df.columns.tolist()
 
+    @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, na_method="drop"):
         """
@@ -106,8 +109,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         """
 
         na_method = self._get_na_method(na_method)
-        self.logger.info("Cleaning (fitting) with respect to samples with "
-                         "na_method '{}'".format(na_method))
+        self.logger.info("Cleaning with respect to samples with na_method '{}'"
+                         "".format(na_method))
         if target not in df.columns:
             raise AutomatminerError(
                 "Target {} must be contained in df.".format(target))
@@ -119,6 +122,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fitted_target = target
         return self
 
+    @log_progress(AMM_LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target, na_method=0):
         """
@@ -137,8 +141,8 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         Returns (pandas.DataFrame)
         """
         na_method = self._get_na_method(na_method)
-        self.logger.info("Cleaning (transforming) with respect to samples with "
-                         "na_method '{}'".format(na_method))
+        self.logger.info("Cleaning with respect to samples with na_method '{}'"
+                         "".format(na_method))
 
         if target != self.fitted_target:
             raise AutomatminerError(
@@ -212,7 +216,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
                 feat_names = feats0 - feats
                 self.logger.info(
                     'These {} features were removed as they had more '
-                    'than {}% missing values:\n{}'.format(
+                    'than {}% missing values: {}'.format(
                         n_feats, napercent, feat_names))
         else:
             mismatch = compare_columns(self.fitted_df, df, ignore=target)
@@ -249,7 +253,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
             clean_df = df.dropna(axis=0, how='any')
             self.dropped_samples = pd.concat(
                 (df[~df.index.isin(clean_df.index)], self.dropped_samples),
-                axis=0)
+                axis=0, sort=True)
             df = clean_df
         elif na_method == "ignore":
             pass
@@ -329,7 +333,6 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         self.fitted_df = None
         self.fitted_target = None
         self.dropped_samples = None
-        self.is_fit = False
 
     def _get_na_method(self, na_method):
         """
@@ -352,7 +355,7 @@ class DataCleaner(DataframeTransformer, LoggableMixin):
         return na_method
 
 
-class FeatureReducer(DataframeTransformer, LoggableMixin):
+class FeatureReducer(DFTransformer, LoggableMixin):
     """
     Perform feature reduction on a clean dataframe.
 
@@ -428,9 +431,9 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
         self._pca = None
         self._pca_feats = None
 
+    @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
-        self.logger.info("Feature reducer fitting to dataframe...")
         missing_remove_features = [c for c in self._remove_features
                                    if c not in df.columns]
         missing_keep_features = [c for c in self._keep_features
@@ -528,9 +531,9 @@ class FeatureReducer(DataframeTransformer, LoggableMixin):
                                   self._remove_features or c != target]
         return self
 
+    @log_progress(AMM_LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target):
-        self.logger.info("Feature reducer transforming dataframe...")
         X = df.drop(columns=target)
         for r, f in self.removed_features.items():
             if r == "pca":

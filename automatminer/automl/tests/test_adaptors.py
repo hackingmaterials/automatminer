@@ -9,12 +9,13 @@ from sklearn.pipeline import Pipeline
 
 from automatminer.presets import get_preset_config
 from automatminer.automl.adaptors import SinglePipelineAdaptor
-from automatminer.utils.package_tools import AutomatminerError
+from automatminer.utils.pkg import AutomatminerError
 
 __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
 
 
-@unittest.skipIf("CI" in os.environ.keys(), "Test too intensive for CircleCI.")
+@unittest.skipIf(os.environ.get("CI", None) == "CIRCLE",
+                 "Test too intensive for CircleCI commit builds.")
 class TestTPOTAdaptor(unittest.TestCase):
     def setUp(self):
         basedir = os.path.dirname(os.path.realpath(__file__))

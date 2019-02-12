@@ -4,14 +4,14 @@ The highest level classes for pipelines.
 from pprint import pformat
 import pickle
 
-from automatminer.base import LoggableMixin, DataframeTransformer
+from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
-from automatminer.utils.ml_tools import regression_or_classification
-from automatminer.utils.package_tools import check_fitted, set_fitted, \
+from automatminer.utils.ml import regression_or_classification
+from automatminer.utils.pkg import check_fitted, set_fitted, \
     return_attrs_recursively, AutomatminerError
 
 
-class MatPipe(DataframeTransformer, LoggableMixin):
+class MatPipe(DFTransformer, LoggableMixin):
     """
     Establish an ML pipeline for transforming compositions, structures,
     bandstructures, and DOS objects into machine-learned properties.
@@ -61,7 +61,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             featurized dataframe in ml-ready form.
         reducer (FeatureReducer): The feature reducer object used to
             select the best features from a "clean" dataframe.
-        learner (AutoMLAdaptor): The auto ml adaptor object used to
+        learner (DFMLAdaptor): The auto ml adaptor object used to
             actually run a auto-ml pipeline on the clean, reduced, featurized
             dataframe.
 
@@ -138,6 +138,9 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.logger.info("MatPipe successfully fit.")
         self.post_fit_df = df
         return self
+
+    def transform(self, df, target, **transform_kwargs):
+        return self.predict(df, target, **transform_kwargs)
 
     @check_fitted
     def predict(self, df, target):
@@ -284,7 +287,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return digeststr
 
     @check_fitted
-    def save(self, filename="matpipe.p"):
+    def save(self, filename="mat.pipe"):
         """
         Pickles and saves a pipeline. Direct pickling will not work as some
         AutoML backends can't serialize.

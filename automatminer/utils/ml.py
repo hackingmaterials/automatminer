@@ -6,7 +6,7 @@ import warnings
 
 import pandas as pd
 
-from .package_tools import AutomatminerError
+from .pkg import AutomatminerError
 
 
 def is_greater_better(scoring_function):

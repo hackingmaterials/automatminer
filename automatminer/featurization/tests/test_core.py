@@ -263,6 +263,14 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("composition" not in df.columns)
         self.assertTrue("structure" not in df.columns)
 
+    def test_functionalization(self):
+        target = "K_VRH"
+        flimit = 2
+        df = self.test_df[['composition', target]].iloc[:flimit]
+        af = AutoFeaturizer(functionalize=True, preset="fast")
+        df = af.fit_transform(df, target)
+        self.assertTupleEqual(df.shape, (flimit, 15888))
+
     def test_StructureFeaturizers_needs_fitting(self):
         fset_nofit = StructureFeaturizers().best
         fset_needfit = StructureFeaturizers().all
