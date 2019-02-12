@@ -4,14 +4,14 @@ The highest level classes for pipelines.
 from pprint import pformat
 import pickle
 
-from automatminer.base import LoggableMixin, DataframeTransformer
+from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
-from automatminer.utils.ml_tools import regression_or_classification
-from automatminer.utils.package_tools import check_fitted, set_fitted, \
+from automatminer.utils.ml import regression_or_classification
+from automatminer.utils.pkg import check_fitted, set_fitted, \
     return_attrs_recursively, AutomatminerError
 
 
-class MatPipe(DataframeTransformer, LoggableMixin):
+class MatPipe(DFTransformer, LoggableMixin):
     """
     Establish an ML pipeline for transforming compositions, structures,
     bandstructures, and DOS objects into machine-learned properties.
@@ -61,7 +61,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             featurized dataframe in ml-ready form.
         reducer (FeatureReducer): The feature reducer object used to
             select the best features from a "clean" dataframe.
-        learner (AutoMLAdaptor): The auto ml adaptor object used to
+        learner (DFMLAdaptor): The auto ml adaptor object used to
             actually run a auto-ml pipeline on the clean, reduced, featurized
             dataframe.
 
@@ -139,6 +139,9 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         self.post_fit_df = df
         return self
 
+    def transform(self, df, target, **transform_kwargs):
+        return self.predict(df, target, **transform_kwargs)
+
     @check_fitted
     def predict(self, df, target):
         """
@@ -167,7 +170,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return predictions
 
     @set_fitted
-    def benchmark(self, df, target, kfold):
+    def benchmark(self, df, target, kfold, fold_subset=None, strict=True):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
@@ -194,51 +197,76 @@ class MatPipe(DataframeTransformer, LoggableMixin):
             kfold (sklearn KFold or StratifiedKFold: The cross validation split
                 object to use for nested cross validation. Used to index the
                 dataframe with .iloc, NOT .loc.
+            fold_subset ([int]): A subset of the folds in kfold to evaluate (by
+                index). For example, to run only the 3rd train/validation/test
+                split of the kfold, set fold_subset = [2]. To use the first and
+                fourth, set fold_subset = [0, 3].
+            strict (bool): If True, treats each train/validation/test split
+                as completely separate problems; this prevents any possible
+                information leakage from the train set into the test set (e.g.,
+                one-hot encoding features values from the test set which do not
+                exist in the train set). However, strict benchmarks require
+                each nested CV fold be featurized separately, which is
+                expensive. Running with strict=False only featurizes the
+                dataset once. strict=True should be used for results which will
+                be reported; strict=False should be used for quick(er) informal
+                benchmarks, which may have results similar to strict
+                benchmarking. Do NOT use strict=False when reporting results!
 
         Returns:
             results ([pd.DataFrame]): Dataframes containing each fold's
                 known targets, as well as their independently predicted targets.
         """
-        # Fit transformers on all data
-        self.logger.info("Featurizing entire dataframe.")
-        df = self.autofeaturizer.fit_transform(df, target)
-        self.logger.info("Cleaning entire dataframe.")
-        na_method = self.cleaner.na_method
-        if na_method != 'ignore':
-            self.logger.info("Temporarily changing cleaner na_method to "
-                             "'ignore' to prevent undesired sample drops.")
-            self.cleaner.na_method = 'ignore'
-        df = self.cleaner.fit_transform(df, target)
-        self.cleaner.na_method = na_method
+        if not fold_subset:
+            fold_subset = list(range(kfold.n_splits))
 
+        self.logger.debug("Beginning benchmark")
         results = []
         fold = 0
-        for train_ix, test_ix in kfold.split(df):
-            fold += 1
-            self.logger.info("Nested CV (fold {}/{}): Running MatPipe."
-                             "".format(fold, kfold.n_splits))
-            # Split and identify test set
-            test = df.iloc[test_ix]
-            train = df[~df.index.isin(test.index)]
 
-            # Drop samples left over from ignored na in total cleaning step.
-            test = test.dropna(axis=0, how='any')
-            train = train.dropna(axis=0, how='any')
-            dropped_test = len(test_ix) - test.shape[0]
-            dropped_train = len(train_ix) - train.shape[0]
-            self.logger.info("Nested CV (fold {}/{}): {} samples dropped from"
-                             " test, {} samples dropped from train."
-                             "".format(fold, kfold.n_splits, dropped_test,
-                                       dropped_train))
+        if strict:
+            self.logger.warning("Beginning strict benchmark.")
+            results = []
+            fold = 0
+            for _, test_ix in kfold.split(df):
+                if fold in fold_subset:
+                    self.logger.info("Training on fold index {}".format(fold))
+                    # Split and identify test set
+                    test = df.iloc[test_ix]
+                    train = df[~df.index.isin(test.index)]
+                    self.fit(train, target)
+                    self.logger.info("Predicting fold index {}".format(fold))
+                    test = self.predict(test, target)
+                    results.append(test)
+                fold += 1
+            return results
+        else:
+            self.logger.warning("Strict benchmarking has been turned OFF! "
+                                "Please refrain from reporting these results,"
+                                "as there may be feature information leakage.")
+            # Featurize all data once
+            df = self.autofeaturizer.fit_transform(df, target)
 
-            # Use transformers on separate training and testing dfs
-            train = self.reducer.fit_transform(train, target)
-            self.post_fit_df = train
-            self.learner.fit(train, target)
-            test = self.reducer.transform(test, target)
-            test = self.learner.predict(test, target)
-            results.append(test)
-        return results
+            for _, test_ix in kfold.split(df):
+                if fold in fold_subset:
+                    self.logger.info("Training on fold index {}".format(fold))
+
+                    # Split and identify test set
+                    test = df.iloc[test_ix]
+                    train = df[~df.index.isin(test.index)]
+
+                    # Use transformers on separate training and testing dfs
+                    train = self.cleaner.fit_transform(train, target)
+                    train = self.reducer.fit_transform(train, target)
+                    self.post_fit_df = train
+                    self.learner.fit(train, target)
+                    self.logger.info("Predicting fold index {}".format(fold))
+                    test = self.cleaner.transform(test, target)
+                    test = self.reducer.transform(test, target)
+                    test = self.learner.predict(test, target)
+                    results.append(test)
+                fold += 1
+            return results
 
     @check_fitted
     def digest(self, filename=None):
@@ -259,7 +287,7 @@ class MatPipe(DataframeTransformer, LoggableMixin):
         return digeststr
 
     @check_fitted
-    def save(self, filename="matpipe.p"):
+    def save(self, filename="mat.pipe"):
         """
         Pickles and saves a pipeline. Direct pickling will not work as some
         AutoML backends can't serialize.

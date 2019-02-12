@@ -1,8 +1,24 @@
 # Change Log
 
-## [Unreleased](https://github.com/hackingmaterials/automatminer/tree/HEAD)
+## [v2019.02.02_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.02.02_beta) (2019-02-02)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.01.26_beta...v2019.02.02_beta)
 
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.01.25_beta...HEAD)
+**Closed issues:**
+
+- Nose ---\> unittest  [\#171](https://github.com/hackingmaterials/automatminer/issues/171)
+- Fix benchmarking [\#170](https://github.com/hackingmaterials/automatminer/issues/170)
+- Should add to PyPi [\#168](https://github.com/hackingmaterials/automatminer/issues/168)
+- An adapter to run a single model [\#165](https://github.com/hackingmaterials/automatminer/issues/165)
+- Add option to remove specific features [\#159](https://github.com/hackingmaterials/automatminer/issues/159)
+- Analytics module needs tests [\#133](https://github.com/hackingmaterials/automatminer/issues/133)
+
+**Merged pull requests:**
+
+- Update codacy and circleCI configs [\#173](https://github.com/hackingmaterials/automatminer/pull/173) ([utf](https://github.com/utf))
+- Add optional to manually keep/remove features [\#172](https://github.com/hackingmaterials/automatminer/pull/172) ([utf](https://github.com/utf))
+
+## [v2019.01.26_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.01.26_beta) (2019-01-26)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.01.25_beta...v2019.01.26_beta)
 
 **Closed issues:**
 
@@ -25,7 +41,7 @@
 - Look into using NestedCV for automl, and whether it would be a good idea or not [\#130](https://github.com/hackingmaterials/automatminer/issues/130)
 - Add a very simple example [\#108](https://github.com/hackingmaterials/automatminer/issues/108)
 - Add another study comparison with matbench [\#65](https://github.com/hackingmaterials/automatminer/issues/65)
-- Add a profiler to DataframeTransformer [\#56](https://github.com/hackingmaterials/automatminer/issues/56)
+- Add a profiler to DFTransformer [\#56](https://github.com/hackingmaterials/automatminer/issues/56)
 
 **Merged pull requests:**
 

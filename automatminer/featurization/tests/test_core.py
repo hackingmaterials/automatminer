@@ -43,7 +43,7 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         # When compositions are strings
         df = copy.copy(self.test_df[['composition', target]].iloc[:self.limit])
-        af = AutoFeaturizer()
+        af = AutoFeaturizer(preset="fast")
         df = af.fit_transform(df, target)
         self.assertAlmostEqual(df["frac f valence electrons"].iloc[2],
                                0.5384615384615384)
@@ -53,7 +53,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         # When compositions are Composition objects
         df = self.test_df[["composition", target]].iloc[:self.limit]
         df["composition"] = [Composition(s) for s in df["composition"]]
-        af = AutoFeaturizer()
+        af = AutoFeaturizer(preset="fast")
         df = af.fit_transform(df, target)
         self.assertAlmostEqual(df["frac f valence electrons"].iloc[2],
                                0.5384615384615384)
@@ -69,10 +69,10 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         # When structures are Structure objects
         df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
-        af = AutoFeaturizer()
+        af = AutoFeaturizer(preset="fast")
         df = af.fit_transform(df, target)
         # Ensure there are some structure features created
-        self.assertTrue("dimensionality" in df.columns)
+        self.assertTrue("vpa" in df.columns)
         # Ensure that composition features are automatically added without
         # explicit column
         self.assertTrue("HOMO_character" in df.columns)
@@ -82,10 +82,10 @@ class TestAutoFeaturizer(unittest.TestCase):
         # When structures are dictionaries
         df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
         df["structure"] = [s.as_dict() for s in df["structure"]]
-        af = AutoFeaturizer()
+        af = AutoFeaturizer(preset="fast")
         df = af.fit_transform(df, target)
         # Ensure there are some structure features created
-        self.assertTrue("dimensionality" in df.columns)
+        self.assertTrue("vpa" in df.columns)
         # Ensure that composition features are automatically added without
         # explicit column
         self.assertTrue("HOMO_character" in df.columns)
@@ -107,7 +107,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         # is not used, exclude is None and featurizers not passed by the users
         # are not used.
         self.assertFalse(af.auto_featurizer)
-        self.assertIsNone(af.metaselector)
         self.assertTrue(af.exclude == [])
         self.assertIn(dn, af.featurizers["structure"])
         self.assertIn(gsf, af.featurizers["structure"])
@@ -127,66 +126,13 @@ class TestAutoFeaturizer(unittest.TestCase):
         ep_feats = ep.feature_labels()
 
         # Test to make sure excluded does not show up
-        af = AutoFeaturizer(exclude=exclude, use_metaselector=False)
+        af = AutoFeaturizer(exclude=exclude, preset="fast")
         af.fit(df, target)
         df = af.fit_transform(df, target)
 
         self.assertTrue(af.auto_featurizer)
-        self.assertIsNone(af.metaselector)
         self.assertIn("ElementProperty", af.exclude)
         self.assertFalse(any([f in df.columns for f in ep_feats]))
-
-    def test_use_metaselector(self):
-        # Test to see if metaselector works for this dataset
-        df = copy.copy(self.test_df.iloc[:self.limit])
-        target = "K_VRH"
-
-        af = AutoFeaturizer(use_metaselector=True)
-        af.fit(df, target)
-
-        self.assertIsNotNone(af.metaselector)
-        dataset_mfs = af.metaselector.dataset_mfs
-        self.assertIn("composition_metafeatures", dataset_mfs.keys())
-        self.assertIn("structure_metafeatures", dataset_mfs.keys())
-        self.assertIsNotNone(dataset_mfs["composition_metafeatures"])
-        self.assertIsNotNone(dataset_mfs["structure_metafeatures"])
-
-        comp_mfs = dataset_mfs["composition_metafeatures"]
-        self.assertEqual(comp_mfs["number_of_compositions"], 5)
-        self.assertAlmostEqual(comp_mfs["percent_of_all_metal"], 0.2)
-        self.assertAlmostEqual(
-            comp_mfs["percent_of_metal_nonmetal"], 0.8)
-        self.assertAlmostEqual(comp_mfs["percent_of_all_nonmetal"], 0.0)
-        self.assertAlmostEqual(
-            comp_mfs["percent_of_contain_trans_metal"], 0.8)
-        self.assertEqual(comp_mfs["number_of_different_elements"], 7)
-        self.assertAlmostEqual(comp_mfs["avg_number_of_elements"], 2.2)
-        self.assertEqual(comp_mfs["max_number_of_elements"], 3)
-        self.assertEqual(comp_mfs["min_number_of_elements"], 1)
-
-        struct_mfs = dataset_mfs["structure_metafeatures"]
-        self.assertEqual(struct_mfs["number_of_structures"], 5)
-        self.assertAlmostEqual(struct_mfs["percent_of_ordered_structures"], 1.0)
-        self.assertAlmostEqual(struct_mfs["avg_number_of_sites"], 7.0)
-        self.assertEqual(struct_mfs["max_number_of_sites"], 12)
-        self.assertEqual(
-            struct_mfs["number_of_different_elements_in_structures"], 7)
-
-        excludes = af.metaselector.excludes
-        self.assertIn("IonProperty", excludes)
-        self.assertIn("Miedema", excludes)
-        self.assertIn("OxidationStates", excludes)
-        self.assertIn("YangSolidSolution", excludes)
-        self.assertIn("TMetalFraction", excludes)
-        self.assertIn("ElectronegativityDiff", excludes)
-        self.assertIn("CationProperty", excludes)
-        self.assertIn("ElectronAffinity", excludes)
-
-        df = af.fit_transform(df, target)
-        ef = ElectronAffinity()
-        ef_feats = ef.feature_labels()
-        self.assertFalse(any([f in df.columns for f in ef_feats]))
-        self.assertFalse(any([f in df.columns for f in ef_feats]))
 
     def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
         """
@@ -219,7 +165,9 @@ class TestAutoFeaturizer(unittest.TestCase):
         df[target] = [["red"]]
         n_cols_init = df.shape[1]
 
-        featurizer = AutoFeaturizer(ignore_errors=False, multiindex=False)
+        featurizer = AutoFeaturizer(preset="fast",
+                                    ignore_errors=False,
+                                    multiindex=False)
         df = featurizer.fit_transform(df, target)
 
         # sanity checks
@@ -251,8 +199,10 @@ class TestAutoFeaturizer(unittest.TestCase):
         df = af.fit_transform(df, target)
         known_feats = CompositionFeaturizers().fast + \
                       StructureFeaturizers().fast
-        n_featurizers_total = sum([len(fl) for fl in af.featurizers.values()])
-        self.assertEqual(n_featurizers_total, len(known_feats))
+        n_structure_featurizers = len(af.featurizers["structure"])
+        n_composition_featurizers = len(af.featurizers["composition"])
+        n_featurizers = n_structure_featurizers + n_composition_featurizers
+        self.assertEqual(n_featurizers, len(known_feats))
 
     def test_transferability(self):
         """
@@ -264,7 +214,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         df1 = self.test_df[cols].iloc[:self.limit]
         df2 = self.test_df[cols].iloc[-1 * self.limit:]
 
-        af = AutoFeaturizer()
+        af = AutoFeaturizer(preset="fast")
         af.fit(df1, target)
 
         df2 = af.transform(df2, target)
@@ -274,24 +224,22 @@ class TestAutoFeaturizer(unittest.TestCase):
     def test_column_attr(self):
         """
         Test that the autofeaturizer object correctly takes in composition_col,
-        structure_col, bandstruct_col, and dos_col, and checks that fit_and_transform()
+        structure_col, bandstruct_col, and dos_col, and checks that
+        fit_and_transform()
         works correctly with the attributes.
         """
-        # Tests fit_transform from original unit tests
-        self.test_featurize_composition()
-        self.test_featurize_structure()
 
         # Modification of test_featurize_composition with AutoFeaturizer parameter
         target = "K_VRH"
         df = copy.copy(self.test_df[['composition', target]].iloc[:self.limit])
-        af = AutoFeaturizer(composition_col="composition")
+        af = AutoFeaturizer(composition_col="composition", preset="best")
         df = af.fit_transform(df, target)
         self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
         self.assertTrue("composition" not in df.columns)
 
         df = self.test_df[["composition", target]].iloc[:self.limit]
         df["composition"] = [Composition(s) for s in df["composition"]]
-        af = AutoFeaturizer(composition_col="composition")
+        af = AutoFeaturizer(composition_col="composition", preset="best")
         df = af.fit_transform(df, target)
         self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
         self.assertTrue("composition" not in df.columns)
@@ -299,21 +247,92 @@ class TestAutoFeaturizer(unittest.TestCase):
         # Modification of test_featurize_structure with AutoFeaturizer parameter
         target = "K_VRH"
         df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
-        af = AutoFeaturizer(structure_col="structure")
+        af = AutoFeaturizer(structure_col="structure", preset="fast")
         df = af.fit_transform(df, target)
-        self.assertTrue("dimensionality" in df.columns)
+        self.assertTrue("vpa" in df.columns)
         self.assertTrue("HOMO_character" in df.columns)
         self.assertTrue("composition" not in df.columns)
         self.assertTrue("structure" not in df.columns)
 
         df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
         df["structure"] = [s.as_dict() for s in df["structure"]]
-        af = AutoFeaturizer(structure_col="structure")
+        af = AutoFeaturizer(structure_col="structure", preset="fast")
         df = af.fit_transform(df, target)
-        self.assertTrue("dimensionality" in df.columns)
+        self.assertTrue("vpa" in df.columns)
         self.assertTrue("HOMO_character" in df.columns)
         self.assertTrue("composition" not in df.columns)
         self.assertTrue("structure" not in df.columns)
+
+    def test_functionalization(self):
+        target = "K_VRH"
+        flimit = 2
+        df = self.test_df[['composition', target]].iloc[:flimit]
+        af = AutoFeaturizer(functionalize=True, preset="fast")
+        df = af.fit_transform(df, target)
+        self.assertTupleEqual(df.shape, (flimit, 15888))
+
+    def test_StructureFeaturizers_needs_fitting(self):
+        fset_nofit = StructureFeaturizers().best
+        fset_needfit = StructureFeaturizers().all
+        af_nofit = AutoFeaturizer(featurizers={"structure": fset_nofit})
+        af_needfit = AutoFeaturizer(featurizers={"structure": fset_needfit})
+        self.assertTrue(af_needfit.needs_fit)
+        self.assertFalse(af_nofit.needs_fit)
+
+    # todo: Fix test once metaselector is converted over to precheck
+    @unittest.skip(reason="Metaselector needs revamp before re-enabling.")
+    def test_use_metaselector(self):
+        # Test to see if metaselector works for this dataset
+        df = copy.copy(self.test_df.iloc[:self.limit])
+        target = "K_VRH"
+
+        af = AutoFeaturizer(use_metaselector=True)
+        af.fit(df, target)
+
+        self.assertIsNotNone(af.metaselector)
+        dataset_mfs = af.metaselector.dataset_mfs
+        self.assertIn("composition_metafeatures", dataset_mfs.keys())
+        self.assertIn("structure_metafeatures", dataset_mfs.keys())
+        self.assertIsNotNone(dataset_mfs["composition_metafeatures"])
+        self.assertIsNotNone(dataset_mfs["structure_metafeatures"])
+
+        comp_mfs = dataset_mfs["composition_metafeatures"]
+        self.assertEqual(comp_mfs["number_of_compositions"], 5)
+        self.assertAlmostEqual(comp_mfs["percent_of_all_metal"], 0.2)
+        self.assertAlmostEqual(
+            comp_mfs["percent_of_metal_nonmetal"], 0.8)
+        self.assertAlmostEqual(comp_mfs["percent_of_all_nonmetal"], 0.0)
+        self.assertAlmostEqual(
+            comp_mfs["percent_of_contain_trans_metal"], 0.8)
+        self.assertEqual(comp_mfs["number_of_different_elements"], 7)
+        self.assertAlmostEqual(comp_mfs["avg_number_of_elements"], 2.2)
+        self.assertEqual(comp_mfs["max_number_of_elements"], 3)
+        self.assertEqual(comp_mfs["min_number_of_elements"], 1)
+
+        struct_mfs = dataset_mfs["structure_metafeatures"]
+        self.assertEqual(struct_mfs["number_of_structures"], 5)
+        self.assertAlmostEqual(struct_mfs["percent_of_ordered_structures"],
+                               1.0)
+        self.assertAlmostEqual(struct_mfs["avg_number_of_sites"], 7.0)
+        self.assertEqual(struct_mfs["max_number_of_sites"], 12)
+        self.assertEqual(
+            struct_mfs["number_of_different_elements_in_structures"], 7)
+
+        excludes = af.metaselector.excludes
+        self.assertIn("IonProperty", excludes)
+        self.assertIn("Miedema", excludes)
+        self.assertIn("OxidationStates", excludes)
+        self.assertIn("YangSolidSolution", excludes)
+        self.assertIn("TMetalFraction", excludes)
+        self.assertIn("ElectronegativityDiff", excludes)
+        self.assertIn("CationProperty", excludes)
+        self.assertIn("ElectronAffinity", excludes)
+
+        df = af.fit_transform(df, target)
+        ef = ElectronAffinity()
+        ef_feats = ef.feature_labels()
+        self.assertFalse(any([f in df.columns for f in ef_feats]))
+        self.assertFalse(any([f in df.columns for f in ef_feats]))
 
 if __name__ == '__main__':
     unittest.main()

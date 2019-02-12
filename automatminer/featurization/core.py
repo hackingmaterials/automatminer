@@ -4,40 +4,30 @@ from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     CompositionToOxidComposition
 from matminer.featurizers.function import FunctionFeaturizer
 
-from automatminer.utils.package_tools import check_fitted, set_fitted
-from automatminer.base import DataframeTransformer, LoggableMixin
+from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR, \
+    AMM_LOG_TRANSFORM_STR
+from automatminer.utils.pkg import check_fitted, set_fitted
+from automatminer.base import DFTransformer, LoggableMixin
 from automatminer.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
-from automatminer.featurization.metaselection.core import FeaturizerMetaSelector
-from automatminer.utils.package_tools import AutomatminerError
+from automatminer.utils.pkg import AutomatminerError
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
               "Qi Wang <wqthu11@gmail.com>"]
 
-_supported_featurizer_types = {"composition": CompositionFeaturizers,
-                               "structure": StructureFeaturizers,
-                               "bandstructure": BSFeaturizers,
-                               "dos": DOSFeaturizers}
-
-_composition_aliases = ["comp", "Composition", "composition", "COMPOSITION",
-                        "comp.", "formula", "chemical composition", "compositions"]
-_structure_aliases = ["structure", "struct", "struc", "struct.", "structures",
-                      "STRUCTURES", "Structure", "structures", "structs"]
-_bandstructure_aliases = ["bandstructure", "bs", "bsdos", "BS", "BSDOS",
-                          "Bandstructure"]
-_dos_aliases = ["density of states", "dos", "DOS", "Density of States"]
-_aliases = _composition_aliases + _structure_aliases + _bandstructure_aliases +\
-           _dos_aliases
+_COMMON_COL_ERR_STR = "composition_col/structure_col/bandstructure_col/dos_col"
 
 
-class AutoFeaturizer(DataframeTransformer, LoggableMixin):
+class AutoFeaturizer(DFTransformer, LoggableMixin):
     """
     Automatically featurize a dataframe.
 
     Use this object first by calling fit, then by calling transform.
 
-    AutoFeaturizer works with a fixed set of possible column names.
+    AutoFeaturizer requires you to specify the column names for each type of
+        featurization, or just use the defaults:
+
         "composition": To use composition features
         "structure": To use structure features
         "bandstructure": To use bandstructure features
@@ -51,42 +41,34 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             featurizers that should be applied. See the Featurizer sets for
             specifics of best/fast/all. Default is "best". Incompatible with
             the featurizers arg.
-        featurizers (dict): Values are the featurizer types you want applied
-            (e.g., "structure", "composition"). The corresponding values
-            are lists of featurizer objects you want applied for each featurizer
-            type.
+        featurizers (dict): Use this option if you want to manually specify
+            the featurizers to use. Keys are the featurizer types you want
+            applied (e.g., "structure", "composition"). The corresponding values
+            are lists of featurizer objects you want for each featurizer type.
 
             Example:
                  {"composition": [ElementProperty.from_preset("matminer"),
                                   EwaldEnergy()]
                   "structure": [BagofBonds(), GlobalSymmetryFeatures()]}
-            Valid keys for each featurizer type are given in the *_aliases
-            constants above.
+
         exclude ([str]): Class names of featurizers to exclude. Only used if
-            your own featurizer dict is NOT passed.
-        use_metaselector (bool): Whether to use FeaturizerMetaSelector to remove
-            featurizers that will return a higher nan fraction than max_na_frac
-            (as below) for the dataset. Only used if own featurizer dict is
-            NOT passed.
-        max_na_frac (float): The maximum fraction (0.0 - 1.0) of samples for a
-            given feature allowed. Featurizers that definitely return a higher
-            nan fraction are automatically removed by FeaturizerMetaSelector.
-            Only used if own featurizer dict is NOT passed and use_metaselector
-            is True.
+            you use a preset.
         ignore_cols ([str]): Column names to be ignored/removed from any
-            dataframe undergoing fitting or transformation.
+            dataframe undergoing fitting or transformation. If columns are
+            not ignored, they may be used later on for learning.
         ignore_errors (bool): If True, each featurizer will ignore all errors
             during featurization.
         drop_inputs (bool): Drop the columns containing input objects for
-            featurization (e.g., drop composition column following featurization).
+            featurization after they are featurized.
         guess_oxistates (bool): If True, try to decorate sites with oxidation
             state.
-        multiiindex (bool): If True, returns a multiindexed dataframe.
+        multiiindex (bool): If True, returns a multiindexed dataframe. Not
+            recommended for use in MatPipe.
         n_jobs (int): The number of parallel jobs to use during featurization
             for each featurizer. Default is n_cores
         logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will be
-            used. If set to False, then no logging will occur.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
 
     Attributes:
         These attributes are set during fitting
@@ -97,34 +79,34 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             featurizers.
         auto_featurizer (bool): whether the featurizers are set automatically,
             or passed by the users.
-        metaselector (object): the FeaturizerMetaSelector class if metaselection
-            is used during featurization. The dataset metafeatures and
-            auto-excluded featurizers can be accessed by self.metaselector.
-            dataset_mfs and self.metaselector.excludes.
-
     """
 
     def __init__(self, preset=None, featurizers=None, exclude=None,
-                 use_metaselector=False, functionalize=False, max_na_frac=0.05,
-                 ignore_cols=None, ignore_errors=True, drop_inputs=True,
+                 functionalize=False, max_na_frac=0.05, ignore_cols=None,
+                 ignore_errors=True, drop_inputs=True,
                  guess_oxistates=True, multiindex=False, n_jobs=None,
-                 logger=True, composition_col="composition", structure_col="structure",
+                 logger=True, composition_col="composition",
+                 structure_col="structure",
                  bandstructure_col="bandstructure", dos_col="dos"):
 
         if featurizers and preset:
             raise AutomatminerError("Featurizers and preset were both set. "
                                     "Please either use a preset ('best', 'all',"
                                     " 'fast') or set featurizers manually.")
+        if not featurizers and not preset:
+            raise AutomatminerError("Please specify set(s) of featurizers to "
+                                    "use either through the featurizers"
+                                    "argument or through the preset argument.")
 
         self.preset = "best" if preset is None else preset
         self._logger = self.get_logger(logger)
         self.featurizers = featurizers
         self.exclude = exclude if exclude else []
-        self.use_metaselector = use_metaselector
         self.functionalize = functionalize
         self.max_na_percent = max_na_frac
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
+        self.fitted_input_df = None
         self.ignore_errors = ignore_errors
         self.drop_inputs = drop_inputs
         self.multiindex = multiindex
@@ -132,38 +114,92 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         self.guess_oxistates = guess_oxistates
         self.features = []
         self.auto_featurizer = True if self.featurizers is None else False
-        self.metaselector = None
         self.composition_col = composition_col
         self.structure_col = structure_col
         self.bandstruct_col = bandstructure_col
         self.dos_col = dos_col
 
+        _supported_featurizers = {composition_col: CompositionFeaturizers,
+                                  structure_col: StructureFeaturizers,
+                                  bandstructure_col: BSFeaturizers,
+                                  dos_col: DOSFeaturizers}
+
+        # user-set featurizers
+        if self.featurizers:
+            if not isinstance(self.featurizers, dict):
+                raise TypeError("Featurizers must be a dictionary with keys"
+                                "matching your {}".format(_COMMON_COL_ERR_STR))
+
+            invalid_ftypes = [f for f in self.featurizers.keys() if
+                              f not in _supported_featurizers.keys()]
+            if invalid_ftypes:
+                raise KeyError("The following keys were specified as featurizer"
+                               " types but were not set in {}"
+                               "".format(_COMMON_COL_ERR_STR))
+
+            for ftype, fset in self.featurizers.items():
+                _allowed = [f.__class__.__name__ for f in
+                            _supported_featurizers[ftype]().all]
+                for f in fset:
+                    if f.__class__.__name__ not in _allowed:
+                        raise ValueError(
+                            "The {} featurizer {} is not supported by "
+                            "AutoFeaturizer. Try updating your version of "
+                            "automatminer and matminer.".format(ftype, f))
+
+        # auto-set featurizers
+        else:
+            featurizers = dict()
+            for featurizer_type in _supported_featurizers.keys():
+                featurizer_set = _supported_featurizers[featurizer_type]
+                featurizers[featurizer_type] = getattr(
+                    featurizer_set(exclude=self.exclude), self.preset)
+            self.featurizers = featurizers
+
+        # Check if any featurizers need fitting (useful for MatPipe)
+        needs_fit = False
+        fittable_fs = StructureFeaturizers().need_fit
+        self.fittable_fcls = set([f.__class__.__name__ for f in fittable_fs])
+
+        # Currently structure featurizers are the only featurizer types which
+        # can be fittable
+        for f in self.featurizers[self.structure_col]:
+            if f.__class__.__name__ in self.fittable_fcls:
+                needs_fit = True
+                break
+        self.needs_fit = needs_fit
+
+    @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
         """
         Fit all featurizers to the df.
 
-        WARNING: for fitting to work, the dataframe must contain the following
-        keys and column value types for each kind of featurization:
+        WARNING: for fitting to work, the dataframe must contain the
+        corresponding *col keys set in __init__. So for composition
+        featurization to work, you must have the composition_col in the
+        dataframe.
 
-            Composition features: "composition" - strings or pymatgen
-                Composition objects
-            Structure features: "structure" - pymatgen Structure objects
-            Bandstructure features: "bandstructure" - pymatgen BandStructure objects
-            DOS features: "dos" - pymatgen DOS objects
+            Composition features: composition_col - pymatgen Composition objs
+            Structure features: structure_col - pymatgen Structure objs
+            Bandstructure features: bandstructure_col - pymatgen Bandstructure
+                objs
+            DOS features: dos_col - pymatgen DOS objs
 
         Args:
-            df (pandas.DataFrame): A dataframe containing at least one of the keys
-                listed above. The column defined by that key should have the corresponding
-                types of objects in it.
+            df (pandas.DataFrame): A dataframe containing at least one of the
+                keys listed above. The column defined by that key should have
+                the corresponding types of objects in it.
             target (str): The ML target key in the dataframe.
 
         Returns:
             (AutoFeaturizer): self
         """
+        # Prevent anything from happening to input df during featurization
+        self.fitted_input_df = df
+
         df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
-        self._customize_featurizers(df)
 
         for featurizer_type, featurizers in self.featurizers.items():
             if not featurizers:
@@ -172,15 +208,31 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             if featurizer_type in df.columns:
                 df = self._tidy_column(df, featurizer_type)
                 for f in featurizers:
+                    log_fit = False
+                    if featurizer_type == self.structure_col:
+                        if f.__class__.__name__ in self.fittable_fcls:
+                            log_fit = True
+                    if log_fit:
+                        self.logger.info("Fitting {}."
+                                         "".format(f.__class__.__name__))
+
                     f.fit(df[featurizer_type].tolist())
                     f.set_n_jobs(self.n_jobs)
                     self.features += f.feature_labels()
-                    self.logger.info("Fit {} to {} samples in dataframe."
-                                     "".format(f.__class__.__name__, df.shape[0]))
+
+                    if log_fit:
+                        self.logger.info(
+                            "Fit {} to {} samples in dataframe."
+                            "".format(f.__class__.__name__, df.shape[0]))
+            else:
+                self.logger.info("Featurizer type {} not in the dataframe to be"
+                                 " fitted. Skipping...".format(featurizer_type))
+
         return self
 
+    @log_progress(AMM_LOG_TRANSFORM_STR)
     @check_fitted
-    def transform(self, df, target, tidy_column=True):
+    def transform(self, df, target):
         """
         Decorate a dataframe containing composition, structure, bandstructure,
         and/or DOS objects with descriptors.
@@ -192,17 +244,20 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Transformed dataframe containing features.
         """
-
-        #todo: structure to oxidstructure + comp2oxidcomp can get called twice by _tidy_column, can be fixed with overriding fit_transform
+        transforming_on_fitted = df is self.fitted_input_df
         df = self._prescreen_df(df, inplace=True)
-        df = self._add_composition_from_structure(df)
+
+        if not transforming_on_fitted:
+            df = self._add_composition_from_structure(df)
 
         for featurizer_type, featurizers in self.featurizers.items():
             if featurizer_type in df.columns:
-                if tidy_column:
+                if not transforming_on_fitted:
                     df = self._tidy_column(df, featurizer_type)
 
                 for f in featurizers:
+                    self.logger.info("Featurizing with {}."
+                                     "".format(f.__class__.__name__))
                     df = f.featurize_dataframe(df, featurizer_type,
                                                ignore_errors=self.ignore_errors,
                                                multiindex=self.multiindex)
@@ -219,23 +274,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             df = ff.fit_featurize_dataframe(df, cols,
                                             ignore_errors=self.ignore_errors,
                                             multiindex=self.multiindex)
-
         return df
-
-    @set_fitted
-    def fit_transform(self, df, target):
-        """
-        Fit and transform the dataframe all as one, without reassigning
-        oxidation states (if valid).
-
-        Args:
-            df (pandas.DataFrame): The dataframe not containing features.
-            target (str): The ML-target property contained in the df.
-
-        Returns:
-            df (pandas.DataFrame): Transformed dataframe containing features.
-        """
-        return self.fit(df, target).transform(df, target, tidy_column=False)
 
     def _prescreen_df(self, df, inplace=True):
         """
@@ -257,70 +296,6 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                     df = df.drop([col], axis=1)
         return df
 
-    def _customize_featurizers(self, df):
-        """
-        Customize the featurizers that will be used in featurization, stored
-        in self.featurizers.
-        If users have passed the featurizers, just use them and normalize
-        the names from the aliases; If users have not passed the featurizers,
-        will auto-set the featurizers, and if use_metaselection is True, will
-        use FeaturizerMetaSelector to remove the featurizers that return a
-        higher nan fraction than self.max_na_frac for the dataset.
-        Args:
-            df (pandas.DataFrame)
-
-        """
-        # auto-set featurizers
-        if not self.featurizers:
-            self.auto_featurizer = True
-            self.featurizers = dict()
-            # use FeaturizerMetaSelector to get removable featurizers
-            if self.use_metaselector:
-                self.logger.info("Running metaselector.")
-                self.metaselector = FeaturizerMetaSelector(self.max_na_percent)
-                auto_exclude = self.metaselector.auto_excludes(df)
-                if auto_exclude:
-                    self.logger.info("Based on metafeatures of the dataset, "
-                                     "these featurizers are excluded for "
-                                     "returning nans more than the "
-                                     "max_na_percent of {}: {}".
-                                     format(self.max_na_percent, auto_exclude))
-                    self.exclude.extend(auto_exclude)
-
-            for featurizer_type in _supported_featurizer_types.keys():
-                if featurizer_type in df.columns:
-                    featurizer_set = _supported_featurizer_types[featurizer_type]
-                    self.featurizers[featurizer_type] = \
-                        getattr(featurizer_set(exclude=self.exclude),
-                                self.preset)
-                else:
-                    self.logger.info("Featurizer type {} not in the dataframe "
-                                     "to be fitted. Skipping...".
-                                     format(featurizer_type))
-        # user-set featurizers
-        else:
-            if not isinstance(self.featurizers, dict):
-                raise TypeError("Featurizers must be a dictionary with keys"
-                                "of 'composition', 'structure', 'bandstructure', "
-                                "and 'dos' and values of corresponding lists of "
-                                "featurizers.")
-            else:
-                for ftype in self.featurizers:
-                    # Normalize the names from the aliases
-                    if ftype in _composition_aliases:
-                        self.featurizers[self.composition_col] = self.featurizers.pop(ftype)
-                    elif ftype in _structure_aliases:
-                        self.featurizers[self.structure_col] = self.featurizers.pop(ftype)
-                    elif ftype in _bandstructure_aliases:
-                        self.featurizers[self.bandstruct_col] = self.featurizers.pop(ftype)
-                    elif ftype in _dos_aliases:
-                        self.featurizers[self.dos_col] = self.featurizers.pop(ftype)
-                    else:
-                        raise ValueError(
-                            "The featurizers dict key {} is not a valid "
-                            "featurizer type. Please choose from {}".format(
-                                ftype, _aliases))
-
     def _tidy_column(self, df, featurizer_type):
         """
         Various conversions to homogenize columns for featurization input.
@@ -337,7 +312,7 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             df (pandas.DataFrame): DataFrame with featurizer_type column
                 ready for featurization.
         """
-        # todo: Make the following conversions more robust (no lazy [0] type checking)
+        # todo: Make the following conversions more robust (no [0] type checking)
         if featurizer_type == self.composition_col:
             # Convert formulas to composition objects
             if isinstance(df[featurizer_type].iloc[0], str):
@@ -352,7 +327,8 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             elif isinstance(df[featurizer_type].iloc[0], dict):
                 self.logger.info("Compositions detected as dicts. Attempting "
                                  "conversion to Composition objects...")
-                df[featurizer_type] = [Composition.from_dict(d) for d in df[featurizer_type]]
+                df[featurizer_type] = [Composition.from_dict(d) for d in
+                                       df[featurizer_type]]
 
             # Convert non-oxidstate containing comps to oxidstate comps
             if self.guess_oxistates:
@@ -377,30 +353,34 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
             self.logger.info("{} detected as strings. Attempting "
                              "conversion to {} objects..."
                              "".format(featurizer_type, featurizer_type))
-            dto = DictToObject(overwrite_data=True, target_col_id=featurizer_type)
+            dto = DictToObject(overwrite_data=True,
+                               target_col_id=featurizer_type)
             df = dto.featurize_dataframe(df, featurizer_type)
 
             # Decorate with oxidstates
             if featurizer_type == self.structure_col and self.guess_oxistates:
-                self.logger.info("Guessing oxidation states of structures, as "
+                self.logger.info("Guessing oxidation states of structures if "
                                  "they were not present in input.")
                 sto = StructureToOxidStructure(
                     target_col_id=featurizer_type, overwrite_data=True,
                     return_original_on_error=True, max_sites=-50)
                 try:
                     df = sto.featurize_dataframe(df, featurizer_type,
-                                             multiindex=self.multiindex)
+                                                 multiindex=self.multiindex)
                 except Exception as e:
                     self.logger.info("Could not decorate oxidation states on"
-                                        " structures due to {}.".format(e))
+                                     " structures due to {}.".format(e))
         return df
 
     def _add_composition_from_structure(self, df, overwrite=True):
         """
         Automatically deduce compositions from structures if:
+
             1. structures are available
-            2. composition features are actually desired. (deduced from whether
+            2. compositions are not available (unless overwrite)
+            3. composition features are actually desired. (deduced from whether
                 composition featurizers are present in self.featurizers).
+
         Args:
             df (pandas.DataFrame): May or may not contain composition column.
             overwrite (bool): Whether to overwrite the composition column if it
@@ -409,16 +389,15 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Contains composition column if desired
         """
-        if (self.structure_col in df.columns and
-                (self.auto_featurizer or (set(_composition_aliases) and
-                                          set(self.featurizers.keys())))
-                and (self.composition_col not in df.columns or overwrite)):
+        if self.structure_col in df.columns \
+                and (self.composition_col not in df.columns or overwrite) \
+                and self.composition_col in self.featurizers:
 
-            if "composition" in df.columns:
+            if self.composition_col in df.columns:
                 self.logger.info("composition column already exists, "
                                  "overwriting with composition from structure.")
             else:
-                self.logger.debug("Adding compositions from structures.")
+                self.logger.info("Adding compositions from structures.")
 
             df = self._tidy_column(df, self.structure_col)
 
@@ -428,14 +407,3 @@ class AutoFeaturizer(DataframeTransformer, LoggableMixin):
                 target_col_id=self.composition_col, overwrite_data=overwrite)
             df = struct2comp.featurize_dataframe(df, self.structure_col)
         return df
-
-
-if __name__ == "__main__":
-    from matminer.datasets.dataset_retrieval import load_dataset, get_available_datasets
-
-    print(get_available_datasets())
-    df = load_dataset("elastic_tensor_2015").rename(columns={"formula": "composition"}).iloc[:20]
-    af = AutoFeaturizer(functionalize=True)
-    print(df)
-    df = af.fit_transform(df, "K_VRH")
-    print(df.describe())

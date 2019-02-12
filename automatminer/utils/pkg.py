@@ -1,6 +1,7 @@
 """
-Tools specific to this package.
+Utils specific to this package.
 """
+
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
@@ -33,8 +34,10 @@ def compare_columns(df1, df2, ignore=None):
                  "mismatch": (bool)}
     """
     ignore = () if ignore is None else ignore
-    df2_not_in_df1 = [f for f in df2.columns if f not in df1.columns and f not in ignore]
-    df1_not_in_df2 = [f for f in df1.columns if f not in df2.columns and f not in ignore]
+    df2_not_in_df1 = [f for f in df2.columns if
+                      f not in df1.columns and f not in ignore]
+    df1_not_in_df2 = [f for f in df1.columns if
+                      f not in df2.columns and f not in ignore]
     matched = not (df2_not_in_df1 + df1_not_in_df2)
     return {"df2_not_in_df1": df2_not_in_df1,
             "df1_not_in_df2": df1_not_in_df2,
@@ -50,6 +53,7 @@ def check_fitted(func):
     Returns:
         A wrapper function for the input function/method.
     """
+
     def wrapper(*args, **kwargs):
         if not hasattr(args[0], "is_fit"):
             raise AttributeError("Method using check_fitted has no is_fit attr"
@@ -59,6 +63,7 @@ def check_fitted(func):
                                  "".format(args[0].__class__.__name__))
         else:
             return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -71,11 +76,13 @@ def set_fitted(func):
     Returns:
         A wrapper function for the input function/method.
     """
+
     def wrapper(*args, **kwargs):
         args[0].is_fit = False
         result = func(*args, **kwargs)
         args[0].is_fit = True
         return result
+
     return wrapper
 
 
@@ -114,5 +121,6 @@ def return_attrs_recursively(obj):
 if __name__ == "__main__":
     class A:
         pass
+
 
     print(isinstance(A, type))

@@ -15,7 +15,7 @@ import matminer.featurizers.bandstructure as bf
 try:
     import torch
     import cgcnn
-except:
+except ImportError:
     torch, cgcnn = None, None
 
 __authors__ = ["Alex Dunn", "Alex Ganose"]
@@ -354,17 +354,20 @@ class DOSFeaturizers(FeaturizerSet):
     def __init__(self, exclude=None):
         super(DOSFeaturizers, self).__init__(exclude=exclude)
 
+        # Best featurizers work on the entire DOS
         self._best_featurizers = [
             dosf.DOSFeaturizer(),
             dosf.DopingFermi(),
-            dosf.Hybridization()
+            dosf.Hybridization(),
         ]
+
+        self._site_featurizers = [dosf.SiteDOS()]
 
 
     @property
     def all(self):
         """List of all density of states based featurizers."""
-        return self.best
+        return self.best + self.site
 
     @property
     def best(self):
@@ -373,6 +376,10 @@ class DOSFeaturizers(FeaturizerSet):
     @property
     def fast(self):
         return self._get_featurizers(self._best_featurizers)
+
+    @property
+    def site(self):
+        return self._get_featurizers(self._site_featurizers)
 
 
 class BSFeaturizers(FeaturizerSet):
@@ -393,7 +400,7 @@ class BSFeaturizers(FeaturizerSet):
 
         self._best_featurizers = [
             bf.BandFeaturizer(),
-            bf.BranchPointEnergy()
+            bf.BranchPointEnergy(),
         ]
 
     @property

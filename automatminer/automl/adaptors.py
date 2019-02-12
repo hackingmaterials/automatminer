@@ -18,6 +18,13 @@ from automatminer.utils.ml_tools import is_greater_better, \
     regression_or_classification
 from automatminer.base import AutoMLAdaptor, LoggableMixin
 from automatminer.automl.keras_wrapper import NnWrapper
+from automatminer.utils.pkg import AutomatminerError, set_fitted, \
+    check_fitted
+from automatminer.utils.ml import is_greater_better, \
+    regression_or_classification
+from automatminer.utils.log import log_progress, AMM_LOG_PREDICT_STR, \
+    AMM_LOG_FIT_STR
+from automatminer.base import DFMLAdaptor, LoggableMixin
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
                'Alireza Faghaninia <alireza.faghaninia@gmail.com>',
@@ -30,7 +37,7 @@ _classifier_modes = {'classifier', 'classification', 'classify'}
 _regressor_modes = {'regressor', 'regression', 'regress'}
 
 
-class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
+class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
     """
     A dataframe adaptor for the TPOT classifiers and regressors.
 
@@ -86,6 +93,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         self._ml_data = None
         self.greater_score_is_better = None
 
+    @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
         """
@@ -185,11 +193,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
         self.models = models
         return best_models_and_scores
 
-    @property
-    @check_fitted
-    def _best_pipeline(self):
-        return self._backend.fitted_pipeline_
-
+    @log_progress(AMM_LOG_PREDICT_STR)
     @check_fitted
     def predict(self, df, target):
         """
@@ -237,6 +241,7 @@ class TPOTAdaptor(AutoMLAdaptor, LoggableMixin):
             df[target + " predicted"] = y_pred
             self.logger.info("Prediction finished successfully.")
             return df
+
 
 class NeuralNetworkAdaptor(LoggableMixin):
     """
@@ -420,7 +425,29 @@ if __name__ == "__main__":
     print(testdf)
     print((testdf[target] - testdf[target + " predicted"]).abs().sum())
 
-class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
+    @property
+    @check_fitted
+    def best_pipeline(self):
+        return self._backend.fitted_pipeline_
+
+
+    @property
+    @check_fitted
+    def features(self):
+        return self._features
+
+    @property
+    @check_fitted
+    def ml_data(self):
+        return self._ml_data
+
+    @property
+    @check_fitted
+    def backend(self):
+        return self._backend
+
+
+class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     """
     For running single models or pipelines in a MatPipe pipeline using the same
     syntax as the AutoML adaptors.
@@ -442,6 +469,7 @@ class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
         self._ml_data = None
         self.fitted_target = None
 
+    @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
         # Prevent goofy pandas casting by casting to native
@@ -456,6 +484,7 @@ class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
         self.logger.info("{} fitting finished.".format(model_name))
 
     # todo: Remove this duplicated code section, maybe just make a parent class
+    @log_progress(AMM_LOG_PREDICT_STR)
     @check_fitted
     def predict(self, df, target):
         """
@@ -497,8 +526,24 @@ class SinglePipelineAdaptor(AutoMLAdaptor, LoggableMixin):
 
     @property
     @check_fitted
-    def _best_pipeline(self):
+    def best_pipeline(self):
         return self._backend
+
+    @property
+    @check_fitted
+    def features(self):
+        return self._features
+
+    @property
+    @check_fitted
+    def ml_data(self):
+        return self._ml_data
+
+    @property
+    @check_fitted
+    def backend(self):
+        return self._backend
+
 
 
 # if __name__ == "__main__":

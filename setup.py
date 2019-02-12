@@ -8,8 +8,6 @@ from automatminer import __version__
 module_dir = os.path.dirname(os.path.abspath(__file__))
 reqs_raw = open(os.path.join(module_dir, "requirements.txt")).read()
 reqs_list = [r.replace("==", ">=") for r in reqs_raw.split("\n")]
-opt_raw = open(os.path.join(module_dir, "requirements-optional.txt")).read()
-opt_list = [o.replace("==", ">=") for o in opt_raw.split("\n")]
 
 if __name__ == "__main__":
     setup(
@@ -26,7 +24,7 @@ if __name__ == "__main__":
         package_data={},
         zip_safe=False,
         install_requires=reqs_list,
-        extras_require={"analytics": opt_list},
+        extras_require={},
         classifiers=['Programming Language :: Python :: 3.6',
                      'Development Status :: 4 - Beta',
                      'Intended Audience :: Science/Research',
@@ -35,7 +33,5 @@ if __name__ == "__main__":
                      'Operating System :: OS Independent',
                      'Topic :: Other/Nonlisted Topic',
                      'Topic :: Scientific/Engineering'],
-        test_suite='',
-        tests_require=['nose'],
-        scripts=[]
-    )
+        test_suite='automatminer',
+        tests_require='tests')
