@@ -7,11 +7,11 @@ import logging
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 
-from automatminer.base import DataframeTransformer, AutoMLAdaptor, LoggableMixin
+from automatminer.base import DFTransformer, DFMLAdaptor, LoggableMixin
 from automatminer.utils.pkg import check_fitted, set_fitted
 
 
-class TestTransformerGood(DataframeTransformer):
+class TestTransformerGood(DFTransformer):
     """
     A test transformer and logger.
 
@@ -59,7 +59,7 @@ class TestTransformerGood(DataframeTransformer):
         return df
 
 
-class TestTransformerBad(DataframeTransformer):
+class TestTransformerBad(DFTransformer):
     """
     A test transformer, implemented incorrectly.
     """
@@ -78,14 +78,14 @@ class TestLoggableMixin(LoggableMixin):
         self._logger = self.get_logger(logger)
 
 
-class TestAdaptorBad(AutoMLAdaptor):
+class TestAdaptorBad(DFMLAdaptor):
     """
     A test adaptor for automl backends, implemented incorrectly.
     """
     def __init__(self):
         pass
 
-class TestAdaptorGood(AutoMLAdaptor):
+class TestAdaptorGood(DFMLAdaptor):
     """
     A test adaptor for automl backends, implemented correctly.
     """
@@ -137,13 +137,29 @@ class TestAdaptorGood(AutoMLAdaptor):
         df = df.drop(columns=self.target)
         return df
 
+    @property
+    def backend(self):
+        return self._backend
 
-class TestMatPipe(unittest.TestCase):
+    @property
+    def ml_data(self):
+        return self._ml_data
+
+    @property
+    def features(self):
+        return self._features
+
+    @property
+    def best_pipeline(self):
+        return self._best_pipeline
+
+
+class TestBaseTransformers(unittest.TestCase):
 
     def setUp(self):
         self.df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [7, 8, 9]})
 
-    def test_DataFrameTransformer(self):
+    def test_DFTransformer(self):
         ttg = TestTransformerGood(5)
         self.assertTrue(hasattr(ttg, "config_attr"))
         self.assertTrue(ttg.config_attr, 5)
@@ -163,19 +179,15 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue("a" in test.columns)
         self.assertTrue("b" in test.columns)
 
-        ttb = TestTransformerBad()
-        with self.assertRaises(NotImplementedError):
-            ttb.fit(self.df, 'a')
-
-        with self.assertRaises(NotImplementedError):
-            ttb.transform(self.df, 'b')
+        with self.assertRaises(TypeError):
+            _ = TestTransformerBad()
 
     def test_LoggableMixin(self):
         tlm = TestLoggableMixin(logger=True)
         self.assertTrue(hasattr(tlm, "logger"))
         self.assertTrue(isinstance(tlm.logger, logging.Logger))
 
-    def test_AutoMLAdaptor(self):
+    def test_DFMLAdaptor(self):
         tag = TestAdaptorGood(config_attr=5)
 
         with self.assertRaises(NotFittedError):
@@ -205,20 +217,8 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue("a" in predicted2)
         self.assertTrue("c" not in predicted2)
 
-        tab = TestAdaptorBad()
-        with self.assertRaises(NotImplementedError):
-            tab.fit(self.df, 'a')
-
-        with self.assertRaises(NotImplementedError):
-            tab.predict(self.df, 'a')
-
-        with self.assertRaises(NotImplementedError):
-            tab.transform(self.df, 'a')
-
-        for attr in ["backend", "best_pipeline", "ml_data", "features"]:
-            with self.assertRaises(NotImplementedError):
-                _ = getattr(tab, attr)
-
+        with self.assertRaises(TypeError):
+            _ = TestAdaptorBad()
 
 if __name__ == "__main__":
     unittest.main()

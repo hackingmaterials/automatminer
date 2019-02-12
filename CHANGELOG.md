@@ -41,7 +41,7 @@
 - Look into using NestedCV for automl, and whether it would be a good idea or not [\#130](https://github.com/hackingmaterials/automatminer/issues/130)
 - Add a very simple example [\#108](https://github.com/hackingmaterials/automatminer/issues/108)
 - Add another study comparison with matbench [\#65](https://github.com/hackingmaterials/automatminer/issues/65)
-- Add a profiler to DataframeTransformer [\#56](https://github.com/hackingmaterials/automatminer/issues/56)
+- Add a profiler to DFTransformer [\#56](https://github.com/hackingmaterials/automatminer/issues/56)
 
 **Merged pull requests:**
 
