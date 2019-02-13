@@ -10,9 +10,8 @@ from collections import OrderedDict
 
 from tpot import TPOTClassifier, TPOTRegressor
 
-from automatminer.automl.tpot_configs.classifier import \
-    classifier_config_dict_mb
-from automatminer.automl.tpot_configs.regressor import regressor_config_dict_mb
+from automatminer.automl.config.tpot_configs import TPOT_CLASSIFIER_CONFIG, \
+    TPOT_REGRESSOR_CONFIG
 from automatminer.utils.pkg import AutomatminerError, set_fitted, \
     check_fitted
 from automatminer.utils.ml import is_greater_better, \
@@ -25,10 +24,6 @@ __authors__ = ['Alex Dunn <ardunn@lbl.gov'
                'Alireza Faghaninia <alireza.faghaninia@gmail.com>',
                'Qi Wang <wqthu11@gmail.com>',
                'Daniel Dopp <dbdopp@lbl.gov>']
-
-_classifier_modes = {'classifier', 'classification', 'classify'}
-
-_regressor_modes = {'regressor', 'regression', 'regress'}
 
 
 class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
@@ -111,11 +106,11 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self.mode = regression_or_classification(df[target])
         if self.mode == "classification":
             self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
-                'config_dict', classifier_config_dict_mb)
+                'config_dict', TPOT_CLASSIFIER_CONFIG)
             self._backend = TPOTClassifier(**self.tpot_kwargs)
         elif self.mode == "regression":
             self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
-                'config_dict', regressor_config_dict_mb)
+                'config_dict', TPOT_REGRESSOR_CONFIG)
             self._backend = TPOTRegressor(**self.tpot_kwargs)
         else:
             raise ValueError("Learning type {} not recognized as a valid mode "
@@ -344,44 +339,3 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     @check_fitted
     def backend(self):
         return self._backend
-
-
-
-# if __name__ == "__main__":
-#     from matminer.datasets.dataset_retrieval import load_dataset
-#     from automatminer.featurization import AutoFeaturizer
-#     from automatminer.preprocessing import DataCleaner, FeatureReducer
-#     from sklearn.ensemble import RandomForestRegressor
-#     from sklearn.linear_model import SGDRegressor
-#     from sklearn.pipeline import Pipeline
-#     from sklearn.preprocessing import StandardScaler
-#
-#     # Load a dataset
-#     df = load_dataset("elastic_tensor_2015").rename(
-#         columns={"formula": "composition"})[["composition", "K_VRH"]]
-#     testdf = df.iloc[501:550]
-#     traindf = df.iloc[:100]
-#     target = "K_VRH"
-#
-#     # Get top-lvel transformers
-#     autofeater = AutoFeaturizer()
-#     cleaner = DataCleaner()
-#     reducer = FeatureReducer()
-#     # learner = TPOTAdaptor("regression", max_time_mins=5)
-#     learner = SinglePipelineAdaptor(model=RandomForestRegressor())
-#     learner = SinglePipelineAdaptor(model=
-#                                     Pipeline([('scaler', StandardScaler()),
-#                                               ('rfr', RandomForestRegressor())]))
-#
-#     # Fit transformers on training data
-#     traindf = autofeater.fit_transform(traindf, target)
-#     traindf = cleaner.fit_transform(traindf, target)
-#     traindf = reducer.fit_transform(traindf, target)
-#     learner.fit(traindf, target)
-#
-#     # Use transformers on testing data
-#     testdf = autofeater.transform(testdf, target)
-#     testdf = cleaner.transform(testdf, target)
-#     testdf = reducer.transform(testdf, target)
-#     testdf = learner.predict(testdf, target)
-#     print(testdf[["K_VRH", "K_VRH predicted"]])
