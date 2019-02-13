@@ -14,7 +14,7 @@ from automatminer.utils.pkg import AutomatminerError
 __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
 
 
-@unittest.skipIf(os.environ.get("FULL_TESTS", True),
+@unittest.skipIf(bool(os.environ.get("FULL_TESTS", True)),
                  "Test too intensive for CircleCI commit builds.")
 class TestTPOTAdaptor(unittest.TestCase):
     def setUp(self):

@@ -84,12 +84,12 @@ class TestMatPipe(unittest.TestCase):
         test = df_test[self.target + " predicted"]
         self.assertTrue(r2_score(true, test) > 0.75)
 
-    @unittest.skipIf(os.environ.get("FULL_TESTS", True),
+    @unittest.skipIf(bool(os.environ.get("FULL_TESTS", True)),
                      "Test too intensive for CircleCI commit builds.")
     def test_benchmarking_strict(self):
         self._run_benchmark(strict=True)
 
-    @unittest.skipIf(os.environ.get("FULL_TESTS", True),
+    @unittest.skipIf(bool(os.environ.get("FULL_TESTS", True)),
                      "Test too intensive for CircleCI commit builds.")
     def test_benchmarking_not_strict(self):
         self._run_benchmark(strict=False)
