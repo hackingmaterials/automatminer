@@ -14,8 +14,8 @@ from automatminer.utils.pkg import AutomatminerError
 __author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
 
 
-# @unittest.skipIf(bool(os.environ.get("FULL_TESTS", True)),
-#                  "Test too intensive for CircleCI commit builds.")
+@unittest.skipIf(int(os.environ.get("SKIP_INTENSIVE", 0)),
+                 "Test too intensive for CircleCI commit builds.")
 class TestTPOTAdaptor(unittest.TestCase):
     def setUp(self):
         basedir = os.path.dirname(os.path.realpath(__file__))
@@ -25,8 +25,6 @@ class TestTPOTAdaptor(unittest.TestCase):
         self.tpot = get_preset_config("debug")["learner"]
 
     def test_regression(self):
-        self.tpot.logger.warn("FULL TESTS IS" + os.environ.get("FULL_TESTS", None))
-        self.tpot.logger.warn("FULL TESTS IS2" + bool(os.environ.get("FULL_TESTS", True)))
         target_key = "K_VRH"
         self.tpot.fit(self.train_df, target_key)
         test_w_predictions = self.tpot.predict(self.test_df, target_key)

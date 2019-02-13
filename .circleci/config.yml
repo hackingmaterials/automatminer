@@ -7,7 +7,7 @@ jobs:
       - image: circleci/python:3.6.7
         environment:
           CODACY_PROJECT_TOKEN: "0cdf090f6d5f4f8783fcf3ce04c6a1d6"
-          FULL_TESTS: false
+          SKIP_INTENSIVE: false
     steps:
       - checkout
 
@@ -57,7 +57,7 @@ jobs:
       - image: circleci/python:3.7.2
         environment:
           CODACY_PROJECT_TOKEN: "0cdf090f6d5f4f8783fcf3ce04c6a1d6"
-          FULL_TESTS: false
+          SKIP_INTENSIVE: 1
     steps:
       - checkout
 
@@ -71,7 +71,7 @@ jobs:
       - run:
           name: setup env and run tests
           command: |
-            echo "FULL TESTS: $FULL_TESTS"
+            echo "SKIPPING INTENSIVE TESTS? $SKIP_INTENSIVE"
             python3 -m venv test_env
             . test_env/bin/activate
             pip install -q --upgrade pip
