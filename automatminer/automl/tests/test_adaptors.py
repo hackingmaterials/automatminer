@@ -25,8 +25,8 @@ class TestTPOTAdaptor(unittest.TestCase):
         self.tpot = get_preset_config("debug")["learner"]
 
     def test_regression(self):
-        print("FULL TESTS IS", os.environ.get("FULL_TESTS", None))
-        print("FULL TESTS IS2", bool(os.environ.get("FULL_TESTS", True)))
+        self.tpot.logger.warn("FULL TESTS IS" + os.environ.get("FULL_TESTS", None))
+        self.tpot.logger.warn("FULL TESTS IS2" + bool(os.environ.get("FULL_TESTS", True)))
         target_key = "K_VRH"
         self.tpot.fit(self.train_df, target_key)
         test_w_predictions = self.tpot.predict(self.test_df, target_key)
