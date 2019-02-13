@@ -15,7 +15,7 @@ Check the TPOT documentation for information on the structure of config_dicts
 
 import numpy as np
 
-classifier_config_dict_mb = {
+TPOT_CLASSIFIER_CONFIG = {
 
     # Classifiers
     'sklearn.naive_bayes.GaussianNB': {
@@ -52,7 +52,7 @@ classifier_config_dict_mb = {
         'criterion': ["gini", "entropy"],
         'max_features': np.arange(0.05, 1.01, 0.05),
         'min_samples_split': range(2, 21),
-        'min_samples_leaf':  range(1, 21),
+        'min_samples_leaf': range(1, 21),
         'bootstrap': [True, False]
     },
 
@@ -120,7 +120,8 @@ classifier_config_dict_mb = {
     },
 
     'sklearn.kernel_approximation.Nystroem': {
-        'kernel': ['rbf', 'cosine', 'chi2', 'laplacian', 'polynomial', 'poly', 'linear', 'additive_chi2', 'sigmoid'],
+        'kernel': ['rbf', 'cosine', 'chi2', 'laplacian', 'polynomial', 'poly',
+                   'linear', 'additive_chi2', 'sigmoid'],
         'gamma': np.arange(0.0, 1.01, 0.05),
         'n_components': range(1, 11)
     },

@@ -15,8 +15,7 @@ Check the TPOT documentation for information on the structure of config_dicts
 
 import numpy as np
 
-
-regressor_config_dict_mb = {
+TPOT_REGRESSOR_CONFIG = {
 
     # Regressors
     'sklearn.linear_model.ElasticNetCV': {
@@ -120,7 +119,8 @@ regressor_config_dict_mb = {
     },
 
     'sklearn.kernel_approximation.Nystroem': {
-        'kernel': ['rbf', 'cosine', 'chi2', 'laplacian', 'polynomial', 'poly', 'linear', 'additive_chi2', 'sigmoid'],
+        'kernel': ['rbf', 'cosine', 'chi2', 'laplacian', 'polynomial', 'poly',
+                   'linear', 'additive_chi2', 'sigmoid'],
         'gamma': np.arange(0.0, 1.01, 0.05),
         'n_components': range(1, 11)
     },
@@ -154,7 +154,6 @@ regressor_config_dict_mb = {
         'sparse': [False],
         'threshold': [10]
     },
-
 
     # Selectors
     'sklearn.feature_selection.SelectFwe': {
