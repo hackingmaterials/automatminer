@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+# Submit and run an intensive test to circleci.
+
 curl \
             --user ${CIRCLE_CI_TOKEN}: \
             --header "Content-Type: application/json" \

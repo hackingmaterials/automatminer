@@ -12,6 +12,8 @@ from monty.os import cd
 __author__ = ["Alex Dunn", "Shyue Ping Ong", "Anubhav Jain"]
 
 
+
+# Making and updatig documentation
 @task
 def make_doc(ctx):
     with cd("docs"):
@@ -21,25 +23,32 @@ def make_doc(ctx):
         ctx.run("cp -r build/html/* .")
         ctx.run("rm -r build")
         ctx.run("touch .nojekyll")
-
 @task
-def publish(ctx):
-    ctx.run("rm dist/*.*", warn=True)
-    ctx.run("python3 setup.py sdist bdist_wheel")
-    ctx.run("twine upload dist/* --verbose")
+def open_doc(ctx):
+    pth = os.path.abspath("docs/index.html")
+    webbrowser.open("file://" + pth)
 
 
+# Consistuent tasks
 @task
 def update_changelog(ctx):
     ctx.run('github_changelog_generator hackingmaterials/automatminer')
 
-
 @task
 def full_tests_circleci(ctx):
-    ctx.run("./all_test_ci.sh")
+    ctx.run("./run_intensive.sh")
 
 @task
-def release(ctx):
+def publish(ctx):
+    """
+    Do this last
+    """
+    ctx.run("rm dist/*.*", warn=True)
+    ctx.run("python3 setup.py sdist bdist_wheel")
+    ctx.run("twine upload dist/* --verbose")
+
+@task
+def release_gh(ctx):
     payload = {
         "tag_name": "v" + __version__,
         "target_commitish": "master",
@@ -54,9 +63,11 @@ def release(ctx):
         headers={"Authorization": "token " + os.environ["GITHUB_RELEASES_TOKEN"]})
     print(response.text)
 
-#TODO: HAVE THIS PUSH A NEW BENCHMARK TO LAWRENCIUM
 
 @task
-def open_doc(ctx):
-    pth = os.path.abspath("docs/index.html")
-    webbrowser.open("file://" + pth)
+def release(ctx):
+    update_changelog()
+    full_tests_circleci()
+
+
+#TODO: HAVE THIS PUSH A NEW BENCHMARK TO LAWRENCIUM
