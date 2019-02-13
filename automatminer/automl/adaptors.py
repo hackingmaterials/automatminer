@@ -10,28 +10,26 @@ from collections import OrderedDict
 
 from tpot import TPOTClassifier, TPOTRegressor
 
-from automatminer.automl.tpot_configs.classifier import \
-    classifier_config_dict_mb
-from automatminer.automl.tpot_configs.regressor import regressor_config_dict_mb
+from automatminer.automl.config.tpot_classifier import \
+    TPOT_CLASSIFIER_CONFIG
+from automatminer.automl.config.tpot_regressor import TPOT_REGRESSOR_CONFIG
 from automatminer.utils.pkg import AutomatminerError, set_fitted, \
     check_fitted
 from automatminer.utils.ml import is_greater_better, \
     regression_or_classification
 from automatminer.utils.log import log_progress, AMM_LOG_PREDICT_STR, \
     AMM_LOG_FIT_STR
+from automatminer.automl.nn.wrapper import NNWrapper
 from automatminer.base import DFMLAdaptor, LoggableMixin
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
                'Alireza Faghaninia <alireza.faghaninia@gmail.com>',
                'Qi Wang <wqthu11@gmail.com>',
-               'Daniel Dopp <dbdopp@lbl.gov>']
-
-_classifier_modes = {'classifier', 'classification', 'classify'}
-
-_regressor_modes = {'regressor', 'regression', 'regress'}
+               'Daniel Dopp <dbdopp@lbl.gov>',
+               'Samy Cherfaoui <scherfaoui@lbl.gov>']
 
 
-class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
+class TPOTAdaxptor(DFMLAdaptor, LoggableMixin):
     """
     A dataframe adaptor for the TPOT classifiers and regressors.
 
@@ -76,16 +74,17 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         tpot_kwargs['verbosity'] = tpot_kwargs.get('verbosity', 2)
 
         self.mode = None
-        self._backend = None
         self.tpot_kwargs = tpot_kwargs
         self.fitted_target = None
-        self._features = None
         self.models = None
-        self._logger = self.get_logger(logger)
         self.is_fit = False
         self.random_state = tpot_kwargs.get('random_state', None)
-        self._ml_data = None
         self.greater_score_is_better = None
+
+        self._backend = None
+        self._ml_data = None
+        self._logger = self.get_logger(logger)
+        self._features = None
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
@@ -111,11 +110,11 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self.mode = regression_or_classification(df[target])
         if self.mode == "classification":
             self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
-                'config_dict', classifier_config_dict_mb)
+                'config_dict', TPOT_CLASSIFIER_CONFIG)
             self._backend = TPOTClassifier(**self.tpot_kwargs)
         elif self.mode == "regression":
             self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
-                'config_dict', regressor_config_dict_mb)
+                'config_dict', TPOT_REGRESSOR_CONFIG)
             self._backend = TPOTRegressor(**self.tpot_kwargs)
         else:
             raise ValueError("Learning type {} not recognized as a valid mode "
@@ -346,8 +345,7 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
         return self._backend
 
 
-
-class NeuralNetworkAdaptor(LoggableMixin):
+class NeuralNetworkAdaptor(DFMLAdaptor, LoggableMixin):
     """
         A dataframe adaptor for a Keras neural network regressor/classifier.
         Args:
@@ -368,18 +366,24 @@ class NeuralNetworkAdaptor(LoggableMixin):
             learning_rate: Specifies learning rate decay of ADAM optimizer
             stop_early: True if neural network should stop training after loss starts to increases, false otherwise.
             **kwargs: Additional (optional) args needed for neural network wrapper.
+
         Attributes:
             The following attributes are set during fitting.
             mode (str): Either "regression" or "classification"
             features (list): The features labels used to develop the ml model.
             ml_data (dict): The raw ml data used for training.
-            backend (NnWrapper): The Keras neural network architecture used for ML training.
+            backend (NNWrapper): The Keras neural network architecture used for ML training.
             is_fit (bool): If True, the adaptor and backend are fit to a dataset.
             fitted_target (str): The target name in the df used for training.
             score (double): Internal CV score of the best model (Stored in backend)
     """
-    def __init__(self, logger=True, init="glorot_uniform", optimizer="adam", hidden_layer_sizes=(100,), units=20, dropout=0.5, show_accuracy=True, batch_spec=((400, 1024), (100, -1)), activation="relu", input_noise=0., use_maxout=False, use_maxnorm=False, learning_rate=0.001, stop_early=False, kfold_splits = 2, **kwargs):
-        self.mode = None
+
+    def __init__(self, logger=True, init="glorot_uniform", optimizer="adam",
+                 hidden_layer_sizes=(100,), units=20, dropout=0.5,
+                 show_accuracy=True, batch_spec=((400, 1024), (100, -1)),
+                 activation="relu", input_noise=0., use_maxout=False,
+                 use_maxnorm=False, learning_rate=0.001, stop_early=False,
+                 kfold_splits=2, **kwargs):
         self.hidden_layer_sizes = hidden_layer_sizes
         self.dropout = dropout
         self.show_accuracy = show_accuracy
@@ -391,19 +395,20 @@ class NeuralNetworkAdaptor(LoggableMixin):
         self.learning_rate = learning_rate
         self.stop_early = stop_early
         self.units = units
-        self._backend = None
-        self.kwargs = kwargs
-        self._features = None
-        self._logger = self.get_logger(logger)
-        self.is_fit = False
-        self.init = init
         self.optimizer = optimizer
         self.score = 0
         self.kfold_splits = kfold_splits
-        self._best_pipeline = None
-        self.backend = None
-        self.best_pipeline = None
+        self.init = init
 
+        self.mode = None
+        self.is_fit = False
+        self.fitted_target = None
+        self._features = None
+        self._best_pipeline = None
+        self._backend = None
+        self._logger = self.get_logger(logger)
+
+    @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
         """
@@ -420,21 +425,22 @@ class NeuralNetworkAdaptor(LoggableMixin):
         X = df.drop(columns=target)
 
         # Determine learning type based on whether classification or regression
-        self.mode = regression_or_classification(df[target])
+        self.mode = regression_or_classification(df[target], self.logger)
         self._features = df.drop(columns=target).columns.tolist()
         self._ml_data = {"X": X, "y": y}
         self.fitted_target = target
-        print(self._logger)
-        self._logger.info("Neural network fitting started.")
-        self._backend = NnWrapper(self.init, self.optimizer, self.hidden_layer_sizes, self.units, self.dropout, self.show_accuracy, self.batch_spec, self.activation, self.input_noise, self.use_maxout, self.use_maxnorm, self.learning_rate, self.stop_early, self.kfold_splits, self.mode)
+        self._backend = NNWrapper(self.init, self.optimizer,
+                                  self.hidden_layer_sizes, self.units,
+                                  self.dropout, self.show_accuracy,
+                                  self.batch_spec, self.activation,
+                                  self.input_noise, self.use_maxout,
+                                  self.use_maxnorm, self.learning_rate,
+                                  self.stop_early, self.kfold_splits, self.mode)
         self._backend = self._backend.best_model(X, y, self.mode)
         self._backend.fit(X, y, **fit_kwargs)
-        self._logger.info("Neural network fitting finished.")
-        #self._best_pipeline = self._backend
-        #self.best_pipeline = self._backend
-        self.backend = self._backend
         return self
 
+    @log_progress(AMM_LOG_PREDICT_STR)
     @check_fitted
     def predict(self, df, target):
         """
@@ -452,19 +458,19 @@ class NeuralNetworkAdaptor(LoggableMixin):
                 the predictions of the target.
         """
         if target != self.fitted_target:
-            raise AutomatminerError("Argument dataframe target {} is different from"
-                                " the fitted dataframe target! {}"
-                                "".format(target, self.fitted_target))
-        elif not self.is_fit:
-            raise NotFittedError("The TPOT models have not been fit!")
+            raise AutomatminerError(
+                "Argument dataframe target {} is different from"
+                " the fitted dataframe target! {}"
+                "".format(target, self.fitted_target))
         elif not all([f in df.columns for f in self._features]):
             not_in_model = [f for f in self._features if f not in df.columns]
             not_in_df = [f for f in df.columns if f not in self._features]
-            raise AutomatminerError("Features used to build model are different "
-                                "from df columns! Features located in model "
-                                "not located in df: \n{} \n Features located "
-                                "in df not in model: \n{}".format(not_in_df,
-                                                                  not_in_model))
+            raise AutomatminerError(
+                "Features used to build model are different "
+                "from df columns! Features located in model "
+                "not located in df: \n{} \n Features located "
+                "in df not in model: \n{}".format(not_in_df,
+                                                  not_in_model))
         else:
             X = df[self._features]  # rectify feature order
             y_pred = self.backend.predict(X)
@@ -474,11 +480,24 @@ class NeuralNetworkAdaptor(LoggableMixin):
 
     @property
     @check_fitted
-    def best_model(self):
-        """
-        The best model found by the wrapper. Performance is evaluated based on cross validation scores
-        Returns:
-            self.backend, self.score (tuple): Contains best architecture returned as well as its cross
-            validation score
-        """
-        return self.backend, 0
+    def best_pipeline(self):
+        return self._backend.fitted_pipeline_
+
+    @property
+    @check_fitted
+    def features(self):
+        return self._features
+
+    @property
+    @check_fitted
+    def ml_data(self):
+        return self._ml_data
+
+    @property
+    @check_fitted
+    def backend(self):
+        return self._backend
+
+
+if __name__ == "__main__":
+    nn = NeuralNetworkAdaptor()

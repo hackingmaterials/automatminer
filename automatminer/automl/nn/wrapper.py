@@ -1,27 +1,30 @@
 """
 Neural network wrappers for Keras.
 """
+
+
+import pandas as pd
 import keras.models
 import keras.legacy.layers
 import keras.regularizers
-import sklearn.metrics
-import sklearn.base
 import keras.constraints
-import keras.layers.noise
-import keras.optimizers
-import keras.callbacks
+from keras.callbacks import EarlyStopping
 from keras.wrappers.scikit_learn import KerasRegressor, KerasClassifier
-import pandas as pd
-from automatminer.automl.nn.genetic import NeuralNetOptimizer
-
-_classifier_modes = {'classifier', 'classification', 'classify'}
-
-_regressor_modes = {'regressor', 'regression', 'regress'}
+from sklearn.metrics import r2_score,
+from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 
 
-class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin,
-                sklearn.base.ClassifierMixin):
-    """Wrapper for Keras feed-forward neural network for classification to enable scikit-learn grid search"""
+
+from automatminer.automl.nn.genetic import NNOptimizer
+
+
+
+
+class NNWrapper(BaseEstimator, RegressorMixin, ClassifierMixin):
+    """
+    Wrapper for Keras feed-forward neural network for classification to
+    enable scikit-learn grid search.
+    """
 
     def __init__(self, init="glorot_uniform", optimizer="adam",
                  hidden_layer_sizes=2, units=20, dropout=0.5,
@@ -29,7 +32,7 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin,
                  activation="sigmoid", input_noise=0., use_maxout=False,
                  use_maxnorm=False, learning_rate=0.001, stop_early=False,
                  kfold_splits=2, mode="regression"):
-        self.hidden_layer_sizes = hidden_layer_sizes
+        self.layer_sizes = hidden_layer_sizes
         self.init = init
         self.optimizer = optimizer
         self.dropout = dropout
@@ -50,13 +53,14 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin,
         self.estimator = None
         self.classifier = None
         self.kfold_splits = kfold_splits
+
         if mode in _classifier_modes:
             self.mode = "classification"
-        else:
+        elif mode in
             self.mode = "regression"
         self.fitted_pipeline_ = None
 
-    def getModel(self):
+    def get_model(self):
         return self.model_
 
     def fit(self, X, y, **kwargs):
@@ -72,11 +76,11 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin,
             dense_kwargs["W_constraint"] = keras.constraints.maxnorm(2)
 
         # hidden layers
-        for layer_size in range(self.hidden_layer_sizes):
+        for layer_size in range(self.layer_sizes):
             if first:
                 if self.use_maxout:
                     model.add(keras.legacy.layers.MaxoutDense(
-                        output_dim=self.hidden_layer_sizes / num_maxout_features,
+                        output_dim=self.layer_sizes / num_maxout_features,
                         input_dim=X.shape[1], init=dense_kwargs["init"],
                         nb_feature=num_maxout_features))
                 else:
@@ -89,7 +93,7 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin,
             else:
                 if self.use_maxout:
                     model.add(keras.legacy.layers.MaxoutDense(
-                        output_dim=self.hidden_layer_sizes / num_maxout_features,
+                        output_dim=self.layer_sizes / num_maxout_features,
                         init=dense_kwargs["init"],
                         nb_feature=num_maxout_features))
                 else:
@@ -138,13 +142,13 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin,
 
         self.model_ = model
         if self.mode == "regression":
-            self.estimator = KerasRegressor(build_fn=self.getModel,
+            self.estimator = KerasRegressor(build_fn=self.get_model,
                                             epochs=self.batch_spec[0][0],
                                             batch_size=self.batch_spec[0][1],
                                             verbose=0)
             self.estimator.fit(X, y)
         else:
-            self.classifier = KerasClassifier(build_fn=self.getModel,
+            self.classifier = KerasClassifier(build_fn=self.get_model,
                                               epochs=self.batch_spec[0][0],
                                               batch_size=self.batch_spec[0][1],
                                               verbose=0)
@@ -162,22 +166,15 @@ class NnWrapper(sklearn.base.BaseEstimator, sklearn.base.RegressorMixin,
         else:
             return self.estimator.predict(X)
 
-    def score(self, X, y):
-        # Set score for regression and classify
-        if self.mode == "classification":
-            return sklearn.metrics.accuracy_score(y, self.predict(X))
-        else:
-            return sklearn.metrics.r2_score(y, self.predict(X))
-
     def best_model(self, X, y, mode):
-        neuralNet = NeuralNetOptimizer(X, y, NnWrapper)
-        return neuralNet.model_win
+        nn = NNOptimizer(X, y, NNWrapper)
+        return nn.top_model
 
 
 if __name__ == "__main__":
     from sklearn.datasets import load_boston
 
-    wrapper = NnWrapper()
+    wrapper = NNWrapper()
     boston = load_boston()
     bos = pd.DataFrame(boston.data)
     bos.columns = boston.feature_names

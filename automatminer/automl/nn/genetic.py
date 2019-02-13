@@ -1,78 +1,77 @@
 import random
 
+import numpy as np
+from sklearn.model_selection import KFold, cross_val_score
+
 from automatminer.base import LoggableMixin
 
 
-class NeuralNetOptimizer(LoggableMixin):
+__authors__ = ['Samy Cherfaoui <scherfaoui@lbl.gov>',
+               'Alex Dunn <ardunn@lbl.gov']
+
+
+class NNOptimizer(LoggableMixin):
     def __init__(self, X, y, model, retain=5, random_select=0.05,
-                 mutate_chance=0.05, count=15):
+                 mutate_chance=0.05, pop_size=15):
         self.random_select = random_select
         self.mutate_chance = mutate_chance
         self.retain = retain
         self.X = X
         self.y = y
-        self.Model = model
-        ACTIVATION = ["sigmoid", "tanh", "relu", "elu"]
-        OPTIMIZERS = ["sgd", "rmsprop", "adagrad", "adadelta", "nadam",
+        self.model = model
+        activation = ["sigmoid", "tanh", "relu", "elu"]
+        optimizers = ["sgd", "rmsprop", "adagrad", "adadelta", "nadam",
                       "adamax", "adam"]
-        self.NN_PARAM_CHOICES = {"units": range(1, 1000),
-                                 "hidden_layer_sizes": range(1, 3),
-                                 "optimizer": OPTIMIZERS,
-                                 "activation": ACTIVATION}
-        pop = self.create_population(count)
+        self.param_grid = {"units": range(1, 1000),
+                           "hidden_layer_sizes": range(1, 3),
+                           "optimizer": optimizers,
+                           "activation": activation}
+
+        population = [None] * pop_size
+        for i in range(pop_size):
+            params = {
+                "units": random.choice(self.param_grid["units"]),
+                "hidden_layer_sizes": random.choice(
+                    self.param_grid["hidden_layer_sizes"]),
+                "optimizer": random.choice(self.param_grid["optimizer"]),
+                "activation": random.choice(self.param_grid["activation"])}
+            population.append(params)
+
+        self.population_size = population
+        self.model = None
+
+    def optimize(self):
         for _ in range(10):
-            pop = self.evolve(pop, X, y)
-
-        self.model_win = self.best_model(pop)
-
-    def create_population(self, count):
-        pop = []
-        for _ in range(count):
-            params = {"units": random.choice(self.NN_PARAM_CHOICES["units"]),
-                      "hidden_layer_sizes": random.choice(
-                          self.NN_PARAM_CHOICES["hidden_layer_sizes"]),
-                      "optimizer": random.choice(
-                          self.NN_PARAM_CHOICES["optimizer"]),
-                      "activation": random.choice(
-                          self.NN_PARAM_CHOICES["activation"])}
-            pop.append(params)
-        return pop
+            pop = self.evolve(pop, self.X, self.y)
+        self.model = self.best_model(self.population_size)
 
     def breed(self, mother, father):
         children = []
         for _ in range(2):
             child = {}
-            for param in self.NN_PARAM_CHOICES:
-                child[param] = random.choice(
-                    [mother[param], father[param]]
-                )
+            for param in self.param_grid:
+                child[param] = random.choice([mother[param], father[param]])
             children.append(child)
         return children
 
     def mutate(self, network):
-        mutation = random.choice(list(self.NN_PARAM_CHOICES.keys()))
-        choice = random.choice(self.NN_PARAM_CHOICES[mutation])
-        network[mutation] = random.choice(self.NN_PARAM_CHOICES[mutation])
+        mutation = random.choice(list(self.param_grid.keys()))
+        choice = random.choice(self.param_grid[mutation])
+        network[mutation] = choice
 
     def evolve(self, pop, X, y):
-        from sklearn.model_selection import KFold, cross_val_score
-        import numpy as np
-
-        models = [(self.Model(units=model["units"],
-                              hidden_layer_sizes=model["hidden_layer_sizes"],
-                              optimizer=model["optimizer"],
-                              activation=model["activation"]), model) for model
+        models = [
+            (self.model(units=model_dict["units"],
+                              hidden_layer_sizes=model_dict["hidden_layer_sizes"],
+                              optimizer=model_dict["optimizer"],
+                              activation=model_dict["activation"]), model_dict) for model_dict
                   in pop]
         kfold = KFold(n_splits=2, shuffle=True, random_state=np.random.seed(7))
         grades = []
         if models[0][0].mode == "regression":
             for model, dicti in models:
-                try:
-                    score = cross_val_score(model, X, y, cv=kfold)
-                    grades.append((score, dicti))
-                except:
-                    continue
-
+                score = cross_val_score(model, X, y, cv=kfold)
+                grades.append((score, dicti))
         else:
             for model, dicti in models:
                 score = cross_val_score(model, X, y, cv=kfold)
@@ -106,7 +105,7 @@ class NeuralNetOptimizer(LoggableMixin):
 
     def best_model(self, parents):
         params = parents[0]
-        return self.Model(units=params["units"],
+        return self.model(units=params["units"],
                           hidden_layer_sizes=params["hidden_layer_sizes"],
                           optimizer=params["optimizer"],
                           activation=params["activation"])
