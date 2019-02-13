@@ -35,6 +35,10 @@ def update_changelog(ctx):
 
 
 @task
+def full_tests_circleci(ctx):
+    ctx.run("./all_test_ci.sh")
+
+@task
 def release(ctx):
     payload = {
         "tag_name": "v" + __version__,
