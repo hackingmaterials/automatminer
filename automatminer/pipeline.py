@@ -128,6 +128,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         """
         self.pre_fit_df = df
         self.ml_type = regression_or_classification(df[target])
+        self.logger.info("Problem type is: {}".format(self.ml_type))
 
         # Fit transformers on training data
         self.logger.info("Fitting MatPipe pipeline to data.")
