@@ -31,6 +31,16 @@ class TestMLTools(unittest.TestCase):
         s = pd.Series(data=["a1", "b", "c"])
         self.assertTrue(regression_or_classification(s) == "classification")
 
+        # binary classification
+        s = pd.Series(data=[0, 1, 0, 0, 1])
+        self.assertTrue(regression_or_classification(s) == "classification")
+
+        s = pd.Series(data=[0.0, 1.0, 0.0, 0.0, 1.0])
+        self.assertTrue(regression_or_classification(s) == "classification")
+
+        s = pd.Series(data=[0, 1, 0, 0, 2])
+        self.assertTrue(regression_or_classification(s) == "regression")
+
 
 if __name__ == "__main__":
     unittest.main()
