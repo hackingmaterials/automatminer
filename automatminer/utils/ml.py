@@ -6,7 +6,7 @@ import warnings
 
 import pandas as pd
 
-from .pkg import AutomatminerError
+from automatminer.utils.pkg import AutomatminerError
 
 
 def is_greater_better(scoring_function):
@@ -38,11 +38,10 @@ def is_greater_better(scoring_function):
     # Check to ensure no metrics are accidentally placed in both sets
     if desired_high_metrics.intersection(desired_low_metrics):
         raise AutomatminerError("Error, there is a metric in both desired"
-                            " high and desired low metrics")
+                                " high and desired low metrics")
 
     if scoring_function not in desired_high_metrics \
             and scoring_function not in desired_low_metrics:
-
         warnings.warn(
             'The scoring_function: "{}" not found; continuing assuming'
             ' greater score is better'.format(scoring_function))
@@ -66,8 +65,12 @@ def regression_or_classification(series):
     if series.dtypes.name == "bool":
         return "classification"
     else:
-        try:
-            pd.to_numeric(series, errors="raise")
-            return "regression"
-        except (ValueError, TypeError):
+        unique = series.unique().tolist()
+        if len(unique) == 2 and all([un in [0, 1] for un in unique]):
             return "classification"
+        else:
+            try:
+                pd.to_numeric(series, errors="raise")
+                return "regression"
+            except (ValueError, TypeError):
+                return "classification"
