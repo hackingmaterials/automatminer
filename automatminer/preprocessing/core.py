@@ -492,7 +492,8 @@ class FeatureReducer(DFTransformer, LoggableMixin):
                                               self.n_pca_features)
                 self.logger.info("PCA running: retaining {} numerical "
                                  "features.".format(self.n_pca_features))
-                self._pca = PCA(n_components=self.n_pca_features)
+                self._pca = PCA(n_components=self.n_pca_features,
+                                svd_solver="randomized")
                 self._pca.fit(X.values, y.values)
                 matrix = self._pca.transform(X.values)
                 pca_feats = ["PCA {}".format(i) for i in
