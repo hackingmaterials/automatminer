@@ -18,6 +18,11 @@ try:
 except ImportError:
     torch, cgcnn = None, None
 
+try:
+    import dscribe
+except ImportError:
+    dscribe = None
+
 __authors__ = ["Alex Dunn", "Alex Ganose"]
 
 
@@ -233,7 +238,9 @@ class StructureFeaturizers(FeaturizerSet):
         self._fast_featurizers = [
             sf.DensityFeatures(),
             sf.GlobalSymmetryFeatures(),
-            sf.EwaldEnergy()
+            sf.EwaldEnergy(),
+            sf.CoulombMatrix(flatten=True),
+            sf.SineCoulombMatrix(flatten=True)
         ]
 
         ssf = sf.SiteStatsFingerprint
@@ -258,19 +265,18 @@ class StructureFeaturizers(FeaturizerSet):
         self._require_external = []
         if torch and cgcnn:
             self._require_external.append(sf.CGCNNFeaturizer())
+        if dscribe:
+            self.require_external.append(sf.SOAP())
 
         self._need_fitting_featurizers = [
             sf.PartialRadialDistributionFunction(),
             sf.BondFractions(),
             sf.BagofBonds(coulomb_matrix=sf.CoulombMatrix()),
-            sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix())
+            sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix()),
         ]
 
         self._matrix_featurizers = [
             sf.RadialDistributionFunction(),  # returns dict
-            sf.CoulombMatrix(),  # returns a matrix
-            sf.SineCoulombMatrix(),  # returns a matrix
-            sf.OrbitalFieldMatrix(flatten=False),  # returns a matrix
             sf.MinimumRelativeDistances(),  # returns a list
             sf.ElectronicRadialDistributionFunction()
         ]
@@ -359,6 +365,7 @@ class DOSFeaturizers(FeaturizerSet):
             dosf.DOSFeaturizer(),
             dosf.DopingFermi(),
             dosf.Hybridization(),
+            dosf.DosAsymmetry()
         ]
 
         self._site_featurizers = [dosf.SiteDOS()]
