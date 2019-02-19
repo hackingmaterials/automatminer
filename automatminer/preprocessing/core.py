@@ -382,11 +382,17 @@ class FeatureReducer(DFTransformer, LoggableMixin):
 
             Example: Apply tree-based feature reduction, then pca:
                 reducers = ('tree', 'pca')
+        corr_threshold (float): The correlation threshold between any two
+            features needed for one to be removed (calculated with R).
+        tree_importance_percentile (float): the selected percentile (between 0.0
+            and 1.0)of the features sorted (descending) based on their
+            importance.
         n_pca_features (int, float): If int, the number of features to be
             retained by PCA. If float, the fraction of features to be retained
             by PCA once the dataframe is passed to it (i.e., 0.5 means PCA
             retains half of the features it is passed). PCA must be present in
-            the reducers.
+            the reducers. 'auto' automatically determines the number of features
+            to retain.
         n_rebate_features (int, float): If int, the number of ReBATE relief
             features to be retained. If float, the fraction of features to be
             retained by ReBATE once it is passed the dataframe (i.e., 0.5 means
@@ -411,16 +417,20 @@ class FeatureReducer(DFTransformer, LoggableMixin):
             applied. The values are the parameters used by each feature reducer.
     """
 
-    def __init__(self, reducers=('corr', 'tree'), n_pca_features=0.3,
-                 n_rebate_features=0.3, logger=True,
-                 keep_features=None, remove_features=None):
+    def __init__(self, reducers=('corr', 'tree'), corr_threshold=0.95,
+                 tree_importance_percentile=0.90, n_pca_features='auto',
+                 n_rebate_features=0.3, keep_features=None,
+                 remove_features=None, logger=True):
+
         for reducer in reducers:
             if reducer not in ["corr", "tree", "rebate", "pca"]:
                 raise ValueError(
                     "Reducer {} not found in known reducers!".format(reducer))
 
         self.reducers = reducers
+        self.corr_threshold = corr_threshold
         self.n_pca_features = n_pca_features
+        self.tree_importance_percentile = tree_importance_percentile
         self.n_rebate_features = n_rebate_features
         self._logger = self.get_logger(logger)
         self._keep_features = keep_features or []
@@ -451,10 +461,11 @@ class FeatureReducer(DFTransformer, LoggableMixin):
             X = df.drop(columns=[target])
             y = df[target]
             if r == "corr":
-                reduced_df = self.rm_correlated(df, target)
+                reduced_df = self.rm_correlated(df, target, self.corr_threshold)
                 reduced_df = reduced_df.drop(columns=[target])
             if r == "tree":
                 tbfr = TreeFeatureReducer(
+                    importance_percentile=self.tree_importance_percentile,
                     mode=regression_or_classification(y),
                     logger=self.logger)
                 reduced_df = tbfr.fit_transform(X, y).copy(deep=True)
@@ -483,17 +494,39 @@ class FeatureReducer(DFTransformer, LoggableMixin):
                     "features: {}".format(reduced_df.columns.tolist()))
                 self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
             elif r == "pca":
-                if isinstance(self.n_pca_features, float):
-                    self.logger.info("Retaining fraction {} of current "
-                                     "{} features."
-                                     "".format(self.n_pca_features,
-                                               df.shape[1]))
-                    self.n_pca_features = int(df.shape[1] *
-                                              self.n_pca_features)
-                self.logger.info("PCA running: retaining {} numerical "
-                                 "features.".format(self.n_pca_features))
-                self._pca = PCA(n_components=self.n_pca_features,
-                                svd_solver="randomized")
+                n_samples, n_features = X.shape
+                if self.n_pca_features == "auto":
+                    if n_samples < n_features:
+                        self.logger.warning(
+                            "Number of samples ({}) is less than number of "
+                            "features ({}). Setting n_pca_features equal to "
+                            "n_samples.".format(n_samples, n_features))
+                        self._pca = PCA(n_components=n_samples,
+                                        svd_solver="full")
+                    else:
+                        self.logger.info("PCA automatically determining "
+                                         "optimal number of features using "
+                                         "Minka's MLE.")
+                        self._pca = PCA(n_components="mle", svd_solver="auto")
+                else:
+                    if isinstance(self.n_pca_features, float):
+                        self.logger.info("Retaining fraction {} of current "
+                                         "{} features."
+                                         "".format(self.n_pca_features,
+                                                   df.shape[1]))
+                        self.n_pca_features = int(df.shape[1] *
+                                                  self.n_pca_features)
+                    if self.n_pca_features > n_samples:
+                        self.logger.warning(
+                            "Number of PCA features interpreted as {}, which is"
+                            " more than the number of samples ({}). "
+                            "n_pca_features coerced to equal n_samples."
+                            "".format(self.n_pca_features, n_samples))
+                        self.n_pca_features = n_samples
+                    self.logger.info("PCA running: retaining {} numerical "
+                                     "features.".format(self.n_pca_features))
+                    self._pca = PCA(n_components=self.n_pca_features,
+                                    svd_solver="auto")
                 self._pca.fit(X.values, y.values)
                 matrix = self._pca.transform(X.values)
                 pca_feats = ["PCA {}".format(i) for i in

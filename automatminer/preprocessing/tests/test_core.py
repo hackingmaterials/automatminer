@@ -137,6 +137,29 @@ class TestPreprocess(unittest.TestCase):
         df_reduced = fr.fit_transform(df, self.target)
         self.assertEqual(df_reduced.shape[1], 15)
 
+    def test_FeatureReducer_pca(self):
+        # Case where n_samples < n_features
+        df = self.test_df.iloc[:10]
+        fr = FeatureReducer(reducers=("pca",), n_pca_features='auto')
+        df_reduced = fr.fit_transform(df, self.target)
+        self.assertTupleEqual(df_reduced.shape, (10, 11))
+
+        # Case where n_samples > n_features
+        fsubset = ['HOMO_energy', 'LUMO_energy', 'gap_AO', 'minimum X',
+                   'maximum X', 'range X', 'mean X', 'std_dev X', 'minimum row',
+                   'maximum row', 'range row', 'mean row', 'std_dev row',
+                   'minimum group', 'maximum group', 'range group',
+                   'mean group', 'std_dev group']
+        df = self.test_df[fsubset + [self.target]]
+        df_reduced = fr.fit_transform(df, self.target)
+        self.assertEqual(df_reduced.shape[0], 200)
+
+        # Manually specified case of n_samples > n_features
+        fr = FeatureReducer(reducers=('pca',), n_pca_features=0.5)
+        df = self.test_df
+        df_reduced = fr.fit_transform(df, self.target)
+        self.assertTupleEqual(df_reduced.shape, (200, 201))
+
     def test_manual_feature_reduction(self):
         fr = FeatureReducer(reducers=[], remove_features=['LUMO_element_Th'])
 
