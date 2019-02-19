@@ -261,12 +261,12 @@ class StructureFeaturizers(FeaturizerSet):
             sf.JarvisCFID(),
         ]
 
-        # Prevent import errors from CGCNN
+        # Prevent import errors
         self._require_external = []
         if torch and cgcnn:
             self._require_external.append(sf.CGCNNFeaturizer())
         if dscribe:
-            self.require_external.append(sf.SOAP())
+            self._require_external.append(sf.SOAP())
 
         self._need_fitting_featurizers = [
             sf.PartialRadialDistributionFunction(),
@@ -332,12 +332,18 @@ class StructureFeaturizers(FeaturizerSet):
         """
         return self._get_featurizers(self._require_external)
 
+    @property
+    def all_vector(self):
+        return self.fast + self.slow + self.need_fit + self.require_external
 
     @property
     def all(self):
+        return self.all_vector
+
+    @property
+    def all_including_matrix(self):
         """List of all structure based featurizers."""
-        return self.fast + self.slow + self.need_fit + self.matrix + \
-               self.require_external
+        return self.all_vector + self.matrix
 
     @property
     def best(self):
@@ -357,6 +363,7 @@ class DOSFeaturizers(FeaturizerSet):
         exclude (list of str, optional): A list of featurizer class names that
             will be excluded from the set of featurizers returned.
     """
+
     def __init__(self, exclude=None):
         super(DOSFeaturizers, self).__init__(exclude=exclude)
 
@@ -369,7 +376,6 @@ class DOSFeaturizers(FeaturizerSet):
         ]
 
         self._site_featurizers = [dosf.SiteDOS()]
-
 
     @property
     def all(self):
@@ -402,6 +408,7 @@ class BSFeaturizers(FeaturizerSet):
         exclude (list of str, optional): A list of featurizer class names that
             will be excluded from the set of featurizers returned.
     """
+
     def __init__(self, exclude=None):
         super(BSFeaturizers, self).__init__(exclude=exclude)
 

@@ -1,5 +1,3 @@
-# coding: utf-8
-
 import unittest
 import inspect
 
@@ -9,7 +7,7 @@ import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
 import matminer.featurizers.bandstructure as bf
 
-from automatminer.featurization.sets import AllFeaturizers
+from automatminer.featurization.sets import AllFeaturizers, StructureFeaturizers
 
 
 class TestAllFeaturizers(unittest.TestCase):
@@ -66,6 +64,8 @@ class TestAllFeaturizers(unittest.TestCase):
 
     def test_structure_featurizers(self):
         ignore = ['StructureComposition', 'CGCNNFeaturizer']
+        ignore += [klass.__class__.__name__ for klass in
+                   StructureFeaturizers().matrix]
         true_feats = self.get_featurizers(sf, ignore)
         test_feats = self.allfs.structure
         self._test_features_implemented(test_feats, true_feats)

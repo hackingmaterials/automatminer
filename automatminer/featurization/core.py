@@ -82,11 +82,10 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
     """
 
     def __init__(self, preset=None, featurizers=None, exclude=None,
-                 functionalize=False, max_na_frac=0.05, ignore_cols=None,
-                 ignore_errors=True, drop_inputs=True,
-                 guess_oxistates=True, multiindex=False, n_jobs=None,
-                 logger=True, composition_col="composition",
-                 structure_col="structure",
+                 functionalize=False, ignore_cols=None,
+                 ignore_errors=True, drop_inputs=True, guess_oxistates=True,
+                 multiindex=False, n_jobs=None, logger=True,
+                 composition_col="composition", structure_col="structure",
                  bandstructure_col="bandstructure", dos_col="dos"):
 
         if featurizers and preset:
@@ -103,7 +102,6 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.featurizers = featurizers
         self.exclude = exclude if exclude else []
         self.functionalize = functionalize
-        self.max_na_percent = max_na_frac
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
         self.fitted_input_df = None
