@@ -334,5 +334,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertFalse(any([f in df.columns for f in ef_feats]))
         self.assertFalse(any([f in df.columns for f in ef_feats]))
 
+
 if __name__ == '__main__':
     unittest.main()
