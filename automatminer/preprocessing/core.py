@@ -417,7 +417,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
             applied. The values are the parameters used by each feature reducer.
     """
 
-    def __init__(self, reducers=('corr', 'tree'), corr_threshold=0.95,
+    def __init__(self, reducers=('pca',), corr_threshold=0.95,
                  tree_importance_percentile=0.90, n_pca_features='auto',
                  n_rebate_features=0.3, keep_features=None,
                  remove_features=None, logger=True):

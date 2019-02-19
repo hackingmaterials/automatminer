@@ -94,7 +94,7 @@ class TestPreprocess(unittest.TestCase):
         self.assertEqual(df_override_clean_transform.shape, (199, 417))
 
     def test_FeatureReducer_basic(self):
-        fr = FeatureReducer()
+        fr = FeatureReducer(reducers=('corr', 'tree'))
 
         # ultra-basic case: are we reducing at least 1 feature?
         df = fr.fit_transform(self.test_df, self.target)
@@ -135,7 +135,7 @@ class TestPreprocess(unittest.TestCase):
         df = self.test_df
         fr = FeatureReducer(reducers=('pca', 'rebate', 'tree'))
         df_reduced = fr.fit_transform(df, self.target)
-        self.assertEqual(df_reduced.shape[1], 15)
+        self.assertGreater(df.shape[1], df_reduced.shape[1])
 
     def test_FeatureReducer_pca(self):
         # Case where n_samples < n_features
