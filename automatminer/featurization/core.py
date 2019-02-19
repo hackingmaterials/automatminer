@@ -258,7 +258,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                      "".format(f.__class__.__name__))
                     df = f.featurize_dataframe(df, featurizer_type,
                                                ignore_errors=self.ignore_errors,
-                                               multiindex=self.multiindex)
+                                               multiindex=self.multiindex,
+                                               inplace=True)
                 df = df.drop(columns=[featurizer_type])
             else:
                 self.logger.info("Featurizer type {} not in the dataframe. "
