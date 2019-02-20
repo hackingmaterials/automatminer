@@ -109,13 +109,13 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
                 'config_dict', TPOT_CLASSIFIER_CONFIG)
             if "scoring" not in self.tpot_kwargs:
-                self.tpot_kwargs["scoring"] = "neg_mean_absolute_error"
+                self.tpot_kwargs["scoring"] = "balanced_accuracy"
             self._backend = TPOTClassifier(**self.tpot_kwargs)
         elif self.mode == "regression":
             self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
                 'config_dict', TPOT_REGRESSOR_CONFIG)
             if "scoring" not in self.tpot_kwargs:
-                self.tpot_kwargs["scoring"] = "balanced_accuracy"
+                self.tpot_kwargs["scoring"] = "neg_mean_absolute_error"
             self._backend = TPOTRegressor(**self.tpot_kwargs)
         else:
             raise ValueError("Learning type {} not recognized as a valid mode "

@@ -30,7 +30,7 @@ class TestTPOTAdaptor(unittest.TestCase):
         test_w_predictions = self.tpot.predict(self.test_df, target_key)
         y_true = test_w_predictions[target_key]
         y_test = test_w_predictions[target_key + " predicted"]
-        self.assertTrue(r2_score(y_true, y_test) > 0.75)
+        self.assertGreater(r2_score(y_true, y_test), 0.75)
 
     def test_classification(self):
         max_kvrh = 50
@@ -43,7 +43,7 @@ class TestTPOTAdaptor(unittest.TestCase):
         test_w_predictions = self.tpot.predict(test_df, classifier_key)
         y_true = test_w_predictions[classifier_key]
         y_test = test_w_predictions[classifier_key + " predicted"]
-        self.assertTrue(f1_score(y_true, y_test) > 0.75)
+        self.assertGreater(f1_score(y_true, y_test), 0.75)
 
     def test_training_only(self):
         target_key = "K_VRH"
