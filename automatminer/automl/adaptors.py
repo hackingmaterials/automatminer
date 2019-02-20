@@ -1,8 +1,6 @@
 """
 Adaptor classes for using AutoML packages in a Matbench pipeline.
-
 Current adaptor classes are:
-
     TPOTAdaptor: Uses the backend from the automl project TPOT, which can be
         found at https://github.com/EpistasisLab/tpot
 """
@@ -29,11 +27,9 @@ __authors__ = ['Alex Dunn <ardunn@lbl.gov'
 class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
     """
     A dataframe adaptor for the TPOT classifiers and regressors.
-
     Args:
         tpot_kwargs: All kwargs accepted by a TPOTRegressor/TPOTClassifier
             or TPOTBase object.
-
             Note that for example, you can limit the models that TPOT explores
             by setting config_dict directly. For example, if you want to only
             use random forest:
@@ -46,14 +42,11 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                 'bootstrap': [True, False]
                 },
             }
-
         logger (Logger, bool): A custom logger object to use for logging.
             Alternatively, if set to True, the default automatminer logger will
             be used. If set to False, then no logging will occur.
-
     Attributes:
         The following attributes are set during fitting.
-
         mode (str): Either "regression" or "classification"
         features (list): The features labels used to develop the ml model.
         ml_data (dict): The raw ml data used for training.
@@ -87,16 +80,13 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
     def fit(self, df, target, **fit_kwargs):
         """
         Train a TPOTRegressor or TPOTClassifier by fitting on a dataframe.
-
         Args:
             df (pandas.DataFrame): The df to be used for training.
             target (str): The key used to identify the machine learning target.
             **fit_kwargs: Keyword arguments to be passed to the TPOT backend.
                 These arguments must be valid arguments to the TPOTBase class.
-
         Returns:
             TPOTAdaptor (self)
-
         """
         # Prevent goofy pandas casting by casting to native
         y = df[target].values.tolist()
@@ -134,18 +124,14 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
     def best_models(self):
         """
         The best models found by TPOT, in order of descending performance.
-
         If you want a pipeline you can use to make predtions, use the
         best_pipeline.
-
         Performance is evaluated based on the TPOT scoring. This can be changed
         by passing a "scoring" kwarg into the __init__ method.
-
         Returns:
             best_models_and_scores (dict): Keys are names of models. Values
                 are the best internal cv scores of that model with the
                 best hyperparameter combination found.
-
         """
         self.greater_score_is_better = is_greater_better(
             self.backend.scoring_function)
@@ -192,21 +178,17 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
     def predict(self, df, target):
         """
         Predict the target property of materials given a df of features.
-
         The predictions are appended to the dataframe in a column called:
             "{target} predicted"
-
         Args:
             df (pandas.DataFrame): Contains all features needed for ML (i.e.,
                 all features contained in the training dataframe.
             target (str): The property to be predicted. Should match the target
                 used for fitting. May or may not be present in the argument
                 dataframe.
-
         Returns:
             (pandas.DataFrame): The argument dataframe plus a column containing
                 the predictions of the target.
-
         """
         if target != self.fitted_target:
             raise AutomatminerError("Argument dataframe target {} is different "
@@ -252,10 +234,8 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     """
     For running single models or pipelines in a MatPipe pipeline using the same
     syntax as the AutoML adaptors.
-
     This adaptor should be able to fit into a MatPipe in similar fashion to
     TPOTAdaptor.
-
     Args:
         model (sklearn Pipeline or BaseEstimator-like): The object you want to
             use for machine learning. Must implement fit/predict/transform
@@ -290,21 +270,17 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     def predict(self, df, target):
         """
         Predict the target property of materials given a df of features.
-
         The predictions are appended to the dataframe in a column called:
             "{target} predicted"
-
         Args:
             df (pandas.DataFrame): Contains all features needed for ML (i.e.,
                 all features contained in the training dataframe.
             target (str): The property to be predicted. Should match the target
                 used for fitting. May or may not be present in the argument
                 dataframe.
-
         Returns:
             (pandas.DataFrame): The argument dataframe plus a column containing
                 the predictions of the target.
-
         """
         if target != self.fitted_target:
             raise AutomatminerError("Argument dataframe target {} is different "
