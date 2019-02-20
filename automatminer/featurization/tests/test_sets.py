@@ -9,6 +9,11 @@ import matminer.featurizers.bandstructure as bf
 
 from automatminer.featurization.sets import AllFeaturizers, StructureFeaturizers
 
+try:
+    import dscribe
+except:
+    dscribe = None
+
 
 class TestAllFeaturizers(unittest.TestCase):
     """
@@ -66,6 +71,8 @@ class TestAllFeaturizers(unittest.TestCase):
         ignore = ['StructureComposition', 'CGCNNFeaturizer']
         ignore += [klass.__class__.__name__ for klass in
                    StructureFeaturizers().matrix]
+        if dscribe:
+            ignore += [sf.SOAP.__class__.__name__]
         true_feats = self.get_featurizers(sf, ignore)
         test_feats = self.allfs.structure
         self._test_features_implemented(test_feats, true_feats)
