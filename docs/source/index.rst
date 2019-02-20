@@ -49,8 +49,6 @@ Or, run a (relatively) rigorous nested cross validation benchmark on a known dat
     predictions_per_fold = pipe.benchmark(df, "bulk modulus", KFold(n_splits=5))
 
 
-
-
 Scope
 =====
 
@@ -92,17 +90,119 @@ Clone latest code from github
     cd automatminer
     pip install -e .
 
-
 Full Code Examples
 ==================
 
-This section is a work in progress; please stay tuned as we add more examples!
+We are now going to walk through how to create a MatPipe using the default
+configurations and the elastic_tensor_2015 dataset. We will then use this
+MatPipe to benchmark the target property K_VRH and we will use our results
+to determine the mean squared error. Buckle up!
+
+Setting up the Dataframe
+------------------------
+
+We will use the matminer function load_dataset to give us access to the
+elastic_tensor_2015 dataset. The result is a Pandas dataframe.
+
+.. code-block:: python
+
+    from matminer.datasets.dataset_retrieval import load_dataset
+
+    df = load_dataset("elastic_tensor_2015") #Loads in Pandas dataset
+
+
+Next, we will use get_preset_config to use different pre-built configurations
+for a MatPipe. The options include production, default, fast, and debug.
+Specific details about each config can be seen in `presets.py
+<api/automatminer.get_preset_config.html>`_. In this example, we will be using
+the debug config for a short program runtime. Of course, you do not need to use
+a preset configuration. Simply use the `MatPipe <api/automatminer.MatPipe.html>`_
+functions to choose your own adaptor. After this step, we will pass in the parameter
+as an argument of `MatPipe <api/automatminer.MatPipe.html>`_ to get a MatPipe
+object.
+
+.. code-block:: python
+
+    from automatminer.presets import get_preset_config
+    from automatminer.pipeline import MatPipe
+
+    # Get preset configurations for debug. The debug configuration allows
+    # for rapid testing while the other configurations are more useful for
+    # real-world applications.
+    debug_config = get_preset_config("debug")
+    # Create a MatPipe using our configuration.
+    pipe = MatPipe(**debug_config)
+
+
+The preset automatminer uses pre-defined column names 'composition' and 'structure'
+to find the composition and structure columns. You can easily fix this by renaming
+your respective columns to the correct names.
+
+.. code-block:: python
+
+    # Rename the appropriate dataframe columns to create a dataframe that
+    # can be passed into our automatminer functions.
+    df = df.rename(columns={"formula": "composition"})[["composition", "structure", "K_VRH"]]
 
 
 Benchmarking automatminer's performance
 ---------------------------------------
 
-Download matminer's Elastic Tensor Dataset from 2015.
+In this example, we are performing a machine learning benchmark using MatPipe
+in order to see how well our MatPipe can predict a certain target property.
+The target property we will be benchmarking in this example is K_VRH. Keep in
+mind that benchmarking requires a KFold object since benchmarks are run with
+nested cross validation. This mitigates the performance of the benchmark based
+on the choice of test set and also better estimates the generalization error
+than a single validation/test split would.
+
+.. code-block:: python
+
+    """
+    MatPipe benchmarks with a nested cross validation, meaning it makes
+    k validation/test splits, where all model selection is done on the train
+    /validation set (a typical CV). When the model is done validating, it is
+    used to predict the previously unseen test set data.
+    """
+    kfold = KFold(n_splits=5) #We will use a 5-Fold object.
+    predicted = pipe.benchmark(df, "K_VRH", kfold)
+
+
+The result of pipe.benchmark() will be a new dataframe with the predicted results
+stored in a column called the property name combined with " predicted". In this
+example, it will be stored in "K_VRH predicted."
+
+
+Calculating MSE
+---------------
+
+As mentioned above, the "predicted" variable is a dataframe that contains several columns,
+including actual property values and predicted property values. In this example, we will
+use the actual K_VRH data and the predicted K_VRH data in order to see how well the
+benchmarking went.
+
+.. code-block:: python
+
+    # Save the actual K_VRH Series to y_true.
+    y_true = predicted["K_VRH"]
+    # Save the predicted K_VRH Series to y_test.
+    y_test = predicted["K_VRH predicted"]
+
+
+Finally, we can use the sklearn package to calculate a wide variety of metrics on
+these two Series. In this case, we want the mean squared error so we will use that
+function.
+
+.. code-block:: python
+    from sklearn.metrics.regression import mean_squared_error
+
+    # Calculate the mean squared error between our two Series and save it to mse.
+    mse = mean_squared_error(y_true, y_test)
+
+
+And voilà, we are done! We have successfully loaded in a dataset, benchmarked a test property
+using a MatPipe with 'debug' configs, and then ran an analysis on our results by calculating
+MSE. And all that in less than 15 lines of code!
 
 
 Citing automatminer
@@ -111,7 +211,7 @@ We are in the process of writing a paper for automatminer. In the meantime, plea
 
 Contributing
 ============
-Interested in contributing? See our `contribution guidelines <https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md>`_ and make a pull request! Please submit questions, issues / bug reports, and all other communication through the  `matminer Google Group <https://groups.google.com/forum/#!forum/matminer>`_.
+Interested in contributing? See our `contribution guidelines <https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md>`_ and make a pull request! Please submit questions, issues/bug reports, and all other communication through the  `matminer Google Group <https://groups.google.com/forum/#!forum/matminer>`_.
 
 
 
@@ -121,3 +221,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+* :ref:`Python API<directory>`
