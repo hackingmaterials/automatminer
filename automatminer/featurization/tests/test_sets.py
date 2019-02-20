@@ -11,7 +11,7 @@ from automatminer.featurization.sets import AllFeaturizers, StructureFeaturizers
 
 try:
     import dscribe
-except:
+except ImportError:
     dscribe = None
 
 
