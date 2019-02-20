@@ -229,7 +229,7 @@ class MatPipe(DFTransformer, LoggableMixin):
             self.logger.warning("Beginning strict benchmark.")
             results = []
             fold = 0
-            for _, test_ix in kfold.split(df):
+            for _, test_ix in kfold.split(X=df, y=df[target]):
                 if fold in fold_subset:
                     self.logger.info("Training on fold index {}".format(fold))
                     # Split and identify test set
