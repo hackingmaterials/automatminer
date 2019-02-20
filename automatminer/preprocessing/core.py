@@ -24,6 +24,10 @@ class DataCleaner(DFTransformer, LoggableMixin):
     """
     Transform a featurized dataframe into an ML-ready dataframe.
 
+    Works by first removing samples not having a target value (if desired), then
+    dropping features with high nan rates. Finally, removing or otherwise
+    handling nans for individual samples (a relatively uncommon occurrence).
+
     Args:
         max_na_frac (float): The maximum fraction (0.0 - 1.0) of samples for a
             given feature allowed. Columns containing a higher nan fraction are
@@ -35,12 +39,13 @@ class DataCleaner(DFTransformer, LoggableMixin):
             variables. Current options: 'one-hot' and 'label'.
         drop_na_targets (bool): Drop samples containing target values which are
             na.
-        na_method (str): Set the na_method for samples for fit and transform.
-            Will override fit and transform arguments. Default is None, where
-            fit and transform independently set their na_methods. Other options
-            are "drop", "ignore" and from pandas.DataFrame.fillna:
-            {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
+        na_method_fit (str, float, int): Set the na_method for samples in fit.
+            Select one of the following methods: "fill" (use pandas fillna with
+            ffill and bfill, sequentially), "ignore" (totally ignore nans in
+            samples), "drop" (drop any remaining samples having a nan feature),
             Alternatively, specify a value to replace the nans, e.g. 0.
+        na_method_transform (str, float, int): The same as na_method_fit, but
+            for transform.
         logger (Logger, bool): A custom logger object to use for logging.
             Alternatively, if set to True, the default automatminer logger will
             be used. If set to False, then no logging will occur.
@@ -62,13 +67,15 @@ class DataCleaner(DFTransformer, LoggableMixin):
     """
 
     def __init__(self, max_na_frac=0.01, encode_categories=True,
-                 encoder='one-hot', drop_na_targets=True, na_method=None,
-                 logger=True):
+                 encoder='one-hot', drop_na_targets=True, na_method_fit="drop",
+                 na_method_transform="fill", logger=True):
         self._logger = self.get_logger(logger)
         self.max_na_frac = max_na_frac
         self.encoder = encoder
         self.encode_categories = encode_categories
         self.drop_na_targets = drop_na_targets
+        self.na_method_fit = na_method_fit
+        self.na_method_transform = na_method_transform
         self._reset_attrs()
         self.dropped_features = None
         self.object_cols = None
@@ -77,7 +84,6 @@ class DataCleaner(DFTransformer, LoggableMixin):
         self.fitted_target = None
         self.dropped_samples = None
         self.is_fit = False
-        self.na_method = na_method
 
     @property
     def retained_features(self):
@@ -92,39 +98,33 @@ class DataCleaner(DFTransformer, LoggableMixin):
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
-    def fit(self, df, target, na_method="drop"):
+    def fit(self, df, target):
         """
         Determine a sequence of preprocessing steps to clean a dataframe.
 
         Args:
             df (pandas.DataFrame): Contains features and the target_key
             target (str): The name of the target in the dataframe
-            na_method (str): How to deal with samples still containing nans
-                after troublesome columns are already dropped. Default is
-                'drop'. Other options are from pandas.DataFrame.fillna:
-                {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
-                Alternatively, specify a value to replace the nans, e.g. 0.
 
         Returns: self
         """
 
-        na_method = self._get_na_method(na_method)
         self.logger.info("Cleaning with respect to samples with na_method '{}'"
-                         "".format(na_method))
+                         "".format(self.na_method_fit))
         if target not in df.columns:
             raise AutomatminerError(
                 "Target {} must be contained in df.".format(target))
 
         self._reset_attrs()
         df = self.to_numerical(df, target)
-        df = self.handle_na(df, target, na_method)
+        df = self.handle_na(df, target, self.na_method_fit)
         self.fitted_df = df
         self.fitted_target = target
         return self
 
     @log_progress(AMM_LOG_TRANSFORM_STR)
     @check_fitted
-    def transform(self, df, target, na_method=0):
+    def transform(self, df, target):
         """
         Apply the sequence of preprocessing steps determined by fit, with the
         option to change the na_method for samples.
@@ -132,17 +132,11 @@ class DataCleaner(DFTransformer, LoggableMixin):
         Args:
             df (pandas.DataFrame): Contains features and the target_key
             target (str): The name of the target in the dataframe
-            na_method (str): How to deal with samples still containing nans
-                after troublesome columns are already dropped. Default is
-                'drop'. Other options are from pandas.DataFrame.fillna:
-                {‘bfill’, ‘pad’, ‘ffill’}, or 'ignore' to ignore nans.
-                Alternatively, specify a value to replace the nans, e.g. 0.
 
         Returns (pandas.DataFrame)
         """
-        na_method = self._get_na_method(na_method)
         self.logger.info("Cleaning with respect to samples with na_method '{}'"
-                         "".format(na_method))
+                         "".format(self.na_method_transform))
 
         if target != self.fitted_target:
             raise AutomatminerError(
@@ -152,7 +146,8 @@ class DataCleaner(DFTransformer, LoggableMixin):
 
         # We assume the two targets are the same from here on out
         df = self.to_numerical(df, target)
-        df = self.handle_na(df, target, na_method, coerce_mismatch=True)
+        df = self.handle_na(df, target, self.na_method_transform,
+                            coerce_mismatch=True)
 
         # Ensure the order of columns is identical
         if target in df.columns:
@@ -257,10 +252,11 @@ class DataCleaner(DFTransformer, LoggableMixin):
             df = clean_df
         elif na_method == "ignore":
             pass
-        elif na_method in ["ffill", "bfill", "pad", None]:
-            df = df.fillna(method=na_method)
+        elif na_method == "fill":
+            df = df.fillna(method="ffill")
+            df = df.fillna(method="bfill")
         else:
-            df = df.fillna(na_method)
+            df = df.fillna(value=na_method)
         self.logger.info("After handling na: {} samples, {} features".format(
             *df.shape))
         return df
@@ -333,26 +329,6 @@ class DataCleaner(DFTransformer, LoggableMixin):
         self.fitted_df = None
         self.fitted_target = None
         self.dropped_samples = None
-
-    def _get_na_method(self, na_method):
-        """
-        Get the na_method, if it is overridden.
-
-        Args:
-            na_method (str): How to deal with samples still containing nans
-                after troublesome columns are already dropped.
-
-        Returns:
-            na_method (str)
-
-        """
-        if self.na_method:
-            if self.na_method != na_method:
-                self.logger.warning(
-                    "na_method set in __init__ ({}) overriding na_method set in"
-                    " fit ({})".format(self.na_method, na_method))
-            na_method = self.na_method
-        return na_method
 
 
 class FeatureReducer(DFTransformer, LoggableMixin):
