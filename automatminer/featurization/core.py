@@ -1,3 +1,10 @@
+"""
+Classes for automatic featurization and core featurizer functionality.
+"""
+
+import os
+
+import pandas as pd
 from pymatgen import Composition
 from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     StructureToComposition, StructureToOxidStructure, \
@@ -37,6 +44,11 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
     the correct column name is not present.
 
     Args:
+        cache_src (str): An absolute path to a json file holding feature
+            information. If file exists, will read features (loc indexwise)
+            from this file instead of featurizing. If this file does not exist,
+            AutoFeaturizer will featurize normally, then save the features to a
+            new file. Only features (not featurizer input objects) will be saved
         preset (str): "best" or "fast" or "all". Determines by preset the
             featurizers that should be applied. See the Featurizer sets for
             specifics of best/fast/all. Default is "best". Incompatible with
@@ -81,8 +93,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             or passed by the users.
     """
 
-    def __init__(self, preset=None, featurizers=None, exclude=None,
-                 functionalize=False, ignore_cols=None,
+    def __init__(self, cache_src=None, preset=None, featurizers=None,
+                 exclude=None, functionalize=False, ignore_cols=None,
                  ignore_errors=True, drop_inputs=True, guess_oxistates=True,
                  multiindex=False, n_jobs=None, logger=True,
                  composition_col="composition", structure_col="structure",
@@ -97,6 +109,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                     "use either through the featurizers"
                                     "argument or through the preset argument.")
 
+        self.cache_src = cache_src
         self.preset = "best" if preset is None else preset
         self._logger = self.get_logger(logger)
         self.featurizers = featurizers
@@ -167,6 +180,18 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 break
         self.needs_fit = needs_fit
 
+        if self.needs_fit and self.cache_src:
+            self.logger.warn("Using cached features on fittable featurizers! "
+                             "Please make sure you are not benchmarking with "
+                             "these options enabled; it is likely you will be"
+                             "leaking data (i.e., features) from the testing"
+                             "sets into the training.")
+
+        if self.cache_src and "json" not in self.cache_src.lower():
+            raise ValueError("The cache_src filename does not contain json."
+                             "JSON is the required file type for featurizer"
+                             "caching.")
+
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
@@ -193,9 +218,11 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         Returns:
             (AutoFeaturizer): self
         """
-        # Prevent anything from happening to input df during featurization
-        self.fitted_input_df = df
+        if self.cache_src and os.path.exists(self.cache_src):
+            self.logger.warn("Cache {} found. Fit aborted.")
+            return self
 
+        self.fitted_input_df = df
         df = self._prescreen_df(df, inplace=True)
         df = self._add_composition_from_structure(df)
 
@@ -225,7 +252,6 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             else:
                 self.logger.info("Featurizer type {} not in the dataframe to be"
                                  " fitted. Skipping...".format(featurizer_type))
-
         return self
 
     @log_progress(AMM_LOG_TRANSFORM_STR)
@@ -242,38 +268,70 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         Returns:
             df (pandas.DataFrame): Transformed dataframe containing features.
         """
-        transforming_on_fitted = df is self.fitted_input_df
-        df = self._prescreen_df(df, inplace=True)
-
-        if not transforming_on_fitted:
-            df = self._add_composition_from_structure(df)
-
-        for featurizer_type, featurizers in self.featurizers.items():
-            if featurizer_type in df.columns:
-                if not transforming_on_fitted:
-                    df = self._tidy_column(df, featurizer_type)
-
-                for f in featurizers:
-                    self.logger.info("Featurizing with {}."
-                                     "".format(f.__class__.__name__))
-                    df = f.featurize_dataframe(df, featurizer_type,
-                                               ignore_errors=self.ignore_errors,
-                                               multiindex=self.multiindex,
-                                               inplace=True)
-                df = df.drop(columns=[featurizer_type])
+        if self.cache_src and os.path.exists(self.cache_src):
+            self.logger.debug("Reading cache_src {}".format(self.cache_src))
+            cached_df = pd.read_json(self.cache_src)
+            if not all([loc in cached_df for loc in df.index]):
+                raise AutomatminerError("Feature cache does not contain all "
+                                        "entries (by DataFrame index) needed "
+                                        "to transform the input df.")
             else:
-                self.logger.info("Featurizer type {} not in the dataframe. "
-                                 "Skipping...".format(featurizer_type))
-        if self.functionalize:
-            ff = FunctionFeaturizer()
-            cols = df.columns.tolist()
-            for ft in self.featurizers.keys():
-                if ft in cols:
-                    cols.pop(ft)
-            df = ff.fit_featurize_dataframe(df, cols,
-                                            ignore_errors=self.ignore_errors,
-                                            multiindex=self.multiindex)
-        return df
+                cached_subdf = cached_df.loc[df.index]
+                if target in cached_subdf.columns:
+                    if target not in df.columns:
+                        self.logger.warn(
+                            "Target not present in both cached df and "
+                            "input df. Cannot perform comparison to"
+                            "ensure index match.")
+                    else:
+                        if not cached_subdf[target].equals(df[target]):
+                            raise AutomatminerError(
+                                "Cached and input dfs with the same index have "
+                                "different feature vectors.")
+                self.logger.info("Restored {} features on {} samples from "
+                                 "cache {}".format(len(cached_subdf.columns),
+                                                   len(df.index),
+                                                   self.cache_src))
+                return cached_subdf
+        else:
+            transforming_on_fitted = df is self.fitted_input_df
+            df = self._prescreen_df(df, inplace=True)
+
+            if not transforming_on_fitted:
+                df = self._add_composition_from_structure(df)
+
+            for featurizer_type, featurizers in self.featurizers.items():
+                if featurizer_type in df.columns:
+                    if not transforming_on_fitted:
+                        df = self._tidy_column(df, featurizer_type)
+
+                    for f in featurizers:
+                        self.logger.info("Featurizing with {}."
+                                         "".format(f.__class__.__name__))
+                        df = f.featurize_dataframe(
+                            df,
+                            featurizer_type,
+                            ignore_errors=self.ignore_errors,
+                            multiindex=self.multiindex,
+                            inplace=False)
+                    if self.drop_inputs:
+                        df = df.drop(columns=[featurizer_type])
+                else:
+                    self.logger.info("Featurizer type {} not in the dataframe. "
+                                     "Skipping...".format(featurizer_type))
+            if self.functionalize:
+                ff = FunctionFeaturizer()
+                cols = df.columns.tolist()
+                for ft in self.featurizers.keys():
+                    if ft in cols:
+                        cols.pop(ft)
+                df = ff.fit_featurize_dataframe(df, cols,
+                                                ignore_errors=self.ignore_errors,
+                                                multiindex=self.multiindex,
+                                                inplace=False)
+                if self.cache_src and not os.path.exists(self.cache_src):
+                    df.to_json(self.cache_src)
+            return df
 
     def _prescreen_df(self, df, inplace=True):
         """
