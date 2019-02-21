@@ -15,7 +15,9 @@ from automatminer.featurization.core import AutoFeaturizer
 from automatminer.featurization.sets import StructureFeaturizers, \
     CompositionFeaturizers
 
-test_dir = os.path.dirname(__file__)
+TEST_DIR = os.path.dirname(__file__)
+CACHE_FILE = "cache_test.json"
+CACHE_PATH = os.path.join(TEST_DIR, CACHE_FILE)
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
@@ -156,9 +158,9 @@ class TestAutoFeaturizer(unittest.TestCase):
                                                 "bandstructure",
                                                 "bandstructure_uniform"]
                                     )
-            df.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
+            df.to_pickle(os.path.join(TEST_DIR, df_bsdos_pickled))
         else:
-            df = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
+            df = pd.read_pickle(os.path.join(TEST_DIR, df_bsdos_pickled))
         df = df.dropna(axis=0)
         df = df.rename(columns={"bandstructure_uniform": "bandstructure",
                                 "bandstructure": "line bandstructure"})
@@ -279,6 +281,21 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue(af_needfit.needs_fit)
         self.assertFalse(af_nofit.needs_fit)
 
+    def test_caching(self):
+        target = "G_VRH"
+
+        self.assertFalse(os.path.exists(CACHE_PATH))
+        af = AutoFeaturizer(cache_src=CACHE_PATH, preset="fast")
+        df = self.test_df[['composition', target]].iloc[:10]
+        df_feats = af.fit_transform(df, target)
+        self.assertTrue(os.path.exists(CACHE_PATH))
+
+        df_cache = self.test_df[['composition', target]].iloc[:10]
+        df_cache_feats = af.fit_transform(df_cache, target)
+        self.assertAlmostEqual(df_feats.iloc[3, 0].tolist(),
+                               df_cache_feats.iloc[3, 0].tolist())
+
+
     # todo: Fix test once metaselector is converted over to precheck
     @unittest.skip(reason="Metaselector needs revamp before re-enabling.")
     def test_use_metaselector(self):
@@ -334,6 +351,8 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertFalse(any([f in df.columns for f in ef_feats]))
         self.assertFalse(any([f in df.columns for f in ef_feats]))
 
+    def tearDown(self):
+        os.remove(CACHE_PATH)
 
 if __name__ == '__main__':
     unittest.main()

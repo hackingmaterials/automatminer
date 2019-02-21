@@ -3,6 +3,7 @@ Classes for automatic featurization and core featurizer functionality.
 """
 
 import os
+import math
 
 import pandas as pd
 from pymatgen import Composition
@@ -18,6 +19,7 @@ from automatminer.base import DFTransformer, LoggableMixin
 from automatminer.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 from automatminer.utils.pkg import AutomatminerError
+from automatminer.utils.ml import regression_or_classification
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
@@ -219,7 +221,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             (AutoFeaturizer): self
         """
         if self.cache_src and os.path.exists(self.cache_src):
-            self.logger.warn("Cache {} found. Fit aborted.")
+            self.logger.info("Cache {} found. Fit aborted."
+                             "".format(self.cache_src))
             return self
 
         self.fitted_input_df = df
@@ -271,7 +274,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         if self.cache_src and os.path.exists(self.cache_src):
             self.logger.debug("Reading cache_src {}".format(self.cache_src))
             cached_df = pd.read_json(self.cache_src)
-            if not all([loc in cached_df for loc in df.index]):
+            if not all([loc in cached_df.index for loc in df.index]):
                 raise AutomatminerError("Feature cache does not contain all "
                                         "entries (by DataFrame index) needed "
                                         "to transform the input df.")
@@ -284,10 +287,32 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                             "input df. Cannot perform comparison to"
                             "ensure index match.")
                     else:
-                        if not cached_subdf[target].equals(df[target]):
+                        cached_targets = cached_subdf[target]
+                        input_targets = df[target]
+                        cached_type = regression_or_classification(
+                            cached_targets)
+                        input_type = regression_or_classification(input_targets)
+                        if cached_type != input_type:
                             raise AutomatminerError(
-                                "Cached and input dfs with the same index have "
-                                "different feature vectors.")
+                                "Cached targets appear to be '{}' type, while "
+                                "input targets appear to be '{}'."
+                                "".format(cached_type, input_type))
+
+                        problems = {}
+                        for ix in input_targets.index:
+                            iv = input_targets[ix]
+                            cv = cached_targets[ix]
+                            if iv != cv:
+                                try:
+                                    if not math.isclose(iv, cv):
+                                        problems[ix] = [iv, cv]
+                                except TypeError:
+                                    pass
+                        if problems:
+                            self.logger.warning(
+                                "Mismatch between cached targets and input "
+                                "targets: \n{}".format(problems))
+
                 self.logger.info("Restored {} features on {} samples from "
                                  "cache {}".format(len(cached_subdf.columns),
                                                    len(df.index),
@@ -329,8 +354,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                                 ignore_errors=self.ignore_errors,
                                                 multiindex=self.multiindex,
                                                 inplace=False)
-                if self.cache_src and not os.path.exists(self.cache_src):
-                    df.to_json(self.cache_src)
+            if self.cache_src and not os.path.exists(self.cache_src):
+                df.to_json(self.cache_src)
             return df
 
     def _prescreen_df(self, df, inplace=True):
