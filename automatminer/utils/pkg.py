@@ -19,7 +19,7 @@ class AutomatminerError(BaseException):
         return "AutomatminerError : " + self.msg
 
 
-def compare_columns(df1, df2, ignore=None):
+def compare_columns(df1, df2, ignore=None) -> dict:
     """
     Compare the columns of a dataframe.
 
@@ -86,7 +86,7 @@ def set_fitted(func):
     return wrapper
 
 
-def return_attrs_recursively(obj):
+def return_attrs_recursively(obj) -> dict:
     """
     Returns attributes of an object recursively. Stops recursion when
     attrs go outside of the automatminer library.
@@ -117,10 +117,3 @@ def return_attrs_recursively(obj):
                 attrdict[attr] = value
     return attrdict
 
-
-if __name__ == "__main__":
-    class A:
-        pass
-
-
-    print(isinstance(A, type))

@@ -9,7 +9,7 @@ import pandas as pd
 from automatminer.utils.pkg import AutomatminerError
 
 
-def is_greater_better(scoring_function):
+def is_greater_better(scoring_function) -> bool:
     """
     Determines whether scoring_function being greater is more favorable/better.
     Args:
@@ -51,7 +51,7 @@ def is_greater_better(scoring_function):
     return scoring_function not in desired_low_metrics
 
 
-def regression_or_classification(series):
+def regression_or_classification(series) -> str:
     """
     Determine if a series (target column) is numeric or categorical, to
     decide on the problem as regression or classification.
