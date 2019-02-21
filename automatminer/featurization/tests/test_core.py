@@ -352,7 +352,8 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertFalse(any([f in df.columns for f in ef_feats]))
 
     def tearDown(self):
-        os.remove(CACHE_PATH)
+        if os.path.exists(CACHE_PATH):
+            os.remove(CACHE_PATH)
 
 if __name__ == '__main__':
     unittest.main()
