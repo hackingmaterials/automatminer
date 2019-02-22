@@ -47,7 +47,7 @@ def get_preset_config(preset='default', **powerups):
     production_config = {
         "learner": TPOTAdaptor(max_time_mins=720,
                                max_eval_time_mins=20),
-        "reducer": FeatureReducer(reducers=('pca')),
+        "reducer": FeatureReducer(reducers=('pca',)),
         "autofeaturizer": AutoFeaturizer(preset="best", **caching_kwargs),
         "cleaner": DataCleaner()
     }
@@ -61,7 +61,7 @@ def get_preset_config(preset='default', **powerups):
 
     express_config = {
         "learner": TPOTAdaptor(max_time_mins=60, population_size=20),
-        "reducer": FeatureReducer(reducers=('pca')),
+        "reducer": FeatureReducer(reducers=('pca',)),
         "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
         "cleaner": DataCleaner()
     }
