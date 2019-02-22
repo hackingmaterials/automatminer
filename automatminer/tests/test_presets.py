@@ -30,15 +30,20 @@ class TestMatPipe(unittest.TestCase):
         for k in KEYSET:
             self.assertTrue(k in debug_single.keys())
 
-    def test_fast(self):
-        fast = get_preset_config("fast")
+    def test_express(self):
+        express = get_preset_config("express")
         for k in KEYSET:
-            self.assertTrue(k in fast.keys())
+            self.assertTrue(k in express.keys())
 
-    def test_default(self):
-        default = get_preset_config("default")
+    def test_heavy(self):
+        heavy = get_preset_config("heavy")
         for k in KEYSET:
-            self.assertTrue(k in default.keys())
+            self.assertTrue(k in heavy.keys())
+
+    def test_caching_powerup(self):
+        cache_src = "./somefile.json"
+        prod = get_preset_config("production", cache_src=cache_src)
+        self.assertEqual(prod[AF_KEY].cache_src, cache_src)
 
     def test_missing(self):
         with self.assertRaises(ValueError):
