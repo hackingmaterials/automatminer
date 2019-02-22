@@ -83,7 +83,7 @@ class MatPipe(DFTransformer, LoggableMixin):
                                         "reducer, and cleaner), or none (to use"
                                         "default).")
             else:
-                config = get_preset_config("default")
+                config = get_preset_config("production")
                 autofeaturizer = config["autofeaturizer"]
                 cleaner = config["cleaner"]
                 reducer = config["reducer"]
