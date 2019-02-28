@@ -16,7 +16,7 @@ from automatminer.preprocessing import FeatureReducer, DataCleaner
 from automatminer.automl import TPOTAdaptor, SinglePipelineAdaptor
 
 
-def get_preset_config(preset='default', **powerups):
+def get_preset_config(preset='express', **powerups):
     """
     Preset configs for MatPipe.
 
