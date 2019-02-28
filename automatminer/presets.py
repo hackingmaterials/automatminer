@@ -16,7 +16,7 @@ from automatminer.preprocessing import FeatureReducer, DataCleaner
 from automatminer.automl import TPOTAdaptor, SinglePipelineAdaptor
 
 
-def get_preset_config(preset='express', **powerups):
+def get_preset_config(preset: bool = 'express', **powerups) -> dict:
     """
     Preset configs for MatPipe.
 
@@ -44,54 +44,49 @@ def get_preset_config(preset='express', **powerups):
     """
     caching_kwargs = {"cache_src": powerups.get("cache_src", None)}
 
-    production_config = {
-        "learner": TPOTAdaptor(max_time_mins=720,
-                               max_eval_time_mins=20),
-        "reducer": FeatureReducer(reducers=('pca',)),
-        "autofeaturizer": AutoFeaturizer(preset="best", **caching_kwargs),
-        "cleaner": DataCleaner()
-    }
-
-    heavy_config = {
-        "learner": TPOTAdaptor(max_time_mins=240),
-        "reducer": FeatureReducer(reducers=("corr", "rebate")),
-        "autofeaturizer": AutoFeaturizer(preset="all", **caching_kwargs),
-        "cleaner": DataCleaner()
-    }
-
-    express_config = {
-        "learner": TPOTAdaptor(max_time_mins=60, population_size=20),
-        "reducer": FeatureReducer(reducers=('pca',)),
-        "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
-        "cleaner": DataCleaner()
-    }
-
-    debug_config = {
-        "learner": TPOTAdaptor(max_time_mins=2,
-                               max_eval_time_mins=1,
-                               population_size=10),
-        "reducer": FeatureReducer(reducers=('corr',)),
-        "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
-        "cleaner": DataCleaner()
-    }
-
-    debug_single_config = {
-        "learner": SinglePipelineAdaptor(
-            model=RandomForestRegressor(n_estimators=10)),
-        "reducer": FeatureReducer(reducers=('corr',)),
-        "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
-        "cleaner": DataCleaner()
-    }
-
     if preset == "production":
+        production_config = {
+            "learner": TPOTAdaptor(max_time_mins=720,
+                                   max_eval_time_mins=20),
+            "reducer": FeatureReducer(reducers=('pca',)),
+            "autofeaturizer": AutoFeaturizer(preset="best", **caching_kwargs),
+            "cleaner": DataCleaner()
+        }
         return production_config
     elif preset == "heavy":
+        heavy_config = {
+            "learner": TPOTAdaptor(max_time_mins=240),
+            "reducer": FeatureReducer(reducers=("corr", "rebate")),
+            "autofeaturizer": AutoFeaturizer(preset="all", **caching_kwargs),
+            "cleaner": DataCleaner()
+        }
         return heavy_config
     elif preset == "express":
+        express_config = {
+            "learner": TPOTAdaptor(max_time_mins=60, population_size=20),
+            "reducer": FeatureReducer(reducers=('pca',)),
+            "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
+            "cleaner": DataCleaner()
+        }
         return express_config
     elif preset == "debug":
+        debug_config = {
+            "learner": TPOTAdaptor(max_time_mins=2,
+                                   max_eval_time_mins=1,
+                                   population_size=10),
+            "reducer": FeatureReducer(reducers=('corr',)),
+            "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
+            "cleaner": DataCleaner()
+        }
         return debug_config
     elif preset == "debug_single":
+        debug_single_config = {
+            "learner": SinglePipelineAdaptor(
+                model=RandomForestRegressor(n_estimators=10)),
+            "reducer": FeatureReducer(reducers=('corr',)),
+            "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
+            "cleaner": DataCleaner()
+        }
         return debug_single_config
     else:
         raise ValueError("{} unknown preset.".format(preset))
