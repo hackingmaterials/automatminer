@@ -163,6 +163,7 @@ class CompositionFeaturizers(FeaturizerSet):
             cf.ElementProperty.from_preset("matminer"),
             cf.ElementProperty.from_preset("magpie"),
             cf.ElementProperty.from_preset("matscholar_el"),
+            cf.ElementProperty.from_preset("deml"),
             cf.ElementFraction(),
             cf.Stoichiometry(),
             cf.TMetalFraction(),

@@ -271,7 +271,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         df = self.test_df[['composition', target]].iloc[:flimit]
         af = AutoFeaturizer(functionalize=True, preset="fast")
         df = af.fit_transform(df, target)
-        self.assertTupleEqual(df.shape, (flimit, 15888))
+        self.assertTupleEqual(df.shape, (flimit, 16848))
 
     def test_StructureFeaturizers_needs_fitting(self):
         fset_nofit = StructureFeaturizers().best

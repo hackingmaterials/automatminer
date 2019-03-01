@@ -126,9 +126,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self._features = df.drop(columns=target).columns.tolist()
         self._ml_data = {"X": X, "y": y}
         self.fitted_target = target
-        self.logger.info("TPOT fitting started.")
         self._backend = self._backend.fit(X, y, **fit_kwargs)
-        self.logger.info("TPOT fitting finished.")
         return self
 
     @property
@@ -226,7 +224,8 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             X = df[self._features].values  # rectify feature order
             y_pred = self._backend.predict(X)
             df[target + " predicted"] = y_pred
-            self.logger.info("Prediction finished successfully.")
+            self.logger.info(self._log_prefix +
+                             "Prediction finished successfully.")
             return df
 
     @property
@@ -316,10 +315,7 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
         self._features = df.drop(columns=target).columns.tolist()
         self._ml_data = {"X": X, "y": y}
         self.fitted_target = target
-        model_name = self._backend.__class__.__name__
-        self.logger.info("{} fitting started.".format(model_name))
         self._backend.fit(X, y)
-        self.logger.info("{} fitting finished.".format(model_name))
 
     # todo: Remove this duplicated code section, maybe just make a parent class
     @log_progress(AMM_LOG_PREDICT_STR)
@@ -359,7 +355,8 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
             X = df[self._features].values  # rectify feature order
             y_pred = self._backend.predict(X)
             df[target + " predicted"] = y_pred
-            self.logger.info("Prediction finished successfully.")
+            self.logger.info(self._log_prefix +
+                             "Prediction finished successfully.")
             return df
 
     @property

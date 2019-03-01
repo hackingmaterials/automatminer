@@ -15,7 +15,7 @@ class LoggableMixin:
 
     @property
     def logger(self):
-        """Get the class lowgger.
+        """Get the class logger.
         If the logger is None, the logging calls will be redirected to a dummy
         logger that has no output.
         """
@@ -48,6 +48,10 @@ class LoggableMixin:
 
         logger.setLevel(logging.INFO)
         return logger
+
+    @property
+    def _log_prefix(self):
+        return self.__class__.__name__ + ": "
 
 
 class DFTransformer(abc.ABC):
