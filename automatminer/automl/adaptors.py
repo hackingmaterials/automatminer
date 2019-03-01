@@ -268,6 +268,20 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
         logger (logging.Logger, bool):  A custom logger object to use for
             logging. Alternatively, if set to True, the default automatminer
             logger will be used. If set to False, then no logging will occur.
+
+    Attributes:
+        The following attributes are set during fitting.
+
+        mode (str): Either AMM_REG_NAME (regression) or AMM_CLF_NAME
+            (classification)
+        features (list): The features labels used to develop the ml model.
+        ml_data (dict): The raw ml data used for training.
+        best_pipeline (sklearn.Pipeline): The best fitted pipeline found.
+        best_models (OrderedDict): The best model names and their scores.
+        backend (TPOTBase): The TPOT object interface used for ML training.
+        is_fit (bool): If True, the adaptor and backend are fit to a dataset.
+        models (OrderedDict): The raw sklearn-style models output by TPOT.
+        fitted_target (str): The target name in the df used for training.
     """
 
     def __init__(self, regressor, classifier, logger=True):
