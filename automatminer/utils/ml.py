@@ -8,6 +8,8 @@ import pandas as pd
 
 from automatminer.utils.pkg import AutomatminerError
 
+AMM_REG_NAME = "regression"
+AMM_CLF_NAME = "classification"
 
 def is_greater_better(scoring_function) -> bool:
     """
@@ -63,14 +65,14 @@ def regression_or_classification(series) -> str:
         (str): "regression" or "classification"
     """
     if series.dtypes.name == "bool":
-        return "classification"
+        return AMM_CLF_NAME
     else:
         unique = series.unique().tolist()
         if len(unique) == 2 and all([un in [0, 1] for un in unique]):
-            return "classification"
+            return AMM_CLF_NAME
         else:
             try:
                 pd.to_numeric(series, errors="raise")
-                return "regression"
+                return AMM_REG_NAME
             except (ValueError, TypeError):
-                return "classification"
+                return AMM_CLF_NAME

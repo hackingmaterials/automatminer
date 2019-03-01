@@ -9,14 +9,15 @@ Use them like so:
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>"]
 
-from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor, XGBClassifier
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 
 from automatminer.featurization import AutoFeaturizer
 from automatminer.preprocessing import FeatureReducer, DataCleaner
 from automatminer.automl import TPOTAdaptor, SinglePipelineAdaptor
 
 
-def get_preset_config(preset: bool = 'express', **powerups) -> dict:
+def get_preset_config(preset: str = 'express', **powerups) -> dict:
     """
     Preset configs for MatPipe.
 
@@ -27,6 +28,8 @@ def get_preset_config(preset: bool = 'express', **powerups) -> dict:
         (very) powerful computing resources. May be buggier and more difficult
         to run than production.
     "express" - Good for quick benchmarks with moderate accuracy.
+    "express_single" - Same as express but uses XGB trees as single models
+        instead of automl TPOT. Good for even more express results.
 
     DEBUG:
     "debug" - Debugging with automl enabled.
@@ -64,7 +67,18 @@ def get_preset_config(preset: bool = 'express', **powerups) -> dict:
     elif preset == "express":
         express_config = {
             "learner": TPOTAdaptor(max_time_mins=60, population_size=20),
-            "reducer": FeatureReducer(reducers=('pca',)),
+            "reducer": FeatureReducer(reducers=('corr',)),
+            "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
+            "cleaner": DataCleaner()
+        }
+        return express_config
+    elif preset == "express_single":
+        xgb_kwargs = {"n_estimators": 300, "max_depth": 3, "n_jobs": -1}
+        express_config = {
+            "learner": SinglePipelineAdaptor(
+                regressor=XGBRegressor(**xgb_kwargs),
+                classifier=XGBClassifier(**xgb_kwargs)),
+            "reducer": FeatureReducer(reducers=('corr',)),
             "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
             "cleaner": DataCleaner()
         }
@@ -80,9 +94,11 @@ def get_preset_config(preset: bool = 'express', **powerups) -> dict:
         }
         return debug_config
     elif preset == "debug_single":
+        rf_kwargs = {"n_estimators": 10, "n_jobs": -1}
         debug_single_config = {
             "learner": SinglePipelineAdaptor(
-                model=RandomForestRegressor(n_estimators=10)),
+                classifier=RandomForestClassifier(**rf_kwargs),
+                regressor=RandomForestRegressor(**rf_kwargs)),
             "reducer": FeatureReducer(reducers=('corr',)),
             "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
             "cleaner": DataCleaner()

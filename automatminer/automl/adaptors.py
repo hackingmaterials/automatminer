@@ -18,6 +18,7 @@ from automatminer.utils.ml import is_greater_better, \
     regression_or_classification
 from automatminer.utils.log import log_progress, AMM_LOG_PREDICT_STR, \
     AMM_LOG_FIT_STR
+from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
 from automatminer.base import DFMLAdaptor, LoggableMixin
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
@@ -54,7 +55,8 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
     Attributes:
         The following attributes are set during fitting.
 
-        mode (str): Either "regression" or "classification"
+        mode (str): Either AMM_REG_NAME (regression) or AMM_CLF_NAME
+            (classification)
         features (list): The features labels used to develop the ml model.
         ml_data (dict): The raw ml data used for training.
         best_pipeline (sklearn.Pipeline): The best fitted pipeline found.
@@ -105,13 +107,13 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         # Determine learning type based on whether classification or regression
         self.mode = regression_or_classification(df[target])
 
-        if self.mode == "classification":
+        if self.mode == AMM_CLF_NAME:
             self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
                 'config_dict', TPOT_CLASSIFIER_CONFIG)
             if "scoring" not in self.tpot_kwargs:
                 self.tpot_kwargs["scoring"] = "balanced_accuracy"
             self._backend = TPOTClassifier(**self.tpot_kwargs)
-        elif self.mode == "regression":
+        elif self.mode == AMM_REG_NAME:
             self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
                 'config_dict', TPOT_REGRESSOR_CONFIG)
             if "scoring" not in self.tpot_kwargs:
@@ -124,9 +126,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self._features = df.drop(columns=target).columns.tolist()
         self._ml_data = {"X": X, "y": y}
         self.fitted_target = target
-        self.logger.info("TPOT fitting started.")
         self._backend = self._backend.fit(X, y, **fit_kwargs)
-        self.logger.info("TPOT fitting finished.")
         return self
 
     @property
@@ -224,7 +224,8 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             X = df[self._features].values  # rectify feature order
             y_pred = self._backend.predict(X)
             df[target + " predicted"] = y_pred
-            self.logger.info("Prediction finished successfully.")
+            self.logger.info(self._log_prefix +
+                             "Prediction finished successfully.")
             return df
 
     @property
@@ -257,32 +258,64 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     TPOTAdaptor.
 
     Args:
-        model (sklearn Pipeline or BaseEstimator-like): The object you want to
-            use for machine learning. Must implement fit/predict/transform
-            methods analagously to BaseEstimator, but does not need to be a
-            BaseEstimator or Pipeline.
+        regressor (sklearn Pipeline or BaseEstimator-like): The object you want
+            to use for machine learning regression. Must implement
+            fit/predict/transform methods analagously to BaseEstimator, but does
+            not need to be a BaseEstimator or Pipeline.
+        classifier (sklearn Pipeline or BaseEstimator-like): The object you want
+            to use for machine learning classification.
+        logger (logging.Logger, bool):  A custom logger object to use for
+            logging. Alternatively, if set to True, the default automatminer
+            logger will be used. If set to False, then no logging will occur.
+
+    Attributes:
+        The following attributes are set during fitting.
+
+        mode (str): Either AMM_REG_NAME (regression) or AMM_CLF_NAME
+            (classification)
+        features (list): The features labels used to develop the ml model.
+        ml_data (dict): The raw ml data used for training.
+        best_pipeline (sklearn.Pipeline): The best fitted pipeline found.
+        best_models (OrderedDict): The best model names and their scores.
+        backend (TPOTBase): The TPOT object interface used for ML training.
+        is_fit (bool): If True, the adaptor and backend are fit to a dataset.
+        models (OrderedDict): The raw sklearn-style models output by TPOT.
+        fitted_target (str): The target name in the df used for training.
     """
 
-    def __init__(self, model, logger=True):
+    def __init__(self, regressor, classifier, logger=True):
         self._logger = self.get_logger(logger)
-        self._backend = model
+        self._regressor = regressor
+        self._classifier = classifier
         self._features = None
         self._ml_data = None
         self.fitted_target = None
+        self._backend = None
+        self.mode = None
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
+
+        # Determine learning type based on whether classification or regression
+        self.mode = regression_or_classification(df[target])
+
+        if self.mode == AMM_CLF_NAME:
+            self._backend = self._classifier
+        elif self.mode == AMM_REG_NAME:
+            self._backend = self._regressor
+        else:
+            raise ValueError("Learning type {} not recognized as a valid mode "
+                             "for {}".format(self.mode,
+                                             self.__class__.__name__))
+
         # Prevent goofy pandas casting by casting to native
         y = df[target].values.tolist()
         X = df.drop(columns=target).values.tolist()
         self._features = df.drop(columns=target).columns.tolist()
         self._ml_data = {"X": X, "y": y}
         self.fitted_target = target
-        model_name = self._backend.__class__.__name__
-        self.logger.info("{} fitting started.".format(model_name))
         self._backend.fit(X, y)
-        self.logger.info("{} fitting finished.".format(model_name))
 
     # todo: Remove this duplicated code section, maybe just make a parent class
     @log_progress(AMM_LOG_PREDICT_STR)
@@ -322,7 +355,8 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
             X = df[self._features].values  # rectify feature order
             y_pred = self._backend.predict(X)
             df[target + " predicted"] = y_pred
-            self.logger.info("Prediction finished successfully.")
+            self.logger.info(self._log_prefix +
+                             "Prediction finished successfully.")
             return df
 
     @property
