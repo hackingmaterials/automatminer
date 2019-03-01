@@ -7,7 +7,7 @@ import unittest
 import pandas as pd
 
 from automatminer.utils.ml import is_greater_better, \
-    regression_or_classification
+    regression_or_classification, AMM_CLF_NAME, AMM_REG_NAME
 
 
 class TestMLTools(unittest.TestCase):
@@ -20,26 +20,26 @@ class TestMLTools(unittest.TestCase):
 
     def test_regression_or_classification(self):
         s = pd.Series(data=["4", "5", "6"])
-        self.assertTrue(regression_or_classification(s) == "regression")
+        self.assertTrue(regression_or_classification(s) == AMM_REG_NAME)
 
         s = pd.Series(data=[1, 2, 3])
-        self.assertTrue(regression_or_classification(s) == "regression")
+        self.assertTrue(regression_or_classification(s) == AMM_REG_NAME)
 
         s = pd.Series(data=["a", "b", "c"])
-        self.assertTrue(regression_or_classification(s) == "classification")
+        self.assertTrue(regression_or_classification(s) == AMM_CLF_NAME)
 
         s = pd.Series(data=["a1", "b", "c"])
-        self.assertTrue(regression_or_classification(s) == "classification")
+        self.assertTrue(regression_or_classification(s) == AMM_CLF_NAME)
 
         # binary classification
         s = pd.Series(data=[0, 1, 0, 0, 1])
-        self.assertTrue(regression_or_classification(s) == "classification")
+        self.assertTrue(regression_or_classification(s) == AMM_CLF_NAME)
 
         s = pd.Series(data=[0.0, 1.0, 0.0, 0.0, 1.0])
-        self.assertTrue(regression_or_classification(s) == "classification")
+        self.assertTrue(regression_or_classification(s) == AMM_CLF_NAME)
 
         s = pd.Series(data=[0, 1, 0, 0, 2])
-        self.assertTrue(regression_or_classification(s) == "regression")
+        self.assertTrue(regression_or_classification(s) == AMM_REG_NAME)
 
 
 if __name__ == "__main__":

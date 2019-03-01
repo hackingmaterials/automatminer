@@ -10,7 +10,8 @@ from automatminer.utils.pkg import AutomatminerError, \
     compare_columns, check_fitted, set_fitted
 from automatminer.utils.log import log_progress, AMM_LOG_TRANSFORM_STR, \
     AMM_LOG_FIT_STR
-from automatminer.utils.ml import regression_or_classification
+from automatminer.utils.ml import regression_or_classification, \
+    AMM_REG_NAME
 from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
     rebate, lower_corr_clf
@@ -572,7 +573,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
         """
         mode = regression_or_classification(df[target])
         corr = abs(df.corr())
-        if mode == "regression":
+        if mode == AMM_REG_NAME:
             corr = corr.sort_values(by=target)
         rm_feats = []
         for feat in corr.columns:
@@ -585,12 +586,12 @@ class FeatureReducer(DFTransformer, LoggableMixin):
                     continue
                 else:
                     if corval >= r_max:
-                        if mode == "regression":
+                        if mode == AMM_REG_NAME:
                             if corr.loc[idx, target] > corr.loc[feat, target]:
                                 removed_feat = feat
                             else:
                                 removed_feat = idx
-                        else:  # mode == "classification"
+                        else:  # mode is classification
                             removed_feat = lower_corr_clf(df, target, feat, idx)
                         if removed_feat not in rm_feats:
                             rm_feats.append(removed_feat)
