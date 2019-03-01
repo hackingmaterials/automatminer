@@ -4,7 +4,7 @@ import unittest
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.pipeline import Pipeline
 
 from automatminer.presets import get_preset_config
@@ -69,9 +69,11 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
         self.test_df = df.copy(deep=True).iloc[451:]
 
     def test_Pipeline(self):
-        model = Pipeline([('scaler', StandardScaler()),
-                          ('rfr', RandomForestRegressor())])
-        learner = SinglePipelineAdaptor(model=model)
+        modelr = Pipeline([('scaler', StandardScaler()),
+                           ('rfr', RandomForestRegressor())])
+        modelc = Pipeline([('scaler', StandardScaler()),
+                           ('rfr', RandomForestClassifier())])
+        learner = SinglePipelineAdaptor(regressor=modelr, classifier=modelc)
         target_key = "K_VRH"
         learner.fit(self.train_df, target_key)
         test_w_predictions = learner.predict(self.test_df, target_key)
@@ -81,25 +83,45 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
         self.assertTrue(r2_score(y_true, y_test) > 0.75)
 
     def test_BaseEstimator(self):
-        model = RandomForestRegressor()
-        learner = SinglePipelineAdaptor(model=model)
+        learner = SinglePipelineAdaptor(regressor=RandomForestRegressor(),
+                                        classifier=RandomForestClassifier())
         target_key = "K_VRH"
         learner.fit(self.train_df, target_key)
         test_w_predictions = learner.predict(self.test_df, target_key)
         y_true = test_w_predictions[target_key]
         y_test = test_w_predictions[target_key + " predicted"]
-        print(r2_score(y_true, y_test))
-        self.assertTrue(r2_score(y_true, y_test) > 0.75)
+        self.assertGreater(r2_score(y_true, y_test), 0.75)
 
     def test_feature_mismatching(self):
-        model = RandomForestRegressor()
-        learner = SinglePipelineAdaptor(model=model)
+        learner = SinglePipelineAdaptor(regressor=RandomForestRegressor(),
+                                        classifier=RandomForestClassifier())
         target_key = "K_VRH"
         df1 = self.train_df
         df2 = self.test_df.rename(columns={'mean X': "some other feature"})
         learner.fit(df1, target_key)
         with self.assertRaises(AutomatminerError):
             learner.predict(df2, target_key)
+
+    def test_BaseEstimator_classification(self):
+        learner = SinglePipelineAdaptor(regressor=RandomForestRegressor(),
+                                        classifier=RandomForestClassifier())
+        # Prepare dataset for classification
+        train_df = self.train_df
+        test_df = self.test_df
+        for df in [train_df, test_df]:
+            df["K_VRH"] = df["K_VRH"] > 150
+            df.rename(columns={"K_VRH": "K_VRH > 50"}, inplace=True)
+
+        print(train_df["K_VRH > 50"].value_counts())
+        print(test_df["K_VRH > 50"].value_counts())
+
+        target_key = "K_VRH > 50"
+        learner.fit(self.train_df, target_key)
+        test_w_predictions = learner.predict(self.test_df, target_key)
+        y_true = test_w_predictions[target_key]
+        y_test = test_w_predictions[target_key + " predicted"]
+        print(f1_score(y_true, y_test))
+        self.assertGreater(f1_score(y_true, y_test), 0.65)
 
 
 if __name__ == '__main__':

@@ -277,6 +277,7 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
         self._features = None
         self._ml_data = None
         self.fitted_target = None
+        self._backend = None
         self.mode = None
 
     @log_progress(AMM_LOG_FIT_STR)
@@ -285,8 +286,15 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
 
         # Determine learning type based on whether classification or regression
         self.mode = regression_or_classification(df[target])
-        # if self.mode == AMM_CLF_NAME:
 
+        if self.mode == AMM_CLF_NAME:
+            self._backend = self._classifier
+        elif self.mode == AMM_REG_NAME:
+            self._backend = self._regressor
+        else:
+            raise ValueError("Learning type {} not recognized as a valid mode "
+                             "for {}".format(self.mode,
+                                             self.__class__.__name__))
 
         # Prevent goofy pandas casting by casting to native
         y = df[target].values.tolist()
