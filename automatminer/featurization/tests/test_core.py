@@ -221,7 +221,7 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         df2 = af.transform(df2, target)
         self.assertAlmostEqual(df2[target].iloc[0], 111.788114, places=5)
-        self.assertAlmostEqual(df2["minimum X"].iloc[1], 1.36, places=2)
+        self.assertAlmostEqual(df2["PymatgenData minimum X"].iloc[1], 1.36, places=2)
 
     def test_column_attr(self):
         """
