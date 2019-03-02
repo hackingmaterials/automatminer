@@ -574,7 +574,11 @@ class FeatureReducer(DFTransformer, LoggableMixin):
     @log_progress(AMM_LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target):
-        X = df.drop(columns=target)
+        if target not in df.columns:
+            self.logger.warning(
+                self._log_prefix + "Target not found in columns to transform.")
+        else:
+            X = df.drop(columns=target)
         for r, f in self.removed_features.items():
             if r == "pca":
                 matrix = self._pca.transform(X)
