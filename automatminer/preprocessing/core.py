@@ -577,6 +577,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
         if target not in df.columns:
             self.logger.warning(
                 self._log_prefix + "Target not found in columns to transform.")
+            X = df
         else:
             X = df.drop(columns=target)
         for r, f in self.removed_features.items():
