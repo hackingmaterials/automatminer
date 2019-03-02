@@ -224,8 +224,6 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             X = df[self._features].values  # rectify feature order
             y_pred = self._backend.predict(X)
             df[target + " predicted"] = y_pred
-            self.logger.info(self._log_prefix +
-                             "Prediction finished successfully.")
             return df
 
     @property

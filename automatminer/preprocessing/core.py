@@ -588,7 +588,8 @@ class FeatureReducer(DFTransformer, LoggableMixin):
             else:
                 X = X.drop(columns=[c for c in f
                                     if c not in self._keep_features])
-        X.loc[:, target] = df[target].values
+        if target in df:
+            X.loc[:, target] = df[target].values
         return X
 
     def rm_correlated(self, df, target, r_max=0.95):
