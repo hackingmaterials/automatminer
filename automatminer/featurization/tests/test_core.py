@@ -1,4 +1,3 @@
-# coding: utf-8
 import os
 import copy
 import unittest
@@ -7,7 +6,7 @@ import pandas as pd
 from pymatgen import Composition
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.datasets.dataset_retrieval import load_dataset
-from matminer.featurizers.composition import ElectronAffinity, ElementProperty
+from matminer.featurizers.composition import ElementProperty
 from matminer.featurizers.structure import GlobalSymmetryFeatures, \
     DensityFeatures
 
