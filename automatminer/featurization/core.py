@@ -405,6 +405,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 ready for featurization.
         """
         # todo: Make the following conversions more robust (no [0] type checking)
+
         if featurizer_type == self.composition_col:
             # Convert formulas to composition objects
             if isinstance(df[featurizer_type].iloc[0], str):
@@ -446,29 +447,33 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
 
         else:
             # Convert structure/bs/dos dicts to objects (robust already)
-            self.logger.info(self._log_prefix +
-                             "{} detected as strings. Attempting "
-                             "conversion to {} objects..."
-                             "".format(featurizer_type, featurizer_type))
-            dto = DictToObject(overwrite_data=True,
-                               target_col_id=featurizer_type)
-            df = dto.featurize_dataframe(df, featurizer_type)
+            if isinstance(df[featurizer_type].iloc[0], (dict, str)):
+                self.logger.info(self._log_prefix.capitalize() +
+                                 "{} detected as string or dict. Attempting "
+                                 "conversion to {} objects..."
+                                 "".format(featurizer_type, featurizer_type))
+                dto = DictToObject(overwrite_data=True,
+                                   target_col_id=featurizer_type)
+                df = dto.featurize_dataframe(df, featurizer_type)
 
-            # Decorate with oxidstates
-            if featurizer_type == self.structure_col and self.guess_oxistates:
-                self.logger.info(self._log_prefix +
-                                 "Guessing oxidation states of structures if "
-                                 "they were not present in input.")
-                sto = StructureToOxidStructure(
-                    target_col_id=featurizer_type, overwrite_data=True,
-                    return_original_on_error=True, max_sites=-50)
-                try:
-                    df = sto.featurize_dataframe(df, featurizer_type,
-                                                 multiindex=self.multiindex)
-                except Exception as e:
-                    self.logger.info(self._log_prefix +
-                                     "Could not decorate oxidation states on"
-                                     " structures due to {}.".format(e))
+                # Decorate with oxidstates
+                if featurizer_type == self.structure_col and \
+                        self.guess_oxistates:
+                    self.logger.info(
+                        self._log_prefix +
+                        "Guessing oxidation states of structures if they were "
+                        "not present in input.")
+                    sto = StructureToOxidStructure(
+                        target_col_id=featurizer_type, overwrite_data=True,
+                        return_original_on_error=True, max_sites=-50)
+                    try:
+                        df = sto.featurize_dataframe(df, featurizer_type,
+                                                     multiindex=self.multiindex)
+                    except Exception as e:
+                        self.logger.info(
+                            self._log_prefix +
+                            "Could not decorate oxidation states on structures "
+                            "due to {}.".format(e))
         return df
 
     def _add_composition_from_structure(self, df, overwrite=True):
@@ -508,3 +513,11 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 target_col_id=self.composition_col, overwrite_data=overwrite)
             df = struct2comp.featurize_dataframe(df, self.structure_col)
         return df
+
+if __name__ == "__main__":
+    from matminer.datasets.dataset_retrieval import load_dataset
+    af = AutoFeaturizer(preset="fast", cache_src="/Users/ardunn/alex/lbl/projects/common_env/dev_codes/hmprivate/hmprivate/automatminer/benchmarking/test.json")
+    df = load_dataset("elastic_tensor_2015")[["structure"]]
+
+    df = af.fit_transform(df, "K_VRH")
+    print(df)
