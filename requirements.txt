@@ -8,5 +8,4 @@ skrebate==0.6
 # Also requirements of matminer
 numpy
 pandas
-scipy
 scikit_learn
