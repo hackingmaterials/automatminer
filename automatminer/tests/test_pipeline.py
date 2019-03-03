@@ -20,6 +20,7 @@ CACHE_SRC = os.path.join(test_dir, "cache.json")
 DIGEST_PATH = os.path.join(test_dir, "matdigest.txt")
 PIPE_PATH = os.path.join(test_dir, "test_pipe.p")
 
+
 class TestMatPipeSetup(unittest.TestCase):
     def setUp(self):
         self.config = get_preset_config('debug')
@@ -141,7 +142,7 @@ class TestMatPipe(unittest.TestCase):
         # Test static subset of kfold
         df2 = self.df.iloc[500:550]
         df_tests2 = pipe.benchmark(df2, self.target, kfold,
-                                        fold_subset=[0, 3], cache=cache)
+                                   fold_subset=[0, 3], cache=cache)
         self.assertEqual(len(df_tests2), 2)
 
     def tearDown(self):
