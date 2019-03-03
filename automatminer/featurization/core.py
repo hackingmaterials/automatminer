@@ -457,9 +457,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 if isinstance(type_tester, str):
                     raise ValueError(
                         "{} column is type {}. Cannot convert."
-                        "".format(featurizer_type,
-                                  type(type_tester),
-                                  featurizer_type))
+                        "".format(featurizer_type, type(type_tester)))
                 dto = DictToObject(overwrite_data=True,
                                    target_col_id=featurizer_type)
                 df = dto.featurize_dataframe(df, featurizer_type)
