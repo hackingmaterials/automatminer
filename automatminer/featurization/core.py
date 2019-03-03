@@ -405,10 +405,11 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 ready for featurization.
         """
         # todo: Make the following conversions more robust (no [0] type checking)
+        type_tester = df[featurizer_type].iloc[0]
 
         if featurizer_type == self.composition_col:
             # Convert formulas to composition objects
-            if isinstance(df[featurizer_type].iloc[0], str):
+            if isinstance(type_tester, str):
                 self.logger.info(self._log_prefix +
                                  "Compositions detected as strings. Attempting "
                                  "conversion to Composition objects...")
@@ -418,7 +419,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                              multiindex=self.multiindex,
                                              ignore_errors=True)
 
-            elif isinstance(df[featurizer_type].iloc[0], dict):
+            elif isinstance(type_tester, dict):
                 self.logger.info(self._log_prefix +
                                  "Compositions detected as dicts. Attempting "
                                  "conversion to Composition objects...")
@@ -447,11 +448,17 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
 
         else:
             # Convert structure/bs/dos dicts to objects (robust already)
-            if isinstance(df[featurizer_type].iloc[0], (dict, str)):
+            if isinstance(type_tester, (dict, str)):
                 self.logger.info(self._log_prefix.capitalize() +
                                  "{} detected as string or dict. Attempting "
                                  "conversion to {} objects..."
                                  "".format(featurizer_type, featurizer_type))
+                if isinstance(type_tester, str):
+                    raise ValueError(
+                        "{} column is type {}. Cannot convert."
+                        "".format(featurizer_type,
+                                  type(type_tester),
+                                  featurizer_type))
                 dto = DictToObject(overwrite_data=True,
                                    target_col_id=featurizer_type)
                 df = dto.featurize_dataframe(df, featurizer_type)
