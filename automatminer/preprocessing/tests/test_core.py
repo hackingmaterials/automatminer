@@ -68,19 +68,70 @@ class TestPreprocess(unittest.TestCase):
                                          ignore=self.target)["mismatch"])
         self.assertTrue(self.target not in df2.columns)
 
-    def test_DataCleaner_na_method(self):
-        dc = DataCleaner(max_na_frac=0.9, na_method_fit="drop",
-                         na_method_transform="fill")
+    def test_DataCleaner_sample_na_method(self):
         df = self.test_df
-        df['HOMO_energy'].iloc[40] = np.nan
-        df['HOMO_energy'].iloc[110] = np.nan
+        df['HOMO_energy'].loc[40] = np.nan
+        df['HOMO_energy'].loc[110] = np.nan
 
-        dffit = df.iloc[:100]
+        # Test when transform method is fill
+        dc = DataCleaner(max_na_frac=0.9,
+                         feature_na_method="drop",
+                         na_method_fit="drop",
+                         na_method_transform="fill")
+        dffit = df.loc[:100]
         fitted = dc.fit_transform(dffit, target=self.target)
-        self.assertTupleEqual(fitted.shape, (99, 417))
+        test_shape = tuple(np.subtract(dffit.shape, (1, 0)).tolist())
+        self.assertTupleEqual(fitted.shape, test_shape)  # minus one sample
+
         dftrans = df.iloc[100:]
         tranz = dc.transform(dftrans, target=self.target)
-        self.assertTupleEqual(tranz.shape, (100, 417))
+        self.assertTupleEqual(tranz.shape, dftrans.shape)
+
+        # Test when transform method is mean
+        dc2 = DataCleaner(max_na_frac=0.9,
+                          feature_na_method="drop",
+                          na_method_fit="drop",
+                          na_method_transform="mean")
+        fitted = dc2.fit_transform(dffit, target=self.target)
+        test_shape = tuple(np.subtract(dffit.shape, (1, 0)).tolist())
+        self.assertTupleEqual(fitted.shape, test_shape)  # minus one sample
+
+        dftrans = df.loc[100:]
+        tranz = dc2.transform(dftrans, target=self.target)
+        self.assertTupleEqual(tranz.shape, dftrans.shape)
+        mean = dftrans.drop(110)["HOMO_energy"].mean()
+        self.assertAlmostEqual(tranz["HOMO_energy"].loc[110], mean)
+
+    def test_DataCleaner_feature_na_method(self):
+        dc = DataCleaner(max_na_frac=0, feature_na_method="drop")
+        df = self.test_df
+        df['LUMO_energy'].iloc[40] = np.nan
+        df['LUMO_energy'].iloc[110] = np.nan
+
+        # Test normal dropping with transformation
+        dffit = df.iloc[:100]
+        fitted = dc.fit_transform(dffit, target=self.target)
+        self.assertNotIn("LUMO_energy", fitted.columns)
+        dftrans = df.iloc[100:]
+        tranz = dc.transform(dftrans, target=self.target)
+        self.assertNotIn("LUMO_energy", tranz.columns)
+
+        # Test filling
+        dc2 = DataCleaner(max_na_frac=0, feature_na_method="fill")
+        fitted = dc2.fit_transform(dffit, target=self.target)
+        true = fitted["LUMO_energy"].iloc[39]
+        filled = fitted["LUMO_energy"].iloc[40]
+        self.assertAlmostEqual(true, filled, places=10)
+        self.assertTupleEqual((100, 417), fitted.shape)
+
+        # Test mean
+        dcmean = DataCleaner(max_na_frac=0, feature_na_method="mean")
+        df['minimum X'].iloc[99] = np.nan
+        minimum_x = dffit["minimum X"]
+        mean_min_x = minimum_x[~minimum_x.isnull()].mean()
+        fitted = dcmean.fit_transform(dffit, target=self.target)
+        self.assertAlmostEqual(fitted["minimum X"].iloc[99], mean_min_x,
+                               places=10)
 
     def test_FeatureReducer_basic(self):
         fr = FeatureReducer(reducers=('corr', 'tree'))

@@ -36,8 +36,9 @@ class DataCleaner(DFTransformer, LoggableMixin):
         feature_na_method (str): Defines how to handle features (column) with
             higher na fraction than max_na_frac. "drop" for dropping these
             features. "fill" for filling these features with pandas bfill and
-            ffill. Alternatively, specify a number to replace the nans, e.g. 0.
-            If all samples are nan, feature will be dropped regardless.
+            ffill. "mean" to fill categorical variables and mean for numerical
+            variables. Alternatively, specify a number to replace the nans,
+            e.g. 0. If all samples are nan, feature will be dropped regardless.
         encode_categories (bool): If True, retains features which are
             categorical (data type is string or object) and then
             one-hot encodes them. If False, drops them.
@@ -49,6 +50,7 @@ class DataCleaner(DFTransformer, LoggableMixin):
             Select one of the following methods: "fill" (use pandas fillna with
             ffill and bfill, sequentially), "ignore" (totally ignore nans in
             samples), "drop" (drop any remaining samples having a nan feature),
+            "mean" (fills categorical variables, takes means of numerical).
             Alternatively, specify a number to replace the nans, e.g. 0.
         na_method_transform (str, float, int): The same as na_method_fit, but
             for transform.
@@ -222,12 +224,23 @@ class DataCleaner(DFTransformer, LoggableMixin):
             if self.feature_na_method == "drop":
                 df = df.dropna(axis=1, thresh=threshold)
             else:
-                df = df.dropna(axis=1, thresh=len(df))
+                df = df.dropna(axis=1, thresh=0)
                 problem_cols = df.columns[df.isnull().mean() > self.max_na_frac]
                 dfp = df[problem_cols]
                 if self.feature_na_method == "fill":
-                    dfp = dfp.fillna(axis=1, method="ffill")
+                    dfp = dfp.fillna(method="ffill")
                     dfp = dfp.fillna(method="bfill")
+                elif self.feature_na_method == "mean":
+                    dfpc = dfp[[ccol for ccol in dfp.columns if ccol in
+                                self.object_cols]]
+                    dfpc = dfpc.fillna(method="ffill")
+                    dfpc = dfpc.fillna(method="bfill")
+                    dfp[dfpc.columns] = dfpc
+
+                    dfpn = dfp[[ncol for ncol in dfp.columns if ncol in
+                                self.number_cols]]
+                    dfpn = dfpn.fillna(value=dfpn.mean())
+                    dfp[dfpn.columns] = dfpn
                 else:
                     dfp = dfp.fillna(value=self.feature_na_method)
                 df[problem_cols] = dfp
@@ -288,6 +301,15 @@ class DataCleaner(DFTransformer, LoggableMixin):
         elif na_method == "fill":
             df = df.fillna(method="ffill")
             df = df.fillna(method="bfill")
+        elif na_method == "mean":
+            dfc = df[[ccol for ccol in df.columns if ccol in self.object_cols]]
+            dfc = dfc.fillna(method="ffill")
+            dfc = dfc.fillna(method="bfill")
+            df[dfc.columns] = dfc
+
+            dfn = df[[ncol for ncol in df.columns if ncol in self.number_cols]]
+            dfn = dfn.fillna(value=dfn.mean())
+            df[dfn.columns] = dfn
         else:
             df = df.fillna(value=na_method)
         self.logger.info(self._log_prefix +
@@ -337,12 +359,12 @@ class DataCleaner(DFTransformer, LoggableMixin):
             if self.encoder == 'one-hot':
                 self.logger.info(self._log_prefix +
                                  "One-hot encoding used for columns {}".format(
-                    object_df.columns.tolist()))
+                                     object_df.columns.tolist()))
                 object_df = pd.get_dummies(object_df).apply(pd.to_numeric)
             elif self.encoder == 'label':
                 self.logger.info(self._log_prefix +
                                  "Label encoding used for columns {}".format(
-                    object_df.columns.tolist()))
+                                     object_df.columns.tolist()))
                 for c in object_df.columns:
                     object_df[c] = LabelEncoder().fit_transform(object_df[c])
                 self.logger.warning(
