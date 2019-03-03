@@ -32,7 +32,12 @@ class DataCleaner(DFTransformer, LoggableMixin):
     Args:
         max_na_frac (float): The maximum fraction (0.0 - 1.0) of samples for a
             given feature allowed. Columns containing a higher nan fraction are
-            dropped.
+            handled according to feature_na_method.
+        feature_na_method (str): Defines how to handle features (column) with
+            higher na fraction than max_na_frac. "drop" for dropping these
+            features. "fill" for filling these features with pandas bfill and
+            ffill. Alternatively, specify a number to replace the nans, e.g. 0.
+            If all samples are nan, feature will be dropped regardless.
         encode_categories (bool): If True, retains features which are
             categorical (data type is string or object) and then
             one-hot encodes them. If False, drops them.
@@ -44,7 +49,7 @@ class DataCleaner(DFTransformer, LoggableMixin):
             Select one of the following methods: "fill" (use pandas fillna with
             ffill and bfill, sequentially), "ignore" (totally ignore nans in
             samples), "drop" (drop any remaining samples having a nan feature),
-            Alternatively, specify a value to replace the nans, e.g. 0.
+            Alternatively, specify a number to replace the nans, e.g. 0.
         na_method_transform (str, float, int): The same as na_method_fit, but
             for transform.
         logger (Logger, bool): A custom logger object to use for logging.
@@ -67,11 +72,13 @@ class DataCleaner(DFTransformer, LoggableMixin):
         dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped
     """
 
-    def __init__(self, max_na_frac=0.01, encode_categories=True,
-                 encoder='one-hot', drop_na_targets=True, na_method_fit="drop",
+    def __init__(self, max_na_frac=0.01, feature_na_method="drop",
+                 encode_categories=True, encoder='one-hot',
+                 drop_na_targets=True, na_method_fit="drop",
                  na_method_transform="fill", logger=True):
         self._logger = self.get_logger(logger)
         self.max_na_frac = max_na_frac
+        self.feature_na_method = feature_na_method
         self.encoder = encoder
         self.encode_categories = encode_categories
         self.drop_na_targets = drop_na_targets
@@ -111,8 +118,8 @@ class DataCleaner(DFTransformer, LoggableMixin):
         """
 
         self.logger.info(self._log_prefix +
-                         "Cleaning with respect to samples with na_method '{}'"
-                         "".format(self.na_method_fit))
+                         "Cleaning with respect to samples with sample "
+                         "na_method '{}'".format(self.na_method_fit))
         if target not in df.columns:
             raise AutomatminerError(
                 "Target {} must be contained in df.".format(target))
@@ -138,8 +145,8 @@ class DataCleaner(DFTransformer, LoggableMixin):
         Returns (pandas.DataFrame)
         """
         self.logger.info(self._log_prefix +
-                         "Cleaning with respect to samples with na_method '{}'"
-                         "".format(self.na_method_transform))
+                         "Cleaning with respect to samples with sample "
+                         "na_method '{}'".format(self.na_method_transform))
 
         if target != self.fitted_target:
             raise AutomatminerError(
@@ -192,8 +199,8 @@ class DataCleaner(DFTransformer, LoggableMixin):
             (pandas.DataFrame) The cleaned df
         """
         self.logger.info(self._log_prefix +
-                         "Before handling na: {} samples, {} features".format(
-            *df.shape))
+                         "Before handling na: {} samples, {} features"
+                         "".format(*df.shape))
 
         # Drop targets containing na before further processing
         if self.drop_na_targets and target in df.columns:
@@ -208,16 +215,30 @@ class DataCleaner(DFTransformer, LoggableMixin):
         feats0 = set(df.columns)
         if not self.is_fit:
             self.logger.info(self._log_prefix +
-                             "Handling na by max na threshold of {}."
-                             "".format(self.max_na_frac))
-            df = df.dropna(axis=1,
-                           thresh=int((1 - self.max_na_frac) * len(df)))
+                             "Handling feature na by max na threshold of {} "
+                             "with method '{}'.".format(self.max_na_frac,
+                                                        self.feature_na_method))
+            threshold = int((1 - self.max_na_frac) * len(df))
+            if self.feature_na_method == "drop":
+                df = df.dropna(axis=1, thresh=threshold)
+            else:
+                df = df.dropna(axis=1, thresh=len(df))
+                problem_cols = df.columns[df.isnull().mean() > self.max_na_frac]
+                dfp = df[problem_cols]
+                if self.feature_na_method == "fill":
+                    dfp = dfp.fillna(axis=1, method="ffill")
+                    dfp = dfp.fillna(method="bfill")
+                else:
+                    dfp = dfp.fillna(value=self.feature_na_method)
+                df[problem_cols] = dfp
+
             if len(df.columns) < len(feats0):
                 feats = set(df.columns)
                 n_feats = len(feats0) - len(feats)
                 napercent = self.max_na_frac * 100
                 feat_names = feats0 - feats
-                self.logger.info(self._log_prefix +
+                self.logger.info(
+                    self._log_prefix +
                     'These {} features were removed as they had more '
                     'than {}% missing values: {}'.format(
                         n_feats, napercent, feat_names))
