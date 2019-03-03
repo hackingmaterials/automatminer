@@ -245,7 +245,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                             log_fit = True
                     if log_fit:
                         self.logger.info(self._log_prefix + "Fitting {}."
-                                         "".format(f.__class__.__name__))
+                                                            "".format(
+                            f.__class__.__name__))
 
                     f.fit(df[featurizer_type].tolist())
                     f.set_n_jobs(self.n_jobs)
@@ -288,10 +289,10 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 cached_subdf = cached_df.loc[df.index]
                 if target in cached_subdf.columns:
                     if target not in df.columns:
-                        self.logger.warn(self._log_prefix +
-                            "Target not present in both cached df and "
-                            "input df. Cannot perform comparison to"
-                            "ensure index match.")
+                        self.logger.warn(
+                            self._log_prefix +
+                            "Target not present in both cached df and input df."
+                            " Cannot perform comparison to ensure index match.")
                     else:
                         cached_targets = cached_subdf[target]
                         input_targets = df[target]
@@ -520,11 +521,3 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 target_col_id=self.composition_col, overwrite_data=overwrite)
             df = struct2comp.featurize_dataframe(df, self.structure_col)
         return df
-
-if __name__ == "__main__":
-    from matminer.datasets.dataset_retrieval import load_dataset
-    af = AutoFeaturizer(preset="fast", cache_src="/Users/ardunn/alex/lbl/projects/common_env/dev_codes/hmprivate/hmprivate/automatminer/benchmarking/test.json")
-    df = load_dataset("elastic_tensor_2015")[["structure"]]
-
-    df = af.fit_transform(df, "K_VRH")
-    print(df)
