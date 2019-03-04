@@ -224,23 +224,22 @@ class DataCleaner(DFTransformer, LoggableMixin):
             if self.feature_na_method == "drop":
                 df = df.dropna(axis=1, thresh=threshold)
             else:
-                df = df.dropna(axis=1, thresh=0)
+                df = df.dropna(axis=1, thresh=1)
                 problem_cols = df.columns[df.isnull().mean() > self.max_na_frac]
                 dfp = df[problem_cols]
                 if self.feature_na_method == "fill":
                     dfp = dfp.fillna(method="ffill")
                     dfp = dfp.fillna(method="bfill")
                 elif self.feature_na_method == "mean":
-                    dfpc = dfp[[ccol for ccol in dfp.columns if ccol in
-                                self.object_cols]]
-                    dfpc = dfpc.fillna(method="ffill")
-                    dfpc = dfpc.fillna(method="bfill")
-                    dfp[dfpc.columns] = dfpc
-
+                    # Take the mean of all numeric columns
                     dfpn = dfp[[ncol for ncol in dfp.columns if ncol in
                                 self.number_cols]]
                     dfpn = dfpn.fillna(value=dfpn.mean())
                     dfp[dfpn.columns] = dfpn
+
+                    # Simply fill one hot encoded columns
+                    dfp = dfp.fillna(method="ffill")
+                    dfp = dfp.fillna(method="bfill")
                 else:
                     dfp = dfp.fillna(value=self.feature_na_method)
                 df[problem_cols] = dfp
@@ -302,14 +301,14 @@ class DataCleaner(DFTransformer, LoggableMixin):
             df = df.fillna(method="ffill")
             df = df.fillna(method="bfill")
         elif na_method == "mean":
-            dfc = df[[ccol for ccol in df.columns if ccol in self.object_cols]]
-            dfc = dfc.fillna(method="ffill")
-            dfc = dfc.fillna(method="bfill")
-            df[dfc.columns] = dfc
-
+            # Samples belonging in number columns are averaged to replace na
             dfn = df[[ncol for ncol in df.columns if ncol in self.number_cols]]
             dfn = dfn.fillna(value=dfn.mean())
             df[dfn.columns] = dfn
+
+            # the rest are simply filled
+            df = df.fillna(method="ffill")
+            df = df.fillna(method="bfill")
         else:
             df = df.fillna(value=na_method)
         self.logger.info(self._log_prefix +

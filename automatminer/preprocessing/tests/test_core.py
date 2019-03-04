@@ -133,6 +133,28 @@ class TestPreprocess(unittest.TestCase):
         self.assertAlmostEqual(fitted["minimum X"].iloc[99], mean_min_x,
                                places=10)
 
+    def test_DataCleaner_na_method_feature_sample_interaction(self):
+        dc = DataCleaner(max_na_frac=0.01, feature_na_method="mean",
+                         na_method_transform="fill", na_method_fit="fill")
+        df = self.test_df
+        # Should be dropped
+        df["maximum X"] = [np.nan] * len(df)
+        # Should be filled via mean
+        df["range X"] = [np.nan] * 100 + df["range X"].iloc[100:].tolist()
+        # Should be filled by 39
+        df["minimum X"].iloc[40] = np.nan
+
+        mean = df["range X"].loc[~df["range X"].isnull()].mean()
+        df = dc.fit_transform(df, self.target)
+        self.assertNotIn("maximum X", df.columns)
+        self.assertIn("range X", df.columns)
+
+        for r in df["range X"].iloc[:100]:
+            self.assertAlmostEqual(r, mean, places=5)
+
+        self.assertIn("minimum X", df.columns)
+        self.assertEqual(df["minimum X"].iloc[40], df["minimum X"].iloc[39])
+
     def test_FeatureReducer_basic(self):
         fr = FeatureReducer(reducers=('corr', 'tree'))
 
