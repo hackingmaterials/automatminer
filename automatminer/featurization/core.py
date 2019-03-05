@@ -418,7 +418,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                        target_col_id=featurizer_type)
                 df = stc.featurize_dataframe(df, featurizer_type,
                                              multiindex=self.multiindex,
-                                             ignore_errors=True)
+                                             ignore_errors=True,
+                                             inplace=False)
 
             elif isinstance(type_tester, dict):
                 self.logger.info(self._log_prefix +
@@ -437,7 +438,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                     return_original_on_error=True, max_sites=-50)
                 try:
                     df = cto.featurize_dataframe(df, featurizer_type,
-                                                 multiindex=self.multiindex)
+                                                 multiindex=self.multiindex,
+                                                 inplace=False)
                 except Exception as e:
                     self.logger.info(self._log_prefix +
                                      "Could not decorate oxidation states due "
@@ -460,7 +462,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                         "".format(featurizer_type, type(type_tester)))
                 dto = DictToObject(overwrite_data=True,
                                    target_col_id=featurizer_type)
-                df = dto.featurize_dataframe(df, featurizer_type)
+                df = dto.featurize_dataframe(df, featurizer_type, inplace=False)
 
                 # Decorate with oxidstates
                 if featurizer_type == self.structure_col and \
@@ -474,7 +476,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                         return_original_on_error=True, max_sites=-50)
                     try:
                         df = sto.featurize_dataframe(df, featurizer_type,
-                                                     multiindex=self.multiindex)
+                                                     multiindex=self.multiindex,
+                                                     inplace=False)
                     except Exception as e:
                         self.logger.info(
                             self._log_prefix +
@@ -517,5 +520,6 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             # states will then be transferred to composition.
             struct2comp = StructureToComposition(
                 target_col_id=self.composition_col, overwrite_data=overwrite)
-            df = struct2comp.featurize_dataframe(df, self.structure_col)
+            df = struct2comp.featurize_dataframe(df, self.structure_col,
+                                                 inplace=False)
         return df
