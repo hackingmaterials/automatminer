@@ -1,4 +1,3 @@
-# coding: utf-8
 import os
 import copy
 import unittest
@@ -7,7 +6,7 @@ import pandas as pd
 from pymatgen import Composition
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.datasets.dataset_retrieval import load_dataset
-from matminer.featurizers.composition import ElectronAffinity, ElementProperty
+from matminer.featurizers.composition import ElementProperty
 from matminer.featurizers.structure import GlobalSymmetryFeatures, \
     DensityFeatures
 
@@ -15,7 +14,9 @@ from automatminer.featurization.core import AutoFeaturizer
 from automatminer.featurization.sets import StructureFeaturizers, \
     CompositionFeaturizers
 
-test_dir = os.path.dirname(__file__)
+TEST_DIR = os.path.dirname(__file__)
+CACHE_FILE = "cache_test.json"
+CACHE_PATH = os.path.join(TEST_DIR, CACHE_FILE)
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
@@ -156,9 +157,9 @@ class TestAutoFeaturizer(unittest.TestCase):
                                                 "bandstructure",
                                                 "bandstructure_uniform"]
                                     )
-            df.to_pickle(os.path.join(test_dir, df_bsdos_pickled))
+            df.to_pickle(os.path.join(TEST_DIR, df_bsdos_pickled))
         else:
-            df = pd.read_pickle(os.path.join(test_dir, df_bsdos_pickled))
+            df = pd.read_pickle(os.path.join(TEST_DIR, df_bsdos_pickled))
         df = df.dropna(axis=0)
         df = df.rename(columns={"bandstructure_uniform": "bandstructure",
                                 "bandstructure": "line bandstructure"})
@@ -219,7 +220,8 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         df2 = af.transform(df2, target)
         self.assertAlmostEqual(df2[target].iloc[0], 111.788114, places=5)
-        self.assertAlmostEqual(df2["minimum X"].iloc[1], 1.36, places=2)
+        self.assertAlmostEqual(df2["PymatgenData minimum X"].iloc[1], 1.36,
+                               places=2)
 
     def test_column_attr(self):
         """
@@ -269,7 +271,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         df = self.test_df[['composition', target]].iloc[:flimit]
         af = AutoFeaturizer(functionalize=True, preset="fast")
         df = af.fit_transform(df, target)
-        self.assertTupleEqual(df.shape, (flimit, 15888))
+        self.assertTupleEqual(df.shape, (flimit, 16848))
 
     def test_StructureFeaturizers_needs_fitting(self):
         fset_nofit = StructureFeaturizers().best
@@ -279,60 +281,23 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue(af_needfit.needs_fit)
         self.assertFalse(af_nofit.needs_fit)
 
-    # todo: Fix test once metaselector is converted over to precheck
-    @unittest.skip(reason="Metaselector needs revamp before re-enabling.")
-    def test_use_metaselector(self):
-        # Test to see if metaselector works for this dataset
-        df = copy.copy(self.test_df.iloc[:self.limit])
-        target = "K_VRH"
+    def test_caching(self):
+        target = "G_VRH"
 
-        af = AutoFeaturizer(use_metaselector=True)
-        af.fit(df, target)
+        self.assertFalse(os.path.exists(CACHE_PATH))
+        af = AutoFeaturizer(cache_src=CACHE_PATH, preset="fast")
+        df = self.test_df[['composition', target]].iloc[:10]
+        df_feats = af.fit_transform(df, target)
+        self.assertTrue(os.path.exists(CACHE_PATH))
 
-        self.assertIsNotNone(af.metaselector)
-        dataset_mfs = af.metaselector.dataset_mfs
-        self.assertIn("composition_metafeatures", dataset_mfs.keys())
-        self.assertIn("structure_metafeatures", dataset_mfs.keys())
-        self.assertIsNotNone(dataset_mfs["composition_metafeatures"])
-        self.assertIsNotNone(dataset_mfs["structure_metafeatures"])
+        df_cache = self.test_df[['composition', target]].iloc[:10]
+        df_cache_feats = af.fit_transform(df_cache, target)
+        self.assertAlmostEqual(df_feats.iloc[3, 0].tolist(),
+                               df_cache_feats.iloc[3, 0].tolist())
 
-        comp_mfs = dataset_mfs["composition_metafeatures"]
-        self.assertEqual(comp_mfs["number_of_compositions"], 5)
-        self.assertAlmostEqual(comp_mfs["percent_of_all_metal"], 0.2)
-        self.assertAlmostEqual(
-            comp_mfs["percent_of_metal_nonmetal"], 0.8)
-        self.assertAlmostEqual(comp_mfs["percent_of_all_nonmetal"], 0.0)
-        self.assertAlmostEqual(
-            comp_mfs["percent_of_contain_trans_metal"], 0.8)
-        self.assertEqual(comp_mfs["number_of_different_elements"], 7)
-        self.assertAlmostEqual(comp_mfs["avg_number_of_elements"], 2.2)
-        self.assertEqual(comp_mfs["max_number_of_elements"], 3)
-        self.assertEqual(comp_mfs["min_number_of_elements"], 1)
-
-        struct_mfs = dataset_mfs["structure_metafeatures"]
-        self.assertEqual(struct_mfs["number_of_structures"], 5)
-        self.assertAlmostEqual(struct_mfs["percent_of_ordered_structures"],
-                               1.0)
-        self.assertAlmostEqual(struct_mfs["avg_number_of_sites"], 7.0)
-        self.assertEqual(struct_mfs["max_number_of_sites"], 12)
-        self.assertEqual(
-            struct_mfs["number_of_different_elements_in_structures"], 7)
-
-        excludes = af.metaselector.excludes
-        self.assertIn("IonProperty", excludes)
-        self.assertIn("Miedema", excludes)
-        self.assertIn("OxidationStates", excludes)
-        self.assertIn("YangSolidSolution", excludes)
-        self.assertIn("TMetalFraction", excludes)
-        self.assertIn("ElectronegativityDiff", excludes)
-        self.assertIn("CationProperty", excludes)
-        self.assertIn("ElectronAffinity", excludes)
-
-        df = af.fit_transform(df, target)
-        ef = ElectronAffinity()
-        ef_feats = ef.feature_labels()
-        self.assertFalse(any([f in df.columns for f in ef_feats]))
-        self.assertFalse(any([f in df.columns for f in ef_feats]))
+    def tearDown(self):
+        if os.path.exists(CACHE_PATH):
+            os.remove(CACHE_PATH)
 
 
 if __name__ == '__main__':

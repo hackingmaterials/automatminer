@@ -10,7 +10,8 @@ from automatminer.utils.pkg import AutomatminerError, \
     compare_columns, check_fitted, set_fitted
 from automatminer.utils.log import log_progress, AMM_LOG_TRANSFORM_STR, \
     AMM_LOG_FIT_STR
-from automatminer.utils.ml import regression_or_classification
+from automatminer.utils.ml import regression_or_classification, \
+    AMM_REG_NAME
 from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
     rebate, lower_corr_clf
@@ -31,7 +32,13 @@ class DataCleaner(DFTransformer, LoggableMixin):
     Args:
         max_na_frac (float): The maximum fraction (0.0 - 1.0) of samples for a
             given feature allowed. Columns containing a higher nan fraction are
-            dropped.
+            handled according to feature_na_method.
+        feature_na_method (str): Defines how to handle features (column) with
+            higher na fraction than max_na_frac. "drop" for dropping these
+            features. "fill" for filling these features with pandas bfill and
+            ffill. "mean" to fill categorical variables and mean for numerical
+            variables. Alternatively, specify a number to replace the nans,
+            e.g. 0. If all samples are nan, feature will be dropped regardless.
         encode_categories (bool): If True, retains features which are
             categorical (data type is string or object) and then
             one-hot encodes them. If False, drops them.
@@ -43,7 +50,8 @@ class DataCleaner(DFTransformer, LoggableMixin):
             Select one of the following methods: "fill" (use pandas fillna with
             ffill and bfill, sequentially), "ignore" (totally ignore nans in
             samples), "drop" (drop any remaining samples having a nan feature),
-            Alternatively, specify a value to replace the nans, e.g. 0.
+            "mean" (fills categorical variables, takes means of numerical).
+            Alternatively, specify a number to replace the nans, e.g. 0.
         na_method_transform (str, float, int): The same as na_method_fit, but
             for transform.
         logger (Logger, bool): A custom logger object to use for logging.
@@ -66,11 +74,13 @@ class DataCleaner(DFTransformer, LoggableMixin):
         dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped
     """
 
-    def __init__(self, max_na_frac=0.01, encode_categories=True,
-                 encoder='one-hot', drop_na_targets=True, na_method_fit="drop",
+    def __init__(self, max_na_frac=0.01, feature_na_method="drop",
+                 encode_categories=True, encoder='one-hot',
+                 drop_na_targets=True, na_method_fit="drop",
                  na_method_transform="fill", logger=True):
         self._logger = self.get_logger(logger)
         self.max_na_frac = max_na_frac
+        self.feature_na_method = feature_na_method
         self.encoder = encoder
         self.encode_categories = encode_categories
         self.drop_na_targets = drop_na_targets
@@ -109,8 +119,9 @@ class DataCleaner(DFTransformer, LoggableMixin):
         Returns: self
         """
 
-        self.logger.info("Cleaning with respect to samples with na_method '{}'"
-                         "".format(self.na_method_fit))
+        self.logger.info(self._log_prefix +
+                         "Cleaning with respect to samples with sample "
+                         "na_method '{}'".format(self.na_method_fit))
         if target not in df.columns:
             raise AutomatminerError(
                 "Target {} must be contained in df.".format(target))
@@ -135,8 +146,9 @@ class DataCleaner(DFTransformer, LoggableMixin):
 
         Returns (pandas.DataFrame)
         """
-        self.logger.info("Cleaning with respect to samples with na_method '{}'"
-                         "".format(self.na_method_transform))
+        self.logger.info(self._log_prefix +
+                         "Cleaning with respect to samples with sample "
+                         "na_method '{}'".format(self.na_method_transform))
 
         if target != self.fitted_target:
             raise AutomatminerError(
@@ -151,10 +163,12 @@ class DataCleaner(DFTransformer, LoggableMixin):
 
         # Ensure the order of columns is identical
         if target in df.columns:
-            self.logger.info("Reordering columns...")
+            self.logger.info(self._log_prefix +
+                             "Reordering columns...")
             df = df[self.fitted_df.columns]
         else:
-            self.logger.info("Target not found in df columns. Ignoring...")
+            self.logger.info(self._log_prefix +
+                             "Target not found in df columns. Ignoring...")
             reordered_cols = self.fitted_df.drop(columns=[target]).columns
             df = df[reordered_cols]
         return df
@@ -186,46 +200,76 @@ class DataCleaner(DFTransformer, LoggableMixin):
         Returns:
             (pandas.DataFrame) The cleaned df
         """
-        self.logger.info("Before handling na: {} samples, {} features".format(
-            *df.shape))
+        self.logger.info(self._log_prefix +
+                         "Before handling na: {} samples, {} features"
+                         "".format(*df.shape))
 
         # Drop targets containing na before further processing
         if self.drop_na_targets and target in df.columns:
             clean_df = df.dropna(axis=0, how='any', subset=[target])
             self.dropped_samples = df[~df.index.isin(clean_df.index)]
-            self.logger.info("{} samples did not have target values. They were "
+            self.logger.info(self._log_prefix +
+                             "{} samples did not have target values. They were "
                              "dropped.".format(len(self.dropped_samples)))
             df = clean_df
 
         # Remove features failing the max_na_frac limit
         feats0 = set(df.columns)
         if not self.is_fit:
-            self.logger.info("Handling na by max na threshold of {}."
-                             "".format(self.max_na_frac))
-            df = df.dropna(axis=1,
-                           thresh=int((1 - self.max_na_frac) * len(df)))
+            self.logger.info(self._log_prefix +
+                             "Handling feature na by max na threshold of {} "
+                             "with method '{}'.".format(self.max_na_frac,
+                                                        self.feature_na_method))
+            threshold = int((1 - self.max_na_frac) * len(df))
+            if self.feature_na_method == "drop":
+                df = df.dropna(axis=1, thresh=threshold)
+            else:
+                df = df.dropna(axis=1, thresh=1)
+                problem_cols = df.columns[df.isnull().mean() > self.max_na_frac]
+                dfp = df[problem_cols]
+                if self.feature_na_method == "fill":
+                    dfp = dfp.fillna(method="ffill")
+                    dfp = dfp.fillna(method="bfill")
+                elif self.feature_na_method == "mean":
+                    # Take the mean of all numeric columns
+                    dfpn = dfp[[ncol for ncol in dfp.columns if ncol in
+                                self.number_cols]]
+                    dfpn = dfpn.fillna(value=dfpn.mean())
+                    dfp[dfpn.columns] = dfpn
+
+                    # Simply fill one hot encoded columns
+                    dfp = dfp.fillna(method="ffill")
+                    dfp = dfp.fillna(method="bfill")
+                else:
+                    dfp = dfp.fillna(value=self.feature_na_method)
+                df[problem_cols] = dfp
+
             if len(df.columns) < len(feats0):
                 feats = set(df.columns)
                 n_feats = len(feats0) - len(feats)
                 napercent = self.max_na_frac * 100
                 feat_names = feats0 - feats
                 self.logger.info(
+                    self._log_prefix +
                     'These {} features were removed as they had more '
                     'than {}% missing values: {}'.format(
                         n_feats, napercent, feat_names))
         else:
             mismatch = compare_columns(self.fitted_df, df, ignore=target)
             if mismatch["mismatch"]:
-                self.logger.warning("Mismatched columns found in dataframe "
+                self.logger.warning(self._log_prefix +
+                                    "Mismatched columns found in dataframe "
                                     "used for fitting and argument dataframe.")
                 if not coerce_mismatch:
                     raise AutomatminerError("Mismatch between columns found in "
                                             "arg dataframe and dataframe used "
                                             "for fitting!")
                 else:
-                    self.logger.warning("Coercing mismatched columns...")
+                    self.logger.warning(self._log_prefix +
+                                        "Coercing mismatched columns...")
                     if mismatch["df1_not_in_df2"]:  # in fitted, not in arg
                         self.logger.warning(
+                            self._log_prefix +
                             "Assuming missing columns in argument df are "
                             "one-hot encoding issues. Setting to zero the "
                             "following new columns:\n{}".format(
@@ -236,6 +280,7 @@ class DataCleaner(DFTransformer, LoggableMixin):
                                 df[c] = np.zeros((df.shape[0]))
                     elif mismatch["df2_not_in_df1"]:  # arg cols not in fitted
                         self.logger.warning(
+                            self._log_prefix +
                             "Following columns are being dropped:\n{}".format(
                                 mismatch["df2_not_in_df1"]))
                         df = df.drop(columns=mismatch["df2_not_in_df1"])
@@ -255,10 +300,20 @@ class DataCleaner(DFTransformer, LoggableMixin):
         elif na_method == "fill":
             df = df.fillna(method="ffill")
             df = df.fillna(method="bfill")
+        elif na_method == "mean":
+            # Samples belonging in number columns are averaged to replace na
+            dfn = df[[ncol for ncol in df.columns if ncol in self.number_cols]]
+            dfn = dfn.fillna(value=dfn.mean())
+            df[dfn.columns] = dfn
+
+            # the rest are simply filled
+            df = df.fillna(method="ffill")
+            df = df.fillna(method="bfill")
         else:
             df = df.fillna(value=na_method)
-        self.logger.info("After handling na: {} samples, {} features".format(
-            *df.shape))
+        self.logger.info(self._log_prefix +
+                         "After handling na: {} samples, {} features".format(
+                             *df.shape))
         return df
 
     def to_numerical(self, df, target):
@@ -273,7 +328,8 @@ class DataCleaner(DFTransformer, LoggableMixin):
         Returns:
             (pandas.DataFrame) The numerical df
         """
-        self.logger.info("Replacing infinite values with nan for easier "
+        self.logger.info(self._log_prefix +
+                         "Replacing infinite values with nan for easier "
                          "screening.")
         df = df.replace([np.inf, -np.inf], np.nan)
         self.number_cols = []
@@ -300,15 +356,18 @@ class DataCleaner(DFTransformer, LoggableMixin):
         object_df = df[self.object_cols]
         if self.encode_categories and self.object_cols:
             if self.encoder == 'one-hot':
-                self.logger.info("One-hot encoding used for columns {}".format(
-                    object_df.columns.tolist()))
+                self.logger.info(self._log_prefix +
+                                 "One-hot encoding used for columns {}".format(
+                                     object_df.columns.tolist()))
                 object_df = pd.get_dummies(object_df).apply(pd.to_numeric)
             elif self.encoder == 'label':
-                self.logger.info("Label encoding used for columns {}".format(
-                    object_df.columns.tolist()))
+                self.logger.info(self._log_prefix +
+                                 "Label encoding used for columns {}".format(
+                                     object_df.columns.tolist()))
                 for c in object_df.columns:
                     object_df[c] = LabelEncoder().fit_transform(object_df[c])
                 self.logger.warning(
+                    self._log_prefix +
                     'LabelEncoder used for categorical colums. For access to '
                     'the original labels via inverse_transform, encode '
                     'manually and set retain_categorical to False')
@@ -428,6 +487,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
                                (missing_keep_features, 'keep')]:
             if features:
                 self.logger.warning(
+                    self._log_prefix +
                     "Asked to {} some features that do not exist in the "
                     "dataframe. Skipping the following features:\n{}".format(
                         name, features))
@@ -452,20 +512,24 @@ class FeatureReducer(DFTransformer, LoggableMixin):
             elif r == "rebate":
                 if isinstance(self.n_rebate_features, float):
                     self.logger.info(
+                        self._log_prefix +
                         "Retaining fraction {} of current {} features.".format(
                             self.n_rebate_features, df.shape[1] - 1))
                     self.n_rebate_features = int(df.shape[1] *
                                                  self.n_rebate_features)
                 self.logger.info(
+                    self._log_prefix +
                     "ReBATE MultiSURF running: retaining {} numerical "
                     "features.".format(self.n_rebate_features))
                 reduced_df = rebate(df, target,
                                     n_features=self.n_rebate_features)
                 reduced_df = reduced_df.copy(deep=True)
                 self.logger.info(
+                    self._log_prefix +
                     "ReBATE MultiSURF completed: retained {} numerical "
                     "features.".format(len(reduced_df.columns)))
                 self.logger.debug(
+                    self._log_prefix +
                     "ReBATE MultiSURF gave the following "
                     "features: {}".format(reduced_df.columns.tolist()))
                 self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
@@ -474,33 +538,38 @@ class FeatureReducer(DFTransformer, LoggableMixin):
                 if self.n_pca_features == "auto":
                     if n_samples < n_features:
                         self.logger.warning(
+                            self._log_prefix +
                             "Number of samples ({}) is less than number of "
                             "features ({}). Setting n_pca_features equal to "
                             "n_samples.".format(n_samples, n_features))
                         self._pca = PCA(n_components=n_samples,
                                         svd_solver="full")
                     else:
-                        self.logger.info("PCA automatically determining "
-                                         "optimal number of features using "
-                                         "Minka's MLE.")
+                        self.logger.info(
+                            self._log_prefix +
+                            "PCA automatically determining optimal number of "
+                            "features using Minka's MLE.")
                         self._pca = PCA(n_components="mle", svd_solver="auto")
                 else:
                     if isinstance(self.n_pca_features, float):
-                        self.logger.info("Retaining fraction {} of current "
-                                         "{} features."
-                                         "".format(self.n_pca_features,
-                                                   df.shape[1]))
+                        self.logger.info(
+                            self._log_prefix +
+                            "Retaining fraction {} of current {} features."
+                            "".format(self.n_pca_features, df.shape[1]))
                         self.n_pca_features = int(df.shape[1] *
                                                   self.n_pca_features)
                     if self.n_pca_features > n_samples:
                         self.logger.warning(
+                            self._log_prefix +
                             "Number of PCA features interpreted as {}, which is"
                             " more than the number of samples ({}). "
                             "n_pca_features coerced to equal n_samples."
                             "".format(self.n_pca_features, n_samples))
                         self.n_pca_features = n_samples
-                    self.logger.info("PCA running: retaining {} numerical "
-                                     "features.".format(self.n_pca_features))
+                    self.logger.info(
+                        self._log_prefix +
+                        "PCA running: retaining {} numerical features."
+                        "".format(self.n_pca_features))
                     self._pca = PCA(n_components=self.n_pca_features,
                                     svd_solver="auto")
                 self._pca.fit(X.values, y.values)
@@ -511,6 +580,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
                 reduced_df = pd.DataFrame(columns=pca_feats, data=matrix,
                                           index=X.index)
                 self.logger.info(
+                    self._log_prefix +
                     "PCA completed: retained {} numerical "
                     "features.".format(len(reduced_df.columns)))
 
@@ -529,11 +599,13 @@ class FeatureReducer(DFTransformer, LoggableMixin):
         for_force_removal = [c for c in self._remove_features if c in all_kept]
 
         if save_from_removal:
-            self.logger.info("Saving features from removal. "
+            self.logger.info(self._log_prefix +
+                             "Saving features from removal. "
                              "Saved features:\n{}".format(save_from_removal))
 
         if for_force_removal:
-            self.logger.info("Forcing removal of features. "
+            self.logger.info(self._log_prefix +
+                             "Forcing removal of features. "
                              "Removed features: \n{}".format(for_force_removal))
             self.removed_features['manual'] = for_force_removal
 
@@ -544,7 +616,12 @@ class FeatureReducer(DFTransformer, LoggableMixin):
     @log_progress(AMM_LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target):
-        X = df.drop(columns=target)
+        if target not in df.columns:
+            self.logger.warning(
+                self._log_prefix + "Target not found in columns to transform.")
+            X = df
+        else:
+            X = df.drop(columns=target)
         for r, f in self.removed_features.items():
             if r == "pca":
                 matrix = self._pca.transform(X)
@@ -553,7 +630,8 @@ class FeatureReducer(DFTransformer, LoggableMixin):
             else:
                 X = X.drop(columns=[c for c in f
                                     if c not in self._keep_features])
-        X.loc[:, target] = df[target].values
+        if target in df:
+            X.loc[:, target] = df[target].values
         return X
 
     def rm_correlated(self, df, target, r_max=0.95):
@@ -572,7 +650,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
         """
         mode = regression_or_classification(df[target])
         corr = abs(df.corr())
-        if mode == "regression":
+        if mode == AMM_REG_NAME:
             corr = corr.sort_values(by=target)
         rm_feats = []
         for feat in corr.columns:
@@ -585,26 +663,32 @@ class FeatureReducer(DFTransformer, LoggableMixin):
                     continue
                 else:
                     if corval >= r_max:
-                        if mode == "regression":
+                        if mode == AMM_REG_NAME:
                             if corr.loc[idx, target] > corr.loc[feat, target]:
                                 removed_feat = feat
                             else:
                                 removed_feat = idx
-                        else:  # mode == "classification"
+                        else:  # mode is classification
                             removed_feat = lower_corr_clf(df, target, feat, idx)
                         if removed_feat not in rm_feats:
                             rm_feats.append(removed_feat)
                             self.logger.debug(
+                                self._log_prefix +
                                 '"{}" correlates strongly with '
                                 '"{}"'.format(feat, idx))
                             self.logger.debug(
+                                self._log_prefix +
                                 'removing "{}"...'.format(removed_feat))
                         if removed_feat == feat:
                             break
         if len(rm_feats) > 0:
             df = df.drop(rm_feats, axis=1)
-            self.logger.info("{} features removed due to cross correlation more"
-                             " than {}".format(len(rm_feats), r_max))
-            self.logger.debug("Features removed by cross-correlation were: {}"
-                              "".format(rm_feats))
+            self.logger.info(
+                self._log_prefix +
+                "{} features removed due to cross correlation more than {}"
+                "".format(len(rm_feats), r_max))
+            self.logger.debug(
+                self._log_prefix +
+                "Features removed by cross-correlation were: {}"
+                "".format(rm_feats))
         return df

@@ -1,8 +1,9 @@
 """
 The highest level classes for pipelines.
 """
-from pprint import pformat
+import os
 import pickle
+from pprint import pformat
 
 from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
@@ -54,7 +55,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         logger (Logger, bool): A custom logger object to use for logging.
             Alternatively, if set to True, the default automatminer logger will
             be used. If set to False, then no logging will occur.
-        log_level (int): The log level. For example logging.DEBUG.
+        log_level (int): The log level. For example logging.DEBUG or 2.
         autofeaturizer (AutoFeaturizer): The autofeaturizer object used to
             automatically decorate the dataframe with descriptors.
         cleaner (DataCleaner): The data cleaner object used to get a
@@ -83,7 +84,7 @@ class MatPipe(DFTransformer, LoggableMixin):
                                         "reducer, and cleaner), or none (to use"
                                         "default).")
             else:
-                config = get_preset_config("default")
+                config = get_preset_config("production")
                 autofeaturizer = config["autofeaturizer"]
                 cleaner = config["cleaner"]
                 reducer = config["reducer"]
@@ -171,7 +172,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         return predictions
 
     @set_fitted
-    def benchmark(self, df, target, kfold, fold_subset=None, strict=True):
+    def benchmark(self, df, target, kfold, fold_subset=None, cache=False):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
@@ -202,72 +203,61 @@ class MatPipe(DFTransformer, LoggableMixin):
                 index). For example, to run only the 3rd train/validation/test
                 split of the kfold, set fold_subset = [2]. To use the first and
                 fourth, set fold_subset = [0, 3].
-            strict (bool): If True, treats each train/validation/test split
-                as completely separate problems; this prevents any possible
-                information leakage from the train set into the test set (e.g.,
-                one-hot encoding features values from the test set which do not
-                exist in the train set). However, strict benchmarks require
-                each nested CV fold be featurized separately, which is
-                expensive. Running with strict=False only featurizes the
-                dataset once. strict=True should be used for results which will
-                be reported; strict=False should be used for quick(er) informal
-                benchmarks, which may have results similar to strict
-                benchmarking. Do NOT use strict=False when reporting results!
+            cache (bool): If True, pre-featurizes the entire dataframe
+                (including test data!) and caches it before iterating over
+                folds. Do NOT use if you are using fittable featurizers whose
+                feature labels are based on their input! Doing so may "leak"
+                information from the testing set to the training set and will
+                over-represent your benchmark. Enabling this for featurizers
+                which are not fittable is completely safe. Note that your
+                autofeaturizer must have a cache_src defined if allow_caching is
+                enabled (do this either through the AutoFeaturizer class or
+                using the cache_src argument to get_preset_config.
 
         Returns:
             results ([pd.DataFrame]): Dataframes containing each fold's
                 known targets, as well as their independently predicted targets.
         """
+        cache_src = self.autofeaturizer.cache_src
+        if cache_src and cache:
+            if os.path.exists(cache_src):
+                self.logger.warning(
+                    "Cache src {} already found! Ensure this featurized data "
+                    "matches the df being benchmarked.".format(cache_src))
+            self.logger.warning("Running pre-featurization for caching.")
+            self.autofeaturizer.fit_transform(df, target)
+        elif cache_src and not cache:
+            raise AutomatminerError(
+                "Caching was enabled in AutoFeaturizer but not in benchmark. "
+                "Either disable caching in AutoFeaturizer or enable it by "
+                "passing cache=True to benchmark.")
+        elif cache and not cache_src:
+            raise AutomatminerError(
+                "MatPipe cache is enabled, but no cache_src was defined in "
+                "autofeaturizer. Pass the cache_src argument to AutoFeaturizer "
+                "or use the cache_src get_preset_config powerup.")
+        else:
+            self.logger.debug("No caching being used in AutoFeaturizer or "
+                              "benchmark.")
+
         if not fold_subset:
             fold_subset = list(range(kfold.n_splits))
 
-        self.logger.debug("Beginning benchmark")
+        self.logger.warning("Beginning benchmark.")
         results = []
         fold = 0
-
-        if strict:
-            self.logger.warning("Beginning strict benchmark.")
-            results = []
-            fold = 0
-            for _, test_ix in kfold.split(X=df, y=df[target]):
-                if fold in fold_subset:
-                    self.logger.info("Training on fold index {}".format(fold))
-                    # Split and identify test set
-                    test = df.iloc[test_ix]
-                    train = df[~df.index.isin(test.index)]
-                    self.fit(train, target)
-                    self.logger.info("Predicting fold index {}".format(fold))
-                    test = self.predict(test, target)
-                    results.append(test)
-                fold += 1
-            return results
-        else:
-            self.logger.warning("Strict benchmarking has been turned OFF! "
-                                "Please refrain from reporting these results,"
-                                "as there may be feature information leakage.")
-            # Featurize all data once
-            df = self.autofeaturizer.fit_transform(df, target)
-
-            for _, test_ix in kfold.split(df):
-                if fold in fold_subset:
-                    self.logger.info("Training on fold index {}".format(fold))
-
-                    # Split and identify test set
-                    test = df.iloc[test_ix]
-                    train = df[~df.index.isin(test.index)]
-
-                    # Use transformers on separate training and testing dfs
-                    train = self.cleaner.fit_transform(train, target)
-                    train = self.reducer.fit_transform(train, target)
-                    self.post_fit_df = train
-                    self.learner.fit(train, target)
-                    self.logger.info("Predicting fold index {}".format(fold))
-                    test = self.cleaner.transform(test, target)
-                    test = self.reducer.transform(test, target)
-                    test = self.learner.predict(test, target)
-                    results.append(test)
-                fold += 1
-            return results
+        for _, test_ix in kfold.split(X=df, y=df[target]):
+            if fold in fold_subset:
+                self.logger.info("Training on fold index {}".format(fold))
+                # Split and identify test set
+                test = df.iloc[test_ix]
+                train = df[~df.index.isin(test.index)]
+                self.fit(train, target)
+                self.logger.info("Predicting fold index {}".format(fold))
+                test = self.predict(test, target)
+                results.append(test)
+            fold += 1
+        return results
 
     @check_fitted
     def digest(self, filename=None):

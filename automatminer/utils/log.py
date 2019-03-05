@@ -13,7 +13,8 @@ AMM_LOG_TRANSFORM_STR = "transforming"
 AMM_LOG_PREDICT_STR = "predicting"
 
 
-def initialize_logger(name, filepath='.', filebase=None, level=None):
+def initialize_logger(name, filepath='.', filebase=None,
+                      level=None) -> logging.Logger:
     """Initialize the default logger with stdout and file handlers.
 
     Args:
@@ -47,7 +48,7 @@ def initialize_logger(name, filepath='.', filebase=None, level=None):
     return logger
 
 
-def initialize_null_logger(name):
+def initialize_null_logger(name) -> logging.Logger:
     """Initialize the a dummy logger which will swallow all logging commands.
     Returns:
         (Logger): The package name.
@@ -88,10 +89,11 @@ def log_progress(operation):
                 result: The method result.
             """
             self = args[0]
-            name = self.__class__.__name__
-            self.logger.info("{} starting {}.".format(name, operation))
+            self.logger.info("{}Starting {}.".format(self._log_prefix,
+                                                     operation))
             result = meth(*args, **kwargs)
-            self.logger.info("{} finished {}.".format(name, operation))
+            self.logger.info("{}Finished {}.".format(self._log_prefix,
+                                                     operation))
             return result
 
         return wrapper
