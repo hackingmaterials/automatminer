@@ -16,3 +16,6 @@ Subpackages
     automatminer.automl
     automatminer.featurization
     automatminer.preprocessing
+    automatminer.base
+    automatminer.pipeline
+    automatminer.presets

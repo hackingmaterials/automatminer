@@ -12,10 +12,12 @@ Module contents
 Submodules
 ----------
 
-automatminer.automl.adaptors module
------------------------------------
+.. automodapi:: automatminer.automl.adaptors
+    :members:
+    :undoc-members:
+    :no-inheritance-diagram:
 
-.. automodule:: automatminer.automl.adaptors
+.. automodapi:: automatminer.automl.adaptors
     :members:
     :undoc-members:
     :no-inheritance-diagram:

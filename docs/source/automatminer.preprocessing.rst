@@ -9,3 +9,15 @@ Module contents
     :undoc-members:
     :no-inheritance-diagram:
 
+Submodules
+----------
+
+.. automodapi:: automatminer.preprocessing.core
+    :members:
+    :undoc-members:
+    :no-inheritance-diagram:
+
+.. automodapi:: automatminer.preprocessing.feature_selection
+    :members:
+    :undoc-members:
+    :no-inheritance-diagram:
