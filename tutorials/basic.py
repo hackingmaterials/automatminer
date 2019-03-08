@@ -21,7 +21,7 @@ from automatminer import MatPipe
 # MatPipe. We can do this with the get_preset_config function; here, we'll use
 # the "express" config, which will provide decent results in a reasonable time
 # frame (an hour or two).
-pipe = MatPipe(**get_preset_config("debug_single"))
+pipe = MatPipe(**get_preset_config("express"))
 
 # Let's download an example dataset and try predicting bulk moduli.
 from sklearn.model_selection import train_test_split

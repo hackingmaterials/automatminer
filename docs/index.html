@@ -6,9 +6,10 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>How it works &#8212; automatminer 2019.02.02_beta documentation</title>
+    <title>How it works &#8212; automatminer 2019.02.03_beta documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
@@ -99,10 +100,88 @@ pip install -e .
 </div>
 <div class="section" id="full-code-examples">
 <h1>Full Code Examples<a class="headerlink" href="#full-code-examples" title="Permalink to this headline">¶</a></h1>
-<p>This section is a work in progress; please stay tuned as we add more examples!</p>
+<p>We are now going to walk through how to create a MatPipe using the default
+configurations and the elastic_tensor_2015 dataset. We will then use this
+MatPipe to benchmark the target property K_VRH and we will use our results
+to determine the mean squared error. Buckle up!</p>
+<div class="section" id="setting-up-the-dataframe">
+<h2>Setting up the Dataframe<a class="headerlink" href="#setting-up-the-dataframe" title="Permalink to this headline">¶</a></h2>
+<p>We will use the matminer function load_dataset to give us access to the
+elastic_tensor_2015 dataset. The result is a Pandas dataframe.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matminer.datasets.dataset_retrieval</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;elastic_tensor_2015&quot;</span><span class="p">)</span> <span class="c1">#Loads in Pandas dataset</span>
+</pre></div>
+</div>
+<p>Next, we will use get_preset_config to use different pre-built configurations
+for a MatPipe. The options include production, default, fast, and debug.
+Specific details about each config can be seen in <a class="reference external" href="api/automatminer.get_preset_config.html">presets.py</a>. In this example, we will be using
+the debug config for a short program runtime. Of course, you do not need to use
+a preset configuration. Simply use the <a class="reference external" href="api/automatminer.MatPipe.html">MatPipe</a>
+functions to choose your own adaptor. After this step, we will pass in the parameter
+as an argument of <a class="reference external" href="api/automatminer.MatPipe.html">MatPipe</a> to get a MatPipe
+object.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer.presets</span> <span class="kn">import</span> <span class="n">get_preset_config</span>
+<span class="kn">from</span> <span class="nn">automatminer.pipeline</span> <span class="kn">import</span> <span class="n">MatPipe</span>
+
+<span class="c1"># Get preset configurations for debug. The debug configuration allows</span>
+<span class="c1"># for rapid testing while the other configurations are more useful for</span>
+<span class="c1"># real-world applications.</span>
+<span class="n">debug_config</span> <span class="o">=</span> <span class="n">get_preset_config</span><span class="p">(</span><span class="s2">&quot;debug&quot;</span><span class="p">)</span>
+<span class="c1"># Create a MatPipe using our configuration.</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span><span class="o">**</span><span class="n">debug_config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The preset automatminer uses pre-defined column names ‘composition’ and ‘structure’
+to find the composition and structure columns. You can easily fix this by renaming
+your respective columns to the correct names.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Rename the appropriate dataframe columns to create a dataframe that</span>
+<span class="c1"># can be passed into our automatminer functions.</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;formula&quot;</span><span class="p">:</span> <span class="s2">&quot;composition&quot;</span><span class="p">})[[</span><span class="s2">&quot;composition&quot;</span><span class="p">,</span> <span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="s2">&quot;K_VRH&quot;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="benchmarking-automatminer-s-performance">
 <h2>Benchmarking automatminer’s performance<a class="headerlink" href="#benchmarking-automatminer-s-performance" title="Permalink to this headline">¶</a></h2>
-<p>Download matminer’s Elastic Tensor Dataset from 2015.</p>
+<p>In this example, we are performing a machine learning benchmark using MatPipe
+in order to see how well our MatPipe can predict a certain target property.
+The target property we will be benchmarking in this example is K_VRH. Keep in
+mind that benchmarking requires a KFold object since benchmarks are run with
+nested cross validation. This mitigates the performance of the benchmark based
+on the choice of test set and also better estimates the generalization error
+than a single validation/test split would.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">MatPipe benchmarks with a nested cross validation, meaning it makes</span>
+<span class="sd">k validation/test splits, where all model selection is done on the train</span>
+<span class="sd">/validation set (a typical CV). When the model is done validating, it is</span>
+<span class="sd">used to predict the previously unseen test set data.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">kfold</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="c1">#We will use a 5-Fold object.</span>
+<span class="n">predicted</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">benchmark</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;K_VRH&quot;</span><span class="p">,</span> <span class="n">kfold</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The result of pipe.benchmark() will be a new dataframe with the predicted results
+stored in a column called the property name combined with ” predicted”. In this
+example, it will be stored in “K_VRH predicted.”</p>
+</div>
+<div class="section" id="calculating-mse">
+<h2>Calculating MSE<a class="headerlink" href="#calculating-mse" title="Permalink to this headline">¶</a></h2>
+<p>As mentioned above, the “predicted” variable is a dataframe that contains several columns,
+including actual property values and predicted property values. In this example, we will
+use the actual K_VRH data and the predicted K_VRH data in order to see how well the
+benchmarking went.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save the actual K_VRH Series to y_true.</span>
+<span class="n">y_true</span> <span class="o">=</span> <span class="n">predicted</span><span class="p">[</span><span class="s2">&quot;K_VRH&quot;</span><span class="p">]</span>
+<span class="c1"># Save the predicted K_VRH Series to y_test.</span>
+<span class="n">y_test</span> <span class="o">=</span> <span class="n">predicted</span><span class="p">[</span><span class="s2">&quot;K_VRH predicted&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Finally, we can use the sklearn package to calculate a wide variety of metrics on
+these two Series. In this case, we want the mean squared error so we will use that
+function.</p>
+<p>And voilà, we are done! We have successfully loaded in a dataset, benchmarked a test property
+using a MatPipe with ‘debug’ configs, and then ran an analysis on our results by calculating
+MSE. And all that in less than 15 lines of code!</p>
 </div>
 </div>
 <div class="section" id="citing-automatminer">
@@ -111,7 +190,7 @@ pip install -e .
 </div>
 <div class="section" id="contributing">
 <h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
-<p>Interested in contributing? See our <a class="reference external" href="https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md">contribution guidelines</a> and make a pull request! Please submit questions, issues / bug reports, and all other communication through the  <a class="reference external" href="https://groups.google.com/forum/#!forum/matminer">matminer Google Group</a>.</p>
+<p>Interested in contributing? See our <a class="reference external" href="https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md">contribution guidelines</a> and make a pull request! Please submit questions, issues/bug reports, and all other communication through the  <a class="reference external" href="https://groups.google.com/forum/#!forum/matminer">matminer Google Group</a>.</p>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
@@ -119,6 +198,7 @@ pip install -e .
 <li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
 <li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
 <li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><a class="reference internal" href="directory.html#directory"><span class="std std-ref">Python API</span></a></li>
 </ul>
 </div>
 
