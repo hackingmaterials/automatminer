@@ -1,0 +1,164 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>automatminer.presets &#8212; automatminer 2019.02.03_beta documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for automatminer.presets</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Various configurations for MatPipe.</span>
+
+<span class="sd">Use them like so:</span>
+
+<span class="sd">    config = get_preset_config()</span>
+<span class="sd">    pipe = MatPipe(**config)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Alex Dunn &lt;ardunn@lbl.gov&gt;&quot;</span><span class="p">]</span>
+
+<span class="kn">from</span> <span class="nn">xgboost</span> <span class="k">import</span> <span class="n">XGBRegressor</span><span class="p">,</span> <span class="n">XGBClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="n">RandomForestClassifier</span>
+
+<span class="kn">from</span> <span class="nn">automatminer.featurization</span> <span class="k">import</span> <span class="n">AutoFeaturizer</span>
+<span class="kn">from</span> <span class="nn">automatminer.preprocessing</span> <span class="k">import</span> <span class="n">FeatureReducer</span><span class="p">,</span> <span class="n">DataCleaner</span>
+<span class="kn">from</span> <span class="nn">automatminer.automl</span> <span class="k">import</span> <span class="n">TPOTAdaptor</span><span class="p">,</span> <span class="n">SinglePipelineAdaptor</span>
+
+
+<div class="viewcode-block" id="get_preset_config"><a class="viewcode-back" href="../../api/automatminer.presets.get_preset_config.html#automatminer.get_preset_config">[docs]</a><span class="k">def</span> <span class="nf">get_preset_config</span><span class="p">(</span><span class="n">preset</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;express&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">powerups</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Preset configs for MatPipe.</span>
+
+<span class="sd">    USER:</span>
+<span class="sd">    &quot;production&quot;: Used for making production predictions and benchmarks.</span>
+<span class="sd">        Balances accuracy and timeliness.</span>
+<span class="sd">    &quot;heavy&quot; - When high accuracy is required, and you have access to</span>
+<span class="sd">        (very) powerful computing resources. May be buggier and more difficult</span>
+<span class="sd">        to run than production.</span>
+<span class="sd">    &quot;express&quot; - Good for quick benchmarks with moderate accuracy.</span>
+<span class="sd">    &quot;express_single&quot; - Same as express but uses XGB trees as single models</span>
+<span class="sd">        instead of automl TPOT. Good for even more express results.</span>
+
+<span class="sd">    DEBUG:</span>
+<span class="sd">    &quot;debug&quot; - Debugging with automl enabled.</span>
+<span class="sd">    &quot;debug_single&quot; - Debugging with a single model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        preset (str): The name of the preset config you&#39;d like to use.</span>
+<span class="sd">        **powerups: Various modifications as kwargs.</span>
+<span class="sd">            cache_src (str): A file path. If specified, Autofeaturizer will use</span>
+<span class="sd">                feature caching with a file stored at this location. See</span>
+<span class="sd">                Autofeaturizer&#39;s cache_src argument for more information.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        (dict) The desired preset config.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">caching_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cache_src&quot;</span><span class="p">:</span> <span class="n">powerups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cache_src&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)}</span>
+
+    <span class="k">if</span> <span class="n">preset</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span><span class="p">:</span>
+        <span class="n">production_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">720</span><span class="p">,</span>
+                                   <span class="n">max_eval_time_mins</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;pca&#39;</span><span class="p">,)),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">production_config</span>
+    <span class="k">elif</span> <span class="n">preset</span> <span class="o">==</span> <span class="s2">&quot;heavy&quot;</span><span class="p">:</span>
+        <span class="n">heavy_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">1440</span><span class="p">),</span>
+            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;corr&quot;</span><span class="p">,</span> <span class="s2">&quot;rebate&quot;</span><span class="p">)),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">heavy_config</span>
+    <span class="k">elif</span> <span class="n">preset</span> <span class="o">==</span> <span class="s2">&quot;express&quot;</span><span class="p">:</span>
+        <span class="n">express_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">population_size</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,)),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;fast&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">express_config</span>
+    <span class="k">elif</span> <span class="n">preset</span> <span class="o">==</span> <span class="s2">&quot;express_single&quot;</span><span class="p">:</span>
+        <span class="n">xgb_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;n_estimators&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s2">&quot;max_depth&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+        <span class="n">express_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">SinglePipelineAdaptor</span><span class="p">(</span>
+                <span class="n">regressor</span><span class="o">=</span><span class="n">XGBRegressor</span><span class="p">(</span><span class="o">**</span><span class="n">xgb_kwargs</span><span class="p">),</span>
+                <span class="n">classifier</span><span class="o">=</span><span class="n">XGBClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">xgb_kwargs</span><span class="p">)),</span>
+            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,)),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;fast&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">express_config</span>
+    <span class="k">elif</span> <span class="n">preset</span> <span class="o">==</span> <span class="s2">&quot;debug&quot;</span><span class="p">:</span>
+        <span class="n">debug_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                   <span class="n">max_eval_time_mins</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">population_size</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,)),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;fast&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">debug_config</span>
+    <span class="k">elif</span> <span class="n">preset</span> <span class="o">==</span> <span class="s2">&quot;debug_single&quot;</span><span class="p">:</span>
+        <span class="n">rf_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;n_estimators&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+        <span class="n">debug_single_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">SinglePipelineAdaptor</span><span class="p">(</span>
+                <span class="n">classifier</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">rf_kwargs</span><span class="p">),</span>
+                <span class="n">regressor</span><span class="o">=</span><span class="n">RandomForestRegressor</span><span class="p">(</span><span class="o">**</span><span class="n">rf_kwargs</span><span class="p">)),</span>
+            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,)),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;fast&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">debug_single_config</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> unknown preset.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">preset</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

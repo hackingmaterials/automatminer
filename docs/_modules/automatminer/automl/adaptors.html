@@ -1,0 +1,434 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>automatminer.automl.adaptors &#8212; automatminer 2019.02.03_beta documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for automatminer.automl.adaptors</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Adaptor classes for using AutoML packages in a Matbench pipeline.</span>
+
+<span class="sd">Current adaptor classes are:</span>
+
+<span class="sd">    TPOTAdaptor: Uses the backend from the automl project TPOT, which can be</span>
+<span class="sd">        found at https://github.com/EpistasisLab/tpot</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">tpot</span> <span class="k">import</span> <span class="n">TPOTClassifier</span><span class="p">,</span> <span class="n">TPOTRegressor</span>
+
+<span class="kn">from</span> <span class="nn">automatminer.automl.config.tpot_configs</span> <span class="k">import</span> <span class="n">TPOT_CLASSIFIER_CONFIG</span><span class="p">,</span> \
+    <span class="n">TPOT_REGRESSOR_CONFIG</span>
+<span class="kn">from</span> <span class="nn">automatminer.utils.pkg</span> <span class="k">import</span> <span class="n">AutomatminerError</span><span class="p">,</span> <span class="n">set_fitted</span><span class="p">,</span> \
+    <span class="n">check_fitted</span>
+<span class="kn">from</span> <span class="nn">automatminer.utils.ml</span> <span class="k">import</span> <span class="n">is_greater_better</span><span class="p">,</span> \
+    <span class="n">regression_or_classification</span>
+<span class="kn">from</span> <span class="nn">automatminer.utils.log</span> <span class="k">import</span> <span class="n">log_progress</span><span class="p">,</span> <span class="n">AMM_LOG_PREDICT_STR</span><span class="p">,</span> \
+    <span class="n">AMM_LOG_FIT_STR</span>
+<span class="kn">from</span> <span class="nn">automatminer.utils.ml</span> <span class="k">import</span> <span class="n">AMM_CLF_NAME</span><span class="p">,</span> <span class="n">AMM_REG_NAME</span>
+<span class="kn">from</span> <span class="nn">automatminer.base</span> <span class="k">import</span> <span class="n">DFMLAdaptor</span><span class="p">,</span> <span class="n">LoggableMixin</span>
+
+<span class="n">__authors__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Alex Dunn &lt;ardunn@lbl.gov&#39;</span>
+               <span class="s1">&#39;Alireza Faghaninia &lt;alireza.faghaninia@gmail.com&gt;&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;Qi Wang &lt;wqthu11@gmail.com&gt;&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;Daniel Dopp &lt;dbdopp@lbl.gov&gt;&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="TPOTAdaptor"><a class="viewcode-back" href="../../../api/automatminer.automl.adaptors.TPOTAdaptor.html#automatminer.TPOTAdaptor">[docs]</a><span class="k">class</span> <span class="nc">TPOTAdaptor</span><span class="p">(</span><span class="n">DFMLAdaptor</span><span class="p">,</span> <span class="n">LoggableMixin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dataframe adaptor for the TPOT classifiers and regressors.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tpot_kwargs: All kwargs accepted by a TPOTRegressor/TPOTClassifier</span>
+<span class="sd">            or TPOTBase object.</span>
+
+<span class="sd">            Note that for example, you can limit the models that TPOT explores</span>
+<span class="sd">            by setting config_dict directly. For example, if you want to only</span>
+<span class="sd">            use random forest:</span>
+<span class="sd">        config_dict = {</span>
+<span class="sd">            &#39;sklearn.ensemble.RandomForestRegressor&#39;: {</span>
+<span class="sd">                &#39;n_estimators&#39;: [100],</span>
+<span class="sd">                &#39;max_features&#39;: np.arange(0.05, 1.01, 0.05),</span>
+<span class="sd">                &#39;min_samples_split&#39;: range(2, 21),</span>
+<span class="sd">                &#39;min_samples_leaf&#39;: range(1, 21),</span>
+<span class="sd">                &#39;bootstrap&#39;: [True, False]</span>
+<span class="sd">                },</span>
+<span class="sd">            }</span>
+
+<span class="sd">        logger (Logger, bool): A custom logger object to use for logging.</span>
+<span class="sd">            Alternatively, if set to True, the default automatminer logger will</span>
+<span class="sd">            be used. If set to False, then no logging will occur.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        The following attributes are set during fitting.</span>
+
+<span class="sd">        mode (str): Either AMM_REG_NAME (regression) or AMM_CLF_NAME</span>
+<span class="sd">            (classification)</span>
+<span class="sd">        features (list): The features labels used to develop the ml model.</span>
+<span class="sd">        ml_data (dict): The raw ml data used for training.</span>
+<span class="sd">        best_pipeline (sklearn.Pipeline): The best fitted pipeline found.</span>
+<span class="sd">        best_models (OrderedDict): The best model names and their scores.</span>
+<span class="sd">        backend (TPOTBase): The TPOT object interface used for ML training.</span>
+<span class="sd">        is_fit (bool): If True, the adaptor and backend are fit to a dataset.</span>
+<span class="sd">        models (OrderedDict): The raw sklearn-style models output by TPOT.</span>
+<span class="sd">        fitted_target (str): The target name in the df used for training.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">tpot_kwargs</span><span class="p">):</span>
+        <span class="n">tpot_kwargs</span><span class="p">[</span><span class="s1">&#39;cv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tpot_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cv&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">tpot_kwargs</span><span class="p">[</span><span class="s1">&#39;n_jobs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tpot_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;n_jobs&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tpot_kwargs</span><span class="p">[</span><span class="s1">&#39;verbosity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tpot_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;verbosity&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span> <span class="o">=</span> <span class="n">tpot_kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted_target</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_features</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fit</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">tpot_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;random_state&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ml_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">greater_score_is_better</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@log_progress</span><span class="p">(</span><span class="n">AMM_LOG_FIT_STR</span><span class="p">)</span>
+    <span class="nd">@set_fitted</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Train a TPOTRegressor or TPOTClassifier by fitting on a dataframe.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pandas.DataFrame): The df to be used for training.</span>
+<span class="sd">            target (str): The key used to identify the machine learning target.</span>
+<span class="sd">            **fit_kwargs: Keyword arguments to be passed to the TPOT backend.</span>
+<span class="sd">                These arguments must be valid arguments to the TPOTBase class.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            TPOTAdaptor (self)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Prevent goofy pandas casting by casting to native</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="c1"># Determine learning type based on whether classification or regression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">regression_or_classification</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="n">AMM_CLF_NAME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span><span class="p">[</span><span class="s1">&#39;config_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s1">&#39;config_dict&#39;</span><span class="p">,</span> <span class="n">TPOT_CLASSIFIER_CONFIG</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;scoring&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span><span class="p">[</span><span class="s2">&quot;scoring&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;balanced_accuracy&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">TPOTClassifier</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="n">AMM_REG_NAME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span><span class="p">[</span><span class="s1">&#39;config_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s1">&#39;config_dict&#39;</span><span class="p">,</span> <span class="n">TPOT_REGRESSOR_CONFIG</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;scoring&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span><span class="p">[</span><span class="s2">&quot;scoring&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;neg_mean_absolute_error&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">TPOTRegressor</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">tpot_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Learning type </span><span class="si">{}</span><span class="s2"> not recognized as a valid mode &quot;</span>
+                             <span class="s2">&quot;for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_features</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ml_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;X&quot;</span><span class="p">:</span> <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted_target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">best_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The best models found by TPOT, in order of descending performance.</span>
+
+<span class="sd">        If you want a pipeline you can use to make predtions, use the</span>
+<span class="sd">        best_pipeline.</span>
+
+<span class="sd">        Performance is evaluated based on the TPOT scoring. This can be changed</span>
+<span class="sd">        by passing a &quot;scoring&quot; kwarg into the __init__ method.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            best_models_and_scores (dict): Keys are names of models. Values</span>
+<span class="sd">                are the best internal cv scores of that model with the</span>
+<span class="sd">                best hyperparameter combination found.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">greater_score_is_better</span> <span class="o">=</span> <span class="n">is_greater_better</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">scoring_function</span><span class="p">)</span>
+
+        <span class="c1"># Get list of evaluated model names, cast to set and back</span>
+        <span class="c1"># to get unique model names, instantiate ordered model dictionary</span>
+        <span class="n">evaluated_models</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">evaluated_individuals_</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="n">model_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">evaluated_models</span><span class="p">))</span>
+        <span class="n">models</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">({</span><span class="n">model</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">model_names</span><span class="p">})</span>
+
+        <span class="c1"># This makes a dict of model names mapped to all runs of that model</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">evaluated_individuals_</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">models</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="c1"># For each base model type sort the runs by best score</span>
+        <span class="k">for</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="n">model_names</span><span class="p">:</span>
+            <span class="n">models</span><span class="p">[</span><span class="n">model_name</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;internal_cv_score&#39;</span><span class="p">],</span>
+                <span class="n">reverse</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">greater_score_is_better</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Gets a simplified dict of the model to only its best run</span>
+        <span class="c1"># Sort the best individual models by type to best models overall</span>
+        <span class="n">best_models</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span>
+            <span class="nb">sorted</span><span class="p">({</span><span class="n">model</span><span class="p">:</span> <span class="n">models</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+                   <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;internal_cv_score&#39;</span><span class="p">],</span>
+                   <span class="n">reverse</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">greater_score_is_better</span><span class="p">))</span>
+
+        <span class="c1"># Mapping of top models to just their score</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="p">{</span><span class="n">model</span><span class="p">:</span> <span class="n">best_models</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="s1">&#39;internal_cv_score&#39;</span><span class="p">]</span>
+                  <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">best_models</span><span class="p">}</span>
+        <span class="c1"># Sorted dict of top models just mapped to their top scores</span>
+        <span class="n">best_models_and_scores</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span>
+            <span class="nb">sorted</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+                   <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                   <span class="n">reverse</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">greater_score_is_better</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span>
+        <span class="k">return</span> <span class="n">best_models_and_scores</span>
+
+    <span class="nd">@log_progress</span><span class="p">(</span><span class="n">AMM_LOG_PREDICT_STR</span><span class="p">)</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict the target property of materials given a df of features.</span>
+
+<span class="sd">        The predictions are appended to the dataframe in a column called:</span>
+<span class="sd">            &quot;{target} predicted&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pandas.DataFrame): Contains all features needed for ML (i.e.,</span>
+<span class="sd">                all features contained in the training dataframe.</span>
+<span class="sd">            target (str): The property to be predicted. Should match the target</span>
+<span class="sd">                used for fitting. May or may not be present in the argument</span>
+<span class="sd">                dataframe.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (pandas.DataFrame): The argument dataframe plus a column containing</span>
+<span class="sd">                the predictions of the target.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_target</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AutomatminerError</span><span class="p">(</span><span class="s2">&quot;Argument dataframe target </span><span class="si">{}</span><span class="s2"> is different &quot;</span>
+                                    <span class="s2">&quot;from the fitted dataframe target! </span><span class="si">{}</span><span class="s2">&quot;</span>
+                                    <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_target</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">]):</span>
+            <span class="n">not_in_model</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+            <span class="n">not_in_df</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">]</span>
+            <span class="k">raise</span> <span class="n">AutomatminerError</span><span class="p">(</span><span class="s2">&quot;Features used to build model are different&quot;</span>
+                                    <span class="s2">&quot; from df columns! Features located in &quot;</span>
+                                    <span class="s2">&quot;model not located in df: </span><span class="se">\n</span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2"> Features &quot;</span>
+                                    <span class="s2">&quot;located in df not in model: </span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span>
+                                    <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">not_in_df</span><span class="p">,</span> <span class="n">not_in_model</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># rectify feature order</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">target</span> <span class="o">+</span> <span class="s2">&quot; predicted&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_pred</span>
+            <span class="k">return</span> <span class="n">df</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">best_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">fitted_pipeline_</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">ml_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ml_data</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">backend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span></div>
+
+
+<div class="viewcode-block" id="SinglePipelineAdaptor"><a class="viewcode-back" href="../../../api/automatminer.automl.adaptors.SinglePipelineAdaptor.html#automatminer.SinglePipelineAdaptor">[docs]</a><span class="k">class</span> <span class="nc">SinglePipelineAdaptor</span><span class="p">(</span><span class="n">DFMLAdaptor</span><span class="p">,</span> <span class="n">LoggableMixin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For running single models or pipelines in a MatPipe pipeline using the same</span>
+<span class="sd">    syntax as the AutoML adaptors.</span>
+
+<span class="sd">    This adaptor should be able to fit into a MatPipe in similar fashion to</span>
+<span class="sd">    TPOTAdaptor.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        regressor (sklearn Pipeline or BaseEstimator-like): The object you want</span>
+<span class="sd">            to use for machine learning regression. Must implement</span>
+<span class="sd">            fit/predict/transform methods analagously to BaseEstimator, but does</span>
+<span class="sd">            not need to be a BaseEstimator or Pipeline.</span>
+<span class="sd">        classifier (sklearn Pipeline or BaseEstimator-like): The object you want</span>
+<span class="sd">            to use for machine learning classification.</span>
+<span class="sd">        logger (logging.Logger, bool):  A custom logger object to use for</span>
+<span class="sd">            logging. Alternatively, if set to True, the default automatminer</span>
+<span class="sd">            logger will be used. If set to False, then no logging will occur.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        The following attributes are set during fitting.</span>
+
+<span class="sd">        mode (str): Either AMM_REG_NAME (regression) or AMM_CLF_NAME</span>
+<span class="sd">            (classification)</span>
+<span class="sd">        features (list): The features labels used to develop the ml model.</span>
+<span class="sd">        ml_data (dict): The raw ml data used for training.</span>
+<span class="sd">        best_pipeline (sklearn.Pipeline): The best fitted pipeline found.</span>
+<span class="sd">        best_models (OrderedDict): The best model names and their scores.</span>
+<span class="sd">        backend (TPOTBase): The TPOT object interface used for ML training.</span>
+<span class="sd">        is_fit (bool): If True, the adaptor and backend are fit to a dataset.</span>
+<span class="sd">        models (OrderedDict): The raw sklearn-style models output by TPOT.</span>
+<span class="sd">        fitted_target (str): The target name in the df used for training.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">regressor</span><span class="p">,</span> <span class="n">classifier</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_regressor</span> <span class="o">=</span> <span class="n">regressor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classifier</span> <span class="o">=</span> <span class="n">classifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_features</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ml_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted_target</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@log_progress</span><span class="p">(</span><span class="n">AMM_LOG_FIT_STR</span><span class="p">)</span>
+    <span class="nd">@set_fitted</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_kwargs</span><span class="p">):</span>
+
+        <span class="c1"># Determine learning type based on whether classification or regression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">regression_or_classification</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="n">AMM_CLF_NAME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classifier</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="n">AMM_REG_NAME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regressor</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Learning type </span><span class="si">{}</span><span class="s2"> not recognized as a valid mode &quot;</span>
+                             <span class="s2">&quot;for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+
+        <span class="c1"># Prevent goofy pandas casting by casting to native</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_features</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ml_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;X&quot;</span><span class="p">:</span> <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted_target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="c1"># todo: Remove this duplicated code section, maybe just make a parent class</span>
+    <span class="nd">@log_progress</span><span class="p">(</span><span class="n">AMM_LOG_PREDICT_STR</span><span class="p">)</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict the target property of materials given a df of features.</span>
+
+<span class="sd">        The predictions are appended to the dataframe in a column called:</span>
+<span class="sd">            &quot;{target} predicted&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pandas.DataFrame): Contains all features needed for ML (i.e.,</span>
+<span class="sd">                all features contained in the training dataframe.</span>
+<span class="sd">            target (str): The property to be predicted. Should match the target</span>
+<span class="sd">                used for fitting. May or may not be present in the argument</span>
+<span class="sd">                dataframe.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (pandas.DataFrame): The argument dataframe plus a column containing</span>
+<span class="sd">                the predictions of the target.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_target</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AutomatminerError</span><span class="p">(</span><span class="s2">&quot;Argument dataframe target </span><span class="si">{}</span><span class="s2"> is different &quot;</span>
+                                    <span class="s2">&quot;from the fitted dataframe target! </span><span class="si">{}</span><span class="s2">&quot;</span>
+                                    <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_target</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">]):</span>
+            <span class="n">not_in_model</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+            <span class="n">not_in_df</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">]</span>
+            <span class="k">raise</span> <span class="n">AutomatminerError</span><span class="p">(</span><span class="s2">&quot;Features used to build model are different&quot;</span>
+                                    <span class="s2">&quot; from df columns! Features located in &quot;</span>
+                                    <span class="s2">&quot;model not located in df: </span><span class="se">\n</span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2"> Features &quot;</span>
+                                    <span class="s2">&quot;located in df not in model: </span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span>
+                                    <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">not_in_df</span><span class="p">,</span> <span class="n">not_in_model</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># rectify feature order</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">target</span> <span class="o">+</span> <span class="s2">&quot; predicted&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_pred</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prefix</span> <span class="o">+</span>
+                             <span class="s2">&quot;Prediction finished successfully.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">df</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">best_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">ml_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ml_data</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@check_fitted</span>
+    <span class="k">def</span> <span class="nf">backend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span></div>
+</pre></div>
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

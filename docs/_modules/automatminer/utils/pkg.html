@@ -1,0 +1,175 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>automatminer.utils.pkg &#8212; automatminer 2019.02.03_beta documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for automatminer.utils.pkg</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utils specific to this package.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="k">import</span> <span class="n">NotFittedError</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="k">import</span> <span class="n">Pipeline</span>
+
+
+<span class="k">class</span> <span class="nc">AutomatminerError</span><span class="p">(</span><span class="ne">BaseException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exception specific to automatminer methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;AutomatminerError : &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span>
+
+
+<span class="k">def</span> <span class="nf">compare_columns</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="n">df2</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compare the columns of a dataframe.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df1 (pandas.DataFrame): The first dataframe.</span>
+<span class="sd">        df2 (pandas.DataFrame): The second dataframe.</span>
+<span class="sd">        ignore ([str]): The feature labels to ignore in the analyis.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (dict): {&quot;df1_not_in_df2&quot;: [The columns in df1 not in df2],</span>
+<span class="sd">                 &quot;df2_not_in_df1&quot;: [The columns in df2 not in df1],</span>
+<span class="sd">                 &quot;mismatch&quot;: (bool)}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ignore</span> <span class="o">=</span> <span class="p">()</span> <span class="k">if</span> <span class="n">ignore</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ignore</span>
+    <span class="n">df2_not_in_df1</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df2</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span>
+                      <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df1</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore</span><span class="p">]</span>
+    <span class="n">df1_not_in_df2</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df1</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span>
+                      <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df2</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore</span><span class="p">]</span>
+    <span class="n">matched</span> <span class="o">=</span> <span class="ow">not</span> <span class="p">(</span><span class="n">df2_not_in_df1</span> <span class="o">+</span> <span class="n">df1_not_in_df2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;df2_not_in_df1&quot;</span><span class="p">:</span> <span class="n">df2_not_in_df1</span><span class="p">,</span>
+            <span class="s2">&quot;df1_not_in_df2&quot;</span><span class="p">:</span> <span class="n">df1_not_in_df2</span><span class="p">,</span>
+            <span class="s2">&quot;mismatch&quot;</span><span class="p">:</span> <span class="ow">not</span> <span class="n">matched</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">check_fitted</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator to check if a transformer has been fitted.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        func: A function or method.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A wrapper function for the input function/method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;is_fit&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Method using check_fitted has no is_fit attr&quot;</span>
+                                 <span class="s2">&quot; to check if fitted!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_fit</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotFittedError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> has not been fit!&quot;</span>
+                                 <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+
+<span class="k">def</span> <span class="nf">set_fitted</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator to ensure a transformer is fitted properly.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        func: A function or method.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A wrapper function for the input function/method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_fit</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_fit</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+
+<span class="k">def</span> <span class="nf">return_attrs_recursively</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns attributes of an object recursively. Stops recursion when</span>
+<span class="sd">    attrs go outside of the automatminer library.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (object): The object with attrs</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        attrdict (dict): The dictionary containing attributes which can</span>
+<span class="sd">            be pretty-printed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attrdict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;__module__&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;automatminer&quot;</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="vm">__module__</span><span class="p">:</span>
+                <span class="n">attrdict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">attr</span><span class="p">:</span> <span class="n">return_attrs_recursively</span><span class="p">(</span><span class="n">value</span><span class="p">)}</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+                <span class="n">attrdict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                                  <span class="s2">&quot;columns&quot;</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                  <span class="s2">&quot;samples&quot;</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Pipeline</span><span class="p">):</span>
+                <span class="n">attrdict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">steps</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">attrdict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Prevent huge matrices being spammed to the digest</span>
+            <span class="k">if</span> <span class="s2">&quot;ml_data&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attr</span><span class="p">:</span>
+                <span class="n">attrdict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">attrdict</span>
+
+</pre></div>
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

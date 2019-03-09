@@ -1,0 +1,192 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>StructureFeaturizers &#8212; automatminer 2019.02.03_beta documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="structurefeaturizers">
+<h1>StructureFeaturizers<a class="headerlink" href="#structurefeaturizers" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="automatminer.featurization.sets.StructureFeaturizers">
+<em class="property">class </em><code class="descclassname">automatminer.featurization.sets.</code><code class="descname">StructureFeaturizers</code><span class="sig-paren">(</span><em>exclude=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/featurization/sets.html#StructureFeaturizers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="automatminer.featurization.sets.FeaturizerSet.html#automatminer.featurization.sets.FeaturizerSet" title="automatminer.featurization.sets.FeaturizerSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.featurization.sets.FeaturizerSet</span></code></a></p>
+<p>Featurizer set containing structure featurizers.</p>
+<p>This class provides subsets for featurizers that require fitting,
+return matrices rather than vectors, and produce many features, as well as
+fast, and slow featurizers. Additional sets containing all featurizers and
+the set of best featurizers are provided.</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fast_featurizers</span> <span class="o">=</span> <span class="n">StructureFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">fast</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>exclude (list of str, optional): A list of featurizer class names that</dt>
+<dd>will be excluded from the set of featurizers returned.</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Attributes Summary</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.all" title="automatminer.featurization.sets.StructureFeaturizers.all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span></code></a></td>
+<td>All featurizers available for this featurization type.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.all_including_matrix" title="automatminer.featurization.sets.StructureFeaturizers.all_including_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_including_matrix</span></code></a></td>
+<td>List of all structure based featurizers.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.all_vector" title="automatminer.featurization.sets.StructureFeaturizers.all_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_vector</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.best" title="automatminer.featurization.sets.StructureFeaturizers.best"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best</span></code></a></td>
+<td>List of featurizers providing useful features in a reasonable time.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.fast" title="automatminer.featurization.sets.StructureFeaturizers.fast"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fast</span></code></a></td>
+<td>List of featurizers that are generally fast to featurize.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.many_features" title="automatminer.featurization.sets.StructureFeaturizers.many_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">many_features</span></code></a></td>
+<td>List of featurizers that return many features.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.matrix" title="automatminer.featurization.sets.StructureFeaturizers.matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrix</span></code></a></td>
+<td>List of featurizers that return matrices as features.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.need_fit" title="automatminer.featurization.sets.StructureFeaturizers.need_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_fit</span></code></a></td>
+<td>List of featurizers which must be fit before featurizing.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.require_external" title="automatminer.featurization.sets.StructureFeaturizers.require_external"><code class="xref py py-obj docutils literal notranslate"><span class="pre">require_external</span></code></a></td>
+<td>Featurizers which require external software not installable via Pypi</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.slow" title="automatminer.featurization.sets.StructureFeaturizers.slow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slow</span></code></a></td>
+<td>List of featurizers that are generally slow to featurize.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="attribute">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.all">
+<code class="descname">all</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>All featurizers available for this featurization type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.all_including_matrix">
+<code class="descname">all_including_matrix</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.all_including_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all structure based featurizers.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.all_vector">
+<code class="descname">all_vector</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.all_vector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.best">
+<code class="descname">best</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.best" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of featurizers providing useful features in a reasonable time.</p>
+<p>Featurizers that take a very long time to run, which crash for many
+systems, or which produce a large number of similar features will be
+excluded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.fast">
+<code class="descname">fast</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.fast" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of featurizers that are generally fast to featurize.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.many_features">
+<code class="descname">many_features</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.many_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of featurizers that return many features.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.matrix">
+<code class="descname">matrix</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of featurizers that return matrices as features.</p>
+<p>These featurizers are not useful for vectorized representations of
+crystal structures.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.need_fit">
+<code class="descname">need_fit</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.need_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of featurizers which must be fit before featurizing.</p>
+<p>Fitting can be performed using the <cite>Featurizer.fit()</cite> method.
+Alternatively, the <cite>Featurizer.fit_featurize_dataframe()</cite> can be used
+to fit and featurize simultaneously.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.require_external">
+<code class="descname">require_external</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.require_external" title="Permalink to this definition">¶</a></dt>
+<dd><p>Featurizers which require external software not installable via
+Pypi</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.slow">
+<code class="descname">slow</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.slow" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of featurizers that are generally slow to featurize.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/automatminer.featurization.sets.StructureFeaturizers.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

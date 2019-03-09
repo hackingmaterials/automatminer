@@ -1,0 +1,242 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>automatminer package &#8212; automatminer 2019.02.03_beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="automatminer-package">
+<h1>automatminer package<a class="headerlink" href="#automatminer-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="id1">
+<h2>automatminer Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-automatminer"></span><div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="api/automatminer.get_preset_config.html#automatminer.get_preset_config" title="automatminer.get_preset_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_preset_config</span></code></a>(preset,&nbsp;**powerups)</td>
+<td>Preset configs for MatPipe.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="api/automatminer.AutoFeaturizer.html#automatminer.AutoFeaturizer" title="automatminer.AutoFeaturizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AutoFeaturizer</span></code></a>([cache_src,&nbsp;preset,&nbsp;…])</td>
+<td>Automatically featurize a dataframe.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/automatminer.DataCleaner.html#automatminer.DataCleaner" title="automatminer.DataCleaner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataCleaner</span></code></a>([max_na_frac,&nbsp;…])</td>
+<td>Transform a featurized dataframe into an ML-ready dataframe.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/automatminer.FeatureReducer.html#automatminer.FeatureReducer" title="automatminer.FeatureReducer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatureReducer</span></code></a>([reducers,&nbsp;corr_threshold,&nbsp;…])</td>
+<td>Perform feature reduction on a clean dataframe.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/automatminer.MatPipe.html#automatminer.MatPipe" title="automatminer.MatPipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MatPipe</span></code></a>([autofeaturizer,&nbsp;cleaner,&nbsp;reducer,&nbsp;…])</td>
+<td>Establish an ML pipeline for transforming compositions, structures, bandstructures, and DOS objects into machine-learned properties.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/automatminer.TPOTAdaptor.html#automatminer.TPOTAdaptor" title="automatminer.TPOTAdaptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TPOTAdaptor</span></code></a>([logger])</td>
+<td>A dataframe adaptor for the TPOT classifiers and regressors.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.automl.html">automatminer.automl package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.html#id1">automatminer.automl Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.automl.html#classes">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.automl.SinglePipelineAdaptor.html">SinglePipelineAdaptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.automl.TPOTAdaptor.html">TPOTAdaptor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.html#module-automatminer.automl.adaptors">automatminer.automl.adaptors Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.automl.html#id2">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.automl.adaptors.SinglePipelineAdaptor.html">SinglePipelineAdaptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.automl.adaptors.TPOTAdaptor.html">TPOTAdaptor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.html#id3">automatminer.automl.adaptors Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.automl.html#id4">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.automl.adaptors.SinglePipelineAdaptor.html">SinglePipelineAdaptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.automl.adaptors.TPOTAdaptor.html">TPOTAdaptor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.featurization.html">automatminer.featurization package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#id1">automatminer.featurization Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.featurization.html#classes">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.featurization.AutoFeaturizer.html">AutoFeaturizer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#module-automatminer.featurization.core">automatminer.featurization.core Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.featurization.html#id2">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.featurization.core.AutoFeaturizer.html">AutoFeaturizer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#module-automatminer.featurization.sets">automatminer.featurization.sets Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.featurization.html#id3">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.featurization.sets.AllFeaturizers.html">AllFeaturizers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.featurization.sets.BSFeaturizers.html">BSFeaturizers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.featurization.sets.CompositionFeaturizers.html">CompositionFeaturizers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.featurization.sets.DOSFeaturizers.html">DOSFeaturizers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.featurization.sets.FeaturizerSet.html">FeaturizerSet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.featurization.sets.StructureFeaturizers.html">StructureFeaturizers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.preprocessing.html">automatminer.preprocessing package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.html#id1">automatminer.preprocessing Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.preprocessing.html#classes">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.preprocessing.DataCleaner.html">DataCleaner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.preprocessing.FeatureReducer.html">FeatureReducer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.html#module-automatminer.preprocessing.core">automatminer.preprocessing.core Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.preprocessing.html#id2">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.preprocessing.core.DataCleaner.html">DataCleaner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.preprocessing.core.FeatureReducer.html">FeatureReducer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.html#module-automatminer.preprocessing.feature_selection">automatminer.preprocessing.feature_selection Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.preprocessing.html#functions">Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.preprocessing.feature_selection.lower_corr_clf.html">lower_corr_clf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.preprocessing.feature_selection.rebate.html">rebate</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.preprocessing.html#id3">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.preprocessing.feature_selection.TreeFeatureReducer.html">TreeFeatureReducer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.base.html">automatminer.base package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.base.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.base.html#module-automatminer.base">automatminer.base Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.base.html#classes">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.base.DFMLAdaptor.html">DFMLAdaptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.base.DFTransformer.html">DFTransformer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.base.LoggableMixin.html">LoggableMixin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.pipeline.html">automatminer.pipeline package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.pipeline.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.pipeline.html#module-automatminer.pipeline">automatminer.pipeline Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.pipeline.html#classes">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.pipeline.MatPipe.html">MatPipe</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.presets.html">automatminer.presets package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.presets.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.presets.html#module-automatminer.presets">automatminer.presets Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.presets.html#functions">Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/automatminer.presets.get_preset_config.html">get_preset_config</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/automatminer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

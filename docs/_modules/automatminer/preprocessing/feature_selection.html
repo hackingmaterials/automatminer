@@ -1,0 +1,284 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>automatminer.preprocessing.feature_selection &#8212; automatminer 2019.02.03_beta documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for automatminer.preprocessing.feature_selection</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Various in-house feature reduction techniques.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="k">import</span> <span class="n">is_classifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> \
+    <span class="n">GradientBoostingClassifier</span><span class="p">,</span> <span class="n">GradientBoostingRegressor</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">check_cv</span><span class="p">,</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">roc_auc_score</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="k">import</span> <span class="n">SGDClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">LabelEncoder</span>
+<span class="kn">from</span> <span class="nn">skrebate</span> <span class="k">import</span> <span class="n">MultiSURF</span>
+
+<span class="kn">from</span> <span class="nn">automatminer.utils.pkg</span> <span class="k">import</span> <span class="n">AutomatminerError</span>
+<span class="kn">from</span> <span class="nn">automatminer.base</span> <span class="k">import</span> <span class="n">LoggableMixin</span><span class="p">,</span> <span class="n">DFTransformer</span>
+
+<span class="n">__authors__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Alireza Faghaninia &lt;alireza@lbl.gov&gt;&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Alex Dunn &lt;ardunn@lbl.gov&gt;&quot;</span><span class="p">]</span>
+
+<span class="c1"># Used in compare_coff_clf, declared here to prevent repeated obj creation</span>
+<span class="n">COMMON_CLF</span> <span class="o">=</span> <span class="n">SGDClassifier</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="TreeFeatureReducer"><a class="viewcode-back" href="../../../api/automatminer.preprocessing.feature_selection.TreeFeatureReducer.html#automatminer.preprocessing.feature_selection.TreeFeatureReducer">[docs]</a><span class="k">class</span> <span class="nc">TreeFeatureReducer</span><span class="p">(</span><span class="n">DFTransformer</span><span class="p">,</span> <span class="n">LoggableMixin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tree-based feature reduction tools based on sklearn models that have</span>
+<span class="sd">        the .feature_importances_ attribute.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mode (str): &quot;regression&quot; or &quot;classification&quot;</span>
+<span class="sd">        importance_percentile (float): the selected percentile of the features</span>
+<span class="sd">            sorted (descending) based on their importance.</span>
+<span class="sd">        random_state (int): relevant if non-deterministic algorithms such as</span>
+<span class="sd">            random forest are used.</span>
+<span class="sd">        logger (Logger, bool): A custom logger object to use for logging.</span>
+<span class="sd">            Alternatively, if set to True, the default automatminer logger will be</span>
+<span class="sd">            used. If set to False, then no logging will occur.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">importance_percentile</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+                 <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">importance_percentile</span> <span class="o">=</span> <span class="n">importance_percentile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_features</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rs</span> <span class="o">=</span> <span class="n">random_state</span>
+
+<div class="viewcode-block" id="TreeFeatureReducer.get_top_features"><a class="viewcode-back" href="../../../api/automatminer.preprocessing.feature_selection.TreeFeatureReducer.html#automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_top_features">[docs]</a>    <span class="k">def</span> <span class="nf">get_top_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feat_importance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simple function to through a sorted list of features and select top</span>
+<span class="sd">            percentiles.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feat_importance ([(str, float)]): a sorted list of</span>
+<span class="sd">                (feature, importance) tuples</span>
+
+<span class="sd">        Returns ([str]): list of the top * percentile of features. * determined</span>
+<span class="sd">            by importance_percentile argument.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">selected_feats</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">frac</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">feat_importance</span><span class="p">:</span>
+            <span class="n">selected_feats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feat</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">frac</span> <span class="o">+=</span> <span class="n">feat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">frac</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">importance_percentile</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">selected_feats</span></div>
+
+<div class="viewcode-block" id="TreeFeatureReducer.get_reduced_features"><a class="viewcode-back" href="../../../api/automatminer.preprocessing.feature_selection.TreeFeatureReducer.html#automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_reduced_features">[docs]</a>    <span class="k">def</span> <span class="nf">get_reduced_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree_model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gives a reduced list of feature names given a tree-based model that</span>
+<span class="sd">            has the .feature_importances_ attribute.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tree_model (instantiated sklearn tree-based model):</span>
+<span class="sd">            X (pandas.dataframe):</span>
+<span class="sd">            y (pandas.Series or numpy.ndarray): the target column</span>
+<span class="sd">            recursive (bool):</span>
+
+<span class="sd">        Returns ([str]): list of the top * percentile of features. * determined</span>
+<span class="sd">            by importance_percentile argument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m_curr</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># current number of top/important features</span>
+        <span class="n">m_prev</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">m_curr</span> <span class="o">&lt;</span> <span class="n">m_prev</span><span class="p">:</span>
+            <span class="n">tree_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">fimportance</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="nb">zip</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">tree_model</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">),</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">tfeats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_features</span><span class="p">(</span><span class="n">fimportance</span><span class="p">)</span>
+            <span class="n">m_curr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tfeats</span><span class="p">)</span>
+            <span class="n">m_prev</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nfeatures: </span><span class="si">{}</span><span class="s1">-&gt;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span> <span class="n">m_curr</span><span class="p">))</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">tfeats</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">recursive</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">tfeats</span></div>
+
+<div class="viewcode-block" id="TreeFeatureReducer.fit"><a class="viewcode-back" href="../../../api/automatminer.preprocessing.feature_selection.TreeFeatureReducer.html#automatminer.preprocessing.feature_selection.TreeFeatureReducer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fits to the data (X) and target (y) to determine the selected_features.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pandas.DataFrame): input data, note that numpy matrix is NOT</span>
+<span class="sd">                accepted since the X.columns is used for feature names</span>
+<span class="sd">            y (pandas.Series or np.ndarray): list of outputs used for fitting</span>
+<span class="sd">                the tree model</span>
+<span class="sd">            tree (str or instantiated sklearn tree-based model): if a model is</span>
+<span class="sd">                directly fed, it must have the .feature_importances_ attribute</span>
+<span class="sd">            recursive (bool): whether to recursively reduce the features (True)</span>
+<span class="sd">                or just do it once (False)</span>
+<span class="sd">            cv (int or CrossValidation): sklearn&#39;s cross-validation with the</span>
+<span class="sd">                same options (int or actual instantiated CrossValidation)</span>
+
+<span class="sd">        Returns (None):</span>
+<span class="sd">            sets the class attribute .selected_features</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m0</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">tree</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="s1">&#39;random forest&#39;</span><span class="p">,</span> <span class="s1">&#39;randomforest&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;classification&#39;</span><span class="p">,</span> <span class="s1">&#39;classifier&#39;</span><span class="p">]:</span>
+                    <span class="n">tree</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tree</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">tree</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;gb&#39;</span><span class="p">,</span> <span class="s1">&#39;gbt&#39;</span><span class="p">,</span> <span class="s1">&#39;gradiet boosting&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;classification&#39;</span><span class="p">,</span> <span class="s1">&#39;classifier&#39;</span><span class="p">]:</span>
+                    <span class="n">tree</span> <span class="o">=</span> <span class="n">GradientBoostingClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tree</span> <span class="o">=</span> <span class="n">GradientBoostingRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">AutomatminerError</span><span class="p">(</span>
+                    <span class="s1">&#39;Unsupported tree_type </span><span class="si">{}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+
+        <span class="n">cv</span> <span class="o">=</span> <span class="n">check_cv</span><span class="p">(</span><span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">classifier</span><span class="o">=</span><span class="n">is_classifier</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+        <span class="n">all_feats</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">train</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">cv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">Xtrn</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+            <span class="n">ytrn</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+            <span class="n">all_feats</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reduced_features</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">Xtrn</span><span class="p">,</span> <span class="n">ytrn</span><span class="p">,</span> <span class="n">recursive</span><span class="p">)</span>
+        <span class="c1"># take the union of selected features of each fold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_feats</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;Finished tree-based feature reduction of </span><span class="si">{}</span><span class="s1"> intial features to &#39;</span>
+            <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_features</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="TreeFeatureReducer.transform"><a class="viewcode-back" href="../../../api/automatminer.preprocessing.feature_selection.TreeFeatureReducer.html#automatminer.preprocessing.feature_selection.TreeFeatureReducer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transforms the data with the subset of features determined after</span>
+<span class="sd">            calling the fit method on the data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pandas.DataFrame): input data, note that numpy matrix is NOT</span>
+<span class="sd">                accepted since the X.columns is used for feature names</span>
+<span class="sd">            y (placeholder): ignored input (for consistency in notation)</span>
+
+<span class="sd">        Returns (pandas.DataFrame): the data with reduced number of features.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AutomatminerError</span><span class="p">(</span><span class="s1">&#39;The fit method should be called first!&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_features</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="rebate"><a class="viewcode-back" href="../../../api/automatminer.preprocessing.feature_selection.rebate.html#automatminer.preprocessing.feature_selection.rebate">[docs]</a><span class="k">def</span> <span class="nf">rebate</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">n_features</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run the ReBATE relief algorithm on a dataframe, returning the reduced df.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): A dataframe</span>
+<span class="sd">        target (str): The target key (must be present in df)</span>
+<span class="sd">        n_features (int): The number of features desired to be returned.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame The dataframe with fewer features, and no target</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">MultiSURF</span><span class="p">(</span><span class="n">n_features_to_select</span><span class="o">=</span><span class="n">n_features</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">feats</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">X</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">feats</span><span class="p">:</span>
+                <span class="n">feats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">feats</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="lower_corr_clf"><a class="viewcode-back" href="../../../api/automatminer.preprocessing.feature_selection.lower_corr_clf.html#automatminer.preprocessing.feature_selection.lower_corr_clf">[docs]</a><span class="k">def</span> <span class="nf">lower_corr_clf</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Train a simple linear model on the data to decide on the worse of two</span>
+<span class="sd">    features. The feature which should be dropped is returned.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): The dataframe containing the target values and</span>
+<span class="sd">            features in question</span>
+<span class="sd">        target (str): The key for the target column</span>
+<span class="sd">        f1 (str): The key for the first feature.</span>
+<span class="sd">        f2 (str): The key for the second feature.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (str): The name of the feature to be dropped (worse score).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">unique_names</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">f1</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">x2</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">f2</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">]</span>
+    <span class="n">comparison_res</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">]):</span>
+        <span class="n">x_tr</span><span class="p">,</span> <span class="n">x_te</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                                                  <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">COMMON_CLF</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">COMMON_CLF</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_te</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_names</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">comparison_res</span><span class="p">[</span><span class="n">features</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">score</span>
+
+    <span class="c1"># return the worse feature, knowing higher is better for both metrics</span>
+    <span class="k">if</span> <span class="n">comparison_res</span><span class="p">[</span><span class="n">f1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">comparison_res</span><span class="p">[</span><span class="n">f2</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">f1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">f2</span></div>
+</pre></div>
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

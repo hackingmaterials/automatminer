@@ -147,9 +147,42 @@ your respective columns to the correct names.</p>
 in order to see how well our MatPipe can predict a certain target property.
 The target property we will be benchmarking in this example is K_VRH. Keep in
 mind that benchmarking requires a KFold object since benchmarks are run with
-nested cross validation. This mitigates the performance of the benchmark based
-on the choice of test set and also better estimates the generalization error
+nested cross validation. But why nested cross validation?</p>
+</div>
+<div class="section" id="nested-cv-for-benchmarking">
+<h2>Nested CV for benchmarking<a class="headerlink" href="#nested-cv-for-benchmarking" title="Permalink to this headline">¶</a></h2>
+<p>Reporting a regular cross validation score is fine, if you are not tuning the
+hyperparameters of your model.</p>
+<a class="reference internal image-reference" href="_images/cv_single.png"><img alt="cv_overfit" class="align-center" src="_images/cv_single.png" style="width: 70%;" /></a>
+<p>But if the model’s hyperparameters are adjusted
+to improve its CV score, reporting the CV score as the generalization error is
+incorrect, because the model may have been overfit to the training dataset.</p>
+<a class="reference internal image-reference" href="_images/cv_overfit.png"><img alt="cv_overfit" class="align-center" src="_images/cv_overfit.png" style="width: 70%;" /></a>
+<p>Using a hold out test set is a better - in this procedure, all training and
+validation is done without knowledge of the final test set, then the
+generalization error is estimated from the prediction error on the test set.
+However, the choice of test set may result in over- or under-representing
+your models generalization error.</p>
+<img alt="cv_overfit" class="align-center" src="_images/cv_holdout.png" />
+<p>Furthermore, if your model’s hyperparameters
+are adjusted based on the test score (and not only the validation score), the
+model will also be overfit to the test set.</p>
+<p>Nested CV mitigates these issues by repeating the following hold-out test procedure k times:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Split data into train/validation and hold out test.</li>
+<li>Give only the train/validation data to the model and allow it to optimize hyperparameters using any method it chooses</li>
+<li>Once the model’s hyperparameters are set, predict the hold out test set and report that as the generalization error.</li>
+</ol>
+</div></blockquote>
+<p>1-3 are repeated for each of k folds in the Nested CV, ensuring every sample in the dataset is tested once.
+This mitigates the performance of the benchmark based on the choice of test set and also better estimates the generalization error
 than a single validation/test split would.</p>
+<img alt="cv_overfit" class="align-center" src="_images/cv_nested.png" />
+<p>tl;dr: <strong>“A nested CV procedure provides an almost unbiased estimate of the true error.”</strong> – Varma and Simon, 2006 (<a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/16504092">10.1186/1471-2105-7-91</a>)</p>
+</div>
+<div class="section" id="setting-up-the-benchmark">
+<h2>Setting up the benchmark<a class="headerlink" href="#setting-up-the-benchmark" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">MatPipe benchmarks with a nested cross validation, meaning it makes</span>
 <span class="sd">k validation/test splits, where all model selection is done on the train</span>
@@ -157,31 +190,41 @@ than a single validation/test split would.</p>
 <span class="sd">used to predict the previously unseen test set data.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="n">kfold</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="c1">#We will use a 5-Fold object.</span>
-<span class="n">predicted</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">benchmark</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;K_VRH&quot;</span><span class="p">,</span> <span class="n">kfold</span><span class="p">)</span>
+<span class="n">predicted_folds</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">benchmark</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;K_VRH&quot;</span><span class="p">,</span> <span class="n">kfold</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The result of pipe.benchmark() will be a new dataframe with the predicted results
+<p>The result of pipe.benchmark() will be a list of dataframes (one for each
+nested CV fold). Each new dataframe has the predicted results
 stored in a column called the property name combined with ” predicted”. In this
 example, it will be stored in “K_VRH predicted.”</p>
 </div>
 <div class="section" id="calculating-mse">
 <h2>Calculating MSE<a class="headerlink" href="#calculating-mse" title="Permalink to this headline">¶</a></h2>
-<p>As mentioned above, the “predicted” variable is a dataframe that contains several columns,
-including actual property values and predicted property values. In this example, we will
-use the actual K_VRH data and the predicted K_VRH data in order to see how well the
-benchmarking went.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save the actual K_VRH Series to y_true.</span>
-<span class="n">y_true</span> <span class="o">=</span> <span class="n">predicted</span><span class="p">[</span><span class="s2">&quot;K_VRH&quot;</span><span class="p">]</span>
-<span class="c1"># Save the predicted K_VRH Series to y_test.</span>
-<span class="n">y_test</span> <span class="o">=</span> <span class="n">predicted</span><span class="p">[</span><span class="s2">&quot;K_VRH predicted&quot;</span><span class="p">]</span>
+<p>For each test fold in our nested CV, we can calculate the prediction error.</p>
+<p>Next, we can use the sklearn package to calculate a wide variety of metrics on
+our predictions. In this case, we want the mean squared error so we will use that
+function.</p>
+<p>Finally, we calculate the mean mse across our test sets.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics.regression</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+
+<span class="c1"># A list to hold our mse scores for each test fold</span>
+<span class="n">mses</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># Calculating mse for each test fold</span>
+<span class="k">for</span> <span class="n">predicted</span> <span class="ow">in</span> <span class="n">predicted_folds</span><span class="p">:</span>
+    <span class="c1"># Save the actual K_VRH Series to y_true.</span>
+    <span class="n">y_true</span> <span class="o">=</span> <span class="n">predicted</span><span class="p">[</span><span class="s2">&quot;K_VRH&quot;</span><span class="p">]</span>
+    <span class="c1"># Save the predicted K_VRH Series to y_test.</span>
+    <span class="n">y_test</span> <span class="o">=</span> <span class="n">predicted</span><span class="p">[</span><span class="s2">&quot;K_VRH predicted&quot;</span><span class="p">]</span>
+    <span class="n">mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+    <span class="n">mses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">mses</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Finally, we can use the sklearn package to calculate a wide variety of metrics on
-these two Series. In this case, we want the mean squared error so we will use that
-function.</p>
 <p>And voilà, we are done! We have successfully loaded in a dataset, benchmarked a test property
 using a MatPipe with ‘debug’ configs, and then ran an analysis on our results by calculating
-MSE. And all that in less than 15 lines of code!</p>
+MSE for each fold of a nested CV.</p>
 </div>
 </div>
 <div class="section" id="citing-automatminer">

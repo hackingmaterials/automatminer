@@ -1,0 +1,180 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>TreeFeatureReducer &#8212; automatminer 2019.02.03_beta documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="treefeaturereducer">
+<h1>TreeFeatureReducer<a class="headerlink" href="#treefeaturereducer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer">
+<em class="property">class </em><code class="descclassname">automatminer.preprocessing.feature_selection.</code><code class="descname">TreeFeatureReducer</code><span class="sig-paren">(</span><em>mode</em>, <em>importance_percentile=0.95</em>, <em>logger=True</em>, <em>random_state=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/feature_selection.html#TreeFeatureReducer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="automatminer.base.DFTransformer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.base.LoggableMixin.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<dl class="docutils">
+<dt>Tree-based feature reduction tools based on sklearn models that have</dt>
+<dd>the .feature_importances_ attribute.</dd>
+<dt>Args:</dt>
+<dd><p class="first">mode (str): “regression” or “classification”
+importance_percentile (float): the selected percentile of the features</p>
+<blockquote>
+<div>sorted (descending) based on their importance.</div></blockquote>
+<dl class="last docutils">
+<dt>random_state (int): relevant if non-deterministic algorithms such as</dt>
+<dd>random forest are used.</dd>
+<dt>logger (Logger, bool): A custom logger object to use for logging.</dt>
+<dd>Alternatively, if set to True, the default automatminer logger will be
+used. If set to False, then no logging will occur.</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods Summary</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.fit" title="automatminer.preprocessing.feature_selection.TreeFeatureReducer.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(X,&nbsp;y[,&nbsp;tree,&nbsp;recursive,&nbsp;cv])</td>
+<td>Fits to the data (X) and target (y) to determine the selected_features.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_reduced_features" title="automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_reduced_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_reduced_features</span></code></a>(tree_model,&nbsp;X,&nbsp;y[,&nbsp;…])</td>
+<td>Gives a reduced list of feature names given a tree-based model that</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_top_features" title="automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_top_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_top_features</span></code></a>(feat_importance)</td>
+<td>Simple function to through a sorted list of features and select top</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.transform" title="automatminer.preprocessing.feature_selection.TreeFeatureReducer.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a>(X[,&nbsp;y])</td>
+<td>Transforms the data with the subset of features determined after</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>tree='rf'</em>, <em>recursive=True</em>, <em>cv=5</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/feature_selection.html#TreeFeatureReducer.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits to the data (X) and target (y) to determine the selected_features.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>X (pandas.DataFrame): input data, note that numpy matrix is NOT</dt>
+<dd>accepted since the X.columns is used for feature names</dd>
+<dt>y (pandas.Series or np.ndarray): list of outputs used for fitting</dt>
+<dd>the tree model</dd>
+<dt>tree (str or instantiated sklearn tree-based model): if a model is</dt>
+<dd>directly fed, it must have the .feature_importances_ attribute</dd>
+<dt>recursive (bool): whether to recursively reduce the features (True)</dt>
+<dd>or just do it once (False)</dd>
+<dt>cv (int or CrossValidation): sklearn’s cross-validation with the</dt>
+<dd>same options (int or actual instantiated CrossValidation)</dd>
+</dl>
+</dd>
+<dt>Returns (None):</dt>
+<dd>sets the class attribute .selected_features</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_reduced_features">
+<code class="descname">get_reduced_features</code><span class="sig-paren">(</span><em>tree_model</em>, <em>X</em>, <em>y</em>, <em>recursive=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/feature_selection.html#TreeFeatureReducer.get_reduced_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_reduced_features" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Gives a reduced list of feature names given a tree-based model that</dt>
+<dd>has the .feature_importances_ attribute.</dd>
+<dt>Args:</dt>
+<dd>tree_model (instantiated sklearn tree-based model):
+X (pandas.dataframe):
+y (pandas.Series or numpy.ndarray): the target column
+recursive (bool):</dd>
+<dt>Returns ([str]): list of the top * percentile of features. * determined</dt>
+<dd>by importance_percentile argument.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_top_features">
+<code class="descname">get_top_features</code><span class="sig-paren">(</span><em>feat_importance</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/feature_selection.html#TreeFeatureReducer.get_top_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_top_features" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Simple function to through a sorted list of features and select top</dt>
+<dd>percentiles.</dd>
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>feat_importance ([(str, float)]): a sorted list of</dt>
+<dd>(feature, importance) tuples</dd>
+</dl>
+</dd>
+<dt>Returns ([str]): list of the top * percentile of features. * determined</dt>
+<dd>by importance_percentile argument.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>X</em>, <em>y=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/feature_selection.html#TreeFeatureReducer.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Transforms the data with the subset of features determined after</dt>
+<dd>calling the fit method on the data.</dd>
+<dt>Args:</dt>
+<dd><dl class="first docutils">
+<dt>X (pandas.DataFrame): input data, note that numpy matrix is NOT</dt>
+<dd>accepted since the X.columns is used for feature names</dd>
+</dl>
+<p class="last">y (placeholder): ignored input (for consistency in notation)</p>
+</dd>
+</dl>
+<p>Returns (pandas.DataFrame): the data with reduced number of features.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/automatminer.preprocessing.feature_selection.TreeFeatureReducer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
