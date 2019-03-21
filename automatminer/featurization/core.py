@@ -93,6 +93,9 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             featurizers.
         auto_featurizer (bool): whether the featurizers are set automatically,
             or passed by the users.
+        fitted_input_df (pd.DataFrame): The dataframe which was fitted on
+        converted_input_df (pd.DataFrame): The converted dataframe which
+            was fitted on (i.e., strings converted to compositions).
     """
 
     def __init__(self, cache_src=None, preset=None, featurizers=None,
@@ -120,6 +123,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.ignore_cols = ignore_cols or []
         self.is_fit = False
         self.fitted_input_df = None
+        self.converted_input_df = None
         self.ignore_errors = ignore_errors
         self.drop_inputs = drop_inputs
         self.multiindex = multiindex
@@ -261,6 +265,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 self.logger.info(self._log_prefix +
                                  "Featurizer type {} not in the dataframe to be"
                                  " fitted. Skipping...".format(featurizer_type))
+        self.converted_input_df = df
         return self
 
     @log_progress(AMM_LOG_TRANSFORM_STR)
@@ -331,7 +336,9 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             transforming_on_fitted = df is self.fitted_input_df
             df = self._prescreen_df(df, inplace=True)
 
-            if not transforming_on_fitted:
+            if transforming_on_fitted:
+                df = self.converted_input_df
+            else:
                 df = self._add_composition_from_structure(df)
 
             for featurizer_type, featurizers in self.featurizers.items():
@@ -418,7 +425,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                        target_col_id=featurizer_type)
                 df = stc.featurize_dataframe(df, featurizer_type,
                                              multiindex=self.multiindex,
-                                             ignore_errors=True)
+                                             ignore_errors=True,
+                                             inplace=False)
 
             elif isinstance(type_tester, dict):
                 self.logger.info(self._log_prefix +
@@ -437,7 +445,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                     return_original_on_error=True, max_sites=-50)
                 try:
                     df = cto.featurize_dataframe(df, featurizer_type,
-                                                 multiindex=self.multiindex)
+                                                 multiindex=self.multiindex,
+                                                 inplace=False)
                 except Exception as e:
                     self.logger.info(self._log_prefix +
                                      "Could not decorate oxidation states due "
@@ -460,7 +469,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                         "".format(featurizer_type, type(type_tester)))
                 dto = DictToObject(overwrite_data=True,
                                    target_col_id=featurizer_type)
-                df = dto.featurize_dataframe(df, featurizer_type)
+                df = dto.featurize_dataframe(df, featurizer_type, inplace=False)
 
                 # Decorate with oxidstates
                 if featurizer_type == self.structure_col and \
@@ -474,7 +483,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                         return_original_on_error=True, max_sites=-50)
                     try:
                         df = sto.featurize_dataframe(df, featurizer_type,
-                                                     multiindex=self.multiindex)
+                                                     multiindex=self.multiindex,
+                                                     inplace=False)
                     except Exception as e:
                         self.logger.info(
                             self._log_prefix +

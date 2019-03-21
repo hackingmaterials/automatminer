@@ -234,8 +234,9 @@ class TestAutoFeaturizer(unittest.TestCase):
         # Modification of test_featurize_composition with AutoFeaturizer parameter
         target = "K_VRH"
         df = copy.copy(self.test_df[['composition', target]].iloc[:self.limit])
-        af = AutoFeaturizer(composition_col="composition", preset="best")
+        af = AutoFeaturizer(composition_col="composition", preset="best", ignore_errors=False)
         df = af.fit_transform(df, target)
+
         self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
         self.assertTrue("composition" not in df.columns)
 
