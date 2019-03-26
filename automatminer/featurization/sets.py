@@ -178,13 +178,26 @@ class CompositionFeaturizers(FeaturizerSet):
         ]
 
         self._need_oxi_featurizers = [
+            cf.YangSolidSolution(),
             cf.CationProperty.from_preset(preset_name='deml'),
             cf.OxidationStates.from_preset(preset_name='deml'),
             cf.ElectronAffinity(),
             cf.ElectronegativityDiff(),
-            cf.YangSolidSolution(),
             cf.IonProperty()
         ]
+
+        self._intermetallics_only = [
+            cf.YangSolidSolution(),
+            cf.Miedema(),
+        ]
+
+    @property
+    def intermetallics_only(self):
+        """List of featurizers that applies only to intermetallics.
+        Will probably be removed by valid_fraction checking if not actally
+        applicable to the dataset.
+        """
+        return self._get_featurizers(self._intermetallics_only)
 
     @property
     def fast(self):
@@ -213,7 +226,7 @@ class CompositionFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        return self.fast
+        return self.fast + self.intermetallics_only
 
 
 class StructureFeaturizers(FeaturizerSet):
