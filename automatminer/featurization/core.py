@@ -4,6 +4,7 @@ Classes for automatic featurization and core featurizer functionality.
 
 import os
 import math
+import copy
 
 import pandas as pd
 from pymatgen import Composition
@@ -88,7 +89,10 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         These attributes are set during fitting
 
         featurizers (dict): Same format as input dictionary in Args. Values
-            contain the actual objects being used for featurization.
+            contain the actual objects being used for featurization. Featurizers
+            can be removed if check_validity=True and the featurizer is not
+            valid for more than self.min_precheck_frac fraction of the fitting
+            dataset.
         features (dict): The features generated from the application of all
             featurizers.
         auto_featurizer (bool): whether the featurizers are set automatically,
@@ -96,14 +100,20 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         fitted_input_df (pd.DataFrame): The dataframe which was fitted on
         converted_input_df (pd.DataFrame): The converted dataframe which
             was fitted on (i.e., strings converted to compositions).
+
+        Attributes not set during fitting and not specified by arguments:
+
+        min_precheck_frac (float): The minimum fraction of a featuriser's input
+            that can be valid (via featurizer.precheck(data).
     """
 
     def __init__(self, cache_src=None, preset=None, featurizers=None,
                  exclude=None, functionalize=False, ignore_cols=None,
                  ignore_errors=True, drop_inputs=True, guess_oxistates=True,
-                 multiindex=False, n_jobs=None, logger=True,
-                 composition_col="composition", structure_col="structure",
-                 bandstructure_col="bandstructure", dos_col="dos"):
+                 multiindex=False, do_precheck=True, n_jobs=None,
+                 logger=True, composition_col="composition",
+                 structure_col="structure", bandstructure_col="bandstructure",
+                 dos_col="dos"):
 
         if featurizers and preset:
             raise AutomatminerError("Featurizers and preset were both set. "
@@ -127,6 +137,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.ignore_errors = ignore_errors
         self.drop_inputs = drop_inputs
         self.multiindex = multiindex
+        self.do_precheck = do_precheck
         self.n_jobs = n_jobs
         self.guess_oxistates = guess_oxistates
         self.features = []
@@ -199,11 +210,14 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                              "JSON is the required file type for featurizer"
                              "caching.")
 
+        self.min_precheck_frac = 0.9
+
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
         """
-        Fit all featurizers to the df.
+        Fit all featurizers to the df and remove featurizers which are out of
+        scope or otherwise cannot be robustly applied to the dataset.
 
         WARNING: for fitting to work, the dataframe must contain the
         corresponding *col keys set in __init__. So for composition
@@ -240,17 +254,49 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 self.logger.info(
                     self._log_prefix +
                     "No {} featurizers being used.".format(featurizer_type))
+                continue
+
             if featurizer_type in df.columns:
                 df = self._tidy_column(df, featurizer_type)
+
+                # Remove invalid featurizers by looking at valid_fraction
+                if self.do_precheck:
+                    self.logger.debug(self._log_prefix +
+                                      "Prechecking featurizers.")
+                    invalid_featurizers = []
+                    for f in featurizers:
+                        try:
+                            frac = f.precheck_dataframe(df, featurizer_type,
+                                                        return_frac=True)
+                            if frac < self.min_precheck_frac:
+                                invalid_featurizers.append(f)
+                                msg = "Will remove {} because it's fraction " \
+                                      "passing the precheck for this " \
+                                      "dataset ({}) was less than the minimum" \
+                                      " ({})" \
+                                      "".format(f.__class__.__name__, frac,
+                                                self.min_precheck_frac)
+                                self.logger.info(self._log_prefix + msg)
+                        except (AttributeError, ValueError, KeyError) as E:
+                            self.logger.warning(
+                                self._log_prefix +
+                                "{} precheck failed with {}. Ignoring...."
+                                "".format(f, E))
+                    self.featurizers[featurizer_type] = [f for f in featurizers
+                                                         if f not in
+                                                         invalid_featurizers]
+                    featurizers = self.featurizers[featurizer_type]
+
+                # Fit the featurizers
                 for f in featurizers:
                     log_fit = False
                     if featurizer_type == self.structure_col:
                         if f.__class__.__name__ in self.fittable_fcls:
                             log_fit = True
                     if log_fit:
-                        self.logger.info(self._log_prefix + "Fitting {}."
-                                                            "".format(
-                            f.__class__.__name__))
+                        self.logger.info(
+                            self._log_prefix +
+                            "Fitting {}.".format(f.__class__.__name__))
 
                     f.fit(df[featurizer_type].tolist())
                     f.set_n_jobs(self.n_jobs)
