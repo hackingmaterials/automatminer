@@ -296,6 +296,16 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertAlmostEqual(df_feats.iloc[3, 0].tolist(),
                                df_cache_feats.iloc[3, 0].tolist())
 
+    def test_prechecking(self):
+        target = "K_VRH"
+        af = AutoFeaturizer(preset="best")
+        df = self.test_df[['composition', target]]
+        af.fit(df, target)
+        classes = [f.__class__.__name__ for f in af.featurizers["composition"]]
+        self.assertNotIn("YangSolidSolution", classes)
+        self.assertNotIn("Miedema", classes)
+        self.assertIn("ElementProperty", classes)
+
     def tearDown(self):
         if os.path.exists(CACHE_PATH):
             os.remove(CACHE_PATH)
