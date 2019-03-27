@@ -20,7 +20,7 @@ if __name__ == "__main__":
                 'Anubhav Jain'],
         author_email='ardunn@lbl.gov',
         license='modified BSD',
-        packages=find_packages(include='./automatminer'),
+        packages=find_packages(where=".", exclude=("benchdev", "benchdev.*")),
         package_data={},
         zip_safe=False,
         install_requires=reqs_list,
