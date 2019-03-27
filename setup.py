@@ -14,13 +14,13 @@ if __name__ == "__main__":
         name='automatminer',
         version=__version__,
         description='automated machine learning for materials science',
-        long_description=open(os.path.join(module_dir, 'README.md')).read(),
+        long_description="",
         url='https://github.com/hackingmaterials/automatminer',
         author=['Alex Dunn', 'Alex Ganose', 'Alireza Faghaninia', 'Qi Wang',
                 'Anubhav Jain'],
         author_email='ardunn@lbl.gov',
         license='modified BSD',
-        packages=find_packages(),
+        packages=find_packages(where=".", exclude=("benchdev", "benchdev.*")),
         package_data={},
         zip_safe=False,
         install_requires=reqs_list,
@@ -34,4 +34,5 @@ if __name__ == "__main__":
                      'Topic :: Other/Nonlisted Topic',
                      'Topic :: Scientific/Engineering'],
         test_suite='automatminer',
-        tests_require='tests')
+        tests_require='tests'
+    )

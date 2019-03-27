@@ -1,0 +1,2 @@
+# Requirements of this dev
+FireWorks==1.8.7
