@@ -58,7 +58,7 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
         return production_config
     elif preset == "heavy":
         heavy_config = {
-            "learner": TPOTAdaptor(max_time_mins=240),
+            "learner": TPOTAdaptor(max_time_mins=1440),
             "reducer": FeatureReducer(reducers=("corr", "rebate")),
             "autofeaturizer": AutoFeaturizer(preset="all", **caching_kwargs),
             "cleaner": DataCleaner()
