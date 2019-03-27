@@ -68,6 +68,3 @@ def release_gh(ctx):
 def release(ctx):
     update_changelog()
     full_tests_circleci()
-
-
-#TODO: HAVE THIS PUSH A NEW BENCHMARK TO LAWRENCIUM
