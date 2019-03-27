@@ -1,5 +1,39 @@
 # Change Log
 
+## [v2019.03.26b0](https://github.com/hackingmaterials/automatminer/tree/v2019.03.26b0) (2019-03-27)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.02.03_beta...v2019.03.26b0)
+
+**Closed issues:**
+
+- matpipe benchmark does not work with StratifiedKFold [\#191](https://github.com/hackingmaterials/automatminer/issues/191)
+- Change TPOT default optimization metric to MAE? [\#190](https://github.com/hackingmaterials/automatminer/issues/190)
+- PCA fails if matrix is large and n\_features \> n\_samples [\#183](https://github.com/hackingmaterials/automatminer/issues/183)
+- Add "powerups" to presets [\#180](https://github.com/hackingmaterials/automatminer/issues/180)
+- General problem: Featurization takes too long! [\#179](https://github.com/hackingmaterials/automatminer/issues/179)
+- DataCleaner na\_method is sloppy [\#178](https://github.com/hackingmaterials/automatminer/issues/178)
+- Autofeaturizer logging is annoying [\#177](https://github.com/hackingmaterials/automatminer/issues/177)
+- Autofeaturizer may run redundant conversions as many as 3 times [\#176](https://github.com/hackingmaterials/automatminer/issues/176)
+- Add circleci test for 3.7 [\#175](https://github.com/hackingmaterials/automatminer/issues/175)
+- Logger should append to existing logs, not overwrite it [\#174](https://github.com/hackingmaterials/automatminer/issues/174)
+- Analytics tests should run whether or not they are on circleci [\#169](https://github.com/hackingmaterials/automatminer/issues/169)
+- Real docs + more thorough example [\#167](https://github.com/hackingmaterials/automatminer/issues/167)
+- Add option to control tree and correlation-based FeatureReducer  params [\#162](https://github.com/hackingmaterials/automatminer/issues/162)
+- Use MEGNet/CGCNN as backend? [\#156](https://github.com/hackingmaterials/automatminer/issues/156)
+- Need more featurizers implemented in matminer/automatminer [\#143](https://github.com/hackingmaterials/automatminer/issues/143)
+- Outlier detection as a preprocessing step [\#135](https://github.com/hackingmaterials/automatminer/issues/135)
+- Look into FunctionFeaturizer [\#134](https://github.com/hackingmaterials/automatminer/issues/134)
+- Analysis class needs to be beefed up with something actually useful [\#105](https://github.com/hackingmaterials/automatminer/issues/105)
+- Analysis should produce summary and visualization as file [\#57](https://github.com/hackingmaterials/automatminer/issues/57)
+
+**Merged pull requests:**
+
+- Documentation is completed [\#198](https://github.com/hackingmaterials/automatminer/pull/198) ([samysspace](https://github.com/samysspace))
+- Edits1 [\#196](https://github.com/hackingmaterials/automatminer/pull/196) ([ardunn](https://github.com/ardunn))
+- changing base classes [\#187](https://github.com/hackingmaterials/automatminer/pull/187) ([ardunn](https://github.com/ardunn))
+
+## [v2019.02.03_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.02.03_beta) (2019-02-03)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.02.02_beta...v2019.02.03_beta)
+
 ## [v2019.02.02_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.02.02_beta) (2019-02-02)
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.01.26_beta...v2019.02.02_beta)
 
@@ -41,7 +75,7 @@
 - Look into using NestedCV for automl, and whether it would be a good idea or not [\#130](https://github.com/hackingmaterials/automatminer/issues/130)
 - Add a very simple example [\#108](https://github.com/hackingmaterials/automatminer/issues/108)
 - Add another study comparison with matbench [\#65](https://github.com/hackingmaterials/automatminer/issues/65)
-- Add a profiler to DFTransformer [\#56](https://github.com/hackingmaterials/automatminer/issues/56)
+- Add a profiler to DataframeTransformer [\#56](https://github.com/hackingmaterials/automatminer/issues/56)
 
 **Merged pull requests:**
 
