@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>AutoFeaturizer &#8212; automatminer 2019.02.03_beta documentation</title>
+    <title>AutoFeaturizer &#8212; automatminer 2019.03.27_beta documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
@@ -36,7 +36,7 @@
 <h1>AutoFeaturizer<a class="headerlink" href="#autofeaturizer" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="automatminer.featurization.AutoFeaturizer">
-<em class="property">class </em><code class="descclassname">automatminer.featurization.</code><code class="descname">AutoFeaturizer</code><span class="sig-paren">(</span><em>cache_src=None</em>, <em>preset=None</em>, <em>featurizers=None</em>, <em>exclude=None</em>, <em>functionalize=False</em>, <em>ignore_cols=None</em>, <em>ignore_errors=True</em>, <em>drop_inputs=True</em>, <em>guess_oxistates=True</em>, <em>multiindex=False</em>, <em>n_jobs=None</em>, <em>logger=True</em>, <em>composition_col='composition'</em>, <em>structure_col='structure'</em>, <em>bandstructure_col='bandstructure'</em>, <em>dos_col='dos'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/featurization/core.html#AutoFeaturizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.featurization.AutoFeaturizer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">automatminer.featurization.</code><code class="descname">AutoFeaturizer</code><span class="sig-paren">(</span><em>cache_src=None</em>, <em>preset=None</em>, <em>featurizers=None</em>, <em>exclude=None</em>, <em>functionalize=False</em>, <em>ignore_cols=None</em>, <em>ignore_errors=True</em>, <em>drop_inputs=True</em>, <em>guess_oxistates=True</em>, <em>multiindex=False</em>, <em>do_precheck=True</em>, <em>n_jobs=None</em>, <em>logger=True</em>, <em>composition_col='composition'</em>, <em>structure_col='structure'</em>, <em>bandstructure_col='bandstructure'</em>, <em>dos_col='dos'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/featurization/core.html#AutoFeaturizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.featurization.AutoFeaturizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="automatminer.base.DFTransformer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.base.LoggableMixin.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
 <p>Automatically featurize a dataframe.</p>
 <p>Use this object first by calling fit, then by calling transform.</p>
@@ -101,13 +101,25 @@ be used. If set to False, then no logging will occur.</dd>
 </dd>
 <dt>Attributes:</dt>
 <dd><p class="first">These attributes are set during fitting</p>
-<dl class="last docutils">
+<dl class="docutils">
 <dt>featurizers (dict): Same format as input dictionary in Args. Values</dt>
-<dd>contain the actual objects being used for featurization.</dd>
+<dd>contain the actual objects being used for featurization. Featurizers
+can be removed if check_validity=True and the featurizer is not
+valid for more than self.min_precheck_frac fraction of the fitting
+dataset.</dd>
 <dt>features (dict): The features generated from the application of all</dt>
 <dd>featurizers.</dd>
 <dt>auto_featurizer (bool): whether the featurizers are set automatically,</dt>
 <dd>or passed by the users.</dd>
+</dl>
+<p>fitted_input_df (pd.DataFrame): The dataframe which was fitted on
+converted_input_df (pd.DataFrame): The converted dataframe which</p>
+<blockquote>
+<div>was fitted on (i.e., strings converted to compositions).</div></blockquote>
+<p>Attributes not set during fitting and not specified by arguments:</p>
+<dl class="last docutils">
+<dt>min_precheck_frac (float): The minimum fraction of a featuriser’s input</dt>
+<dd>that can be valid (via featurizer.precheck(data).</dd>
 </dl>
 </dd>
 </dl>
