@@ -1,4 +1,4 @@
-### Automatminer benchmarking dev
+# Automatminer benchmarking dev
 
 `dev` is a collection of dev tools for executing hundred or thousands of machine
 learning benchmarks on parallel computing resources with Fireworks. This is not
