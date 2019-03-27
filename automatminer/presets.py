@@ -88,7 +88,7 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
             "learner": TPOTAdaptor(max_time_mins=2,
                                    max_eval_time_mins=1,
                                    population_size=10),
-            "reducer": FeatureReducer(reducers=('corr',)),
+            "reducer": FeatureReducer(reducers=('corr', 'tree')),
             "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
             "cleaner": DataCleaner()
         }
