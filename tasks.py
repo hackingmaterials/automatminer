@@ -33,6 +33,8 @@ def open_doc(ctx):
 @task
 def update_changelog(ctx):
     ctx.run('github_changelog_generator hackingmaterials/automatminer')
+    ctx.run("git add CHANGELOG.md")
+    ctx.run("git commit CHANGELOG.md -m 'update changelog'")
 
 @task
 def full_tests_circleci(ctx):
@@ -66,5 +68,14 @@ def release_gh(ctx):
 
 @task
 def release(ctx):
+    # run update_changelog
     update_changelog()
+
+    # push all your changes to master
+    # this step is missing here
+
+    # then do release_gh
+    release_gh()
+
+    # finally, run the tests
     full_tests_circleci()
