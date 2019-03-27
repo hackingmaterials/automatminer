@@ -7,7 +7,6 @@ import warnings
 
 import git
 import automatminer
-import hmprivate
 from fireworks import Firework, Workflow, ScriptTask, LaunchPad, FWorker
 from sklearn.model_selection import KFold
 
