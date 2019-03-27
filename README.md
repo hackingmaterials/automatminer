@@ -1,4 +1,4 @@
-![logo](./docs/source/_static/logo_lowres.png)
+<img src="./docs/source/_static/logo_lowres.png" alt="logo" width="500"/>
 
 automatminer is an automatic prediction engine for materials properties.
 
