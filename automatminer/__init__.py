@@ -4,7 +4,7 @@ from automatminer.featurization import AutoFeaturizer
 from automatminer.pipeline import MatPipe
 from automatminer.presets import get_preset_config
 
-__author__ = 'Alex Dunn, Qi Wang, Alex Ganose, Daniel Dopp, Anubhav Jain'
+__author__ = 'Alex Dunn, Qi Wang, Alex Ganose, Alireza Faghaninia, Anubhav Jain'
 __author_email__ = 'ardunn@lbl.gov'
 __license__ = 'Modified BSD'
-__version__ = '2019.03.26b0'
+__version__ = '2019.03.27_beta'
