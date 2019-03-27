@@ -1,2 +1,5 @@
 include LICENSE
 include CHANGELOG.md
+include CONTRIBUTING.md
+recursive-include tutorials
+recursive-exclude dev
