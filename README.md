@@ -1,4 +1,4 @@
-![logo](./docs/source/_static/logo_small.png)
+![logo](./docs/source/_static/logo.svg)
 
 automatminer is an automatic prediction engine for materials properties.
 

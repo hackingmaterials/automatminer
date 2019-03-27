@@ -123,7 +123,7 @@
             <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                                    <span class="n">max_eval_time_mins</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                    <span class="n">population_size</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
-            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,)),</span>
+            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,</span> <span class="s1">&#39;tree&#39;</span><span class="p">)),</span>
             <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;fast&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
             <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
         <span class="p">}</span>

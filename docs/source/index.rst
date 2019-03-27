@@ -4,9 +4,9 @@
 
 .. role:: red
 
-:red:`WARNING! These docs are incomplete. Read and use at your own risk!``
+:red:`WARNING! These docs and examples are a work in progress. Read and use at your own risk!``
 
-.. image:: _static/logo_med.png
+.. image:: _static/logo.svg
    :alt: server
    :align: center
    :width: 600px
