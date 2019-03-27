@@ -3,7 +3,7 @@ Base classes, mixins, and other inheritables.
 """
 import abc
 import logging
-
+from sklearn.base import BaseEstimator
 from automatminer.utils.log import initialize_logger, \
     initialize_null_logger, AMM_LOGGER_BASENAME
 
@@ -54,7 +54,7 @@ class LoggableMixin:
         return self.__class__.__name__ + ": "
 
 
-class DFTransformer(abc.ABC):
+class DFTransformer(abc.ABC, BaseEstimator):
     """ A base class to allow easy transformation in the same way as
     TransformerMixin and BaseEstimator in sklearn, but for pandas dataframes.
 
