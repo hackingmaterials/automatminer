@@ -1,5 +1,12 @@
 # Change Log
 
+## [v2019.03.27_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.03.27_beta) (2019-03-27)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.03.26b0...v2019.03.27_beta)
+
+**Merged pull requests:**
+
+- Dev [\#200](https://github.com/hackingmaterials/automatminer/pull/200) ([ardunn](https://github.com/ardunn))
+
 ## [v2019.03.26b0](https://github.com/hackingmaterials/automatminer/tree/v2019.03.26b0) (2019-03-27)
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.02.03_beta...v2019.03.26b0)
 

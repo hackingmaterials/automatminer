@@ -1,14 +1,10 @@
-#!/usr/bin/env python
+"""Bench-dev (HT-benchmarking) package. If you're looking to install
+automatminer (the regular package), just use setup.py."""
 
 from setuptools import setup, find_packages
 import os
 
 from benchdev import __version__
-
-"""
-Bench-dev (HT-benchmarking) package. If you're looking to install 
-automatminer (the regular package), just use setup.py.
-"""
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 reqs_raw = open(os.path.join(module_dir, "requirements_dev.txt")).read()

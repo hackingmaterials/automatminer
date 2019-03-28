@@ -4,7 +4,6 @@ Classes for automatic featurization and core featurizer functionality.
 
 import os
 import math
-import copy
 
 import pandas as pd
 from pymatgen import Composition
