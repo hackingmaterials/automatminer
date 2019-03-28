@@ -16,7 +16,8 @@ if __name__ == "__main__":
         name='automatminer',
         version=__version__,
         description='automated machine learning for materials science',
-        long_description="",
+        long_description="Automated machine learning for materials science. "
+                         "https://github.com/hackingmaterials/automatminer",
         url='https://github.com/hackingmaterials/automatminer',
         author=['Alex Dunn', 'Alex Ganose', 'Alireza Faghaninia', 'Qi Wang',
                 'Anubhav Jain'],
