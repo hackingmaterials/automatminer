@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-from .automatminer import __version__
+from automatminer.__init__ import __version__
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 reqs_raw = open(os.path.join(module_dir, "requirements.txt")).read()
@@ -10,9 +10,13 @@ reqs_list = [r for r in reqs_raw.split("\n")]
 
 
 if __name__ == "__main__":
+
+    with open(os.path.join(module_dir, "VERSION"), "r") as f:
+        version = f.read()
+
     setup(
         name='automatminer',
-        version=__version__,
+        version=version,
         description='automated machine learning for materials science',
         long_description="Automated machine learning for materials science. "
                          "https://github.com/hackingmaterials/automatminer",
