@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-
 from setuptools import setup, find_packages
 import os
 
-from automatminer import __version__
+from .automatminer import __version__
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 reqs_raw = open(os.path.join(module_dir, "requirements.txt")).read()

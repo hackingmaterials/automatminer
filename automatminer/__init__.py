@@ -7,4 +7,4 @@ from automatminer.presets import get_preset_config
 __author__ = 'Alex Dunn, Qi Wang, Alex Ganose, Alireza Faghaninia, Anubhav Jain'
 __author_email__ = 'ardunn@lbl.gov'
 __license__ = 'Modified BSD'
-__version__ = '2019.03.27_beta'
+__version__ = '2019.03.27_beta1'
