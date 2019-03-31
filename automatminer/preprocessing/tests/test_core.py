@@ -155,7 +155,6 @@ class TestPreprocess(unittest.TestCase):
         self.assertIn("minimum X", df.columns)
         self.assertEqual(df["minimum X"].iloc[40], df["minimum X"].iloc[39])
 
-
     def test_DataCleaner_emergency_na_transform_imputation(self):
         """For the case where a fit DataCleaner must include feature X, but
         in the df-to-be-transformed that feature is all nan, which makes
