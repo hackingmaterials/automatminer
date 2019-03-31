@@ -260,11 +260,7 @@ class DataCleaner(DFTransformer, LoggableMixin):
                 self.logger.warning(self._log_prefix +
                                     "Mismatched columns found in dataframe "
                                     "used for fitting and argument dataframe.")
-                if not coerce_mismatch:
-                    raise AutomatminerError("Mismatch between columns found in "
-                                            "arg dataframe and dataframe used "
-                                            "for fitting!")
-                else:
+                if coerce_mismatch:
                     self.logger.warning(self._log_prefix +
                                         "Coercing mismatched columns...")
                     if mismatch["df1_not_in_df2"]:  # in fitted, not in arg
@@ -278,12 +274,16 @@ class DataCleaner(DFTransformer, LoggableMixin):
                             if c not in df.columns and c != target:
                                 # Interpret as one-hot problems...
                                 df[c] = np.zeros((df.shape[0]))
-                    elif mismatch["df2_not_in_df1"]:  # arg cols not in fitted
+                    if mismatch["df2_not_in_df1"]:  # arg cols not in fitted
                         self.logger.warning(
                             self._log_prefix +
                             "Following columns are being dropped:\n{}".format(
                                 mismatch["df2_not_in_df1"]))
                         df = df.drop(columns=mismatch["df2_not_in_df1"])
+                else:
+                    raise AutomatminerError("Mismatch between columns found in "
+                                            "arg dataframe and dataframe used "
+                                            "for fitting!")
 
             # handle the case where all samples of transformed df are nan but
             # feature is required by fitted input df, and these is no way to
