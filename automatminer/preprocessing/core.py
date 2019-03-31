@@ -285,6 +285,21 @@ class DataCleaner(DFTransformer, LoggableMixin):
                                 mismatch["df2_not_in_df1"]))
                         df = df.drop(columns=mismatch["df2_not_in_df1"])
 
+            # handle the case where all samples of transformed df are nan but
+            # feature is required by fitted input df, and these is no way to
+            # impute by samples or drop...
+            nan_cols = [c for c in df.columns if df[c].isna().all()]
+            if nan_cols:
+                self.logger.error(self._log_prefix + "Columns {} are all nan "
+                                  "in transform df but are required by the fit "
+                                  "df. Using mean values of fitted df to "
+                                  "impute transformed df. This may result in "
+                                  "highly erroenous imputed values!"
+                                  "".format(nan_cols))
+                for col in nan_cols:
+                    mean_val = self.fitted_df[col].mean()
+                    df[col] = [mean_val] * df.shape[0]
+
         self.dropped_features = [c for c in feats0 if
                                  c not in df.columns.values]
 

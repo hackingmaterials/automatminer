@@ -155,6 +155,27 @@ class TestPreprocess(unittest.TestCase):
         self.assertIn("minimum X", df.columns)
         self.assertEqual(df["minimum X"].iloc[40], df["minimum X"].iloc[39])
 
+
+    def test_DataCleaner_emergency_na_transform_imputation(self):
+        """For the case where a fit DataCleaner must include feature X, but
+        in the df-to-be-transformed that feature is all nan, which makes
+        it unable to be imputed correctly.
+
+        Current implementation dictates this "emergency" be resolved by
+        imputing with the mean of feature x from the fitted_df."""
+        dc = DataCleaner()   # should work regardless of default
+        df = self.test_df
+
+        fit_df = df.iloc[:150]
+        trs_df = df.iloc[151:]
+        trs_df["range X"] = [np.nan] * trs_df.shape[0]
+        dc.fit(fit_df, self.target)
+
+        trs_df2 = dc.transform(trs_df, self.target)
+        self.assertAlmostEqual(trs_df2["range X"].mean(),
+                               fit_df["range X"].mean())
+        self.assertAlmostEqual(trs_df2["range X"].std(), 0.0)
+
     def test_FeatureReducer_basic(self):
         fr = FeatureReducer(reducers=('corr', 'tree'))
 
