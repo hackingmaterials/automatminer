@@ -19,6 +19,7 @@ from automatminer.preprocessing import DataCleaner, FeatureReducer
 from automatminer.automl.adaptors import TPOTAdaptor, SinglePipelineAdaptor
 from automatminer.pipeline import MatPipe
 from automatminer.utils.ml import AMM_REG_NAME, AMM_CLF_NAME
+from automatminer.utils.log import initialize_logger, AMM_LOGGER_BASENAME
 
 from benchdev.config import LP
 
@@ -78,7 +79,9 @@ class RunPipe(FireTaskBase):
             "reducer": FeatureReducer(**reducer_kwargs),
             "cleaner": DataCleaner(**cleaner_kwargs),
             "autofeaturizer": AutoFeaturizer(**autofeaturizer_kwargs)}
-        pipe = MatPipe(**pipe_config)
+
+        logger = initialize_logger(AMM_LOGGER_BASENAME, filepath=save_dir)
+        pipe = MatPipe(**pipe_config, logger=logger)
 
         # Set up dataset
         # Dataset should already be set up correctly as pickle beforehand.
@@ -124,7 +127,6 @@ class RunPipe(FireTaskBase):
         pipe.digest(os.path.join(save_dir, "digest.txt"))
         result_df.to_csv(os.path.join(save_dir, "test_df.csv"))
         pipe.post_fit_df.to_csv(os.path.join(save_dir, "fitted_df.csv"))
-        shutil.copy("automatminer.log", os.path.join(save_dir, "automatminer.log"))
 
         # Evaluate model
         true = result_df[target]
@@ -345,7 +347,8 @@ class RunSingleFit(FireTaskBase):
             "reducer": FeatureReducer(**reducer_kwargs),
             "cleaner": DataCleaner(**cleaner_kwargs),
             "autofeaturizer": AutoFeaturizer(**autofeaturizer_kwargs)}
-        pipe = MatPipe(**pipe_config)
+        logger = initialize_logger(AMM_LOGGER_BASENAME, filepath=base_save_dir)
+        pipe = MatPipe(**pipe_config, logger=logger)
 
         # Set up dataset
         # Dataset should already be set up correctly as pickle beforehand.
@@ -356,4 +359,3 @@ class RunSingleFit(FireTaskBase):
 
         pipe.fit(df, target)
         pipe.save(os.path.join(base_save_dir, "pipe.p"))
-        shutil.copy("automatminer.log", os.path.join(base_save_dir, "automatminer.log"))
