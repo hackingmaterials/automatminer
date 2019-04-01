@@ -2,6 +2,7 @@
 The environment variables you need for this all to work are:
 
 - AMM_BENCH_DIR: where to store benchmarks
+- AMM_MODEL_DIR: where to store models (from production fits on full datasets)
 - AMM_DATASET_DIR: where to store datasets
 - AMM_CODE_DIR: where to run tests
 """
@@ -131,10 +132,18 @@ GFA = {
 
 EXPT_IS_METAL = {
     "name": "expt_is_metal",
-    "data_pickle": "expt_gaps.pickle.gz",
+    "data_pickle": "expt_is_metal.pickle.gz",
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True
+}
+
+EXPT_GAP = {
+    "name": "expt_gap",
+    "data_pickle": "expt_gap.pickle.gz",
+    "target": "gap expt",
+    "problem_type": AMM_REG_NAME,
+    "clf_pos_label": None
 }
 
 PHONONS = {
@@ -145,7 +154,15 @@ PHONONS = {
     "clf_pos_label": None
 }
 
-BENCHMARK_DEBUG_SET = [JDFT2D, PHONONS, EXPT_IS_METAL]
+STEELS_YIELD = {
+    "name": "steels_yield",
+    "data_pickle": "steels_yield.pickle.gz",
+    "target": "yield strength",
+    "problem_type": AMM_REG_NAME,
+    "clf_pos_label": None
+}
+
+BENCHMARK_DEBUG_SET = [JDFT2D, PHONONS, EXPT_IS_METAL, STEELS_YIELD]
 BENCHMARK_FULL_SET = [BULK, SHEAR, LOG_BULK, LOG_SHEAR, REFRACTIVE, JDFT2D,
                       MP_GAP, MP_IS_METAL, MP_E_FORM, CASTELLI_E_FORM, GFA,
-                      EXPT_IS_METAL, PHONONS]
+                      EXPT_IS_METAL, EXPT_GAP, STEELS_YIELD, PHONONS]

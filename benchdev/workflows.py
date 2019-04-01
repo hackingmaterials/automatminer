@@ -33,6 +33,10 @@ def get_last_commit():
 def get_time_str():
     return datetime.datetime.now().strftime("%Y.%m.%d_%H:%M:%S")
 
+def check_pipe_config(pipe_config):
+    if "logger" in pipe_config:
+        raise ValueError("Logger is set internally by tasks.")
+
 
 def wf_single_fit(fworker, fit_name, pipe_config, name, data_pickle, target, *args,
                   tags=None, **kwargs):
@@ -40,6 +44,7 @@ def wf_single_fit(fworker, fit_name, pipe_config, name, data_pickle, target, *ar
     Submit a dataset to be fit for a single pipeline (i.e., to train on a
     dataset for real predictions).
     """
+    check_pipe_config(pipe_config)
     warnings.warn("Single fitted MatPipe not being stored in automatminer db "
                   "collections. Please consult fw_spec to find the benchmark "
                   "on {}".format(fworker))
@@ -75,6 +80,7 @@ def wf_evaluate_build(fworker, build_name, dataset_set, pipe_config,
     - "cori": Cori
     - "lrc": Lawrencium
     """
+    check_pipe_config(pipe_config)
     if fworker not in valid_fworkers:
         raise ValueError("fworker must be in {}".format(valid_fworkers))
 
@@ -139,6 +145,7 @@ def wf_benchmark(fworker, pipe_config, name, data_pickle, target, problem_type,
                  cache=True, kfold_config=KFOLD_DEFAULT, tags=None,
                  return_fireworks=False, add_dataset_to_names=True,
                  build_id=None):
+    check_pipe_config(pipe_config)
     if fworker not in valid_fworkers:
         raise ValueError("fworker must be in {}".format(valid_fworkers))
 
@@ -257,13 +264,13 @@ if __name__ == "__main__":
     # from tpot.base import TPOTBase
     # TPOTBase(generations=, population_size=)
     pipe_config = {
-        # "learner_name": "TPOTAdaptor",
-        # "learner_kwargs": {"generations": 20, "population_size": 20, "max_eval_time_mins": 10},
+        "learner_name": "TPOTAdaptor",
+        "learner_kwargs": {"generations": 20, "population_size": 20, "max_eval_time_mins": 10},
         # "learner_kwargs": {"max_time_mins": 720, "max_eval_time_mins": 10, "population_size": 100},
         # "learner_kwargs": {"max_time_mins": 360, "population_size": 30},
 
-        "learner_name": "rf",
-        "learner_kwargs": {"n_estimators": 500},
+        # "learner_name": "rf",
+        # "learner_kwargs": {"n_estimators": 500},
 
 
         "reducer_kwargs": {"reducers": ("corr",)},
@@ -285,13 +292,13 @@ if __name__ == "__main__":
         # "drop_mean",
         # "af_best",
         # "tpot_generations",
-        # "debug"
+        "debug"
     ]
 
-    # wf = wf_evaluate_build("lrc", "generations short fast", BENCHMARK_FULL_SET, pipe_config,
-    #                        include_tests=False, cache=True, tags=tags)
-    wf = wf_evaluate_build("local", "debug", LOCAL_DEBUG_SET,
-                           pipe_config, include_tests=False, cache=True, tags=tags)
+    wf = wf_evaluate_build("lrc", "debug 1", BENCHMARK_FULL_SET, pipe_config,
+                           include_tests=False, cache=True, tags=tags)
+    # wf = wf_evaluate_build("local", "debug", LOCAL_DEBUG_SET,
+    #                        pipe_config, include_tests=False, cache=True, tags=tags)
 
 
     # ds = LOCAL_DEBUG_SET[0]
