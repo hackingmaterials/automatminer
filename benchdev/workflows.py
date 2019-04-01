@@ -12,7 +12,7 @@ from sklearn.model_selection import KFold
 
 from benchdev.tasks import \
     ConsolidatePipesToBenchmark, RunPipe, StorePipeResults, \
-    ConsolidateBenchmarksToBuild
+    ConsolidateBenchmarksToBuild, RunSingleFit
 from benchdev.config import LP, KFOLD_DEFAULT, \
     LOCAL_DEBUG_SET, RUN_TESTS_CMD, BENCHMARK_DEBUG_SET, BENCHMARK_FULL_SET
 
@@ -29,6 +29,41 @@ def get_last_commit():
     top_dir = os.path.join(os.path.dirname(file), "../")
     repo = git.Repo(top_dir)
     return str(repo.head.commit)
+
+def get_time_str():
+    return datetime.datetime.now().strftime("%Y.%m.%d_%H:%M:%S")
+
+
+def wf_single_fit(fworker, fit_name, pipe_config, name, data_pickle, target, *args,
+                  tags=None, **kwargs):
+    """
+    Submit a dataset to be fit for a single pipeline (i.e., to train on a
+    dataset for real predictions).
+    """
+    warnings.warn("Single fitted MatPipe not being stored in automatminer db "
+                  "collections. Please consult fw_spec to find the benchmark "
+                  "on {}".format(fworker))
+    if fworker not in valid_fworkers:
+        raise ValueError("fworker must be in {}".format(valid_fworkers))
+
+    base_save_dir = get_time_str() + "_single_fit"
+
+    spec = {
+        "pipe_config": pipe_config,
+        "base_save_dir": base_save_dir,
+        "data_pickle": data_pickle,
+        "target": target,
+        "automatminer_commit": get_last_commit(),
+        "tags": tags if tags else [],
+        "_fworker": fworker
+    }
+
+    fw_name = "{} single fit".format(name)
+    wf_name = "single fit: {} ({}) [{}]".format(name, fit_name, fworker)
+
+    fw = Firework(RunSingleFit(), spec=spec, name=fw_name)
+    wf = Workflow([fw], metadata={"tags": tags}, name=wf_name)
+    return wf
 
 
 def wf_evaluate_build(fworker, build_name, dataset_set, pipe_config,
@@ -79,7 +114,8 @@ def wf_evaluate_build(fworker, build_name, dataset_set, pipe_config,
                                     "pipe_config": pipe_config,
                                     "build_name": build_name,
                                     "commit": get_last_commit(),
-                                    "_fworker": fworker},
+                                    "_fworker": fworker,
+                                    "tags": tags},
                               name="build merge ({})".format(build_id))
 
     for fw in fws_consolidate:
@@ -121,8 +157,7 @@ def wf_benchmark(fworker, pipe_config, name, data_pickle, target, problem_type,
     benchmark_config_for_hash["data_pickle"] = data_pickle
     benchmark_config_for_hash = str(benchmark_config_for_hash).encode("UTF-8")
     benchmark_hash = hashlib.sha1(benchmark_config_for_hash).hexdigest()[:10]
-    now = datetime.datetime.now().strftime("%Y.%m.%d_%H:%M:%S")
-    base_save_dir = now + "_" + benchmark_hash
+    base_save_dir = get_time_str() + "_" + benchmark_hash
 
     common_spec = {
         "pipe_config": pipe_config,
@@ -222,13 +257,13 @@ if __name__ == "__main__":
     # from tpot.base import TPOTBase
     # TPOTBase(generations=, population_size=)
     pipe_config = {
-        "learner_name": "TPOTAdaptor",
-        "learner_kwargs": {"generations": 20, "population_size": 20, "max_eval_time_mins": 10},
+        # "learner_name": "TPOTAdaptor",
+        # "learner_kwargs": {"generations": 20, "population_size": 20, "max_eval_time_mins": 10},
         # "learner_kwargs": {"max_time_mins": 720, "max_eval_time_mins": 10, "population_size": 100},
         # "learner_kwargs": {"max_time_mins": 360, "population_size": 30},
 
-        # "learner_name": "rf",
-        # "learner_kwargs": {"n_estimators": 500},
+        "learner_name": "rf",
+        "learner_kwargs": {"n_estimators": 500},
 
 
         "reducer_kwargs": {"reducers": ("corr",)},
@@ -240,18 +275,27 @@ if __name__ == "__main__":
         "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"}
     }
 
+
     # from sklearn.ensemble import RandomForestClassifier
     #
     # rf = RandomForestClassifier()
     tags = [
-        "data_full",
-        "corr_only",
-        "drop_mean",
-        "af_best",
-        "tpot_generations",
+        # "data_full",
+        # "corr_only",
+        # "drop_mean",
+        # "af_best",
+        # "tpot_generations",
+        # "debug"
     ]
 
-    # wf = wf_benchmark("local", pipe_config, **LOCAL_DEBUG_SET[0], return_fireworks=False)
-    wf = wf_evaluate_build("lrc", "generations short fast", BENCHMARK_FULL_SET, pipe_config,
-                           include_tests=False, cache=True, tags=tags)
+    # wf = wf_evaluate_build("lrc", "generations short fast", BENCHMARK_FULL_SET, pipe_config,
+    #                        include_tests=False, cache=True, tags=tags)
+    wf = wf_evaluate_build("local", "debug", LOCAL_DEBUG_SET,
+                           pipe_config, include_tests=False, cache=True, tags=tags)
+
+
+    # ds = LOCAL_DEBUG_SET[0]
+    # wf = wf_single_fit("local", "test fit", pipe_config, **ds, tags=["debug"])
+
+    LP.reset(password=None, require_password=False)
     LP.add_wf(wf)
