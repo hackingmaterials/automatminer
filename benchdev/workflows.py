@@ -294,6 +294,7 @@ if __name__ == "__main__":
         # "tpot_generations",
         "debug"
     ]
+    
 
     wf = wf_evaluate_build("lrc", "debug 1", BENCHMARK_FULL_SET, pipe_config,
                            include_tests=False, cache=True, tags=tags)
