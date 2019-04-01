@@ -63,6 +63,7 @@ class TestTransformerBad(DFTransformer):
     """
     A test transformer, implemented incorrectly.
     """
+
     def __init__(self):
         pass
 
@@ -74,6 +75,7 @@ class TestLoggableMixin(LoggableMixin):
     Args:
         logger (bool or logging.Logger): The logging object.
     """
+
     def __init__(self, logger=True):
         self._logger = self.get_logger(logger)
 
@@ -82,13 +84,16 @@ class TestAdaptorBad(DFMLAdaptor):
     """
     A test adaptor for automl backends, implemented incorrectly.
     """
+
     def __init__(self):
         pass
+
 
 class TestAdaptorGood(DFMLAdaptor):
     """
     A test adaptor for automl backends, implemented correctly.
     """
+
     def __init__(self, config_attr):
         self.config_attr = config_attr
         self.target = None
@@ -182,6 +187,21 @@ class TestBaseTransformers(unittest.TestCase):
         with self.assertRaises(TypeError):
             _ = TestTransformerBad()
 
+    def test_DFTransformer_BaseEstimator_behavior(self):
+        ttg = TestTransformerGood(5)
+        ttg_nested = TestTransformerGood(ttg)
+
+        self.assertEqual(ttg.get_params()["config_attr"], 5)
+        self.assertEqual(ttg_nested.get_params()["config_attr__config_attr"], 5)
+
+        ttg.set_params(config_attr=6)
+        self.assertEqual(ttg.get_params()["config_attr"], 6)
+        self.assertEqual(ttg_nested.get_params()["config_attr__config_attr"], 6)
+
+        ttg_nested.set_params(config_attr__config_attr=7)
+        self.assertEqual(ttg.get_params()["config_attr"], 7)
+        self.assertEqual(ttg_nested.get_params()["config_attr__config_attr"], 7)
+
     def test_LoggableMixin(self):
         tlm = TestLoggableMixin(logger=True)
         self.assertTrue(hasattr(tlm, "logger"))
@@ -219,6 +239,7 @@ class TestBaseTransformers(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             _ = TestAdaptorBad()
+
 
 if __name__ == "__main__":
     unittest.main()
