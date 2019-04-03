@@ -1,5 +1,11 @@
+"""
+This file makes the following benchmarking datasets:
+    - jdft2d
+
+From matminer's dataset library.
+"""
+
 from matminer.datasets.dataset_retrieval import load_dataset
-from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 
 
 import pandas as pd
@@ -14,4 +20,4 @@ df = df[["structure", "exfoliation_en"]]
 df = df.reset_index(drop=True)
 
 print(df)
-df.to_pickle("jdft2d_new.pickle.gz")
+df.to_pickle("jdft2d.pickle.gz")

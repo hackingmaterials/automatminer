@@ -1,5 +1,11 @@
+"""
+This file makes the following benchmarking datasets:
+    - glass
+
+From matminer's dataset library.
+"""
+
 from matminer.datasets.dataset_retrieval import load_dataset
-from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 
 
 import pandas as pd
@@ -8,20 +14,15 @@ pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
-mpdr = MPDataRetrieval()
 
-
-df = load_dataset("expt_gap")
+df = load_dataset("glass_ternary_landolt")
 
 df = df.rename(columns={"formula": "composition"})
+df = df[["composition", "gfa"]]
 
-df["is_metal"] = df["gap expt"] == 0
-
-df = df.drop(columns=["gap expt"])
-
-print(df["is_metal"].value_counts())
-
+df["gfa"] = df["gfa"] == 0
 df = df.reset_index(drop=True)
 
 print(df)
-df.to_pickle("expt_gaps.pickle.gz")
+print(df["gfa"].value_counts())
+df.to_pickle("glass.pickle.gz")
