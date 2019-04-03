@@ -25,7 +25,7 @@ EXPORT_COV_CMD = "coverage xml && python-codacy-coverage -r coverage.xml"
 # Local testing configuration...
 LOCAL_DEBUG_REG = {
     "name": "debug_local_reg",
-    "data_pickle": "jdft2d_smalldf.pickle.gz",
+    "data_pickle": "debug_jdft2d.pickle.gz",
     "target": "exfoliation_en",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -33,7 +33,7 @@ LOCAL_DEBUG_REG = {
 
 LOCAL_DEBUG_CLF = {
     "name": "debug_local_clf",
-    "data_pickle": "expt_gaps_smalldf.pickle.gz",
+    "data_pickle": "debug_expt_is_metal.pickle.gz",
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True
