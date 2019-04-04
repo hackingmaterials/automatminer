@@ -1,5 +1,5 @@
 # Requirements of this project alone
-matminer>=0.5.4
+matminer>=0.5.5
 xlrd==1.1.0
 xgboost==0.72.1
 tpot==0.9.5
@@ -9,3 +9,4 @@ skrebate==0.6
 numpy
 pandas
 scikit_learn
+pymatgen>=2019.3.27
