@@ -59,7 +59,7 @@ class RunPipe(FireTaskBase):
         save_dir = fw_spec.pop("save_dir")
         save_dir = os.path.join(base_save_dir, save_dir)
 
-        os.environ["OMP_NUM_THREADS"] = 2
+        os.environ["OMP_NUM_THREADS"] = "2"
 
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
