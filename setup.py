@@ -1,8 +1,6 @@
 from setuptools import setup, find_packages
 import os
 
-from automatminer.__init__ import __version__
-
 module_dir = os.path.dirname(os.path.abspath(__file__))
 reqs_raw = open(os.path.join(module_dir, "requirements.txt")).read()
 # reqs_list = [r.replace("==", ">=") for r in reqs_raw.split("\n")]
