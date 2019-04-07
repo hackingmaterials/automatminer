@@ -253,7 +253,6 @@ class StructureFeaturizers(FeaturizerSet):
             sf.DensityFeatures(),
             sf.GlobalSymmetryFeatures(),
             sf.EwaldEnergy(),
-            sf.CoulombMatrix(flatten=True),
             sf.SineCoulombMatrix(flatten=True)
         ]
 
@@ -290,6 +289,7 @@ class StructureFeaturizers(FeaturizerSet):
         ]
 
         self._matrix_featurizers = [
+            sf.CoulombMatrix(flatten=False),
             sf.RadialDistributionFunction(),  # returns dict
             sf.MinimumRelativeDistances(),  # returns a list
             sf.ElectronicRadialDistributionFunction()
