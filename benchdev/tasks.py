@@ -4,7 +4,6 @@ import copy
 import datetime
 import warnings
 from math import sqrt
-from multiprocessing import cpu_count
 
 import numpy as np
 import pandas as pd
