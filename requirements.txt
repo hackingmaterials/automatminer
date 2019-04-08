@@ -6,7 +6,7 @@ tpot==0.9.5
 skrebate==0.6
 
 # Also requirements of matminer
-pymatgen==2019.3.27
 numpy
 pandas
+pymatgen
 scikit_learn
