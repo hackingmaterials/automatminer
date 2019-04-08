@@ -59,14 +59,6 @@ class RunPipe(FireTaskBase):
         save_dir = fw_spec.pop("save_dir")
         save_dir = os.path.join(base_save_dir, save_dir)
 
-        # Multiprocessing and memory problems
-        print("BENCHDEV SAYS: SETTING OMP NUMBER OF THREADS TO 1")
-        os.environ["OMP_NUM_THREADS"] = "1"
-        if not autofeaturizer_kwargs.get("n_jobs", None):
-            n_jobs = int(cpu_count()/2)
-            print("BENCHDEV SAYS: SETTING AUTOFEATURIZER N_JOBS TO 1/2 CPU_COUNT ({})".format(n_jobs))
-            autofeaturizer_kwargs["n_jobs"] = n_jobs
-
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
