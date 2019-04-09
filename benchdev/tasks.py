@@ -69,6 +69,10 @@ class RunPipe(FireTaskBase):
         n_jobs = int(cpu_count()/2)
         print("Setting number of jobs to: {}".format(n_jobs))
         autofeaturizer_kwargs["n_jobs"] = n_jobs
+        if "n_jobs" in learner_kwargs:
+            print("Overwriting n_jobs! Sorry about that.")
+        learner_kwargs["n_jobs"] = n_jobs
+        learner_kwargs["verbosity"] = 3
 
 
         # Set up pipeline config
