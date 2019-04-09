@@ -70,8 +70,8 @@ class RunPipe(FireTaskBase):
         print("Setting number of jobs to: {}".format(n_jobs))
         autofeaturizer_kwargs["n_jobs"] = n_jobs
         if "n_jobs" in learner_kwargs:
-            print("Overwriting n_jobs! Sorry about that.")
-        learner_kwargs["n_jobs"] = n_jobs
+            print("Overwriting n_jobs to 1! Sorry about that.")
+        learner_kwargs["n_jobs"] = 2
         learner_kwargs["verbosity"] = 3
 
 
