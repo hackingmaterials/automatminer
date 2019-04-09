@@ -61,6 +61,16 @@ class RunPipe(FireTaskBase):
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
+
+        from multiprocessing import cpu_count
+        ont = os.environ.get("OMP_NUM_THREADS", None)
+        print("Number of omp threads: {}".format(ont))
+        print("Number of cpus: {}".format(cpu_count()))
+        n_jobs = int(cpu_count()/2)
+        print("Setting number of jobs to: {}".format(n_jobs))
+        autofeaturizer_kwargs["n_jobs"] = n_jobs
+
+
         # Set up pipeline config
         if learner_name == "TPOTAdaptor":
             learner = TPOTAdaptor(**learner_kwargs)
@@ -114,6 +124,7 @@ class RunPipe(FireTaskBase):
         if fold >= kfold.n_splits:
             raise ValueError("{} is out of range for KFold with n_splits="
                              "{}".format(fold, kfold))
+
 
         # Run the benchmark
         t1 = time.time()
