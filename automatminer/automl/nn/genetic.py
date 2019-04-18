@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.model_selection import KFold, cross_val_score
 
 from automatminer.base import LoggableMixin
+from automatminer.utils.ml import AMM_REG_NAME, AMM_CLF_NAME
 
 
 __authors__ = ['Samy Cherfaoui <scherfaoui@lbl.gov>',
@@ -68,7 +69,7 @@ class NNOptimizer(LoggableMixin):
                   in pop]
         kfold = KFold(n_splits=2, shuffle=True, random_state=np.random.seed(7))
         grades = []
-        if models[0][0].mode == "regression":
+        if models[0][0].mode == AMM_REG_NAME:
             for model, dicti in models:
                 score = cross_val_score(model, X, y, cv=kfold)
                 grades.append((score, dicti))

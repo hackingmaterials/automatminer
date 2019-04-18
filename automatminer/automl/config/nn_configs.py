@@ -13,9 +13,8 @@ NN_DEFAULT_CONFIG = {
     "activation": "sigmoid",
     "input_noise": 0,
     "use_maxout": False,
-
-
 }
+
 init="glorot_uniform", optimizer="adam",
                  hidden_layer_sizes=2, units=20, dropout=0.5,
                  show_accuracy=True, batch_spec=((400, 1024), (100, -1)),

@@ -15,9 +15,7 @@ from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 
 
 from automatminer.utils.ml import AMM_REG_NAME, AMM_CLF_NAME
-from automatminer.automl.nn.genetic import NNOptimizer
-
-
+# from .genetic import NNOptimizer
 
 
 class NNWrapper(BaseEstimator, RegressorMixin, ClassifierMixin):
@@ -31,7 +29,7 @@ class NNWrapper(BaseEstimator, RegressorMixin, ClassifierMixin):
                  show_accuracy=True, batch_spec=((400, 1024), (100, -1)),
                  activation="sigmoid", input_noise=0., use_maxout=False,
                  use_maxnorm=False, learning_rate=0.001, stop_early=False,
-                 kfold_splits=2, mode=AMM_REG_NAME):
+                 mode=AMM_REG_NAME):
         self.layer_sizes = hidden_layer_sizes
         self.init = init
         self.optimizer = optimizer
@@ -45,27 +43,22 @@ class NNWrapper(BaseEstimator, RegressorMixin, ClassifierMixin):
         self.learning_rate = learning_rate
         self.stop_early = stop_early
         self.units = units
+        self.mode = mode
 
         if self.use_maxout:
             self.use_maxnorm = True
 
         self.model_ = None
-        self.estimator = None
-        self.classifier = None
-        self.kfold_splits = kfold_splits
-
+        self.predictor = None
         if mode not in [AMM_REG_NAME, AMM_CLF_NAME]:
             raise ValueError("mode argument must be either {} or {}"
                              "".format(AMM_CLF_NAME, AMM_REG_NAME))
-        else:
-            self.mode = mode
         self.fitted_pipeline_ = None
 
     def get_model(self):
         return self.model_
 
-    def fit(self, X, y, **kwargs):
-        self.set_params(**kwargs)
+    def fit(self, X, y):
         model = keras.models.Sequential()
         first = True
         if self.input_noise > 0:
@@ -109,8 +102,7 @@ class NNWrapper(BaseEstimator, RegressorMixin, ClassifierMixin):
                                          **dense_kwargs))
         else:
             model.add(keras.layers.Dense(units=1,
-                                         kernel_initializer=dense_kwargs[
-                                             "init"]))
+                                         kernel_initializer=dense_kwargs["init"]))
         model.add(keras.layers.Activation(self.activation))
 
         if self.mode == AMM_CLF_NAME:
@@ -143,43 +135,58 @@ class NNWrapper(BaseEstimator, RegressorMixin, ClassifierMixin):
 
         self.model_ = model
         if self.mode == AMM_REG_NAME:
-            self.estimator = KerasRegressor(build_fn=self.get_model,
+            self.regressor = KerasRegressor(build_fn=self.get_model,
                                             epochs=self.batch_spec[0][0],
                                             batch_size=self.batch_spec[0][1],
                                             verbose=0)
-            self.estimator.fit(X, y)
+            self.regressor.fit(X, y)
         else:
             self.classifier = KerasClassifier(build_fn=self.get_model,
                                               epochs=self.batch_spec[0][0],
                                               batch_size=self.batch_spec[0][1],
                                               verbose=0)
             self.classifier.fit(X, y)
+        return self
 
     def predict(self, X):
         if self.mode == AMM_CLF_NAME:
             return self.classifier.predict(X)
         else:
-            return self.estimator.predict(X)
+            return self.regressor.predict(X)
 
     def predict_proba(self, X):
         if self.mode == AMM_CLF_NAME:
             return self.classifier.predict_proba(X)
         else:
-            return self.estimator.predict(X)
-
-    def best_model(self, X, y, mode):
-        nn = NNOptimizer(X, y, NNWrapper)
-        return nn.top_model
+            return self.regressor.predict(X)
 
 
 if __name__ == "__main__":
     from sklearn.datasets import load_boston
+    from sklearn.model_selection import train_test_split
+    from sklearn.metrics import mean_absolute_error
 
-    wrapper = NNWrapper()
+    wrapper = NNWrapper(mode=AMM_REG_NAME)
     boston = load_boston()
     bos = pd.DataFrame(boston.data)
     bos.columns = boston.feature_names
     bos['PRICE'] = boston.target
     print(bos)
-    model = wrapper.best_model(bos.drop(columns="PRICE"), bos["PRICE"],
-                               AMM_REG_NAME)
+
+    X = bos.drop(columns="PRICE")
+    y = bos["PRICE"]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+
+    wrapper.fit(X_train, y_train)
+    predictions = wrapper.predict(X_test)
+
+    print(y_test)
+    print(predictions)
+
+    print(mean_absolute_error(y_true=y_test, y_pred=predictions))
+
+    from keras.utils import plot_model
+    plot_model(wrapper.regressor, to_file='model.png')
+
