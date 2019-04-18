@@ -149,12 +149,12 @@ def wf_benchmark(fworker, pipe_config, name, data_pickle, target, problem_type,
     if fworker not in valid_fworkers:
         raise ValueError("fworker must be in {}".format(valid_fworkers))
 
-    if fworker == "cori":
-        n_cori_jobs = 32
-        warnings.warn(
-            "Worker is cori. Overriding n_jobs to {}".format(n_cori_jobs))
-        pipe_config["learner_kwargs"]["n_jobs"] = n_cori_jobs
-        pipe_config["autofeaturizer_kwargs"]["n_jobs"] = n_cori_jobs
+    # if fworker == "cori":
+    #     n_cori_jobs = 32
+    #     warnings.warn(
+    #         "Worker is cori. Overriding n_jobs to {}".format(n_cori_jobs))
+    #     pipe_config["learner_kwargs"]["n_jobs"] = n_cori_jobs
+    #     pipe_config["autofeaturizer_kwargs"]["n_jobs"] = n_cori_jobs
 
     # Single (run) hash is the combination of pipe configuration + last commit
     # + data_pickle
@@ -162,6 +162,7 @@ def wf_benchmark(fworker, pipe_config, name, data_pickle, target, problem_type,
     benchmark_config_for_hash = copy.deepcopy(pipe_config)
     benchmark_config_for_hash["last_commit"] = last_commit
     benchmark_config_for_hash["data_pickle"] = data_pickle
+    benchmark_config_for_hash["worker"] = fworker
     benchmark_config_for_hash = str(benchmark_config_for_hash).encode("UTF-8")
     benchmark_hash = hashlib.sha1(benchmark_config_for_hash).hexdigest()[:10]
     base_save_dir = get_time_str() + "_" + benchmark_hash
@@ -259,26 +260,29 @@ if __name__ == "__main__":
     - tpot_short
     - tpot_long
     - tpot_generations
+    - tpot_limited_mem
     """
 
     # from tpot.base import TPOTBase
     # TPOTBase(generations=, population_size=)
     pipe_config = {
         "learner_name": "TPOTAdaptor",
-        "learner_kwargs": {"generations": 20, "population_size": 20, "max_eval_time_mins": 10},
-        # "learner_kwargs": {"max_time_mins": 720, "max_eval_time_mins": 10, "population_size": 100},
-        # "learner_kwargs": {"max_time_mins": 360, "population_size": 30},
+        # "learner_kwargs": {"generations": 20, "population_size": 20, "memory": "auto", "n_jobs": 4, "max_eval_time_mins": 20},
+        # "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 20, "population_size": 100, "memory": "auto", "n_jobs": 4},
+        "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 10, "population_size": 100, "memory": "auto", "n_jobs": 4},
 
         # "learner_name": "rf",
         # "learner_kwargs": {"n_estimators": 500},
 
 
         "reducer_kwargs": {"reducers": ("corr",)},
+        # "reducer_kwargs": {"reducers": ("corr", "tree"), "tree_importance_percentile": 0.99},
         # "reducer_kwargs": {"reducers": ("pca",), "n_pca_features": 0.3},
         # "reducer_kwargs": {"reducers": ("rebate",), "n_rebate_features": 0.3},
 
         # "reducer_kwargs": {"reducers": ()},
-        "autofeaturizer_kwargs": {"preset": "fast"},
+        # "autofeaturizer_kwargs": {"preset": "fast", "n_jobs": 10},
+        "autofeaturizer_kwargs": {"preset": "best", "n_jobs": 10},
         "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"}
     }
 
@@ -287,23 +291,27 @@ if __name__ == "__main__":
     #
     # rf = RandomForestClassifier()
     tags = [
-        # "data_full",
+        "data_full",
+        "drop_mean",
+        "af_best",
+        "tpot_limited_mem"
         # "corr_only",
         # "drop_mean",
-        # "af_best",
+        # "af_fast",
         # "tpot_generations",
-        "debug"
+        # "debug"
     ]
-    
 
-    wf = wf_evaluate_build("lrc", "debug 1", BENCHMARK_FULL_SET, pipe_config,
-                           include_tests=False, cache=True, tags=tags)
-    # wf = wf_evaluate_build("local", "debug", LOCAL_DEBUG_SET,
-    #                        pipe_config, include_tests=False, cache=True, tags=tags)
+    from benchdev.config import MP_E_FORM, JDFT2D, BULK
+    # wf = wf_evaluate_build("lrc", "set generation size", BENCHMARK_FULL_SET, pipe_config,
+    #                        include_tests=False, cache=True, tags=tags)
 
+    # wf = wf_benchmark("lrc", pipe_config, **BULK, cache=True, tags=tags)
+    wf = wf_evaluate_build("lrc", "best corr only long", BENCHMARK_FULL_SET,
+                           pipe_config, include_tests=False, cache=True, tags=tags)
 
     # ds = LOCAL_DEBUG_SET[0]
     # wf = wf_single_fit("local", "test fit", pipe_config, **ds, tags=["debug"])
 
-    LP.reset(password=None, require_password=False)
+    # LP.reset(password=None, require_password=False)
     LP.add_wf(wf)

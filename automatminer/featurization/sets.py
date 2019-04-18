@@ -23,57 +23,9 @@ try:
 except ImportError:
     dscribe = None
 
+from .base import FeaturizerSet
+
 __authors__ = ["Alex Dunn", "Alex Ganose"]
-
-
-class FeaturizerSet:
-    """Abstract class for defining sets of featurizers.
-
-    All FeaturizerSets should implement at least two sets of featurizers, best
-    and all. The set of best featurizers should contain those featurizers
-    that balance speed, applicability and usefulness. This should be determined
-    by the implementor.
-
-    Each set returned is a list of matminer featurizer objects.
-
-    Args:
-        exclude (list of str, optional): A list of featurizer class names that
-            will be excluded from the set of featurizers returned.
-    """
-
-    def __init__(self, exclude=None):
-        self.exclude = exclude if exclude else []
-
-    def __call__(self, *args, **kwargs):
-        return self.all
-
-    @property
-    def best(self):
-        """List of featurizers providing useful features in a reasonable time.
-
-        Featurizers that take a very long time to run, which crash for many
-        systems, or which produce a large number of similar features will be
-        excluded.
-        """
-        raise NotImplementedError("This featurizer set must return a set of "
-                                  "best featurizers")
-
-    @property
-    def all(self):
-        """All featurizers available for this featurization type."""
-        raise NotImplementedError("This featurizer set must return a set of "
-                                  "all featurizers")
-
-    @property
-    def fast(self):
-        """Fast featurizers available for this featurization type."""
-        raise NotImplementedError("This featurizer set must return a set of "
-                                  "fast featurizers")
-
-    def _get_featurizers(self, featurizers):
-        """Utility function for getting featurizers not in the ignore list."""
-        return [f for f in featurizers
-                if f.__class__.__name__ not in self.exclude]
 
 
 class AllFeaturizers(FeaturizerSet):
@@ -135,6 +87,11 @@ class AllFeaturizers(FeaturizerSet):
     @property
     def fast(self):
         featurizers = [f.fast for f in self._featurizer_sets.values()]
+        return self._get_featurizers(featurizers)
+
+    @property
+    def debug(self):
+        featurizers = [f.debug for f in self._featurizer_sets.values()]
         return self._get_featurizers(featurizers)
 
 
@@ -227,6 +184,10 @@ class CompositionFeaturizers(FeaturizerSet):
     @property
     def best(self):
         return self.fast + self.intermetallics_only
+
+    @property
+    def debug(self):
+        return self._get_featurizers([cf.ElementProperty.from_preset("magpie")])
 
 
 class StructureFeaturizers(FeaturizerSet):
@@ -363,6 +324,10 @@ class StructureFeaturizers(FeaturizerSet):
     def best(self):
         return self.fast + self.slow + self.require_external
 
+    @property
+    def debug(self):
+        return self._get_featurizers([sf.SineCoulombMatrix(flatten=True)])
+
 
 class DOSFeaturizers(FeaturizerSet):
     """Featurizer set containing density of states featurizers.
@@ -408,6 +373,10 @@ class DOSFeaturizers(FeaturizerSet):
     def site(self):
         return self._get_featurizers(self._site_featurizers)
 
+    @property
+    def debug(self):
+        return self._get_featurizers([dosf.DOSFeaturizer()])
+
 
 class BSFeaturizers(FeaturizerSet):
     """Featurizer set containing band structure featurizers.
@@ -443,3 +412,7 @@ class BSFeaturizers(FeaturizerSet):
     @property
     def fast(self):
         return self._get_featurizers(self._best_featurizers)
+
+    @property
+    def debug(self):
+        return self._get_featurizers([bf.BandFeaturizer()])
