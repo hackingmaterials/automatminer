@@ -15,7 +15,7 @@ from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 
 
 from automatminer.utils.ml import AMM_REG_NAME, AMM_CLF_NAME
-# from .genetic import NNOptimizer
+# from .genetic import NNGA
 
 
 class NNWrapper(BaseEstimator, RegressorMixin, ClassifierMixin):
@@ -70,7 +70,7 @@ class NNWrapper(BaseEstimator, RegressorMixin, ClassifierMixin):
             dense_kwargs["W_constraint"] = keras.constraints.maxnorm(2)
 
         # hidden layers
-        for layer_size in range(self.layer_sizes):
+        for layer_size in range(1, self.layer_sizes):
             if first:
                 if self.use_maxout:
                     model.add(keras.legacy.layers.MaxoutDense(
