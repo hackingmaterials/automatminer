@@ -534,20 +534,20 @@ class FeatureReducer(DFTransformer, LoggableMixin):
                                                  self.n_rebate_features)
                 self.logger.info(
                     self._log_prefix +
-                    "ReBATE MultiSURF running: retaining {} numerical "
+                    "ReBATE MultiSURF* running: retaining {} numerical "
                     "features.".format(self.n_rebate_features))
                 reduced_df = rebate(df, target,
                                     n_features=self.n_rebate_features)
                 reduced_df = reduced_df.copy(deep=True)
                 self.logger.info(
                     self._log_prefix +
-                    "ReBATE MultiSURF completed: retained {} numerical "
+                    "ReBATE MultiSURF* completed: retained {} numerical "
                     "features.".format(len(reduced_df.columns)))
                 self.logger.debug(
                     self._log_prefix +
-                    "ReBATE MultiSURF gave the following "
+                    "ReBATE MultiSURF* gave the following "
                     "features: {}".format(reduced_df.columns.tolist()))
-                self.reducer_params[r] = {"algo": "MultiSURF Algorithm"}
+                self.reducer_params[r] = {"algo": "MultiSURF* Algorithm"}
             elif r == "pca":
                 n_samples, n_features = X.shape
                 if self.n_pca_features == "auto":
