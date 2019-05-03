@@ -9,7 +9,7 @@ from sklearn.model_selection import check_cv, train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.linear_model import SGDClassifier
 from sklearn.preprocessing import LabelEncoder
-from skrebate import MultiSURF
+from skrebate import MultiSURFstar
 
 from automatminer.utils.pkg import AutomatminerError
 from automatminer.base import LoggableMixin, DFTransformer
@@ -165,7 +165,7 @@ class TreeFeatureReducer(DFTransformer, LoggableMixin):
 
 def rebate(df, target, n_features):
     """
-    Run the ReBATE relief algorithm on a dataframe, returning the reduced df.
+    Run the MultiSURF* algorithm on a dataframe, returning the reduced df.
 
     Args:
         df (pandas.DataFrame): A dataframe
@@ -178,7 +178,7 @@ def rebate(df, target, n_features):
     """
     X = df.drop(target, axis=1)
     y = df[target]
-    rf = MultiSURF(n_features_to_select=n_features, n_jobs=-1)
+    rf = MultiSURFstar(n_features_to_select=n_features, n_jobs=-1)
     matrix = rf.fit_transform(X.values, y.values)
     feats = []
     for c in matrix.T:
