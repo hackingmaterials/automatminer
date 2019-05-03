@@ -93,10 +93,7 @@ class NNGA(DFMLAdaptor, LoggableMixin):
         param_pop = [None] * pop_size
         for i in range(pop_size):
             params = {p: random.choice(g) for p, g in param_grid.items()}
-            if any([p == params for p in param_pop]):
-                continue
-            else:
-                param_pop[i] = params
+            param_pop[i] = params
 
         self.pop = [NNModelInfo(p, 0) for p in param_pop]
         self.model_class = NNWrapper
@@ -119,15 +116,55 @@ class NNGA(DFMLAdaptor, LoggableMixin):
             t_pop_ranked = sorted(t_pop)
             t_pop_p = [None] * len(t_pop)
             for j, _ in enumerate(t_pop_ranked):
-                t_pop_p = p * (1 - p) ** (j)
-            winners[i] = random.choices(t_pop, weights=t_pop_p, k=1)
+                t_pop_p[j] = p * (1 - p) ** (j)
+            winners[i] = random.choices(t_pop, weights=t_pop_p, k=1)[0]
         return winners
 
-    def evolve(self, gen, X_train, X_val, y_train, y_val):
+    def evolve(self, gen, gen_pop):
         # evaluate all of this generations' population
 
-        print("in evolve: generation is", gen)
+        n_ran = self.probability_to_number(self.pop_size, self.random_rate)
+        ran_pop = random.sample(gen_pop, n_ran)
+        n_elite = self.probability_to_number(self.pop_size, self.elitism_rate)
+        elite_pop = heapq.nsmallest(n_elite, gen_pop)
 
+        n_contestants = self.probability_to_number(self.pop_size, self.tournament_rate)
+        n_winners = self.pop_size - n_ran - n_elite
+        tournament_pop = self.tournament_select(gen_pop, n_winners, n_contestants)
+
+        print("random pop", ran_pop)
+        print("elite pop", elite_pop)
+        print("tournament pop", tournament_pop)
+
+        pool = ran_pop + elite_pop + tournament_pop
+
+        print("pool is", pool)
+
+        # breed
+        new_gen = [None] * self.pop_size
+        for i in range(self.pop_size):
+            # don't allow self-breeding
+            parents = tuple(random.sample(pool, 2))
+            m, f = parents
+
+            child_params = {}
+            for param in self.param_grid:
+                if random.random() < self.mutation_rate:
+                    # mutate
+                    child_params[param] = random.choice(self.param_grid[param])
+                else:
+                    # uniform crossover
+                    m_params = m.params[param]
+                    f_params = f.params[param]
+                    child_params[param] = random.choice([m_params, f_params])
+
+            child = NNModelInfo(params=child_params, gen=gen + 1, parents=parents)
+            f.children.append(child.ref)
+            m.children.append(child.ref)
+            new_gen[i] = child
+        return new_gen
+
+    def train_pop(self, gen, X_train, X_val, y_train, y_val):
         gen_pop = [i for i in self.pop if i.gen == gen]
 
         print("gen pop is:", gen_pop)
@@ -148,40 +185,7 @@ class NNGA(DFMLAdaptor, LoggableMixin):
                 )
             score = scorer(y_val, y_pred)
             individual.score = score
-
-        n_ran = self.probability_to_number(self.pop_size, self.random_rate)
-        ran_pop = random.sample(gen_pop, n_ran)
-        n_elite = self.probability_to_number(self.pop_size, self.elitism_rate)
-        elite_pop = heapq.nsmallest(n_elite, gen_pop)
-
-        n_contestants = self.probability_to_number(self.pop_size, self.tournament_rate)
-        n_winners = self.pop_size - n_ran - n_elite
-        tournament_pop = self.tournament_select(gen_pop, n_winners, n_contestants)
-
-        pool = ran_pop + elite_pop + tournament_pop
-
-        # breed
-        new_gen = [None] * self.pop_size
-        for i in range(self.pop_size):
-            # don't allow self-breeding
-            parents = tuple(random.sample(pool, 2))
-            m, f = parents
-
-            child_params = {}
-            for param in self.param_grid:
-                if random.random < self.mutation_rate:
-                    # mutate
-                    child_params[param] = random.choice(self.param_grid[param])
-                else:
-                    # uniform crossover
-                    child_params[param] = random.choice([m[param], f[param]])
-
-            child = NNModelInfo(params=child_params, gen=gen + 1, parents=parents)
-            f.children.append(child.ref)
-            m.children.append(child.ref)
-            new_gen[i] = child
-        return new_gen
-
+        return gen_pop
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
@@ -191,14 +195,19 @@ class NNGA(DFMLAdaptor, LoggableMixin):
 
         self.mode = regression_or_classification(df[target])
 
-        for i in tqdm(range(self.generations), desc="NN Generation"):
+        for g in tqdm(range(self.generations), desc="NN Generation"):
             splits = train_test_split(X, y, test_size=0.8)
-            new_gen = self.evolve(i, *splits)
-            self.pop.extend(new_gen)
+            gen_pop = self.train_pop(g, *splits)
+
+            # Don't evolve the last generation
+            if g != self.generations - 1:
+                new_gen = self.evolve(g, gen_pop)
+                self.pop.extend(new_gen)
+
 
         self.best_individual = min(self.pop)
-        self.logger(self._log_prefix + "Best model found: {}".format(self.best_individual))
-        self.logger(self._log_prefix + "Best model training: {}".format(self.best_individual))
+        self.logger.info(self._log_prefix + "Best model found: {}".format(self.best_individual))
+        self.logger.info(self._log_prefix + "Best model training: {}".format(self.best_individual))
         self.best_model = self.model_class(**self.best_individual["params"])
         self.best_model.fit(X, y)
 
@@ -246,7 +255,7 @@ if __name__ == "__main__":
 
     df_train, df_test = train_test_split(df)
 
-    nnga = NNGA()
+    nnga = NNGA(pop_size=5, generations=2)
     nnga.fit(df, "PRICE")
     df_pred = nnga.predict(df_train, target)
 
