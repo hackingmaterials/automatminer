@@ -23,8 +23,8 @@ __authors__ = ['Alex Dunn <ardunn@lbl.gov',
 param_grid = {
     "activation": ["sigmoid", "tanh", "relu", "elu"],
     "optimizer": ["sgd", "rmsprop", "adagrad", "adadelta", "nadam", "adamax", "adam"],
-    "units": range(1, 5),
-    "hidden_layer_sizes": range(1, 3)
+    "units": range(5, 105, 10),
+    "hidden_layer_sizes": range(1, 10, 2)
 }
 
 
@@ -71,9 +71,10 @@ class NNGA(DFMLAdaptor, LoggableMixin):
         self.pbar = pbar
         self.mode = None
         self.generations = generations
-        self.best_individual = None
         self.best_model = None
         self._logger = self.get_logger(logger)
+        self._features = None
+        self._ml_data = None
 
 
         reg_metrics = {
@@ -126,7 +127,7 @@ class NNGA(DFMLAdaptor, LoggableMixin):
         n_ran = self.probability_to_number(self.pop_size, self.random_rate)
         ran_pop = random.sample(gen_pop, n_ran)
         n_elite = self.probability_to_number(self.pop_size, self.elitism_rate)
-        elite_pop = heapq.nsmallest(n_elite, gen_pop)
+        elite_pop = heapq.nlargest(n_elite, gen_pop)
 
         n_contestants = self.probability_to_number(self.pop_size, self.tournament_rate)
         n_winners = self.pop_size - n_ran - n_elite
@@ -167,9 +168,9 @@ class NNGA(DFMLAdaptor, LoggableMixin):
     def train_pop(self, gen, X_train, X_val, y_train, y_val):
         gen_pop = [i for i in self.pop if i.gen == gen]
 
-        print("gen pop is:", gen_pop)
+        # print("gen pop is:", gen_pop)
         for individual in gen_pop:
-            print("individual is", individual)
+            # print("individual is", individual)
             model = self.model_class(**individual.params)
             model.fit(X_train, y_train)
             y_pred = model.predict(X_val)
@@ -199,18 +200,28 @@ class NNGA(DFMLAdaptor, LoggableMixin):
             splits = train_test_split(X, y, test_size=0.8)
             gen_pop = self.train_pop(g, *splits)
 
+            self.logger.info("Best individual as of gen {}: {}".format(g, self.best_individual))
+
+
             # Don't evolve the last generation
             if g != self.generations - 1:
                 new_gen = self.evolve(g, gen_pop)
                 self.pop.extend(new_gen)
 
 
-        self.best_individual = min(self.pop)
+
+        print("BEST INDIVIDUAL IS", self.best_individual)
         self.logger.info(self._log_prefix + "Best model found: {}".format(self.best_individual))
         self.logger.info(self._log_prefix + "Best model training: {}".format(self.best_individual))
-        self.best_model = self.model_class(**self.best_individual["params"])
+        self.best_model = self.model_class(**self.best_individual.params)
         self.best_model.fit(X, y)
 
+        self._features = df.drop(columns=target).columns.tolist()
+        self._ml_data = {"X": X, "y": y}
+
+    @property
+    def best_individual(self):
+        return max(self.prop)
 
     @log_progress(AMM_LOG_PREDICT_STR)
     @check_fitted
@@ -246,18 +257,32 @@ if __name__ == "__main__":
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import mean_absolute_error
     import pandas as pd
+    from automatminer.featurization.core import AutoFeaturizer
+    from automatminer.preprocessing.core import DataCleaner, FeatureReducer
 
-    target = "PRICE"
-    boston = load_boston()
-    df = pd.DataFrame(boston.data)
-    df.columns = boston.feature_names
-    df[target] = boston.target
 
-    df_train, df_test = train_test_split(df)
 
-    nnga = NNGA(pop_size=5, generations=2)
-    nnga.fit(df, "PRICE")
-    df_pred = nnga.predict(df_train, target)
+    # target = "PRICE"
+    # boston = load_boston()
+    # df = pd.DataFrame(boston.data)
+    # df.columns = boston.feature_names
+    # df[target] = boston.target
+
+
+    target = "K_VRH"
+    df = pd.read_pickle("/Users/ardunn/alex/lbl/projects/automatminer/automatminer/benchdev/testing/datasets/elasticity_K_VRH.pickle.gz")
+    af = AutoFeaturizer(cache_src="./tmp.json", preset="debug")
+    dc = DataCleaner(**{"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"})
+    af.fit(df, target)
+    df = af.transform(df, target)
+    dc.fit(df, target)
+    df = dc.transform(df, target)
+
+    df_train, df_test = train_test_split(df, test_size=0.8)
+
+    nnga = NNGA(pop_size=20, generations=10)
+    nnga.fit(df_train, target)
+    df_pred = nnga.predict(df_test, target)
 
     print(df)
 
