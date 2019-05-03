@@ -1,3 +1,5 @@
+import math
+import heapq
 import random
 from hashlib import sha1
 from dataclasses import dataclass
@@ -30,7 +32,10 @@ class NNModelInfo:
     gen: int
     score: (float, None) = None
     parents: (tuple, None) = None
-    children: (tuple, None) = None
+    children: (list) = []
+
+    def __lt__(self, other):
+        return self.score < other.score
 
     @property
     def ordered_params(self) -> OrderedDict:
@@ -52,15 +57,17 @@ def neg_mean_squared_error(*args, **kwargs):
 
 class NNGA(DFMLAdaptor, LoggableMixin):
     def __init__(self, param_grid=param_grid, selection_rate=0.75, random_rate=0.05,
-                 mutation_rate=0.05, elitism_rate=0.05, pop_size=15, reg_metric='mae',
+                 tournament_rate = 0.1, mutation_rate=0.05, elitism_rate=0.05, pop_size=15, reg_metric='mae',
                  clf_metric='f1', pbar=True):
         self.param_grid = param_grid
-        self.random_select = random_select
+        self.selection_rate = selection_rate
+        self.tournament_rate = tournament_rate
+        self.random_rate = random_rate
+        self.elitism_rate = elitism_rate
         self.mutation_rate = mutation_rate
         self.pop_size = 15
         self.pbar = pbar
         self.mode = None
-        self.selection_rate = selection_rate
 
         reg_metrics = {
             'neg_mae': neg_mean_absolute_error,
@@ -84,14 +91,31 @@ class NNGA(DFMLAdaptor, LoggableMixin):
             else:
                 param_pop[i] = params
 
-        nns = [NNModelInfo(p, 0) for p in param_pop]
-        self.pop = {nn.ref: nn for nn in nns}
+        self.pop = [NNModelInfo(p, 0) for p in param_pop]
         self.model_class = NNWrapper
 
+    @staticmethod
+    def probability_to_number(n_individuals, probability):
+        return math.ceil(n_individuals * probability)
 
 
-    def tournament_select(self, individuals, p=0.05):
-        pass
+    def tournament_select(self, individuals, n_winners, n_contestants):
+        # choose k (the tournament size) individuals from the pop at random
+        # choose the best individual from the tournament with probability p
+        # choose the second best individual with probability p*(1-p)
+        # choose the third best individual with probability p*((1-p)^2)
+        # and so on
+
+        p = self.selection_rate
+        winners = [None] * n_winners
+        for i in range(n_winners):
+            t_pop = random.sample(individuals, n_contestants)
+            t_pop_ranked = sorted(t_pop)
+            t_pop_p = [None] * len(t_pop)
+            for j, individual in enumerate(t_pop_ranked):
+                individual.p_tournament = p * (1 - p) ** (j)
+            winners[i] = random.choices(t_pop, weights=t_pop_p, k=1)
+        return winners
 
     def evolve(self, gen, X_train, X_val, y_train, y_val):
 
@@ -114,12 +138,38 @@ class NNGA(DFMLAdaptor, LoggableMixin):
             score = scorer(y_val, y_pred)
             individual.score = score
 
+        n_ran = self.probability_to_number(self.pop_size, self.random_rate)
+        random_pop = random.sample(gen_pop, n_ran)
+        n_elite = self.probability_to_number(self.pop_size, self.elitism_rate)
+        elite_pop = heapq.nsmallest(n_elite, gen_pop)
+
+        n_contestants = self.probability_to_number(self.pop_size, self.tournament_rate)
+        n_winners = self.pop_size - n_ran - elite_pop
+        tournament_pop = self.tournament_select(gen_pop, n_winners, n_contestants)
+
+        pool = random_pop + elite_pop + tournament_pop
+
         # breed
-        for _ in range(2):
+        new_gen = [None] * self.pop_size
+        for i in range(self.pop_size):
+            # don't allow self-breeding
+            parents = tuple(random.sample(pool, 2))
+            m, f = parents
+
+            child_params = {}
             for param in self.param_grid:
-                child[param] = random.choice([mother[param], father[param]])
+                if random.random < self.mutation_rate:
+                    # mutate
+                    child_params[param] = random.choice(self.param_grid[param])
+                else:
+                    # uniform crossover
+                    child_params[param] = random.choice([m[param], f[param]])
 
-
+            child = NNModelInfo(params=child_params, gen=gen + 1, parents=parents)
+            f.children.append(child.ref)
+            m.children.append(child.ref)
+            new_gen[i] = child
+        return new_gen
 
 
     @log_progress(AMM_LOG_FIT_STR)
@@ -134,43 +184,6 @@ class NNGA(DFMLAdaptor, LoggableMixin):
 
         if self.mode == AMM_REG_NAME:
             pass
-
-        kfold = KFold(n_splits=2, shuffle=True, random_state=np.random.seed(7))
-        grades = []
-        if models[0][0].mode == AMM_REG_NAME:
-            for model, dicti in models:
-                score = cross_val_score(model, X, y, cv=kfold)
-                grades.append((score, dicti))
-        else:
-            for model, dicti in models:
-                score = cross_val_score(model, X, y, cv=kfold)
-                if all([not np.isnan(result) for result in score]):
-                    grades.append((score, dicti))
-        grades = [x for x in
-                  sorted(grades, key=lambda x: x[0].mean(), reverse=True)]
-        retain_length = int(len(grades) * self.retain)
-        parents = [dictionary for model, dictionary in grades[:retain_length]]
-        for individual, dicti in grades[retain_length:]:
-            if self.random_select > random.random():
-                parents.append(dicti)
-        for individual in parents:
-            if self.mutate_chance > random.random():
-                self.mutate(individual)
-        parents_length = len(parents)
-        desired_length = len(pop) - parents_length
-        children = []
-        while len(children) < desired_length:
-            male = random.randint(0, parents_length - 1)
-            female = random.randint(0, parents_length - 1)
-            if male != female:
-                male = parents[male]
-                female = parents[female]
-                babies = self.breed(male, female)
-                for baby in babies:
-                    if len(children) < desired_length:
-                        children.append(baby)
-        parents.extend(children)
-        return parents
 
     @log_progress(AMM_LOG_PREDICT_STR)
     @check_fitted
