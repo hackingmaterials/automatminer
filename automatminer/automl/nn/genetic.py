@@ -67,7 +67,7 @@ class NNGA(DFMLAdaptor, LoggableMixin):
         self.random_rate = random_rate
         self.elitism_rate = elitism_rate
         self.mutation_rate = mutation_rate
-        self.pop_size = 15
+        self.pop_size = pop_size
         self.pbar = pbar
         self.mode = None
         self.generations = generations
@@ -169,7 +169,8 @@ class NNGA(DFMLAdaptor, LoggableMixin):
         gen_pop = [i for i in self.pop if i.gen == gen]
 
         # print("gen pop is:", gen_pop)
-        for individual in gen_pop:
+        pbar_description = "Generation {} progress".format(gen + 1)
+        for individual in tqdm(gen_pop, desc=pbar_description):
             # print("individual is", individual)
             model = self.model_class(**individual.params)
             model.fit(X_train, y_train)
@@ -196,7 +197,7 @@ class NNGA(DFMLAdaptor, LoggableMixin):
 
         self.mode = regression_or_classification(df[target])
 
-        for g in tqdm(range(self.generations), desc="NN Generation"):
+        for g in range(self.generations):
             splits = train_test_split(X, y, test_size=0.8)
             gen_pop = self.train_pop(g, *splits)
 
@@ -221,7 +222,7 @@ class NNGA(DFMLAdaptor, LoggableMixin):
 
     @property
     def best_individual(self):
-        return max(self.prop)
+        return max(self.pop)
 
     @log_progress(AMM_LOG_PREDICT_STR)
     @check_fitted
