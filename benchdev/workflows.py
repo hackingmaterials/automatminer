@@ -265,24 +265,29 @@ if __name__ == "__main__":
 
     # from tpot.base import TPOTBase
     # TPOTBase(generations=, population_size=)
-    pipe_config = {
-        "learner_name": "TPOTAdaptor",
-        # "learner_kwargs": {"generations": 20, "population_size": 20, "memory": "auto", "n_jobs": 4, "max_eval_time_mins": 20},
-        # "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 20, "population_size": 100, "memory": "auto", "n_jobs": 4},
-        "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 10, "population_size": 100, "memory": "auto", "n_jobs": 4},
+    # pipe_config = {
+    #     "learner_name": "TPOTAdaptor",
+    #     # "learner_kwargs": {"generations": 20, "population_size": 20, "memory": "auto", "n_jobs": 4, "max_eval_time_mins": 20},
+    #     # "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 20, "population_size": 100, "memory": "auto", "n_jobs": 4},
+    #     "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 10, "population_size": 100, "memory": "auto", "n_jobs": 4},
+    #
+    #
+    #     "reducer_kwargs": {"reducers": ("corr",)},
+    #     # "reducer_kwargs": {"reducers": ("corr", "tree"), "tree_importance_percentile": 0.99},
+    #     # "reducer_kwargs": {"reducers": ("pca",), "n_pca_features": 0.3},
+    #     # "reducer_kwargs": {"reducers": ("rebate",), "n_rebate_features": 0.3},
+    #
+    #     # "reducer_kwargs": {"reducers": ()},
+    #     # "autofeaturizer_kwargs": {"preset": "fast", "n_jobs": 10},
+    #     "autofeaturizer_kwargs": {"preset": "best", "n_jobs": 10},
+    #     "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"}
+    # }
 
-        # "learner_name": "rf",
-        # "learner_kwargs": {"n_estimators": 500},
-
-
-        "reducer_kwargs": {"reducers": ("corr",)},
-        # "reducer_kwargs": {"reducers": ("corr", "tree"), "tree_importance_percentile": 0.99},
-        # "reducer_kwargs": {"reducers": ("pca",), "n_pca_features": 0.3},
-        # "reducer_kwargs": {"reducers": ("rebate",), "n_rebate_features": 0.3},
-
-        # "reducer_kwargs": {"reducers": ()},
-        # "autofeaturizer_kwargs": {"preset": "fast", "n_jobs": 10},
-        "autofeaturizer_kwargs": {"preset": "best", "n_jobs": 10},
+    pipe_config_debug = {
+        "autofeaturizer_kwargs": {"preset": "debug", "n_jobs": 10},
+        "reducer_kwargs": {"reducers": ()},
+        "learner_name": "rf",
+        "learner_kwargs": {"n_estimators": 500},
         "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"}
     }
 
@@ -293,8 +298,12 @@ if __name__ == "__main__":
     tags = [
         "data_full",
         "drop_mean",
-        "af_best",
-        "tpot_limited_mem"
+        # "af_best",
+        "af_debug",
+        "rf",
+        "debug",
+        "no_reduction"
+        # "tpot_limited_mem"
         # "corr_only",
         # "drop_mean",
         # "af_fast",
@@ -307,8 +316,8 @@ if __name__ == "__main__":
     #                        include_tests=False, cache=True, tags=tags)
 
     # wf = wf_benchmark("lrc", pipe_config, **BULK, cache=True, tags=tags)
-    wf = wf_evaluate_build("lrc", "best corr only long", BENCHMARK_FULL_SET,
-                           pipe_config, include_tests=False, cache=True, tags=tags)
+    wf = wf_evaluate_build("lrc", "rf only no reduction", BENCHMARK_FULL_SET,
+                           pipe_config_debug, include_tests=False, cache=True, tags=tags)
 
     # ds = LOCAL_DEBUG_SET[0]
     # wf = wf_single_fit("local", "test fit", pipe_config, **ds, tags=["debug"])
