@@ -1,58 +1,139 @@
 import random
+from hashlib import sha1
+from dataclasses import dataclass
+from collections import OrderedDict, ChainMap
 
 import numpy as np
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error, f1_score, accuracy_score, roc_auc_score
 
 from automatminer.automl.nn.wrapper import NNWrapper
 from automatminer.base import LoggableMixin, DFMLAdaptor
 from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR, AMM_LOG_PREDICT_STR
 from automatminer.utils.pkg import set_fitted, check_fitted
-from automatminer.utils.ml import AMM_REG_NAME, AMM_CLF_NAME
+from automatminer.utils.ml import AMM_REG_NAME, AMM_CLF_NAME, regression_or_classification
 
 __authors__ = ['Samy Cherfaoui <scherfaoui@lbl.gov>',
                'Alex Dunn <ardunn@lbl.gov']
 
 param_grid = {
     "activation": ["sigmoid", "tanh", "relu", "elu"],
-    "optimizers": ["sgd", "rmsprop", "adagrad", "adadelta", "nadam", "adamax", "adam"]
+    "optimizers": ["sgd", "rmsprop", "adagrad", "adadelta", "nadam", "adamax", "adam"],
     "units": range(1, 1000),
     "hidden_layer_sizes": range(1, 5)
 }
 
 
-class NNGA(DFMLAdaptor, LoggableMixin):
+@dataclass(repr=True)
+class NNModelInfo:
+    params: dict
+    gen: int
+    score: (float, None) = None
+    parents: (tuple, None) = None
+    children: (tuple, None) = None
 
-    def __init__(self, param_grid=param_grid, retain=5, random_select=0.05,
-                 mutation_rate=0.05, pop_size=15, pbar=True):
+    @property
+    def ordered_params(self) -> OrderedDict:
+        return OrderedDict(self.params)
+
+    @property
+    def ref(self) -> str:
+        model_hash = sha1(str(self.ordered_params).encode("UTF-8")).hexdigest()
+        return "model_{}".format(model_hash)
+
+
+def neg_mean_absolute_error(*args, **kwargs):
+    return -1.0 * mean_absolute_error(*args, **kwargs)
+
+
+def neg_mean_squared_error(*args, **kwargs):
+    return -1.0 * mean_squared_error(*args, **kwargs)
+
+
+class NNGA(DFMLAdaptor, LoggableMixin):
+    def __init__(self, param_grid=param_grid, selection_rate=0.75, random_rate=0.05,
+                 mutation_rate=0.05, elitism_rate=0.05, pop_size=15, reg_metric='mae',
+                 clf_metric='f1', pbar=True):
         self.param_grid = param_grid
         self.random_select = random_select
         self.mutation_rate = mutation_rate
         self.pop_size = 15
         self.pbar = pbar
+        self.mode = None
+        self.selection_rate = selection_rate
 
-        pop = [None] * pop_size
+        reg_metrics = {
+            'neg_mae': neg_mean_absolute_error,
+            'neg_mse': neg_mean_squared_error
+        }
+
+        clf_metrics = {
+            "f1": f1_score,
+            "roc_auc": roc_auc_score,
+            "accuracy": accuracy_score
+        }
+
+        self.reg_scorer = reg_metrics[reg_metric]
+        self.clf_scorer = clf_metrics[clf_metric]
+
+        param_pop = [None] * pop_size
         for i in range(pop_size):
             params = {p: random.choice(g) for p, g in param_grid.items()}
-            pop[i] = params
-        self.pop = pop
+            if any([p == params for p in param_pop]):
+                continue
+            else:
+                param_pop[i] = params
+
+        nns = [NNModelInfo(p, 0) for p in param_pop]
+        self.pop = {nn.ref: nn for nn in nns}
         self.model_class = NNWrapper
 
-    def mutate(self, pop):
+
+
+    def tournament_select(self, individuals, p=0.05):
         pass
 
-    def breed(self, mom, dad):
-        pass
+    def evolve(self, gen, X_train, X_val, y_train, y_val):
+
+        # evaluate all of this generations' population
+        gen_pop = [i for i in self.pop if i.gen == gen]
+        for individual in gen_pop:
+            model = self.model_class(**individual.params)
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_val)
+            if self.mode == AMM_REG_NAME:
+                scorer = self.reg_scorer
+            elif self.mode == AMM_CLF_NAME:
+                scorer = self.clf_scorer
+            else:
+                raise ValueError(
+                    "'mode' attribute value {} is invalid! Must be either {} "
+                    "(regression) or {} (classification)"
+                    "".format(self.mode, AMM_REG_NAME, AMM_CLF_NAME)
+                )
+            score = scorer(y_val, y_pred)
+            individual.score = score
+
+        # breed
+        for _ in range(2):
+            for param in self.param_grid:
+                child[param] = random.choice([mother[param], father[param]])
+
+
+
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **kwargs):
-        y = df[target].values.tolist()
-        X = df.drop(columns=target).values.tolist()
-        models = [self.model_class(**p) for p in self.pop]
-        train, validation = train_test_split(X, y)
+        y = df[target].values
+        X = df.drop(columns=target).values
 
-        y = df[target].values.tolist()
-        X = df.drop(columns=target).values.tolist()
+        self.mode = regression_or_classification(df[target])
+
+        X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.8)
+
+        if self.mode == AMM_REG_NAME:
+            pass
 
         kfold = KFold(n_splits=2, shuffle=True, random_state=np.random.seed(7))
         grades = []
