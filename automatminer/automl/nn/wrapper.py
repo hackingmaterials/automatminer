@@ -26,7 +26,7 @@ class NNWrapper(BaseEstimator, RegressorMixin, ClassifierMixin):
 
     def __init__(self, init="glorot_uniform", optimizer="adam",
                  hidden_layer_sizes=2, units=20, dropout=0.5,
-                 show_accuracy=True, batch_spec=((400, 1024), (100, -1)),
+                 show_accuracy=0, batch_spec=((400, 1024), (100, -1)),
                  activation="sigmoid", input_noise=0., use_maxout=False,
                  use_maxnorm=False, learning_rate=0.001, stop_early=False,
                  mode=AMM_REG_NAME):
