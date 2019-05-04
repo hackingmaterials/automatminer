@@ -15,6 +15,14 @@ Check the TPOT documentation for information on the structure of config_dicts
 
 import numpy as np
 
+tree_estimators = [20, 100, 200, 500, 1000]
+tree_max_features = np.arange(0.05, 1.01, 0.1)
+tree_learning_rates = [1e-2, 1e-1, 0.5,  1.]
+tree_max_depths = range(1, 11, 2)
+tree_min_samples_split = range(2, 21, 3)
+tree_min_samples_leaf = range(1, 21, 3)
+tree_ensemble_subsample = np.arange(0.05, 1.01, 0.1)
+
 
 TPOT_REGRESSOR_CONFIG = {
 
@@ -25,36 +33,36 @@ TPOT_REGRESSOR_CONFIG = {
     },
 
     'sklearn.ensemble.ExtraTreesRegressor': {
-        'n_estimators': [100],
-        'max_features': np.arange(0.05, 1.01, 0.05),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21),
+        'n_estimators':tree_estimators,
+        'max_features': tree_max_features,
+        'min_samples_split': tree_min_samples_split,
+        'min_samples_leaf': tree_min_samples_leaf,
         'bootstrap': [True, False]
     },
 
     'sklearn.ensemble.GradientBoostingRegressor': {
-        'n_estimators': [100],
+        'n_estimators': tree_estimators,
         'loss': ["ls", "lad", "huber", "quantile"],
-        'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
-        'max_depth': range(1, 11),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21),
+        'learning_rate': tree_learning_rates,
+        'max_depth': tree_max_depths,
+        'min_samples_split': tree_min_samples_split,
+        'min_samples_leaf': tree_min_samples_leaf,
         'subsample': np.arange(0.05, 1.01, 0.05),
         'max_features': np.arange(0.05, 1.01, 0.05),
         'alpha': [0.75, 0.8, 0.85, 0.9, 0.95, 0.99]
     },
 
-    'sklearn.ensemble.AdaBoostRegressor': {
-        'n_estimators': [100],
-        'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
-        'loss': ["linear", "square", "exponential"],
-        'max_depth': range(1, 11)
-    },
+    # 'sklearn.ensemble.AdaBoostRegressor': {
+    #     'n_estimators': tree_estimators,
+    #     'learning_rate': tree_learning_rates,
+    #     'loss': ["linear", "square", "exponential"],
+    #     'max_depth': tree_max_depths
+    # },
 
     'sklearn.tree.DecisionTreeRegressor': {
-        'max_depth': range(1, 11),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21)
+        'max_depth': tree_max_depths,
+        'min_samples_split': tree_min_samples_split,
+        'min_samples_leaf': tree_min_samples_leaf
     },
 
     'sklearn.neighbors.KNeighborsRegressor': {
@@ -76,10 +84,10 @@ TPOT_REGRESSOR_CONFIG = {
     },
 
     'sklearn.ensemble.RandomForestRegressor': {
-        'n_estimators': [100],
-        'max_features': np.arange(0.05, 1.01, 0.05),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21),
+        'n_estimators': tree_estimators,
+        'max_features': np.arange(0.05, 1.01, 0.1),
+        'min_samples_split': tree_min_samples_split,
+        'min_samples_leaf': tree_min_samples_leaf,
         'bootstrap': [True, False]
     },
 
@@ -87,11 +95,11 @@ TPOT_REGRESSOR_CONFIG = {
     },
 
     'xgboost.XGBRegressor': {
-        'n_estimators': [100],
-        'max_depth': range(1, 11),
-        'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
-        'subsample': np.arange(0.05, 1.01, 0.05),
-        'min_child_weight': range(1, 21),
+        'n_estimators': tree_estimators,
+        'max_depth': tree_max_depths,
+        'learning_rate': tree_learning_rates,
+        'subsample': tree_ensemble_subsample,
+        'min_child_weight': range(1, 21, 4),
         'nthread': [1]
     },
 
@@ -180,7 +188,7 @@ TPOT_REGRESSOR_CONFIG = {
         'estimator': {
             'sklearn.ensemble.ExtraTreesRegressor': {
                 'n_estimators': [100],
-                'max_features': np.arange(0.05, 1.01, 0.05)
+                'max_features': tree_max_features
             }
         }
     }
@@ -206,37 +214,37 @@ TPOT_CLASSIFIER_CONFIG = {
 
     'sklearn.tree.DecisionTreeClassifier': {
         'criterion': ["gini", "entropy"],
-        'max_depth': range(1, 11),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21)
+        'max_depth': tree_max_depths,
+        'min_samples_split': tree_min_samples_split,
+        'min_samples_leaf': tree_min_samples_leaf
     },
 
     'sklearn.ensemble.ExtraTreesClassifier': {
-        'n_estimators': [100],
+        'n_estimators': tree_estimators,
         'criterion': ["gini", "entropy"],
-        'max_features': np.arange(0.05, 1.01, 0.05),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21),
+        'max_features': tree_max_features,
+        'min_samples_split': tree_min_samples_split,
+        'min_samples_leaf': tree_min_samples_leaf,
         'bootstrap': [True, False]
     },
 
     'sklearn.ensemble.RandomForestClassifier': {
-        'n_estimators': [100],
+        'n_estimators': tree_estimators,
         'criterion': ["gini", "entropy"],
-        'max_features': np.arange(0.05, 1.01, 0.05),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf':  range(1, 21),
+        'max_features': tree_max_features,
+        'min_samples_split': tree_min_samples_split,
+        'min_samples_leaf':  tree_min_samples_leaf,
         'bootstrap': [True, False]
     },
 
     'sklearn.ensemble.GradientBoostingClassifier': {
-        'n_estimators': [100],
-        'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
-        'max_depth': range(1, 11),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21),
-        'subsample': np.arange(0.05, 1.01, 0.05),
-        'max_features': np.arange(0.05, 1.01, 0.05)
+        'n_estimators': tree_estimators,
+        'learning_rate': tree_learning_rates,
+        'max_depth': tree_max_depths,
+        'min_samples_split': tree_min_samples_split,
+        'min_samples_leaf':tree_min_samples_leaf,
+        'subsample': tree_ensemble_subsample,
+        'max_features': tree_max_features
     },
 
     'sklearn.neighbors.KNeighborsClassifier': {
@@ -260,10 +268,10 @@ TPOT_CLASSIFIER_CONFIG = {
     },
 
     'xgboost.XGBClassifier': {
-        'n_estimators': [100],
-        'max_depth': range(1, 11),
-        'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
-        'subsample': np.arange(0.05, 1.01, 0.05),
+        'n_estimators': tree_estimators,
+        'max_depth': tree_max_depths,
+        'learning_rate': tree_learning_rates,
+        'subsample': tree_ensemble_subsample,
         'min_child_weight': range(1, 21),
         'nthread': [1]
     },
@@ -353,7 +361,7 @@ TPOT_CLASSIFIER_CONFIG = {
             'sklearn.ensemble.ExtraTreesClassifier': {
                 'n_estimators': [100],
                 'criterion': ['gini', 'entropy'],
-                'max_features': np.arange(0.05, 1.01, 0.05)
+                'max_features': tree_max_features
             }
         }
     },
@@ -364,7 +372,7 @@ TPOT_CLASSIFIER_CONFIG = {
             'sklearn.ensemble.ExtraTreesClassifier': {
                 'n_estimators': [100],
                 'criterion': ['gini', 'entropy'],
-                'max_features': np.arange(0.05, 1.01, 0.05)
+                'max_features': tree_max_features
             }
         }
     }
