@@ -8,6 +8,7 @@ Current adaptor classes are:
 """
 from collections import OrderedDict
 
+import numpy as np
 from tpot import TPOTClassifier, TPOTRegressor
 
 from automatminer.automl.config.tpot_configs import TPOT_CLASSIFIER_CONFIG, \
@@ -102,8 +103,8 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
 
         """
         # Prevent goofy pandas casting by casting to native
-        y = df[target].values.tolist()
-        X = df.drop(columns=target).values.tolist()
+        y = df[target].values
+        X = df.drop(columns=target).values
 
         # Determine learning type based on whether classification or regression
         self.mode = regression_or_classification(df[target])
@@ -125,7 +126,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                              "for {}".format(self.mode,
                                              self.__class__.__name__))
         self._features = df.drop(columns=target).columns.tolist()
-        self._ml_data = {"X": X, "y": y}
+        self._ml_data = {"X": X.tolist(), "y": y.tolist()}
         self.fitted_target = target
         self._backend = self._backend.fit(X, y, **fit_kwargs)
         return self
