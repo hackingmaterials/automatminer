@@ -73,6 +73,10 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         tpot_kwargs['n_jobs'] = tpot_kwargs.get('n_jobs', -1)
         tpot_kwargs['verbosity'] = tpot_kwargs.get('verbosity', 2)
         tpot_kwargs['memory'] = tpot_kwargs.get('memory', 'auto')
+        tpot_kwargs['template'] = tpot_kwargs.get(
+            'template',
+            'Selector-Transformer-Classifier'
+        )
 
         self.mode = None
         self._backend = None
