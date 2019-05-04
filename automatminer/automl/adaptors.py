@@ -8,7 +8,6 @@ Current adaptor classes are:
 """
 from collections import OrderedDict
 
-import numpy as np
 from tpot import TPOTClassifier, TPOTRegressor
 
 from automatminer.automl.config.tpot_configs import TPOT_CLASSIFIER_CONFIG, \
@@ -73,10 +72,6 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         tpot_kwargs['n_jobs'] = tpot_kwargs.get('n_jobs', -1)
         tpot_kwargs['verbosity'] = tpot_kwargs.get('verbosity', 2)
         tpot_kwargs['memory'] = tpot_kwargs.get('memory', 'auto')
-        tpot_kwargs['template'] = tpot_kwargs.get(
-            'template',
-            'Selector-Transformer-Classifier'
-        )
 
         self.mode = None
         self._backend = None
@@ -112,6 +107,12 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
 
         # Determine learning type based on whether classification or regression
         self.mode = regression_or_classification(df[target])
+
+        mltype_str = "Classifier" if self.mode == AMM_CLF_NAME else "Regressor"
+        self.tpot_kwargs['template'] = self.tpot_kwargs.get(
+            'template',
+            'Selector-Transformer-{}'.format(mltype_str)
+        )
 
         if self.mode == AMM_CLF_NAME:
             self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
