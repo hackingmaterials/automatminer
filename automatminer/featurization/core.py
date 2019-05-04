@@ -99,6 +99,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         fitted_input_df (pd.DataFrame): The dataframe which was fitted on
         converted_input_df (pd.DataFrame): The converted dataframe which
             was fitted on (i.e., strings converted to compositions).
+        removed_featurizers ([BaseFeaturizer]): A list of featurizers removed
+            by prechecking methods, if applicable
 
         Attributes not set during fitting and not specified by arguments:
 
@@ -141,6 +143,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.guess_oxistates = guess_oxistates
         self.features = []
         self.auto_featurizer = True if self.featurizers is None else False
+        self.removed_featurizers = None
         self.composition_col = composition_col
         self.structure_col = structure_col
         self.bandstruct_col = bandstructure_col
@@ -284,6 +287,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                     self.featurizers[featurizer_type] = [f for f in featurizers
                                                          if f not in
                                                          invalid_featurizers]
+                    self.removed_featurizers = invalid_featurizers
                     featurizers = self.featurizers[featurizer_type]
 
                 # Fit the featurizers

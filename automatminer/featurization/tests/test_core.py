@@ -202,7 +202,10 @@ class TestAutoFeaturizer(unittest.TestCase):
                       StructureFeaturizers().fast
         n_structure_featurizers = len(af.featurizers["structure"])
         n_composition_featurizers = len(af.featurizers["composition"])
-        n_featurizers = n_structure_featurizers + n_composition_featurizers
+        n_removed_featurizers = len(af.removed_featurizers)
+        n_featurizers = n_structure_featurizers + \
+                        n_composition_featurizers + \
+                        n_removed_featurizers
         self.assertEqual(n_featurizers, len(known_feats))
 
     def test_transferability(self):
