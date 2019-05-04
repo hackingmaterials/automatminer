@@ -215,7 +215,6 @@ class StructureFeaturizers(FeaturizerSet):
             sf.GlobalSymmetryFeatures(),
             sf.EwaldEnergy(),
             sf.SineCoulombMatrix(flatten=True),
-            sf.GlobalInstabilityIndex(),
         ]
 
         ssf = sf.SiteStatsFingerprint
@@ -234,6 +233,7 @@ class StructureFeaturizers(FeaturizerSet):
             sf.Dimensionality(),
             sf.OrbitalFieldMatrix(flatten=True),
             sf.JarvisCFID(),
+            sf.GlobalInstabilityIndex(),
         ]
 
         # Prevent import errors
