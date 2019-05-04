@@ -214,7 +214,8 @@ class StructureFeaturizers(FeaturizerSet):
             sf.DensityFeatures(),
             sf.GlobalSymmetryFeatures(),
             sf.EwaldEnergy(),
-            sf.SineCoulombMatrix(flatten=True)
+            sf.SineCoulombMatrix(flatten=True),
+            sf.GlobalInstabilityIndex(),
         ]
 
         ssf = sf.SiteStatsFingerprint
