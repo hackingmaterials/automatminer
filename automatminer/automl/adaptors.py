@@ -19,7 +19,8 @@ from automatminer.utils.ml import is_greater_better, \
 from automatminer.utils.log import log_progress, AMM_LOG_PREDICT_STR, \
     AMM_LOG_FIT_STR
 from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
-from automatminer.base import DFMLAdaptor, LoggableMixin
+from automatminer.base import LoggableMixin
+from automatminer.automl.base import DFMLAdaptor
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
                'Alireza Faghaninia <alireza.faghaninia@gmail.com>',
