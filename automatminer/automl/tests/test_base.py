@@ -80,10 +80,6 @@ class TestAdaptorGood(DFMLAdaptor):
         return self._backend
 
     @property
-    def ml_data(self):
-        return self._ml_data
-
-    @property
     def features(self):
         return self._features
 
@@ -111,12 +107,10 @@ class TestBaseAutoMLTransformers(unittest.TestCase):
 
         tag.fit(self.df, 'a')
         self.assertTrue(hasattr(tag, "features"))
-        self.assertTrue(hasattr(tag, "ml_data"))
         self.assertTrue(hasattr(tag, "best_pipeline"))
         self.assertTrue(hasattr(tag, "backend"))
-        self.assertTrue(hasattr(tag, "backend"))
+        self.assertTrue(hasattr(tag, "fitted_target"))
         self.assertTrue(tag.is_fit)
-        self.assertTrue(tag.ml_data["X"].shape[1] == 2)
         self.assertTrue(tag.best_pipeline == "pipeline1")
         self.assertTrue(tag.backend == "mybackend")
         self.assertTrue(tag.features[0] == "b")
