@@ -3,10 +3,10 @@ Base classes for automl.
 """
 
 import abc
-from typing import List, Dict
+from typing import List
 
+import numpy as np
 import pandas as pd
-from sklearn.base import BaseEstimator
 
 from automatminer.base import DFTransformer
 from automatminer.utils.log import AMM_LOG_PREDICT_STR, log_progress
@@ -34,7 +34,7 @@ class DFMLAdaptor(DFTransformer):
 
     @property
     @abc.abstractmethod
-    def features(self) -> List:
+    def features(self) -> (List, np.ndarray):
         """
         The features being used for machine learning.
 
@@ -45,47 +45,41 @@ class DFMLAdaptor(DFTransformer):
 
     @property
     @abc.abstractmethod
-    def ml_data(self) -> Dict:
-        """
-        The raw ML-data being passed to the backend.
-
-        Returns:
-            (dict): At minimum, the raw X and y matrices being used to train.
-                May also contain other data.
-        """
-        pass
-
-    @property
-    @abc.abstractmethod
-    def best_pipeline(self) -> BaseEstimator:
-        """
-        The best pipeline returned by the automl backend. Should implement fit
-        and predict methods and be able to make predictions.
-
-        Returns:
-            sklearn.pipeline.Pipeline or BaseEstimator:
-        """
-        pass
-
-    @property
-    @abc.abstractmethod
     def backend(self):
         """
-        The raw, fitted backend object, if it exists. Does not need to directly
-        implement fit and predict methods.
+        The AutoML backend object. Does not need to implement any methods for
+        compatibility with higher level classes. If no AutoML backend is present
+        e.g., SinglePipelineAdaptor, backend = None.
 
-        Returns:
-            Backend object (e.g., TPOTClassifier)
-
+        Does not need to be serializable, as matpipe.save will not save
+        backends.
         """
         pass
 
-    @log_progress(AMM_LOG_PREDICT_STR)
+    @property
+    @abc.abstractmethod
+    def best_pipeline(self):
+        """
+        The best ML pipeline found by the backend. Can be any type though
+        BaseEstimator is preferred.
+
+            1. MUST implement a .predict method unless DFMLAdaptor.predict is
+            overridden!
+
+            2. MUST be serializable!
+
+        Should be as close to the algorithm as possible - i.e., instead of
+        calling TPOTClassifier.fit, calls TPOTClassifier.fitted_pipeline_, so
+        that examining the true form of models is more straightforward.
+        """
+        pass
+
     @check_fitted
+    @log_progress(AMM_LOG_PREDICT_STR)
     def predict(self, df: pd.DataFrame, target: str) -> pd.DataFrame:
         """
         Predict the target property of materials given a df of features. This
-        base method is widely applicable across many kinds of DFMLAdaptors.
+        base method is widely applicanble across different AutoML backends.
 
         The predictions are appended to the dataframe in a column called:
             "{target} predicted"
@@ -118,7 +112,7 @@ class DFMLAdaptor(DFTransformer):
                 "".format(not_in_df, not_in_model))
         else:
             X = df[self.features].values  # rectify feature order
-            y_pred = self.backend.predict(X)
+            y_pred = self.best_pipeline.predict(X)
             df[target + " predicted"] = y_pred
 
             log_msg = "Prediction finished successfully."
@@ -130,4 +124,3 @@ class DFMLAdaptor(DFTransformer):
 
     def transform(self, df: pd.DataFrame, target: str) -> pd.DataFrame:
         return self.predict(df, target)
-
