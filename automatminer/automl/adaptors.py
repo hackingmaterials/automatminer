@@ -78,7 +78,6 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self._features = None
         self._logger = self.get_logger(logger)
 
-
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
