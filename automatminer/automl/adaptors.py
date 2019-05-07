@@ -12,12 +12,10 @@ from tpot import TPOTClassifier, TPOTRegressor
 
 from automatminer.automl.config.tpot_configs import TPOT_CLASSIFIER_CONFIG, \
     TPOT_REGRESSOR_CONFIG
-from automatminer.utils.pkg import AutomatminerError, set_fitted, \
-    check_fitted
+from automatminer.utils.pkg import set_fitted, check_fitted
 from automatminer.utils.ml import is_greater_better, \
     regression_or_classification
-from automatminer.utils.log import log_progress, AMM_LOG_PREDICT_STR, \
-    AMM_LOG_FIT_STR
+from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR
 from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
 from automatminer.base import LoggableMixin
 from automatminer.automl.base import DFMLAdaptor
@@ -54,18 +52,13 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             be used. If set to False, then no logging will occur.
 
     Attributes:
-        The following attributes are set during fitting.
+        The following unique attributes are set during fitting.
 
         mode (str): Either AMM_REG_NAME (regression) or AMM_CLF_NAME
             (classification)
-        features (list): The features labels used to develop the ml model.
-        ml_data (dict): The raw ml data used for training.
-        best_pipeline (sklearn.Pipeline): The best fitted pipeline found.
         best_models (OrderedDict): The best model names and their scores.
         backend (TPOTBase): The TPOT object interface used for ML training.
-        is_fit (bool): If True, the adaptor and backend are fit to a dataset.
         models (OrderedDict): The raw sklearn-style models output by TPOT.
-        fitted_target (str): The target name in the df used for training.
     """
 
     def __init__(self, logger=True, **tpot_kwargs):
@@ -76,11 +69,11 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
 
         self.mode = None
         self.tpot_kwargs = tpot_kwargs
-        self.fitted_target = None
         self.models = None
         self.random_state = tpot_kwargs.get('random_state', None)
         self.greater_score_is_better = None
 
+        self._fitted_target = None
         self._backend = None
         self._features = None
         self._logger = self.get_logger(logger)
@@ -132,7 +125,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                              "for {}".format(self.mode,
                                              self.__class__.__name__))
         self._features = df.drop(columns=target).columns.tolist()
-        self.fitted_target = target
+        self._fitted_target = target
         self._backend = self._backend.fit(X, y, **fit_kwargs)
         return self
 
@@ -213,7 +206,6 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         return self._fitted_target
 
 
-
 class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     """
     For running single models or pipelines in a MatPipe pipeline using the same
@@ -234,13 +226,10 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
             logger will be used. If set to False, then no logging will occur.
 
     Attributes:
-        The following attributes are set during fitting.
+        The following unique attributes are set during fitting.
 
         mode (str): Either AMM_REG_NAME (regression) or AMM_CLF_NAME
             (classification)
-        _features (list): The features labels used to develop the ml model.
-        _best_pipeline (sklearn.Pipeline): The best fitted pipeline found.
-        _fitted_target (str): The target name in the df used for training.
         _regressor (BaseEstimator): The single pipeline to be used for
             regression
         _classifier (BaseEstimator)L The single pipeline to be used for
