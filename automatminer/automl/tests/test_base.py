@@ -33,6 +33,7 @@ class TestAdaptorGood(DFMLAdaptor):
         self._best_pipeline = None
         self._backend = None
         self._features = None
+        self._fitted_target = None
 
     @set_fitted
     def fit(self, df, target):
@@ -51,6 +52,7 @@ class TestAdaptorGood(DFMLAdaptor):
         else:
             raise ValueError("Target {} not in dataframe.".format(target))
 
+        self._fitted_target = target
         self._best_pipeline = "pipeline1"
         self._ml_data = {"y": df[target], "X": df.drop(columns=[target])}
         self._backend = "mybackend"
@@ -89,6 +91,10 @@ class TestAdaptorGood(DFMLAdaptor):
     def best_pipeline(self):
         return self._best_pipeline
 
+    @property
+    def fitted_target(self):
+        return self._fitted_target
+
 
 class TestBaseAutoMLTransformers(unittest.TestCase):
     def setUp(self):
@@ -107,6 +113,7 @@ class TestBaseAutoMLTransformers(unittest.TestCase):
         self.assertTrue(hasattr(tag, "features"))
         self.assertTrue(hasattr(tag, "ml_data"))
         self.assertTrue(hasattr(tag, "best_pipeline"))
+        self.assertTrue(hasattr(tag, "backend"))
         self.assertTrue(hasattr(tag, "backend"))
         self.assertTrue(tag.is_fit)
         self.assertTrue(tag.ml_data["X"].shape[1] == 2)

@@ -75,16 +75,16 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         tpot_kwargs['memory'] = tpot_kwargs.get('memory', 'auto')
 
         self.mode = None
-        self._backend = None
         self.tpot_kwargs = tpot_kwargs
         self.fitted_target = None
-        self._features = None
         self.models = None
-        self._logger = self.get_logger(logger)
-        self.is_fit = False
         self.random_state = tpot_kwargs.get('random_state', None)
-        self._ml_data = None
         self.greater_score_is_better = None
+
+        self._backend = None
+        self._features = None
+        self._logger = self.get_logger(logger)
+
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
@@ -132,7 +132,6 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                              "for {}".format(self.mode,
                                              self.__class__.__name__))
         self._features = df.drop(columns=target).columns.tolist()
-        self._ml_data = {"X": X.tolist(), "y": y.tolist()}
         self.fitted_target = target
         self._backend = self._backend.fit(X, y, **fit_kwargs)
         return self
@@ -160,9 +159,10 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
 
         # Get list of evaluated model names, cast to set and back
         # to get unique model names, instantiate ordered model dictionary
-        evaluated_models = [key.split('(')[0]
-                            for key in
-                            self.backend.evaluated_individuals_.keys()]
+        evaluated_models = []
+        for key in self.backend.evaluated_individuals_.keys():
+            evaluated_models.append(key.split('(')[0])
+
         model_names = list(set(evaluated_models))
         models = OrderedDict({model: [] for model in model_names})
 
@@ -187,6 +187,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         # Mapping of top models to just their score
         scores = {model: best_models[model]['internal_cv_score']
                   for model in best_models}
+
         # Sorted dict of top models just mapped to their top scores
         best_models_and_scores = OrderedDict(
             sorted(scores.items(),
@@ -195,64 +196,22 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self.models = models
         return best_models_and_scores
 
-    @log_progress(AMM_LOG_PREDICT_STR)
-    @check_fitted
-    def predict(self, df, target):
-        """
-        Predict the target property of materials given a df of features.
-
-        The predictions are appended to the dataframe in a column called:
-            "{target} predicted"
-
-        Args:
-            df (pandas.DataFrame): Contains all features needed for ML (i.e.,
-                all features contained in the training dataframe.
-            target (str): The property to be predicted. Should match the target
-                used for fitting. May or may not be present in the argument
-                dataframe.
-
-        Returns:
-            (pandas.DataFrame): The argument dataframe plus a column containing
-                the predictions of the target.
-
-        """
-        if target != self.fitted_target:
-            raise AutomatminerError("Argument dataframe target {} is different "
-                                    "from the fitted dataframe target! {}"
-                                    "".format(target, self.fitted_target))
-        elif not all([f in df.columns for f in self._features]):
-            not_in_model = [f for f in self._features if f not in df.columns]
-            not_in_df = [f for f in df.columns if f not in self._features]
-            raise AutomatminerError("Features used to build model are different"
-                                    " from df columns! Features located in "
-                                    "model not located in df: \n{} \n Features "
-                                    "located in df not in model: \n{}"
-                                    "".format(not_in_df, not_in_model))
-        else:
-            X = df[self._features].values  # rectify feature order
-            y_pred = self._backend.predict(X)
-            df[target + " predicted"] = y_pred
-            return df
+    @property
+    def backend(self):
+        return self._backend
 
     @property
-    @check_fitted
     def best_pipeline(self):
         return self._backend.fitted_pipeline_
 
     @property
-    @check_fitted
     def features(self):
         return self._features
 
     @property
-    @check_fitted
-    def ml_data(self):
-        return self._ml_data
+    def fitted_target(self):
+        return self._fitted_target
 
-    @property
-    @check_fitted
-    def backend(self):
-        return self._backend
 
 
 class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
@@ -279,25 +238,24 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
 
         mode (str): Either AMM_REG_NAME (regression) or AMM_CLF_NAME
             (classification)
-        features (list): The features labels used to develop the ml model.
-        ml_data (dict): The raw ml data used for training.
-        best_pipeline (sklearn.Pipeline): The best fitted pipeline found.
-        best_models (OrderedDict): The best model names and their scores.
-        backend (TPOTBase): The TPOT object interface used for ML training.
-        is_fit (bool): If True, the adaptor and backend are fit to a dataset.
-        models (OrderedDict): The raw sklearn-style models output by TPOT.
-        fitted_target (str): The target name in the df used for training.
+        _features (list): The features labels used to develop the ml model.
+        _best_pipeline (sklearn.Pipeline): The best fitted pipeline found.
+        _fitted_target (str): The target name in the df used for training.
+        _regressor (BaseEstimator): The single pipeline to be used for
+            regression
+        _classifier (BaseEstimator)L The single pipeline to be used for
+            classification
+
     """
 
     def __init__(self, regressor, classifier, logger=True):
+        self.mode = None
         self._logger = self.get_logger(logger)
         self._regressor = regressor
         self._classifier = classifier
         self._features = None
-        self._ml_data = None
-        self.fitted_target = None
-        self._backend = None
-        self.mode = None
+        self._fitted_target = None
+        self._best_pipeline = None
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
@@ -307,9 +265,9 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
         self.mode = regression_or_classification(df[target])
 
         if self.mode == AMM_CLF_NAME:
-            self._backend = self._classifier
+            self._best_pipeline = self._classifier
         elif self.mode == AMM_REG_NAME:
-            self._backend = self._regressor
+            self._best_pipeline = self._regressor
         else:
             raise ValueError("Learning type {} not recognized as a valid mode "
                              "for {}".format(self.mode,
@@ -319,56 +277,18 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
         y = df[target].values.tolist()
         X = df.drop(columns=target).values.tolist()
         self._features = df.drop(columns=target).columns.tolist()
-        self._ml_data = {"X": X, "y": y}
-        self.fitted_target = target
-        self._backend.fit(X, y)
+        self._fitted_target = target
+        self._best_pipeline.fit(X, y)
 
-    # todo: Remove this duplicated code section, maybe just make a parent class
-    @log_progress(AMM_LOG_PREDICT_STR)
+    @property
     @check_fitted
-    def predict(self, df, target):
-        """
-        Predict the target property of materials given a df of features.
-
-        The predictions are appended to the dataframe in a column called:
-            "{target} predicted"
-
-        Args:
-            df (pandas.DataFrame): Contains all features needed for ML (i.e.,
-                all features contained in the training dataframe.
-            target (str): The property to be predicted. Should match the target
-                used for fitting. May or may not be present in the argument
-                dataframe.
-
-        Returns:
-            (pandas.DataFrame): The argument dataframe plus a column containing
-                the predictions of the target.
-
-        """
-        if target != self.fitted_target:
-            raise AutomatminerError("Argument dataframe target {} is different "
-                                    "from the fitted dataframe target! {}"
-                                    "".format(target, self.fitted_target))
-        elif not all([f in df.columns for f in self._features]):
-            not_in_model = [f for f in self._features if f not in df.columns]
-            not_in_df = [f for f in df.columns if f not in self._features]
-            raise AutomatminerError("Features used to build model are different"
-                                    " from df columns! Features located in "
-                                    "model not located in df: \n{} \n Features "
-                                    "located in df not in model: \n{}"
-                                    "".format(not_in_df, not_in_model))
-        else:
-            X = df[self._features].values  # rectify feature order
-            y_pred = self._backend.predict(X)
-            df[target + " predicted"] = y_pred
-            self.logger.info(self._log_prefix +
-                             "Prediction finished successfully.")
-            return df
+    def backend(self):
+        return None
 
     @property
     @check_fitted
     def best_pipeline(self):
-        return self._backend
+        return self._best_pipeline
 
     @property
     @check_fitted
@@ -377,10 +297,5 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
 
     @property
     @check_fitted
-    def ml_data(self):
-        return self._ml_data
-
-    @property
-    @check_fitted
-    def backend(self):
-        return self._backend
+    def fitted_target(self):
+        return self._fitted_target
