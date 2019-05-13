@@ -8,8 +8,6 @@ Current adaptor classes are:
 """
 from collections import OrderedDict
 
-import adanet
-import tensorflow as tf
 from tpot import TPOTClassifier, TPOTRegressor
 
 from automatminer.automl.config.tpot_configs import TPOT_CLASSIFIER_CONFIG, \
@@ -291,39 +289,3 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
         return self._fitted_target
 
 
-
-class AdaNetAdaptor(DFMLAdaptor, LoggableMixin):
-
-    def __init__(self, regressor, classifier, logger=True):
-        self.mode = None
-        self._logger = self.get_logger(logger)
-        self._regressor = regressor
-        self._classifier = classifier
-        self._features = None
-        self._fitted_target = None
-        self._best_pipeline = None
-
-    @log_progress(AMM_LOG_FIT_STR)
-    @set_fitted
-    def fit(self, df, target, **fit_kwargs):
-        pass
-
-    @property
-    @check_fitted
-    def backend(self):
-        return None
-
-    @property
-    @check_fitted
-    def best_pipeline(self):
-        return self._best_pipeline
-
-    @property
-    @check_fitted
-    def features(self):
-        return self._features
-
-    @property
-    @check_fitted
-    def fitted_target(self):
-        return self._fitted_target
