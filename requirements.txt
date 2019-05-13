@@ -1,7 +1,7 @@
 # Requirements of this project alone
 matminer>=0.5.5
 xlrd==1.1.0
-xgboost==0.72.1
+xgboost==0.80
 tpot==0.10.1
 skrebate==0.6
 
