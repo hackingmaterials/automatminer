@@ -303,10 +303,19 @@ class TestAutoFeaturizer(unittest.TestCase):
         target = "K_VRH"
         af = AutoFeaturizer(preset="best")
         df = self.test_df[['composition', target]]
+
+        # Increase the minimum precheck fraction for purposes of this test
+        af.min_precheck_frac = 0.99
+
         af.fit(df, target)
         classes = [f.__class__.__name__ for f in af.featurizers["composition"]]
+
+        # both of these should be around 0.922 precheck fraction, so they fail
+        # the precheck test.
         self.assertNotIn("YangSolidSolution", classes)
         self.assertNotIn("Miedema", classes)
+
+        # ElementProperty precheck is correct for all entries, so it should pass
         self.assertIn("ElementProperty", classes)
 
     def tearDown(self):
