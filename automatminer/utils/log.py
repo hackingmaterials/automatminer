@@ -34,7 +34,7 @@ def initialize_logger(name, filepath='.', filebase=None,
     filebase = filebase or name
     logpath = os.path.join(filepath, filebase)
     if os.path.exists(logpath + ".log"):
-        logpath += "_" + datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+        logpath += "_" + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     logpath += ".log"
 
     handler = logging.FileHandler(logpath, mode='w')
