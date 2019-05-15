@@ -34,7 +34,7 @@ def open_doc(ctx):
 def update_changelog(ctx):
     ctx.run('github_changelog_generator hackingmaterials/automatminer')
     ctx.run("git add CHANGELOG.md")
-    ctx.run("git commit CHANGELOG.md -m 'update changelog'")
+    ctx.run("git commit CHANGELOG.md -m 'update changelog [skip ci]'")
 
 @task
 def full_tests_circleci(ctx):

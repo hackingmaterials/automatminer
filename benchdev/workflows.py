@@ -268,8 +268,8 @@ if __name__ == "__main__":
     pipe_config = {
         "learner_name": "TPOTAdaptor",
         # "learner_kwargs": {"generations": 100, "population_size": 100, "memory": "auto", "n_jobs": 10, "max_eval_time_mins": 5},
-        # "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 20, "population_size": 100, "memory": "auto", "n_jobs": 4},
-        "learner_kwargs": {"max_time_mins": 30, "max_eval_time_mins": 10, "population_size": 100, "memory": "auto", "n_jobs": 4},
+        "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 20, "population_size": 100, "memory": "auto", "n_jobs": 4},
+        # "learner_kwargs": {"max_time_mins": 360, "max_eval_time_mins": 10, "population_size": 100, "memory": "auto", "n_jobs": 4},
 
 
         # "reducer_kwargs": {"reducers": ("corr",)},
@@ -278,9 +278,7 @@ if __name__ == "__main__":
         # "reducer_kwargs": {"reducers": ("rebate",), "n_rebate_features": 0.3},
 
         # "reducer_kwargs": {"reducers": ()},
-        "autofeaturizer_kwargs": {"preset": "robust", "n_jobs": 10},
-        # "autofeaturizer_kwargs": {"preset": "robust", "n_jobs": 10},
-        # "autofeaturizer_kwargs": {"preset": "best", "n_jobs": 10},
+        "autofeaturizer_kwargs": {"preset": "debug", "n_jobs": 10},
         "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"}
     }
 
@@ -297,28 +295,28 @@ if __name__ == "__main__":
     #
     # rf = RandomForestClassifier()
     tags = [
-        "data_full",
-        "drop_mean",
+        # "data_full",
+        # "drop_mean",
         # "af_best",
-        "af_debug",
-        "rf",
-        "debug",
-        "no_reduction"
+        # "af_debug",
+        # "rf",
+        # "debug",
+        # "no_reduction"
         # "tpot_limited_mem"
         # "corr_only",
         # "drop_mean",
         # "af_fast",
         # "tpot_generations",
-        # "debug"
+        "debug"
     ]
 
     from benchdev.config import MP_E_FORM, JDFT2D, BULK, GFA
     # wf = wf_evaluate_build("lrc", "set generation size", BENCHMARK_FULL_SET, pipe_config,
     #                        include_tests=False, cache=True, tags=tags)
 
-    wf = wf_benchmark("lrc", pipe_config, **GFA, cache=True, tags=tags)
-    # wf = wf_evaluate_build("lrc", "rf only no reduction", BENCHMARK_FULL_SET,
-    #                        pipe_config_debug, include_tests=False, cache=True, tags=tags)
+    # wf = wf_benchmark("lrc", pipe_config, **GFA, cache=True, tags=tags)
+    wf = wf_evaluate_build("lrc", "debug featurization long tpot", BENCHMARK_FULL_SET,
+                           pipe_config, include_tests=False, cache=True, tags=tags)
 
 
     # ds = LOCAL_DEBUG_SET[0]
