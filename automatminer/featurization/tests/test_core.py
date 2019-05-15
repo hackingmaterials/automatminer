@@ -22,12 +22,6 @@ __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
               "Qi Wang <wqthu11@gmail.com>"]
 
-import pandas as pd
-
-# pd.set_option('display.height', 1000)
-pd.set_option('display.max_rows', 500)
-pd.set_option('display.max_columns', 500)
-pd.set_option('display.width', 1000)
 
 class TestAutoFeaturizer(unittest.TestCase):
     def setUp(self):
@@ -251,7 +245,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("composition" not in df.columns)
         self.assertTrue(custom_comp_key not in df.columns)
 
-
         df = copy.copy(mod_comp_df)
         df[custom_comp_key] = [Composition(s) for s in df[custom_comp_key]]
         af = AutoFeaturizer(composition_col=custom_comp_key, preset="express")
@@ -259,7 +252,6 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertEqual(df["MagpieData minimum Number"].iloc[2], 14.0)
         self.assertTrue("composition" not in df.columns)
         self.assertTrue(custom_comp_key not in df.columns)
-
 
         # Modification of test_featurize_structure with AutoFeaturizer parameter
         cols = ['structure', target]
@@ -293,7 +285,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         df = self.test_df[['composition', target]].iloc[:flimit]
         af = AutoFeaturizer(functionalize=True, preset="express")
         df = af.fit_transform(df, target)
-        self.assertTupleEqual(df.shape, (flimit, 16848))
+        self.assertTupleEqual(df.shape, (flimit, 1752))
 
     def test_StructureFeaturizers_needs_fitting(self):
         fset_nofit = StructureFeaturizers().express
@@ -319,7 +311,7 @@ class TestAutoFeaturizer(unittest.TestCase):
 
     def test_prechecking(self):
         target = "K_VRH"
-        af = AutoFeaturizer(preset="best")
+        af = AutoFeaturizer(preset="express")
         df = self.test_df[['composition', target]]
 
         # Increase the minimum precheck fraction for purposes of this test
@@ -333,7 +325,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertNotIn("YangSolidSolution", classes)
         self.assertNotIn("Miedema", classes)
 
-        # ElementProperty precheck is correct for all entries, so it should passZ
+        # ElementProperty precheck is correct for all entries, so it should pass
         self.assertIn("ElementProperty", classes)
 
     def tearDown(self):

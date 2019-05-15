@@ -7,7 +7,8 @@ import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
 import matminer.featurizers.bandstructure as bf
 
-from automatminer.featurization.sets import AllFeaturizers, StructureFeaturizers
+from automatminer.featurization.sets import AllFeaturizers, \
+    StructureFeaturizers, CompositionFeaturizers, BSFeaturizers, DOSFeaturizers
 
 try:
     import dscribe
@@ -85,6 +86,20 @@ class TestAllFeaturizers(unittest.TestCase):
         test_feats = self.allfs.bandstructure
         self._test_features_implemented(test_feats, true_feats)
 
+
+class TestFeaturizerSets(unittest.TestCase):
+    def setUp(self):
+        self.required_attrs = ["express", "heavy", "debug", "all"]
+        self.c = CompositionFeaturizers()
+        self.s = StructureFeaturizers()
+        self.b = BSFeaturizers()
+        self.d = DOSFeaturizers()
+
+    def test_sets_not_empty(self):
+        for attr in self.required_attrs:
+            for ftype in [self.c, self.s, self.b, self.d]:
+                print(ftype.__class__.__name__, attr)
+                self.assertNotEqual(getattr(ftype, attr), [])
 
 if __name__ == '__main__':
     unittest.main()

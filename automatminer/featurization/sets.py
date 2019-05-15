@@ -178,7 +178,7 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def debug(self):
-        return self._get_featurizers(sf.SineCoulombMatrix(flatten=True))
+        return self._get_featurizers([sf.SineCoulombMatrix(flatten=True)])
 
     @property
     def need_fit(self):
