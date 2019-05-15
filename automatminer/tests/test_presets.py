@@ -14,7 +14,7 @@ ML_KEY = "learner"
 KEYSET = [AF_KEY, DC_KEY, FR_KEY, ML_KEY]
 
 
-class TestMatPipe(unittest.TestCase):
+class TestMatPipePresets(unittest.TestCase):
     def test_production(self):
         prod = get_preset_config("production")
         for k in KEYSET:
