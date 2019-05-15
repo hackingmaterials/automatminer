@@ -315,7 +315,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertNotIn("YangSolidSolution", classes)
         self.assertNotIn("Miedema", classes)
 
-        # ElementProperty precheck is correct for all entries, so it should pass
+        # ElementProperty precheck is correct for all entries, so it should passZ
         self.assertIn("ElementProperty", classes)
 
     def tearDown(self):
