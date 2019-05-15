@@ -28,73 +28,6 @@ from .base import FeaturizerSet
 __authors__ = ["Alex Dunn", "Alex Ganose"]
 
 
-class AllFeaturizers(FeaturizerSet):
-    """Featurizer set containing all available featurizers.
-
-    This class provides subsets for composition, structure, density of states
-    and band structure based featurizers. Additional sets containing all
-    featurizers and the set of best featurizers are provided.
-
-    Example usage::
-
-        composition_featurizers = AllFeaturizers().composition
-
-    Args:
-        exclude (list of str, optional): A list of featurizer class names that
-            will be excluded from the set of featurizers returned.
-    """
-
-    def __init__(self, exclude=None):
-        super(AllFeaturizers, self).__init__(exclude=exclude)
-
-        self._featurizer_sets = {
-            'comp': CompositionFeaturizers(),
-            'struct': StructureFeaturizers(),
-            'bs': BSFeaturizers(),
-            'dos': DOSFeaturizers()
-        }
-
-    @property
-    def composition(self):
-        """List of all composition based featurizers."""
-        return self._get_featurizers(self._featurizer_sets['comp'].all)
-
-    @property
-    def structure(self):
-        """List of all structure based featurizers."""
-        return self._get_featurizers(self._featurizer_sets['struct'].all)
-
-    @property
-    def bandstructure(self):
-        """List of all band structure based featurizers."""
-        return self._get_featurizers(self._featurizer_sets['bs'].all)
-
-    @property
-    def dos(self):
-        """List of all density of states based featurizers."""
-        return self._get_featurizers(self._featurizer_sets['dos'].all)
-
-    @property
-    def all(self):
-        featurizers = [f.all for f in self._featurizer_sets.values()]
-        return self._get_featurizers(featurizers)
-
-    @property
-    def best(self):
-        featurizers = [f.best for f in self._featurizer_sets.values()]
-        return self._get_featurizers(featurizers)
-
-    @property
-    def fast(self):
-        featurizers = [f.fast for f in self._featurizer_sets.values()]
-        return self._get_featurizers(featurizers)
-
-    @property
-    def debug(self):
-        featurizers = [f.debug for f in self._featurizer_sets.values()]
-        return self._get_featurizers(featurizers)
-
-
 class CompositionFeaturizers(FeaturizerSet):
     """Featurizer set containing composition featurizers.
 
@@ -417,3 +350,70 @@ class BSFeaturizers(FeaturizerSet):
     @property
     def debug(self):
         return self._get_featurizers([bf.BandFeaturizer()])
+
+
+class AllFeaturizers(FeaturizerSet):
+    """Featurizer set containing all available featurizers.
+
+    This class provides subsets for composition, structure, density of states
+    and band structure based featurizers. Additional sets containing all
+    featurizers and the set of best featurizers are provided.
+
+    Example usage::
+
+        composition_featurizers = AllFeaturizers().composition
+
+    Args:
+        exclude (list of str, optional): A list of featurizer class names that
+            will be excluded from the set of featurizers returned.
+    """
+
+    def __init__(self, exclude=None):
+        super(AllFeaturizers, self).__init__(exclude=exclude)
+
+        self._featurizer_sets = {
+            'comp': CompositionFeaturizers(),
+            'struct': StructureFeaturizers(),
+            'bs': BSFeaturizers(),
+            'dos': DOSFeaturizers()
+        }
+
+    @property
+    def composition(self):
+        """List of all composition based featurizers."""
+        return self._get_featurizers(self._featurizer_sets['comp'].all)
+
+    @property
+    def structure(self):
+        """List of all structure based featurizers."""
+        return self._get_featurizers(self._featurizer_sets['struct'].all)
+
+    @property
+    def bandstructure(self):
+        """List of all band structure based featurizers."""
+        return self._get_featurizers(self._featurizer_sets['bs'].all)
+
+    @property
+    def dos(self):
+        """List of all density of states based featurizers."""
+        return self._get_featurizers(self._featurizer_sets['dos'].all)
+
+    @property
+    def all(self):
+        featurizers = [f.all for f in self._featurizer_sets.values()]
+        return self._get_featurizers(featurizers)
+
+    @property
+    def best(self):
+        featurizers = [f.best for f in self._featurizer_sets.values()]
+        return self._get_featurizers(featurizers)
+
+    @property
+    def fast(self):
+        featurizers = [f.fast for f in self._featurizer_sets.values()]
+        return self._get_featurizers(featurizers)
+
+    @property
+    def debug(self):
+        featurizers = [f.debug for f in self._featurizer_sets.values()]
+        return self._get_featurizers(featurizers)
