@@ -35,12 +35,14 @@ class FeaturizerSet(abc.ABC):
     @property
     @abc.abstractmethod
     def express(self):
-        """A focused set of featurizers which should be:
+        """A focused set of featurizers which should:
 
-        * reasonably fast to featurize
-        * not prone to errors/nans
+        * be reasonably fast to featurize
+        * be not prone to errors/nans
         * provide informative learning features
         * do not include many irrelevant features making ML expensive
+        * have each featurizer return a vector
+        * allow the recognized type (structure, composition, etc.) as input.
         """
         pass
 
@@ -62,7 +64,14 @@ class FeaturizerSet(abc.ABC):
     @property
     @abc.abstractmethod
     def all(self):
-        """All featurizers available for this featurization type."""
+        """All featurizers available for this featurization type. These
+        featurizers are allowed to:
+
+        * have multiple, highly similar versions of the same featurizer,
+        * not work on standard versions of the input types (e.g., SiteDOS works
+            on the DOS for a single site, not structure
+        * return non-vectorized outputs (e.g., matrices, other data types).
+        """
         pass
 
     @property
