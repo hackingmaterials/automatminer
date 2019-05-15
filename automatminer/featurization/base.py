@@ -12,10 +12,11 @@ class FeaturizerSet(abc.ABC):
 
     All FeaturizerSets should implement at least fours sets of featurizers:
 
-        - best - The set of best featurizers
-        - fast - A set of generally applicable fast featurizers
-        - debug - An ultra-minimal set of featurizers for debugging
-        - all - The set of all featurizers
+        - express - The "go-to" set of featurizers
+        - heavy - A more expensive and complete (though not necessarily
+            better) version of express.
+        - all - All featurizers available for the intended featurization type(s)
+        - debug - An ultra-minimal set of featurizers for debugging purposes.
 
     Each set returned is a list of matminer featurizer objects. The choice of
     featurizers for a given set is at the discrtetion of the implementor.
@@ -33,12 +34,28 @@ class FeaturizerSet(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def best(self):
-        """List of featurizers providing useful features in a reasonable time.
+    def express(self):
+        """A focused set of featurizers which should be:
 
-        Featurizers that take a very long time to run, which crash for many
-        systems, or which produce a large number of similar features will be
-        excluded.
+        * reasonably fast to featurize
+        * not prone to errors/nans
+        * provide informative learning features
+        * do not include many irrelevant features making ML expensive
+        """
+        pass
+
+    @property
+    @abc.abstractmethod
+    def heavy(self):
+        """A more expensive and complete (though not necessarily better)
+        version of express.
+
+        Similar to express, all featurizers selected should return useful
+        learning features. However the selected featurizers may now:
+
+        * generate many (thousands+) features
+        * be expensive to featurize (1s+ per item)
+        * be prone to NaNs on certain datasets
         """
         pass
 
@@ -46,12 +63,6 @@ class FeaturizerSet(abc.ABC):
     @abc.abstractmethod
     def all(self):
         """All featurizers available for this featurization type."""
-        pass
-
-    @property
-    @abc.abstractmethod
-    def fast(self):
-        """Fast featurizers available for this featurization type."""
         pass
 
     @property
