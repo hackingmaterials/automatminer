@@ -31,14 +31,12 @@ __authors__ = ["Alex Dunn", "Alex Ganose"]
 class CompositionFeaturizers(FeaturizerSet):
     """Featurizer set containing composition featurizers.
 
-    This class provides subsets for featurizers that require the composition
-    to have oxidation states, as well as robust, and slow featurizers. Additional
-    sets containing all featurizers and the set of best featurizers are
-    provided.
+    See the FeaturizerSet documentation for details of each property (sublist
+    of featurizers).
 
     Example usage::
 
-        fast_featurizers = CompositionFeaturizers().robust
+        best_featurizers = CompositionFeaturizers().express
 
     Args:
         exclude (list of str, optional): A list of featurizer class names that
@@ -48,50 +46,12 @@ class CompositionFeaturizers(FeaturizerSet):
     def __init__(self, exclude=None):
         super(CompositionFeaturizers, self).__init__(exclude=exclude)
 
-        self.fast_best = [
-            cf.ElementProperty.from_preset("magpie"),
-
-        ]
-
-        self._fast_featurizers = [
-            cf.AtomicOrbitals(),
-            cf.ElementProperty.from_preset("matminer"),
-            cf.ElementProperty.from_preset("magpie"),
-            cf.ElementProperty.from_preset("matscholar_el"),
-            cf.ElementProperty.from_preset("deml"),
-            cf.ElementFraction(),
-            cf.Stoichiometry(),
-            cf.TMetalFraction(),
-            cf.BandCenter(),
-            cf.ValenceOrbital()
-        ]
-
-        self._slow_featurizers = [
-            cf.Miedema(),
-            cf.AtomicPackingEfficiency(),  # slower than the rest
-            cf.CohesiveEnergy()  # requires mpid present
-        ]
-
-        self._need_oxi_featurizers = [
-            cf.YangSolidSolution(),
-            cf.CationProperty.from_preset(preset_name='deml'),
-            cf.OxidationStates.from_preset(preset_name='deml'),
-            cf.ElectronAffinity(),
-            cf.ElectronegativityDiff(),
-            cf.IonProperty()
-        ]
-
-        self._intermetallics_only = [
-            cf.YangSolidSolution(),
-            cf.Miedema(),
-        ]
-
     @property
     def debug(self):
         return self._get_featurizers([cf.ElementProperty.from_preset("magpie")])
 
     @property
-    def robust(self):
+    def express(self):
         fs = [
             cf.ElementProperty.from_preset("magpie"),
             cf.OxidationStates.from_preset(preset_name='deml'),
@@ -104,67 +64,46 @@ class CompositionFeaturizers(FeaturizerSet):
         return self._get_featurizers(fs)
 
     @property
-    def best(self):
+    def heavy(self):
         fs = [cf.AtomicPackingEfficiency()] + self.robust
+        return self._get_featurizers(fs)
 
     @property
     def all(self):
         fs = [
+            cf.AtomicOrbitals(),
+            cf.ElementProperty.from_preset("matminer"),
+            cf.ElementProperty.from_preset("magpie"),
+            cf.ElementProperty.from_preset("matscholar_el"),
+            cf.ElementProperty.from_preset("deml"),
+            cf.ElementFraction(),
+            cf.Stoichiometry(),
+            cf.TMetalFraction(),
+            cf.BandCenter(),
+            cf.ValenceOrbital(),
+            cf.YangSolidSolution(),
+            cf.CationProperty.from_preset(preset_name='deml'),
+            cf.OxidationStates.from_preset(preset_name='deml'),
+            cf.ElectronAffinity(),
+            cf.ElectronegativityDiff(),
+            cf.IonProperty(),
+            cf.Miedema(),
+            cf.AtomicPackingEfficiency(),  # slower than the rest
+            cf.CohesiveEnergy()  # requires mpid present
 
         ]
-    # @property
-    # def intermetallics_only(self):
-    #     """List of featurizers that applies only to intermetallics.
-    #     Will probably be removed by valid_fraction checking if not actally
-    #     applicable to the dataset.
-    #     """
-    #     return self._get_featurizers(self._intermetallics_only)
-    #
-    # @property
-    # def robust(self):
-    #     """List of featurizers that are generally quick to featurize."""
-    #     return self._get_featurizers(self._fast_featurizers)
-    #
-    # @property
-    # def slow(self):
-    #     """List of featurizers that are generally slow to featurize."""
-    #     return self._get_featurizers(self._slow_featurizers)
-    #
-    # @property
-    # def need_oxi(self):
-    #     """Featurizers that require the composition to have oxidation states.
-    #
-    #     If the composition is not decorated with oxidation states the
-    #     oxidation states will be guessed. This can cause a significant increase
-    #     in featurization time.
-    #     """
-    #     return self._get_featurizers(self._need_oxi_featurizers)
-    #
-    # @property
-    # def all(self):
-    #     """List of all composition based featurizers."""
-    #     return self.robust + self.need_oxi + self.slow
-    #
-    # @property
-    # def best(self):
-    #     return self.robust + self.intermetallics_only
-    #
-    # @property
-    # def debug(self):
-    #     return self._get_featurizers([cf.ElementProperty.from_preset("magpie")])
+        return self._get_featurizers(fs)
 
 
 class StructureFeaturizers(FeaturizerSet):
     """Featurizer set containing structure featurizers.
 
-    This class provides subsets for featurizers that require fitting,
-    return matrices rather than vectors, and produce many features, as well as
-    robust, and slow featurizers. Additional sets containing all featurizers and
-    the set of best featurizers are provided.
+    See the FeaturizerSet documentation for details of each property (sublist
+    of featurizers).
 
     Example usage::
 
-        fast_featurizers = StructureFeaturizers().robust
+        best_featurizers = StructureFeaturizers().express
 
     Args:
         exclude (list of str, optional): A list of featurizer class names that
@@ -173,24 +112,32 @@ class StructureFeaturizers(FeaturizerSet):
 
     def __init__(self, exclude=None):
         super(StructureFeaturizers, self).__init__(exclude=exclude)
+        self.ssf = sf.SiteStatsFingerprint
 
-        self._fast_featurizers = [
+    def _add_external(self, fset):
+        # Prevent import errors
+        require_external = []
+        if torch and cgcnn:
+            require_external.append(sf.CGCNNFeaturizer())
+        if dscribe:
+            require_external.append(sf.SOAP())
+        return fset + require_external
+
+    @property
+    def express(self):
+        fs = [
             sf.DensityFeatures(),
             sf.GlobalSymmetryFeatures(),
             sf.EwaldEnergy(),
             sf.SineCoulombMatrix(flatten=True),
-            sf.GlobalInstabilityIndex(),
+            sf.GlobalInstabilityIndex()
         ]
+        return self._get_featurizers(fs)
 
-        ssf = sf.SiteStatsFingerprint
-        self._slow_featurizers = [
-            ssf.from_preset('CrystalNNFingerprint_ops'),
-            ssf.from_preset("BondLength-dejong2016"),
-            ssf.from_preset("BondAngle-dejong2016"),
-            ssf.from_preset("Composition-dejong2016_SD"),
-            ssf.from_preset("Composition-dejong2016_AD"),
-            ssf.from_preset("CoordinationNumber_ward-prb-2017"),
-            ssf.from_preset("LocalPropertyDifference_ward-prb-2017"),
+    @property
+    def heavy(self):
+        fs = [
+            self.ssf.from_preset('CrystalNNFingerprint_ops'),
             sf.ChemicalOrdering(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
@@ -199,99 +146,103 @@ class StructureFeaturizers(FeaturizerSet):
             sf.OrbitalFieldMatrix(flatten=True),
             sf.JarvisCFID(),
         ]
-
-        # Prevent import errors
-        self._require_external = []
-        if torch and cgcnn:
-            self._require_external.append(sf.CGCNNFeaturizer())
-        if dscribe:
-            self._require_external.append(sf.SOAP())
-
-        self._need_fitting_featurizers = [
-            sf.PartialRadialDistributionFunction(),
-            sf.BondFractions(),
-            sf.BagofBonds(coulomb_matrix=sf.CoulombMatrix()),
-            sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix()),
-        ]
-
-        self._matrix_featurizers = [
-            sf.CoulombMatrix(flatten=False),
-            sf.RadialDistributionFunction(),  # returns dict
-            sf.MinimumRelativeDistances(),  # returns a list
-            sf.ElectronicRadialDistributionFunction()
-        ]
-
-        # these are the same as _need_fitting_featurizers
-        self._many_features_featurizers = [
-            sf.PartialRadialDistributionFunction(),
-            sf.BondFractions(approx_bonds=False),
-            sf.BagofBonds(coulomb_matrix=sf.CoulombMatrix()),
-            sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix()),
-            sf.OrbitalFieldMatrix(flatten=True),
-            sf.JarvisCFID()
-        ]
-
-    @property
-    def robust(self):
-        """List of featurizers that are generally robust to featurize."""
-        return self._get_featurizers(self._fast_featurizers)
-
-    @property
-    def slow(self):
-        """List of featurizers that are generally slow to featurize."""
-        return self._get_featurizers(self._slow_featurizers)
-
-    @property
-    def need_fit(self):
-        """List of featurizers which must be fit before featurizing.
-
-        Fitting can be performed using the `Featurizer.fit()` method.
-        Alternatively, the `Featurizer.fit_featurize_dataframe()` can be used
-        to fit and featurize simultaneously.
-        """
-        return self._get_featurizers(self._need_fitting_featurizers)
-
-    @property
-    def matrix(self):
-        """List of featurizers that return matrices as features.
-
-        These featurizers are not useful for vectorized representations of
-        crystal structures.
-        """
-        return self._get_featurizers(self._matrix_featurizers)
-
-    @property
-    def many_features(self):
-        """List of featurizers that return many features."""
-        return self._get_featurizers(self._many_features_featurizers)
-
-    @property
-    def require_external(self):
-        """Featurizers which require external software not installable via
-        Pypi
-        """
-        return self._get_featurizers(self._require_external)
-
-    @property
-    def all_vector(self):
-        return self.robust + self.slow + self.need_fit + self.require_external
+        fs += self.express
+        fs = self._add_external(fs)
+        return self._get_featurizers(fs)
 
     @property
     def all(self):
-        return self.all_vector
+        fs = [
+            # Vector
+            self.ssf.from_preset('CrystalNNFingerprint_ops'),
+            self.ssf.from_preset("BondLength-dejong2016"),
+            self.ssf.from_preset("BondAngle-dejong2016"),
+            self.ssf.from_preset("Composition-dejong2016_SD"),
+            self.ssf.from_preset("Composition-dejong2016_AD"),
+            self.ssf.from_preset("CoordinationNumber_ward-prb-2017"),
+            self.ssf.from_preset("LocalPropertyDifference_ward-prb-2017"),
+            sf.BondFractions(approx_bonds=False),
+            sf.BagofBonds(coulomb_matrix=sf.CoulombMatrix()),
+            sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix()),
+            sf.CoulombMatrix(flatten=True),
+            sf.BondFractions(),
 
-    @property
-    def all_including_matrix(self):
-        """List of all structure based featurizers."""
-        return self.all_vector + self.matrix
-
-    @property
-    def best(self):
-        return self.robust + self.slow + self.require_external
+            # Non vector
+            sf.CoulombMatrix(flatten=False), # returns matrix
+            sf.SineCoulombMatrix(flatten=False), # returns matrix
+            sf.RadialDistributionFunction(),  # returns dict
+            sf.MinimumRelativeDistances(),  # returns a list
+            sf.ElectronicRadialDistributionFunction(), # returns ??
+            sf.PartialRadialDistributionFunction(), # returns ??
+        ]
+        fs += self.heavy
+        return self._get_featurizers(fs)
 
     @property
     def debug(self):
-        return self._get_featurizers([sf.SineCoulombMatrix(flatten=True)])
+        return self._get_featurizers(sf.SineCoulombMatrix(flatten=True))
+
+        # @property
+    # def robust(self):
+    #     """List of featurizers that are generally robust to featurize."""
+    #     return self._get_featurizers(self._fast_featurizers)
+    #
+    # @property
+    # def slow(self):
+    #     """List of featurizers that are generally slow to featurize."""
+    #     return self._get_featurizers(self._slow_featurizers)
+    #
+    # @property
+    # def need_fit(self):
+    #     """List of featurizers which must be fit before featurizing.
+    #
+    #     Fitting can be performed using the `Featurizer.fit()` method.
+    #     Alternatively, the `Featurizer.fit_featurize_dataframe()` can be used
+    #     to fit and featurize simultaneously.
+    #     """
+    #     return self._get_featurizers(self._need_fitting_featurizers)
+    #
+    # @property
+    # def matrix(self):
+    #     """List of featurizers that return matrices as features.
+    #
+    #     These featurizers are not useful for vectorized representations of
+    #     crystal structures.
+    #     """
+    #     return self._get_featurizers(self._matrix_featurizers)
+    #
+    # @property
+    # def many_features(self):
+    #     """List of featurizers that return many features."""
+    #     return self._get_featurizers(self._many_features_featurizers)
+    #
+    # @property
+    # def require_external(self):
+    #     """Featurizers which require external software not installable via
+    #     Pypi
+    #     """
+    #     return self._get_featurizers(self._require_external)
+    #
+    # @property
+    # def all_vector(self):
+    #     return self.robust + self.slow + self.need_fit + self.require_external
+    #
+    # @property
+    # def all(self):
+    #     return self.all_vector
+    #
+    # @property
+    # def all_including_matrix(self):
+    #     """List of all structure based featurizers."""
+    #     return self.all_vector + self.matrix
+    #
+    # @property
+    # def best(self):
+    #     return self.robust + self.slow + self.require_external
+    #
+    # @property
+    # def debug(self):
+    #     return self._get_featurizers([sf.SineCoulombMatrix(flatten=True)])
 
 
 class DOSFeaturizers(FeaturizerSet):
