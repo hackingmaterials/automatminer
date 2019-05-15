@@ -12,7 +12,7 @@ FeaturizerSet
 
       ~FeaturizerSet.all
       ~FeaturizerSet.best
-      ~FeaturizerSet.fast
+      ~FeaturizerSet.robust
 
    .. rubric:: Methods Summary
 
@@ -24,7 +24,7 @@ FeaturizerSet
 
    .. autoattribute:: all
    .. autoattribute:: best
-   .. autoattribute:: fast
+   .. autoattribute:: robust
 
    .. rubric:: Methods Documentation
 

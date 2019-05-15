@@ -15,7 +15,7 @@ AllFeaturizers
       ~AllFeaturizers.best
       ~AllFeaturizers.composition
       ~AllFeaturizers.dos
-      ~AllFeaturizers.fast
+      ~AllFeaturizers.robust
       ~AllFeaturizers.structure
 
    .. rubric:: Attributes Documentation
@@ -25,5 +25,5 @@ AllFeaturizers
    .. autoattribute:: best
    .. autoattribute:: composition
    .. autoattribute:: dos
-   .. autoattribute:: fast
+   .. autoattribute:: robust
    .. autoattribute:: structure

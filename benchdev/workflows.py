@@ -278,7 +278,8 @@ if __name__ == "__main__":
         # "reducer_kwargs": {"reducers": ("rebate",), "n_rebate_features": 0.3},
 
         # "reducer_kwargs": {"reducers": ()},
-        "autofeaturizer_kwargs": {"preset": "fast", "n_jobs": 10},
+        "autofeaturizer_kwargs": {"preset": "robust", "n_jobs": 10},
+        # "autofeaturizer_kwargs": {"preset": "robust", "n_jobs": 10},
         # "autofeaturizer_kwargs": {"preset": "best", "n_jobs": 10},
         "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"}
     }
@@ -315,7 +316,7 @@ if __name__ == "__main__":
     # wf = wf_evaluate_build("lrc", "set generation size", BENCHMARK_FULL_SET, pipe_config,
     #                        include_tests=False, cache=True, tags=tags)
 
-    wf = wf_benchmark("local", pipe_config, **GFA, cache=True, tags=tags)
+    wf = wf_benchmark("lrc", pipe_config, **GFA, cache=True, tags=tags)
     # wf = wf_evaluate_build("lrc", "rf only no reduction", BENCHMARK_FULL_SET,
     #                        pipe_config_debug, include_tests=False, cache=True, tags=tags)
 

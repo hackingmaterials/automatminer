@@ -41,10 +41,10 @@
 <p>Featurizer set containing structure featurizers.</p>
 <p>This class provides subsets for featurizers that require fitting,
 return matrices rather than vectors, and produce many features, as well as
-fast, and slow featurizers. Additional sets containing all featurizers and
+robust, and slow featurizers. Additional sets containing all featurizers and
 the set of best featurizers are provided.</p>
 <p>Example usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fast_featurizers</span> <span class="o">=</span> <span class="n">StructureFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">fast</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fast_featurizers</span> <span class="o">=</span> <span class="n">StructureFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">robust</span>
 </pre></div>
 </div>
 <dl class="docutils">
@@ -74,8 +74,8 @@ the set of best featurizers are provided.</p>
 <tr class="row-even"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.best" title="automatminer.featurization.sets.StructureFeaturizers.best"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best</span></code></a></td>
 <td>List of featurizers providing useful features in a reasonable time.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.fast" title="automatminer.featurization.sets.StructureFeaturizers.fast"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fast</span></code></a></td>
-<td>List of featurizers that are generally fast to featurize.</td>
+<tr class="row-odd"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.robust" title="automatminer.featurization.sets.StructureFeaturizers.robust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">robust</span></code></a></td>
+<td>List of featurizers that are generally robust to featurize.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#automatminer.featurization.sets.StructureFeaturizers.many_features" title="automatminer.featurization.sets.StructureFeaturizers.many_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">many_features</span></code></a></td>
 <td>List of featurizers that return many features.</td>
@@ -122,9 +122,9 @@ excluded.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="automatminer.featurization.sets.StructureFeaturizers.fast">
-<code class="descname">fast</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.fast" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of featurizers that are generally fast to featurize.</p>
+<dt id="automatminer.featurization.sets.StructureFeaturizers.robust">
+<code class="descname">robust</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.robust" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of featurizers that are generally robust to featurize.</p>
 </dd></dl>
 
 <dl class="attribute">

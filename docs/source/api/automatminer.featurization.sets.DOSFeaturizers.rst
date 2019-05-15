@@ -12,12 +12,12 @@ DOSFeaturizers
 
       ~DOSFeaturizers.all
       ~DOSFeaturizers.best
-      ~DOSFeaturizers.fast
+      ~DOSFeaturizers.robust
       ~DOSFeaturizers.site
 
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: all
    .. autoattribute:: best
-   .. autoattribute:: fast
+   .. autoattribute:: robust
    .. autoattribute:: site

@@ -58,13 +58,12 @@ class CompositionFeaturizers(FeaturizerSet):
             cf.IonProperty(),
             cf.YangSolidSolution(),
             cf.Miedema(),
-            cf.YangSolidSolution()
         ]
         return self._get_featurizers(fs)
 
     @property
     def heavy(self):
-        fs = [cf.AtomicPackingEfficiency()] + self.robust
+        fs = [cf.AtomicPackingEfficiency()] + self.express
         return self._get_featurizers(fs)
 
     @property
@@ -180,6 +179,16 @@ class StructureFeaturizers(FeaturizerSet):
     @property
     def debug(self):
         return self._get_featurizers(sf.SineCoulombMatrix(flatten=True))
+
+    @property
+    def need_fit(self):
+        fs = [
+            sf.PartialRadialDistributionFunction(),
+            sf.BondFractions(),
+            sf.BagofBonds(coulomb_matrix=sf.CoulombMatrix()),
+            sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix()),
+        ]
+        return self._get_featurizers(fs)
 
 
 class DOSFeaturizers(FeaturizerSet):

@@ -14,7 +14,7 @@ StructureFeaturizers
       ~StructureFeaturizers.all_including_matrix
       ~StructureFeaturizers.all_vector
       ~StructureFeaturizers.best
-      ~StructureFeaturizers.fast
+      ~StructureFeaturizers.robust
       ~StructureFeaturizers.many_features
       ~StructureFeaturizers.matrix
       ~StructureFeaturizers.need_fit
@@ -27,7 +27,7 @@ StructureFeaturizers
    .. autoattribute:: all_including_matrix
    .. autoattribute:: all_vector
    .. autoattribute:: best
-   .. autoattribute:: fast
+   .. autoattribute:: robust
    .. autoattribute:: many_features
    .. autoattribute:: matrix
    .. autoattribute:: need_fit

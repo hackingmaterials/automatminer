@@ -12,7 +12,7 @@ CompositionFeaturizers
 
       ~CompositionFeaturizers.all
       ~CompositionFeaturizers.best
-      ~CompositionFeaturizers.fast
+      ~CompositionFeaturizers.robust
       ~CompositionFeaturizers.need_oxi
       ~CompositionFeaturizers.slow
 
@@ -20,6 +20,6 @@ CompositionFeaturizers
 
    .. autoattribute:: all
    .. autoattribute:: best
-   .. autoattribute:: fast
+   .. autoattribute:: robust
    .. autoattribute:: need_oxi
    .. autoattribute:: slow

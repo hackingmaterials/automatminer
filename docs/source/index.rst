@@ -112,7 +112,7 @@ elastic_tensor_2015 dataset. The result is a Pandas dataframe.
 
 
 Next, we will use get_preset_config to use different pre-built configurations
-for a MatPipe. The options include production, default, fast, and debug.
+for a MatPipe. The options include production, default, robust, and debug.
 Specific details about each config can be seen in `presets.py
 <api/automatminer.get_preset_config.html>`_. In this example, we will be using
 the debug config for a short program runtime. Of course, you do not need to use

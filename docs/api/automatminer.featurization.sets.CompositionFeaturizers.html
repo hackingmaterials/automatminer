@@ -40,11 +40,11 @@
 <dd><p>Bases: <a class="reference internal" href="automatminer.featurization.sets.FeaturizerSet.html#automatminer.featurization.sets.FeaturizerSet" title="automatminer.featurization.sets.FeaturizerSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.featurization.sets.FeaturizerSet</span></code></a></p>
 <p>Featurizer set containing composition featurizers.</p>
 <p>This class provides subsets for featurizers that require the composition
-to have oxidation states, as well as fast, and slow featurizers. Additional
+to have oxidation states, as well as robust, and slow featurizers. Additional
 sets containing all featurizers and the set of best featurizers are
 provided.</p>
 <p>Example usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fast_featurizers</span> <span class="o">=</span> <span class="n">CompositionFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">fast</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fast_featurizers</span> <span class="o">=</span> <span class="n">CompositionFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">robust</span>
 </pre></div>
 </div>
 <dl class="docutils">
@@ -68,7 +68,7 @@ provided.</p>
 <tr class="row-even"><td><a class="reference internal" href="#automatminer.featurization.sets.CompositionFeaturizers.best" title="automatminer.featurization.sets.CompositionFeaturizers.best"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best</span></code></a></td>
 <td>List of featurizers providing useful features in a reasonable time.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#automatminer.featurization.sets.CompositionFeaturizers.fast" title="automatminer.featurization.sets.CompositionFeaturizers.fast"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fast</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#automatminer.featurization.sets.CompositionFeaturizers.robust" title="automatminer.featurization.sets.CompositionFeaturizers.robust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">robust</span></code></a></td>
 <td>List of featurizers that are generally quick to featurize.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#automatminer.featurization.sets.CompositionFeaturizers.need_oxi" title="automatminer.featurization.sets.CompositionFeaturizers.need_oxi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_oxi</span></code></a></td>
@@ -96,8 +96,8 @@ excluded.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="automatminer.featurization.sets.CompositionFeaturizers.fast">
-<code class="descname">fast</code><a class="headerlink" href="#automatminer.featurization.sets.CompositionFeaturizers.fast" title="Permalink to this definition">¶</a></dt>
+<dt id="automatminer.featurization.sets.CompositionFeaturizers.robust">
+<code class="descname">robust</code><a class="headerlink" href="#automatminer.featurization.sets.CompositionFeaturizers.robust" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of featurizers that are generally quick to featurize.</p>
 </dd></dl>
 

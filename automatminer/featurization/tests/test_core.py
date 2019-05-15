@@ -22,6 +22,12 @@ __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Alireza Faghaninia <alireza@lbl.gov>",
               "Qi Wang <wqthu11@gmail.com>"]
 
+import pandas as pd
+
+# pd.set_option('display.height', 1000)
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
 
 class TestAutoFeaturizer(unittest.TestCase):
     def setUp(self):
@@ -44,21 +50,17 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         # When compositions are strings
         df = copy.copy(self.test_df[['composition', target]].iloc[:self.limit])
-        af = AutoFeaturizer(preset="fast")
+        af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
-        self.assertAlmostEqual(df["frac f valence electrons"].iloc[2],
-                               0.5384615384615384)
-        self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
+        self.assertAlmostEqual(df["MagpieData minimum Number"].iloc[2], 14.0)
         self.assertTrue("composition" not in df.columns)
 
         # When compositions are Composition objects
         df = self.test_df[["composition", target]].iloc[:self.limit]
         df["composition"] = [Composition(s) for s in df["composition"]]
-        af = AutoFeaturizer(preset="fast")
+        af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
-        self.assertAlmostEqual(df["frac f valence electrons"].iloc[2],
-                               0.5384615384615384)
-        self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
+        self.assertAlmostEqual(df["MagpieData minimum Number"].iloc[2], 14.0)
         self.assertTrue("composition" not in df.columns)
 
     def test_featurize_structure(self):
@@ -70,26 +72,26 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         # When structures are Structure objects
         df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
-        af = AutoFeaturizer(preset="fast")
+        af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
         # Ensure there are some structure features created
         self.assertTrue("vpa" in df.columns)
         # Ensure that composition features are automatically added without
         # explicit column
-        self.assertTrue("HOMO_character" in df.columns)
+        self.assertTrue("MagpieData minimum Number" in df.columns)
         self.assertTrue("composition" not in df.columns)
         self.assertTrue("structure" not in df.columns)
 
         # When structures are dictionaries
         df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
         df["structure"] = [s.as_dict() for s in df["structure"]]
-        af = AutoFeaturizer(preset="fast")
+        af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
         # Ensure there are some structure features created
         self.assertTrue("vpa" in df.columns)
         # Ensure that composition features are automatically added without
         # explicit column
-        self.assertTrue("HOMO_character" in df.columns)
+        self.assertTrue("MagpieData minimum Number" in df.columns)
         self.assertTrue("composition" not in df.columns)
         self.assertTrue("structure" not in df.columns)
 
@@ -127,7 +129,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         ep_feats = ep.feature_labels()
 
         # Test to make sure excluded does not show up
-        af = AutoFeaturizer(exclude=exclude, preset="fast")
+        af = AutoFeaturizer(exclude=exclude, preset="express")
         af.fit(df, target)
         df = af.fit_transform(df, target)
 
@@ -166,7 +168,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         df[target] = [["red"]]
         n_cols_init = df.shape[1]
 
-        featurizer = AutoFeaturizer(preset="fast",
+        featurizer = AutoFeaturizer(preset="express",
                                     ignore_errors=False,
                                     multiindex=False)
         df = featurizer.fit_transform(df, target)
@@ -196,10 +198,10 @@ class TestAutoFeaturizer(unittest.TestCase):
     def test_presets(self):
         target = "K_VRH"
         df = copy.copy(self.test_df.iloc[:self.limit])
-        af = AutoFeaturizer(preset="fast")
+        af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
-        known_feats = CompositionFeaturizers().fast + \
-                      StructureFeaturizers().fast
+        known_feats = CompositionFeaturizers().express + \
+                      StructureFeaturizers().express
         n_structure_featurizers = len(af.featurizers["structure"])
         n_composition_featurizers = len(af.featurizers["composition"])
         n_removed_featurizers = len(af.removed_featurizers)
@@ -218,67 +220,83 @@ class TestAutoFeaturizer(unittest.TestCase):
         df1 = self.test_df[cols].iloc[:self.limit]
         df2 = self.test_df[cols].iloc[-1 * self.limit:]
 
-        af = AutoFeaturizer(preset="fast")
+        af = AutoFeaturizer(preset="express")
         af.fit(df1, target)
 
         df2 = af.transform(df2, target)
         self.assertAlmostEqual(df2[target].iloc[0], 111.788114, places=5)
-        self.assertAlmostEqual(df2["PymatgenData minimum X"].iloc[1], 1.36,
+        self.assertAlmostEqual(df2["MagpieData mean Number"].iloc[1], 17.5,
                                places=2)
 
     def test_column_attr(self):
         """
         Test that the autofeaturizer object correctly takes in composition_col,
         structure_col, bandstruct_col, and dos_col, and checks that
-        fit_and_transform()
-        works correctly with the attributes.
+        fit_and_transform() works correctly with the attributes.
         """
 
         # Modification of test_featurize_composition with AutoFeaturizer parameter
         target = "K_VRH"
-        df = copy.copy(self.test_df[['composition', target]].iloc[:self.limit])
-        af = AutoFeaturizer(composition_col="composition", preset="best", ignore_errors=False)
-        df = af.fit_transform(df, target)
+        custom_comp_key = "comp"
+        cols = ['composition', target]
+        mod_comp_df = self.test_df[cols].iloc[:self.limit]
+        mod_comp_df = mod_comp_df.rename(columns=
+                                         {"composition": custom_comp_key})
 
-        self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
-        self.assertTrue("composition" not in df.columns)
-
-        df = self.test_df[["composition", target]].iloc[:self.limit]
-        df["composition"] = [Composition(s) for s in df["composition"]]
-        af = AutoFeaturizer(composition_col="composition", preset="best")
+        df = copy.copy(mod_comp_df)
+        af = AutoFeaturizer(composition_col=custom_comp_key, preset="express",
+                            ignore_errors=True)
         df = af.fit_transform(df, target)
-        self.assertEqual(df["LUMO_element"].iloc[0], "Nb")
+        self.assertEqual(df["MagpieData minimum Number"].iloc[2], 14.0)
         self.assertTrue("composition" not in df.columns)
+        self.assertTrue(custom_comp_key not in df.columns)
+
+
+        df = copy.copy(mod_comp_df)
+        df[custom_comp_key] = [Composition(s) for s in df[custom_comp_key]]
+        af = AutoFeaturizer(composition_col=custom_comp_key, preset="express")
+        df = af.fit_transform(df, target)
+        self.assertEqual(df["MagpieData minimum Number"].iloc[2], 14.0)
+        self.assertTrue("composition" not in df.columns)
+        self.assertTrue(custom_comp_key not in df.columns)
+
 
         # Modification of test_featurize_structure with AutoFeaturizer parameter
-        target = "K_VRH"
-        df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
-        af = AutoFeaturizer(structure_col="structure", preset="fast")
-        df = af.fit_transform(df, target)
-        self.assertTrue("vpa" in df.columns)
-        self.assertTrue("HOMO_character" in df.columns)
-        self.assertTrue("composition" not in df.columns)
-        self.assertTrue("structure" not in df.columns)
+        cols = ['structure', target]
+        mod_struc_df = self.test_df[cols].iloc[:self.limit]
+        custom_struc_key = "struc"
+        mod_struc_df = mod_struc_df.rename(
+            columns={"structure": custom_struc_key})
 
-        df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
-        df["structure"] = [s.as_dict() for s in df["structure"]]
-        af = AutoFeaturizer(structure_col="structure", preset="fast")
+        df = copy.copy(mod_struc_df)
+        af = AutoFeaturizer(structure_col=custom_struc_key, preset="express")
         df = af.fit_transform(df, target)
         self.assertTrue("vpa" in df.columns)
-        self.assertTrue("HOMO_character" in df.columns)
+        self.assertTrue("MagpieData mean Number" in df.columns)
         self.assertTrue("composition" not in df.columns)
         self.assertTrue("structure" not in df.columns)
+        self.assertTrue(custom_struc_key not in df.columns)
+
+        df = copy.copy(mod_struc_df)
+        df[custom_struc_key] = [s.as_dict() for s in df[custom_struc_key]]
+        af = AutoFeaturizer(structure_col=custom_struc_key, preset="express")
+        df = af.fit_transform(df, target)
+        self.assertTrue("vpa" in df.columns)
+        self.assertTrue("MagpieData mean Number" in df.columns)
+        self.assertTrue("composition" not in df.columns)
+        self.assertTrue("structure" not in df.columns)
+        self.assertTrue(custom_struc_key not in df.columns)
 
     def test_functionalization(self):
         target = "K_VRH"
         flimit = 2
         df = self.test_df[['composition', target]].iloc[:flimit]
-        af = AutoFeaturizer(functionalize=True, preset="fast")
+        af = AutoFeaturizer(functionalize=True, preset="express")
         df = af.fit_transform(df, target)
         self.assertTupleEqual(df.shape, (flimit, 16848))
 
     def test_StructureFeaturizers_needs_fitting(self):
-        fset_nofit = StructureFeaturizers().best
+        fset_nofit = StructureFeaturizers().express
         fset_needfit = StructureFeaturizers().all
         af_nofit = AutoFeaturizer(featurizers={"structure": fset_nofit})
         af_needfit = AutoFeaturizer(featurizers={"structure": fset_needfit})
@@ -289,7 +307,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         target = "G_VRH"
 
         self.assertFalse(os.path.exists(CACHE_PATH))
-        af = AutoFeaturizer(cache_src=CACHE_PATH, preset="fast")
+        af = AutoFeaturizer(cache_src=CACHE_PATH, preset="express")
         df = self.test_df[['composition', target]].iloc[:10]
         df_feats = af.fit_transform(df, target)
         self.assertTrue(os.path.exists(CACHE_PATH))

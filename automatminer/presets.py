@@ -68,7 +68,7 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
         express_config = {
             "learner": TPOTAdaptor(max_time_mins=60, population_size=20),
             "reducer": FeatureReducer(reducers=('corr',)),
-            "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
+            "autofeaturizer": AutoFeaturizer(preset="robust", **caching_kwargs),
             "cleaner": DataCleaner()
         }
         return express_config
@@ -79,7 +79,7 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
                 regressor=XGBRegressor(**xgb_kwargs),
                 classifier=XGBClassifier(**xgb_kwargs)),
             "reducer": FeatureReducer(reducers=('corr',)),
-            "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
+            "autofeaturizer": AutoFeaturizer(preset="robust", **caching_kwargs),
             "cleaner": DataCleaner()
         }
         return express_config
@@ -89,7 +89,7 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
                                    max_eval_time_mins=1,
                                    population_size=10),
             "reducer": FeatureReducer(reducers=('corr', 'tree')),
-            "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
+            "autofeaturizer": AutoFeaturizer(preset="robust", **caching_kwargs),
             "cleaner": DataCleaner()
         }
         return debug_config
@@ -100,7 +100,7 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
                 classifier=RandomForestClassifier(**rf_kwargs),
                 regressor=RandomForestRegressor(**rf_kwargs)),
             "reducer": FeatureReducer(reducers=('corr',)),
-            "autofeaturizer": AutoFeaturizer(preset="fast", **caching_kwargs),
+            "autofeaturizer": AutoFeaturizer(preset="robust", **caching_kwargs),
             "cleaner": DataCleaner()
         }
         return debug_single_config

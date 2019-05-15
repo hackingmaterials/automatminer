@@ -87,9 +87,9 @@
 <span class="sd">            from this file instead of featurizing. If this file does not exist,</span>
 <span class="sd">            AutoFeaturizer will featurize normally, then save the features to a</span>
 <span class="sd">            new file. Only features (not featurizer input objects) will be saved</span>
-<span class="sd">        preset (str): &quot;best&quot; or &quot;fast&quot; or &quot;all&quot;. Determines by preset the</span>
+<span class="sd">        preset (str): &quot;best&quot; or &quot;robust&quot; or &quot;all&quot;. Determines by preset the</span>
 <span class="sd">            featurizers that should be applied. See the Featurizer sets for</span>
-<span class="sd">            specifics of best/fast/all. Default is &quot;best&quot;. Incompatible with</span>
+<span class="sd">            specifics of best/robust/all. Default is &quot;best&quot;. Incompatible with</span>
 <span class="sd">            the featurizers arg.</span>
 <span class="sd">        featurizers (dict): Use this option if you want to manually specify</span>
 <span class="sd">            the featurizers to use. Keys are the featurizer types you want</span>
@@ -153,7 +153,7 @@
         <span class="k">if</span> <span class="n">featurizers</span> <span class="ow">and</span> <span class="n">preset</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">AutomatminerError</span><span class="p">(</span><span class="s2">&quot;Featurizers and preset were both set. &quot;</span>
                                     <span class="s2">&quot;Please either use a preset (&#39;best&#39;, &#39;all&#39;,&quot;</span>
-                                    <span class="s2">&quot; &#39;fast&#39;) or set featurizers manually.&quot;</span><span class="p">)</span>
+                                    <span class="s2">&quot; &#39;robust&#39;) or set featurizers manually.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">featurizers</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">preset</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">AutomatminerError</span><span class="p">(</span><span class="s2">&quot;Please specify set(s) of featurizers to &quot;</span>
                                     <span class="s2">&quot;use either through the featurizers&quot;</span>

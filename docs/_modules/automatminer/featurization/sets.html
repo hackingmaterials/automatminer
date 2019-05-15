@@ -37,9 +37,9 @@
 <span class="sd">Defines sets of featurizers to be used by automatminer during featurization.</span>
 
 <span class="sd">Featurizer sets are classes with attributes containing lists of featurizers.</span>
-<span class="sd">For example, the set of all fast structure featurizers could be found with::</span>
+<span class="sd">For example, the set of all robust structure featurizers could be found with::</span>
 
-<span class="sd">    StructureFeaturizers().fast</span>
+<span class="sd">    StructureFeaturizers().robust</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">matminer.featurizers.composition</span> <span class="k">as</span> <span class="nn">cf</span>
@@ -100,10 +100,10 @@
                                   <span class="s2">&quot;all featurizers&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Fast featurizers available for this featurization type.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This featurizer set must return a set of &quot;</span>
-                                  <span class="s2">&quot;fast featurizers&quot;</span><span class="p">)</span>
+                                  <span class="s2">&quot;robust featurizers&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">featurizers</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Utility function for getting featurizers not in the ignore list.&quot;&quot;&quot;</span>
@@ -168,8 +168,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">featurizers</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">featurizers</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">fast</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_featurizer_sets</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">featurizers</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">robust</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_featurizer_sets</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">featurizers</span><span class="p">)</span></div>
 
 
@@ -177,13 +177,13 @@
     <span class="sd">&quot;&quot;&quot;Featurizer set containing composition featurizers.</span>
 
 <span class="sd">    This class provides subsets for featurizers that require the composition</span>
-<span class="sd">    to have oxidation states, as well as fast, and slow featurizers. Additional</span>
+<span class="sd">    to have oxidation states, as well as robust, and slow featurizers. Additional</span>
 <span class="sd">    sets containing all featurizers and the set of best featurizers are</span>
 <span class="sd">    provided.</span>
 
 <span class="sd">    Example usage::</span>
 
-<span class="sd">        fast_featurizers = CompositionFeaturizers().fast</span>
+<span class="sd">        fast_featurizers = CompositionFeaturizers().robust</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
@@ -235,7 +235,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_intermetallics_only</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;List of featurizers that are generally quick to featurize.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fast_featurizers</span><span class="p">)</span>
 
@@ -257,11 +257,11 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;List of all composition based featurizers.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fast</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_oxi</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_oxi</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">best</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fast</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">intermetallics_only</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">intermetallics_only</span></div>
 
 
 <div class="viewcode-block" id="StructureFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.StructureFeaturizers.html#automatminer.featurization.sets.StructureFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">StructureFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
@@ -269,12 +269,12 @@
 
 <span class="sd">    This class provides subsets for featurizers that require fitting,</span>
 <span class="sd">    return matrices rather than vectors, and produce many features, as well as</span>
-<span class="sd">    fast, and slow featurizers. Additional sets containing all featurizers and</span>
+<span class="sd">    robust, and slow featurizers. Additional sets containing all featurizers and</span>
 <span class="sd">    the set of best featurizers are provided.</span>
 
 <span class="sd">    Example usage::</span>
 
-<span class="sd">        fast_featurizers = StructureFeaturizers().fast</span>
+<span class="sd">        fast_featurizers = StructureFeaturizers().robust</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
@@ -341,8 +341,8 @@
         <span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of featurizers that are generally fast to featurize.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of featurizers that are generally robust to featurize.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fast_featurizers</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -383,7 +383,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fast</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_fit</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_external</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_fit</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_external</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -396,7 +396,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">best</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fast</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_external</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_external</span></div>
 
 
 <div class="viewcode-block" id="DOSFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.DOSFeaturizers.html#automatminer.featurization.sets.DOSFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">DOSFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
@@ -436,7 +436,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_featurizers</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_featurizers</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -476,7 +476,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_featurizers</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_featurizers</span><span class="p">)</span></div>
 </pre></div>
 

@@ -12,10 +12,10 @@ BSFeaturizers
 
       ~BSFeaturizers.all
       ~BSFeaturizers.best
-      ~BSFeaturizers.fast
+      ~BSFeaturizers.robust
 
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: all
    .. autoattribute:: best
-   .. autoattribute:: fast
+   .. autoattribute:: robust
