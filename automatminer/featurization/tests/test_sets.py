@@ -69,8 +69,6 @@ class TestAllFeaturizers(unittest.TestCase):
 
     def test_structure_featurizers(self):
         ignore = ['StructureComposition', 'CGCNNFeaturizer']
-        ignore += [klass.__class__.__name__ for klass in
-                   StructureFeaturizers().matrix]
         if not dscribe:
             ignore += ["SOAP"]
         true_feats = self.get_featurizers(sf, ignore)
