@@ -18,7 +18,7 @@ class TestAutoFeaturizer(unittest.TestCase):
                 self._fast = [cf.ElementProperty.from_preset("matminer")]
 
             @property
-            def fast(self):
+            def express(self):
                 return self._get_featurizers()
 
         with self.assertRaises(TypeError):
@@ -27,14 +27,14 @@ class TestAutoFeaturizer(unittest.TestCase):
         class GoodFeaturizerSet(FeaturizerSet):
             def __init__(self, exclude=None):
                 super(GoodFeaturizerSet, self).__init__(exclude=exclude)
-                self._fast = [cf.ElementProperty.from_preset("matminer")]
-                self._debug = self._fast
-                self._all = self._fast
-                self._best = self._fast
+                self._express = [cf.ElementProperty.from_preset("matminer")]
+                self._debug = self.express
+                self._all = self.express
+                self._heavy = self.express
 
             @property
-            def fast(self):
-                return self._get_featurizers(self._fast)
+            def express(self):
+                return self._get_featurizers(self._express)
 
             @property
             def debug(self):
@@ -45,7 +45,7 @@ class TestAutoFeaturizer(unittest.TestCase):
                 return self._get_featurizers(self._all)
 
             @property
-            def best(self):
-                return self._get_featurizers(self._best)
+            def heavy(self):
+                return self._get_featurizers(self._heavy)
 
         GoodFeaturizerSet()
