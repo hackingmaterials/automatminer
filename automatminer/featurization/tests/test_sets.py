@@ -101,5 +101,6 @@ class TestFeaturizerSets(unittest.TestCase):
                 print(ftype.__class__.__name__, attr)
                 self.assertNotEqual(getattr(ftype, attr), [])
 
+
 if __name__ == '__main__':
     unittest.main()
