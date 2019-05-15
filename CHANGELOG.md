@@ -1,5 +1,22 @@
 # Change Log
 
+## [v2019.05.14_beta0](https://github.com/hackingmaterials/automatminer/tree/v2019.05.14_beta0) (2019-05-15)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.03.27_beta...v2019.05.14_beta0)
+
+**Closed issues:**
+
+- Update xgboost version to 0.80 [\#210](https://github.com/hackingmaterials/automatminer/issues/210)
+- featurization takes too much ram [\#206](https://github.com/hackingmaterials/automatminer/issues/206)
+- setup.py imports automatminer  [\#202](https://github.com/hackingmaterials/automatminer/issues/202)
+- Include a \(basic\) neural network separate from NNAdaptor [\#197](https://github.com/hackingmaterials/automatminer/issues/197)
+- Metaselector needs a rework [\#149](https://github.com/hackingmaterials/automatminer/issues/149)
+
+**Merged pull requests:**
+
+- Use MultiSURF\* instead of MultiSURF [\#207](https://github.com/hackingmaterials/automatminer/pull/207) ([utf](https://github.com/utf))
+- fix versioning [\#203](https://github.com/hackingmaterials/automatminer/pull/203) ([ardunn](https://github.com/ardunn))
+- make DFTransformer inherit BaseEstimator [\#201](https://github.com/hackingmaterials/automatminer/pull/201) ([Qi-max](https://github.com/Qi-max))
+
 ## [v2019.03.27_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.03.27_beta) (2019-03-27)
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.03.26b0...v2019.03.27_beta)
 
@@ -92,7 +109,7 @@
 - Better handling of adding oxidation states to large structures. [\#142](https://github.com/hackingmaterials/automatminer/pull/142) ([utf](https://github.com/utf))
 
 ## [2018.12.11_beta](https://github.com/hackingmaterials/automatminer/tree/2018.12.11_beta) (2018-12-12)
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2018.11.2-beta...2018.12.11_beta)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2018.11.16-beta...2018.12.11_beta)
 
 **Closed issues:**
 
@@ -112,11 +129,11 @@
 - Basic Analytics Tools [\#132](https://github.com/hackingmaterials/automatminer/pull/132) ([Doppe1g4nger](https://github.com/Doppe1g4nger))
 - dev\_scripts draft for evaluation + various fixes [\#131](https://github.com/hackingmaterials/automatminer/pull/131) ([ardunn](https://github.com/ardunn))
 
-## [v2018.11.2-beta](https://github.com/hackingmaterials/automatminer/tree/v2018.11.2-beta) (2018-11-17)
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2018.11.16-beta...v2018.11.2-beta)
-
 ## [v2018.11.16-beta](https://github.com/hackingmaterials/automatminer/tree/v2018.11.16-beta) (2018-11-17)
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2018.11.2-alpha...v2018.11.16-beta)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2018.11.2-beta...v2018.11.16-beta)
+
+## [v2018.11.2-beta](https://github.com/hackingmaterials/automatminer/tree/v2018.11.2-beta) (2018-11-17)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2018.11.2-alpha...v2018.11.2-beta)
 
 **Closed issues:**
 
