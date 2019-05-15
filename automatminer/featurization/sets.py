@@ -2,9 +2,9 @@
 Defines sets of featurizers to be used by automatminer during featurization.
 
 Featurizer sets are classes with attributes containing lists of featurizers.
-For example, the set of all fast structure featurizers could be found with::
+For example, the set of all robust structure featurizers could be found with::
 
-    StructureFeaturizers().fast
+    StructureFeaturizers().robust
 """
 
 import matminer.featurizers.composition as cf
@@ -32,13 +32,13 @@ class CompositionFeaturizers(FeaturizerSet):
     """Featurizer set containing composition featurizers.
 
     This class provides subsets for featurizers that require the composition
-    to have oxidation states, as well as fast, and slow featurizers. Additional
+    to have oxidation states, as well as robust, and slow featurizers. Additional
     sets containing all featurizers and the set of best featurizers are
     provided.
 
     Example usage::
 
-        fast_featurizers = CompositionFeaturizers().fast
+        fast_featurizers = CompositionFeaturizers().robust
 
     Args:
         exclude (list of str, optional): A list of featurizer class names that
@@ -47,6 +47,11 @@ class CompositionFeaturizers(FeaturizerSet):
 
     def __init__(self, exclude=None):
         super(CompositionFeaturizers, self).__init__(exclude=exclude)
+
+        self.fast_best = [
+            cf.ElementProperty.from_preset("magpie"),
+
+        ]
 
         self._fast_featurizers = [
             cf.AtomicOrbitals(),
@@ -82,45 +87,71 @@ class CompositionFeaturizers(FeaturizerSet):
         ]
 
     @property
-    def intermetallics_only(self):
-        """List of featurizers that applies only to intermetallics.
-        Will probably be removed by valid_fraction checking if not actally
-        applicable to the dataset.
-        """
-        return self._get_featurizers(self._intermetallics_only)
+    def debug(self):
+        return self._get_featurizers([cf.ElementProperty.from_preset("magpie")])
 
     @property
-    def fast(self):
-        """List of featurizers that are generally quick to featurize."""
-        return self._get_featurizers(self._fast_featurizers)
-
-    @property
-    def slow(self):
-        """List of featurizers that are generally slow to featurize."""
-        return self._get_featurizers(self._slow_featurizers)
-
-    @property
-    def need_oxi(self):
-        """Featurizers that require the composition to have oxidation states.
-
-        If the composition is not decorated with oxidation states the
-        oxidation states will be guessed. This can cause a significant increase
-        in featurization time.
-        """
-        return self._get_featurizers(self._need_oxi_featurizers)
-
-    @property
-    def all(self):
-        """List of all composition based featurizers."""
-        return self.fast + self.need_oxi + self.slow
+    def robust(self):
+        fs = [
+            cf.ElementProperty.from_preset("magpie"),
+            cf.OxidationStates.from_preset(preset_name='deml'),
+            cf.ElectronAffinity(),
+            cf.IonProperty(),
+            cf.YangSolidSolution(),
+            cf.Miedema(),
+            cf.YangSolidSolution()
+        ]
+        return self._get_featurizers(fs)
 
     @property
     def best(self):
-        return self.fast + self.intermetallics_only
+        fs = [cf.AtomicPackingEfficiency()] + self.robust
 
     @property
-    def debug(self):
-        return self._get_featurizers([cf.ElementProperty.from_preset("magpie")])
+    def all(self):
+        fs = [
+
+        ]
+    # @property
+    # def intermetallics_only(self):
+    #     """List of featurizers that applies only to intermetallics.
+    #     Will probably be removed by valid_fraction checking if not actally
+    #     applicable to the dataset.
+    #     """
+    #     return self._get_featurizers(self._intermetallics_only)
+    #
+    # @property
+    # def robust(self):
+    #     """List of featurizers that are generally quick to featurize."""
+    #     return self._get_featurizers(self._fast_featurizers)
+    #
+    # @property
+    # def slow(self):
+    #     """List of featurizers that are generally slow to featurize."""
+    #     return self._get_featurizers(self._slow_featurizers)
+    #
+    # @property
+    # def need_oxi(self):
+    #     """Featurizers that require the composition to have oxidation states.
+    #
+    #     If the composition is not decorated with oxidation states the
+    #     oxidation states will be guessed. This can cause a significant increase
+    #     in featurization time.
+    #     """
+    #     return self._get_featurizers(self._need_oxi_featurizers)
+    #
+    # @property
+    # def all(self):
+    #     """List of all composition based featurizers."""
+    #     return self.robust + self.need_oxi + self.slow
+    #
+    # @property
+    # def best(self):
+    #     return self.robust + self.intermetallics_only
+    #
+    # @property
+    # def debug(self):
+    #     return self._get_featurizers([cf.ElementProperty.from_preset("magpie")])
 
 
 class StructureFeaturizers(FeaturizerSet):
@@ -128,12 +159,12 @@ class StructureFeaturizers(FeaturizerSet):
 
     This class provides subsets for featurizers that require fitting,
     return matrices rather than vectors, and produce many features, as well as
-    fast, and slow featurizers. Additional sets containing all featurizers and
+    robust, and slow featurizers. Additional sets containing all featurizers and
     the set of best featurizers are provided.
 
     Example usage::
 
-        fast_featurizers = StructureFeaturizers().fast
+        fast_featurizers = StructureFeaturizers().robust
 
     Args:
         exclude (list of str, optional): A list of featurizer class names that
@@ -201,8 +232,8 @@ class StructureFeaturizers(FeaturizerSet):
         ]
 
     @property
-    def fast(self):
-        """List of featurizers that are generally fast to featurize."""
+    def robust(self):
+        """List of featurizers that are generally robust to featurize."""
         return self._get_featurizers(self._fast_featurizers)
 
     @property
@@ -243,7 +274,7 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def all_vector(self):
-        return self.fast + self.slow + self.need_fit + self.require_external
+        return self.robust + self.slow + self.need_fit + self.require_external
 
     @property
     def all(self):
@@ -256,7 +287,7 @@ class StructureFeaturizers(FeaturizerSet):
 
     @property
     def best(self):
-        return self.fast + self.slow + self.require_external
+        return self.robust + self.slow + self.require_external
 
     @property
     def debug(self):
@@ -300,7 +331,7 @@ class DOSFeaturizers(FeaturizerSet):
         return self._get_featurizers(self._best_featurizers)
 
     @property
-    def fast(self):
+    def robust(self):
         return self._get_featurizers(self._best_featurizers)
 
     @property
@@ -344,7 +375,7 @@ class BSFeaturizers(FeaturizerSet):
         return self._get_featurizers(self._best_featurizers)
 
     @property
-    def fast(self):
+    def robust(self):
         return self._get_featurizers(self._best_featurizers)
 
     @property
@@ -409,8 +440,8 @@ class AllFeaturizers(FeaturizerSet):
         return self._get_featurizers(featurizers)
 
     @property
-    def fast(self):
-        featurizers = [f.fast for f in self._featurizer_sets.values()]
+    def robust(self):
+        featurizers = [f.robust for f in self._featurizer_sets.values()]
         return self._get_featurizers(featurizers)
 
     @property
