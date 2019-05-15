@@ -3,6 +3,7 @@ Base classes for sets of featurizers.
 """
 
 import abc
+from typing import List
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
 
@@ -34,7 +35,7 @@ class FeaturizerSet(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def express(self):
+    def express(self) -> List:
         """A focused set of featurizers which should:
 
         * be reasonably fast to featurize
@@ -48,7 +49,7 @@ class FeaturizerSet(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def heavy(self):
+    def heavy(self) -> List:
         """A more expensive and complete (though not necessarily better)
         version of express.
 
@@ -63,7 +64,7 @@ class FeaturizerSet(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def all(self):
+    def all(self) -> List:
         """All featurizers available for this featurization type. These
         featurizers are allowed to:
 
@@ -76,11 +77,11 @@ class FeaturizerSet(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def debug(self):
+    def debug(self) -> List:
         """An ultra-minimal set of featurizers for debugging."""
         pass
 
-    def _get_featurizers(self, featurizers):
+    def _get_featurizers(self, featurizers: List) -> List:
         """Utility function for getting featurizers not in the ignore list."""
         return [f for f in featurizers
                 if f.__class__.__name__ not in self.exclude]
