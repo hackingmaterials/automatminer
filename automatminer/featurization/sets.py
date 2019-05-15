@@ -4,9 +4,8 @@ Defines sets of featurizers to be used by automatminer during featurization.
 Featurizer sets are classes with attributes containing lists of featurizers.
 For example, the set of all robust structure featurizers could be found with::
 
-    StructureFeaturizers().robust
+    StructureFeaturizers().express
 """
-
 import matminer.featurizers.composition as cf
 import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
@@ -168,12 +167,12 @@ class StructureFeaturizers(FeaturizerSet):
             sf.BondFractions(),
 
             # Non vector
-            sf.CoulombMatrix(flatten=False), # returns matrix
-            sf.SineCoulombMatrix(flatten=False), # returns matrix
+            sf.CoulombMatrix(flatten=False),  # returns matrix
+            sf.SineCoulombMatrix(flatten=False),  # returns matrix
             sf.RadialDistributionFunction(),  # returns dict
             sf.MinimumRelativeDistances(),  # returns a list
-            sf.ElectronicRadialDistributionFunction(), # returns ??
-            sf.PartialRadialDistributionFunction(), # returns ??
+            sf.ElectronicRadialDistributionFunction(),  # returns ??
+            sf.PartialRadialDistributionFunction(),  # returns ??
         ]
         fs += self.heavy
         return self._get_featurizers(fs)
@@ -182,77 +181,20 @@ class StructureFeaturizers(FeaturizerSet):
     def debug(self):
         return self._get_featurizers(sf.SineCoulombMatrix(flatten=True))
 
-        # @property
-    # def robust(self):
-    #     """List of featurizers that are generally robust to featurize."""
-    #     return self._get_featurizers(self._fast_featurizers)
-    #
-    # @property
-    # def slow(self):
-    #     """List of featurizers that are generally slow to featurize."""
-    #     return self._get_featurizers(self._slow_featurizers)
-    #
-    # @property
-    # def need_fit(self):
-    #     """List of featurizers which must be fit before featurizing.
-    #
-    #     Fitting can be performed using the `Featurizer.fit()` method.
-    #     Alternatively, the `Featurizer.fit_featurize_dataframe()` can be used
-    #     to fit and featurize simultaneously.
-    #     """
-    #     return self._get_featurizers(self._need_fitting_featurizers)
-    #
-    # @property
-    # def matrix(self):
-    #     """List of featurizers that return matrices as features.
-    #
-    #     These featurizers are not useful for vectorized representations of
-    #     crystal structures.
-    #     """
-    #     return self._get_featurizers(self._matrix_featurizers)
-    #
-    # @property
-    # def many_features(self):
-    #     """List of featurizers that return many features."""
-    #     return self._get_featurizers(self._many_features_featurizers)
-    #
-    # @property
-    # def require_external(self):
-    #     """Featurizers which require external software not installable via
-    #     Pypi
-    #     """
-    #     return self._get_featurizers(self._require_external)
-    #
-    # @property
-    # def all_vector(self):
-    #     return self.robust + self.slow + self.need_fit + self.require_external
-    #
-    # @property
-    # def all(self):
-    #     return self.all_vector
-    #
-    # @property
-    # def all_including_matrix(self):
-    #     """List of all structure based featurizers."""
-    #     return self.all_vector + self.matrix
-    #
-    # @property
-    # def best(self):
-    #     return self.robust + self.slow + self.require_external
-    #
-    # @property
-    # def debug(self):
-    #     return self._get_featurizers([sf.SineCoulombMatrix(flatten=True)])
-
 
 class DOSFeaturizers(FeaturizerSet):
     """Featurizer set containing density of states featurizers.
 
-    This class provides subsets all featurizers and the set of best featurizers.
+    See the FeaturizerSet documentation for details of each property (sublist
+    of featurizers).
 
     Example usage::
 
-        dos_featurizers = DOSFeaturizers().best
+        dos_featurizers = DOSFeaturizers().express
+
+    Density of states featurizers should work on the entire density of states
+    if they are in express or heavy. If they are in "all" they may work on
+    sites or return matrices.
 
     Args:
         exclude (list of str, optional): A list of featurizer class names that
@@ -262,32 +204,24 @@ class DOSFeaturizers(FeaturizerSet):
     def __init__(self, exclude=None):
         super(DOSFeaturizers, self).__init__(exclude=exclude)
 
-        # Best featurizers work on the entire DOS
-        self._best_featurizers = [
+    @property
+    def all(self):
+        """List of all density of states based featurizers."""
+        return self.heavy + [dosf.SiteDOS()]
+
+    @property
+    def express(self):
+        fs = [
             dosf.DOSFeaturizer(),
             dosf.DopingFermi(),
             dosf.Hybridization(),
             dosf.DosAsymmetry()
         ]
-
-        self._site_featurizers = [dosf.SiteDOS()]
-
-    @property
-    def all(self):
-        """List of all density of states based featurizers."""
-        return self.best + self.site
+        return self._get_featurizers(fs)
 
     @property
-    def best(self):
-        return self._get_featurizers(self._best_featurizers)
-
-    @property
-    def robust(self):
-        return self._get_featurizers(self._best_featurizers)
-
-    @property
-    def site(self):
-        return self._get_featurizers(self._site_featurizers)
+    def heavy(self):
+        return self.express
 
     @property
     def debug(self):
@@ -297,7 +231,8 @@ class DOSFeaturizers(FeaturizerSet):
 class BSFeaturizers(FeaturizerSet):
     """Featurizer set containing band structure featurizers.
 
-    This class provides subsets all featurizers and the set of best featurizers.
+    See the FeaturizerSet documentation for details of each property (sublist
+    of featurizers).
 
     Example usage::
 
@@ -311,23 +246,19 @@ class BSFeaturizers(FeaturizerSet):
     def __init__(self, exclude=None):
         super(BSFeaturizers, self).__init__(exclude=exclude)
 
-        self._best_featurizers = [
-            bf.BandFeaturizer(),
-            bf.BranchPointEnergy(),
-        ]
+    @property
+    def express(self):
+        fs = [bf.BandFeaturizer(), bf.BranchPointEnergy()]
+        return self._get_featurizers(fs)
+
+    @property
+    def heavy(self):
+        return self.express
 
     @property
     def all(self):
         """List of all band structure based featurizers."""
-        return self.best
-
-    @property
-    def best(self):
-        return self._get_featurizers(self._best_featurizers)
-
-    @property
-    def robust(self):
-        return self._get_featurizers(self._best_featurizers)
+        return self.heavy
 
     @property
     def debug(self):
@@ -381,21 +312,21 @@ class AllFeaturizers(FeaturizerSet):
         return self._get_featurizers(self._featurizer_sets['dos'].all)
 
     @property
+    def express(self):
+        fs = [f.express for f in self._featurizer_sets.values()]
+        return self._get_featurizers(fs)
+
+    @property
+    def heavy(self):
+        fs = [f.heavy for f in self._featurizer_sets.values()]
+        return self._get_featurizers(fs)
+
+    @property
     def all(self):
-        featurizers = [f.all for f in self._featurizer_sets.values()]
-        return self._get_featurizers(featurizers)
-
-    @property
-    def best(self):
-        featurizers = [f.best for f in self._featurizer_sets.values()]
-        return self._get_featurizers(featurizers)
-
-    @property
-    def robust(self):
-        featurizers = [f.robust for f in self._featurizer_sets.values()]
-        return self._get_featurizers(featurizers)
+        fs = [f.all for f in self._featurizer_sets.values()]
+        return self._get_featurizers(fs)
 
     @property
     def debug(self):
-        featurizers = [f.debug for f in self._featurizer_sets.values()]
-        return self._get_featurizers(featurizers)
+        fs = [f.debug for f in self._featurizer_sets.values()]
+        return self._get_featurizers(fs)
