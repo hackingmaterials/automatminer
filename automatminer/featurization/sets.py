@@ -2,7 +2,7 @@
 Defines sets of featurizers to be used by automatminer during featurization.
 
 Featurizer sets are classes with attributes containing lists of featurizers.
-For example, the set of all robust structure featurizers could be found with::
+For example, the set of all express structure featurizers could be found with::
 
     StructureFeaturizers().express
 """
@@ -245,7 +245,7 @@ class BSFeaturizers(FeaturizerSet):
 
     Example usage::
 
-        bs_featurizers = BSFeaturizers().best
+        bs_featurizers = BSFeaturizers().express
 
     Args:
         exclude (list of str, optional): A list of featurizer class names that
@@ -279,7 +279,7 @@ class AllFeaturizers(FeaturizerSet):
 
     This class provides subsets for composition, structure, density of states
     and band structure based featurizers. Additional sets containing all
-    featurizers and the set of best featurizers are provided.
+    featurizers and the set of express/heavy/etc. featurizers are provided.
 
     Example usage::
 

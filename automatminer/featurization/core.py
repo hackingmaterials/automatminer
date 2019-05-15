@@ -51,9 +51,9 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             from this file instead of featurizing. If this file does not exist,
             AutoFeaturizer will featurize normally, then save the features to a
             new file. Only features (not featurizer input objects) will be saved
-        preset (str): "best" or "robust" or "all". Determines by preset the
-            featurizers that should be applied. See the Featurizer sets for
-            specifics of best/robust/all. Default is "best". Incompatible with
+        preset (str): "express" or "heavy" or "debug" or "all. Determines by
+            preset the featurizers that should be applied. See the Featurizer
+            sets for specifics of each. Default is "express". Incompatible with
             the featurizers arg.
         featurizers (dict): Use this option if you want to manually specify
             the featurizers to use. Keys are the featurizer types you want
@@ -118,15 +118,16 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
 
         if featurizers and preset:
             raise AutomatminerError("Featurizers and preset were both set. "
-                                    "Please either use a preset ('best', 'all',"
-                                    " 'robust') or set featurizers manually.")
+                                    "Please either use a preset ('express', "
+                                    "'all', 'debug', 'heavy') or set "
+                                    "featurizers manually.")
         if not featurizers and not preset:
             raise AutomatminerError("Please specify set(s) of featurizers to "
                                     "use either through the featurizers"
                                     "argument or through the preset argument.")
 
         self.cache_src = cache_src
-        self.preset = "best" if preset is None else preset
+        self.preset = "express" if preset is None else preset
         self._logger = self.get_logger(logger)
         self.featurizers = featurizers
         self.exclude = exclude if exclude else []
