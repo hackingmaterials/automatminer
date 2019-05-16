@@ -64,7 +64,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
     def __init__(self, logger=True, **tpot_kwargs):
         tpot_kwargs['cv'] = tpot_kwargs.get('cv', 5)
         tpot_kwargs['n_jobs'] = tpot_kwargs.get('n_jobs', -1)
-        tpot_kwargs['verbosity'] = tpot_kwargs.get('verbosity', 2)
+        tpot_kwargs['verbosity'] = tpot_kwargs.get('verbosity', 3)
         tpot_kwargs['memory'] = tpot_kwargs.get('memory', 'auto')
 
         self.mode = None
