@@ -249,9 +249,9 @@ class MatPipe(DFTransformer, LoggableMixin):
         for _, test_ix in kfold.split(X=df, y=df[target]):
             if fold in fold_subset:
                 self.logger.info("Training on fold index {}".format(fold))
-                # Split and identify test set
-                test = df.iloc[test_ix]
-                train = df[~df.index.isin(test.index)]
+                # Split, identify, and randomize test set
+                test = df.iloc[test_ix].sample(frac=1)
+                train = df[~df.index.isin(test.index)].sample(frac=1)
                 self.fit(train, target)
                 self.logger.info("Predicting fold index {}".format(fold))
                 test = self.predict(test, target)
