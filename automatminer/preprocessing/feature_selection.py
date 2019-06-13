@@ -142,7 +142,8 @@ class TreeFeatureReducer(DFTransformer, LoggableMixin):
         # take the union of selected features of each fold
         self.selected_features = list(set(all_feats))
         self.logger.info(
-            'Finished tree-based feature reduction of {} intial features to '
+            self._log_prefix +
+            'Finished tree-based feature reduction of {} initial features to '
             '{}'.format(m0, len(self.selected_features)))
         return self
 
