@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>automatminer.featurization.core &#8212; automatminer 2019.03.27_beta documentation</title>
+    <meta charset="utf-8" />
+    <title>automatminer.featurization.core &#8212; automatminer 2019.05.14_beta0 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -39,7 +37,6 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">copy</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pymatgen</span> <span class="k">import</span> <span class="n">Composition</span>
@@ -87,9 +84,9 @@
 <span class="sd">            from this file instead of featurizing. If this file does not exist,</span>
 <span class="sd">            AutoFeaturizer will featurize normally, then save the features to a</span>
 <span class="sd">            new file. Only features (not featurizer input objects) will be saved</span>
-<span class="sd">        preset (str): &quot;best&quot; or &quot;robust&quot; or &quot;all&quot;. Determines by preset the</span>
-<span class="sd">            featurizers that should be applied. See the Featurizer sets for</span>
-<span class="sd">            specifics of best/robust/all. Default is &quot;best&quot;. Incompatible with</span>
+<span class="sd">        preset (str): &quot;express&quot; or &quot;heavy&quot; or &quot;debug&quot; or &quot;all. Determines by</span>
+<span class="sd">            preset the featurizers that should be applied. See the Featurizer</span>
+<span class="sd">            sets for specifics of each. Default is &quot;express&quot;. Incompatible with</span>
 <span class="sd">            the featurizers arg.</span>
 <span class="sd">        featurizers (dict): Use this option if you want to manually specify</span>
 <span class="sd">            the featurizers to use. Keys are the featurizer types you want</span>
@@ -135,6 +132,8 @@
 <span class="sd">        fitted_input_df (pd.DataFrame): The dataframe which was fitted on</span>
 <span class="sd">        converted_input_df (pd.DataFrame): The converted dataframe which</span>
 <span class="sd">            was fitted on (i.e., strings converted to compositions).</span>
+<span class="sd">        removed_featurizers ([BaseFeaturizer]): A list of featurizers removed</span>
+<span class="sd">            by prechecking methods, if applicable</span>
 
 <span class="sd">        Attributes not set during fitting and not specified by arguments:</span>
 
@@ -152,15 +151,16 @@
 
         <span class="k">if</span> <span class="n">featurizers</span> <span class="ow">and</span> <span class="n">preset</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">AutomatminerError</span><span class="p">(</span><span class="s2">&quot;Featurizers and preset were both set. &quot;</span>
-                                    <span class="s2">&quot;Please either use a preset (&#39;best&#39;, &#39;all&#39;,&quot;</span>
-                                    <span class="s2">&quot; &#39;robust&#39;) or set featurizers manually.&quot;</span><span class="p">)</span>
+                                    <span class="s2">&quot;Please either use a preset (&#39;express&#39;, &quot;</span>
+                                    <span class="s2">&quot;&#39;all&#39;, &#39;debug&#39;, &#39;heavy&#39;) or set &quot;</span>
+                                    <span class="s2">&quot;featurizers manually.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">featurizers</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">preset</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">AutomatminerError</span><span class="p">(</span><span class="s2">&quot;Please specify set(s) of featurizers to &quot;</span>
                                     <span class="s2">&quot;use either through the featurizers&quot;</span>
                                     <span class="s2">&quot;argument or through the preset argument.&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">cache_src</span> <span class="o">=</span> <span class="n">cache_src</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">preset</span> <span class="o">=</span> <span class="s2">&quot;best&quot;</span> <span class="k">if</span> <span class="n">preset</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">preset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preset</span> <span class="o">=</span> <span class="s2">&quot;express&quot;</span> <span class="k">if</span> <span class="n">preset</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">preset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">featurizers</span> <span class="o">=</span> <span class="n">featurizers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="n">exclude</span> <span class="k">if</span> <span class="n">exclude</span> <span class="k">else</span> <span class="p">[]</span>
@@ -177,6 +177,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">guess_oxistates</span> <span class="o">=</span> <span class="n">guess_oxistates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_featurizer</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featurizers</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removed_featurizers</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">composition_col</span> <span class="o">=</span> <span class="n">composition_col</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">structure_col</span> <span class="o">=</span> <span class="n">structure_col</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bandstruct_col</span> <span class="o">=</span> <span class="n">bandstructure_col</span>
@@ -320,6 +321,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">featurizers</span><span class="p">[</span><span class="n">featurizer_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">featurizers</span>
                                                          <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span>
                                                          <span class="n">invalid_featurizers</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">removed_featurizers</span> <span class="o">=</span> <span class="n">invalid_featurizers</span>
                     <span class="n">featurizers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">featurizers</span><span class="p">[</span><span class="n">featurizer_type</span><span class="p">]</span>
 
                 <span class="c1"># Fit the featurizers</span>
@@ -621,7 +623,7 @@
       &copy;2019, Alex Dunn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

@@ -234,53 +234,30 @@ def wf_benchmark(fworker, pipe_config, name, data_pickle, target, problem_type,
 
 
 if __name__ == "__main__":
-    """
-    Current tags
-    
-    Dataset sets
-    - data_debug
-    - data_full
-    
-    Feature reduction
-    - corr_only
-    - pca_only
-    - rebate_only
-    
-    Data cleaning:
-    - mean_only
-    - drop_mean: drop for features and fit samples, mean for transform
-    
-    autofeaturizer:
-    - af_fast
-    - af_best
-    
-    learner:
-    - single_debug
-    - single
-    - tpot_short
-    - tpot_long
-    - tpot_generations
-    - tpot_limited_mem
-    """
 
     # from tpot.base import TPOTBase
     # TPOTBase(generations=, population_size=)
     pipe_config = {
         "learner_name": "TPOTAdaptor",
         # "learner_kwargs": {"generations": 100, "population_size": 100, "memory": "auto", "n_jobs": 10, "max_eval_time_mins": 5},
-        "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 20, "population_size": 100, "memory": "auto", "n_jobs": 4},
+        "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 20, "population_size": 100, "memory": "auto", "n_jobs": 6},
         # "learner_kwargs": {"max_time_mins": 360, "max_eval_time_mins": 10, "population_size": 100, "memory": "auto", "n_jobs": 4},
 
 
         # "reducer_kwargs": {"reducers": ("corr",)},
-        "reducer_kwargs": {"reducers": ("corr", "tree"), "tree_importance_percentile": 0.99},
+        "reducer_kwargs": {"reducers": ("tree",), "tree_importance_percentile": 0.99},
         # "reducer_kwargs": {"reducers": ("pca",), "n_pca_features": 0.3},
         # "reducer_kwargs": {"reducers": ("rebate",), "n_rebate_features": 0.3},
 
         # "reducer_kwargs": {"reducers": ()},
-        "autofeaturizer_kwargs": {"preset": "debug", "n_jobs": 10},
-        "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"}
+        "autofeaturizer_kwargs": {"preset": "express", "n_jobs": 10},
+        \
+        # "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"},
+        "cleaner_kwargs": {"max_na_frac": 0.1, "feature_na_method": "drop", "na_method_fit": "mean", "na_method_transform": "mean"}
     }
+
+    # todo: change the feature_na_method!
+    # todo: change the tpot template!!!
 
     # pipe_config_debug = {
     #     "autofeaturizer_kwargs": {"preset": "debug", "n_jobs": 10},
@@ -307,7 +284,7 @@ if __name__ == "__main__":
         # "drop_mean",
         # "af_fast",
         # "tpot_generations",
-        "debug"
+        # "debug"
     ]
 
     from benchdev.config import MP_E_FORM, JDFT2D, BULK, GFA
@@ -315,7 +292,7 @@ if __name__ == "__main__":
     #                        include_tests=False, cache=True, tags=tags)
 
     # wf = wf_benchmark("lrc", pipe_config, **GFA, cache=True, tags=tags)
-    wf = wf_evaluate_build("lrc", "debug featurization long tpot", BENCHMARK_FULL_SET,
+    wf = wf_evaluate_build("cori", "diff impute long tpot 2", BENCHMARK_FULL_SET,
                            pipe_config, include_tests=False, cache=True, tags=tags)
 
 

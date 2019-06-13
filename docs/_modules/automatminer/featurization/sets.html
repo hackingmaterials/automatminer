@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>automatminer.featurization.sets &#8212; automatminer 2019.03.27_beta documentation</title>
+    <meta charset="utf-8" />
+    <title>automatminer.featurization.sets &#8212; automatminer 2019.05.14_beta0 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -37,11 +35,10 @@
 <span class="sd">Defines sets of featurizers to be used by automatminer during featurization.</span>
 
 <span class="sd">Featurizer sets are classes with attributes containing lists of featurizers.</span>
-<span class="sd">For example, the set of all robust structure featurizers could be found with::</span>
+<span class="sd">For example, the set of all express structure featurizers could be found with::</span>
 
-<span class="sd">    StructureFeaturizers().robust</span>
+<span class="sd">    StructureFeaturizers().express</span>
 <span class="sd">&quot;&quot;&quot;</span>
-
 <span class="kn">import</span> <span class="nn">matminer.featurizers.composition</span> <span class="k">as</span> <span class="nn">cf</span>
 <span class="kn">import</span> <span class="nn">matminer.featurizers.structure</span> <span class="k">as</span> <span class="nn">sf</span>
 <span class="kn">import</span> <span class="nn">matminer.featurizers.dos</span> <span class="k">as</span> <span class="nn">dosf</span>
@@ -58,18 +55,20 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="n">dscribe</span> <span class="o">=</span> <span class="kc">None</span>
 
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">FeaturizerSet</span>
+
 <span class="n">__authors__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Alex Dunn&quot;</span><span class="p">,</span> <span class="s2">&quot;Alex Ganose&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="FeaturizerSet"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.FeaturizerSet.html#automatminer.featurization.sets.FeaturizerSet">[docs]</a><span class="k">class</span> <span class="nc">FeaturizerSet</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Abstract class for defining sets of featurizers.</span>
+<div class="viewcode-block" id="CompositionFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.CompositionFeaturizers.html#automatminer.featurization.sets.CompositionFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">CompositionFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Featurizer set containing composition featurizers.</span>
 
-<span class="sd">    All FeaturizerSets should implement at least two sets of featurizers, best</span>
-<span class="sd">    and all. The set of best featurizers should contain those featurizers</span>
-<span class="sd">    that balance speed, applicability and usefulness. This should be determined</span>
-<span class="sd">    by the implementor.</span>
+<span class="sd">    See the FeaturizerSet documentation for details of each property (sublist</span>
+<span class="sd">    of featurizers).</span>
 
-<span class="sd">    Each set returned is a list of matminer featurizer objects.</span>
+<span class="sd">    Example usage::</span>
+
+<span class="sd">        best_featurizers = CompositionFeaturizers().express</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
@@ -77,38 +76,235 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="n">exclude</span> <span class="k">if</span> <span class="n">exclude</span> <span class="k">else</span> <span class="p">[]</span>
-
-<div class="viewcode-block" id="FeaturizerSet.__call__"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.FeaturizerSet.html#automatminer.featurization.sets.FeaturizerSet.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">all</span></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CompositionFeaturizers</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">best</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of featurizers providing useful features in a reasonable time.</span>
+    <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">([</span><span class="n">cf</span><span class="o">.</span><span class="n">ElementProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;magpie&quot;</span><span class="p">)])</span>
 
-<span class="sd">        Featurizers that take a very long time to run, which crash for many</span>
-<span class="sd">        systems, or which produce a large number of similar features will be</span>
-<span class="sd">        excluded.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This featurizer set must return a set of &quot;</span>
-                                  <span class="s2">&quot;best featurizers&quot;</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">express</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">ElementProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;magpie&quot;</span><span class="p">),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">OxidationStates</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="n">preset_name</span><span class="o">=</span><span class="s1">&#39;deml&#39;</span><span class="p">),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">ElectronAffinity</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">IonProperty</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">YangSolidSolution</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">Miedema</span><span class="p">(),</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">heavy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span><span class="n">cf</span><span class="o">.</span><span class="n">AtomicPackingEfficiency</span><span class="p">()]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">express</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;All featurizers available for this featurization type.&quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This featurizer set must return a set of &quot;</span>
-                                  <span class="s2">&quot;all featurizers&quot;</span><span class="p">)</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">AtomicOrbitals</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">ElementProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;matminer&quot;</span><span class="p">),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">ElementProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;magpie&quot;</span><span class="p">),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">ElementProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;matscholar_el&quot;</span><span class="p">),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">ElementProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;deml&quot;</span><span class="p">),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">ElementFraction</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">Stoichiometry</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">TMetalFraction</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">BandCenter</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">ValenceOrbital</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">YangSolidSolution</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">CationProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="n">preset_name</span><span class="o">=</span><span class="s1">&#39;deml&#39;</span><span class="p">),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">OxidationStates</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="n">preset_name</span><span class="o">=</span><span class="s1">&#39;deml&#39;</span><span class="p">),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">ElectronAffinity</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">ElectronegativityDiff</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">IonProperty</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">Miedema</span><span class="p">(),</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">AtomicPackingEfficiency</span><span class="p">(),</span>  <span class="c1"># slower than the rest</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">CohesiveEnergy</span><span class="p">()</span>  <span class="c1"># requires mpid present</span>
+
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StructureFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.StructureFeaturizers.html#automatminer.featurization.sets.StructureFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">StructureFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Featurizer set containing structure featurizers.</span>
+
+<span class="sd">    See the FeaturizerSet documentation for details of each property (sublist</span>
+<span class="sd">    of featurizers).</span>
+
+<span class="sd">    Example usage::</span>
+
+<span class="sd">        best_featurizers = StructureFeaturizers().express</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
+<span class="sd">            will be excluded from the set of featurizers returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">StructureFeaturizers</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssf</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">SiteStatsFingerprint</span>
+
+    <span class="k">def</span> <span class="nf">_add_external</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fset</span><span class="p">):</span>
+        <span class="c1"># Prevent import errors</span>
+        <span class="n">require_external</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">torch</span> <span class="ow">and</span> <span class="n">cgcnn</span><span class="p">:</span>
+            <span class="n">require_external</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">CGCNNFeaturizer</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">dscribe</span><span class="p">:</span>
+            <span class="n">require_external</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">SOAP</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">fset</span> <span class="o">+</span> <span class="n">require_external</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Fast featurizers available for this featurization type.&quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This featurizer set must return a set of &quot;</span>
-                                  <span class="s2">&quot;robust featurizers&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">express</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">DensityFeatures</span><span class="p">(),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">GlobalSymmetryFeatures</span><span class="p">(),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">EwaldEnergy</span><span class="p">(),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">SineCoulombMatrix</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">GlobalInstabilityIndex</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">featurizers</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Utility function for getting featurizers not in the ignore list.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">featurizers</span>
-                <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span><span class="p">]</span></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">heavy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s1">&#39;CrystalNNFingerprint_ops&#39;</span><span class="p">),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">ChemicalOrdering</span><span class="p">(),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">StructuralHeterogeneity</span><span class="p">(),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">MaximumPackingEfficiency</span><span class="p">(),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">XRDPowderPattern</span><span class="p">(),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">Dimensionality</span><span class="p">(),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">OrbitalFieldMatrix</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">JarvisCFID</span><span class="p">(),</span>
+        <span class="p">]</span>
+        <span class="n">fs</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">express</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_external</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1"># Vector</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s1">&#39;CrystalNNFingerprint_ops&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;BondLength-dejong2016&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;BondAngle-dejong2016&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;Composition-dejong2016_SD&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;Composition-dejong2016_AD&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;CoordinationNumber_ward-prb-2017&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;LocalPropertyDifference_ward-prb-2017&quot;</span><span class="p">),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">BondFractions</span><span class="p">(</span><span class="n">approx_bonds</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">BagofBonds</span><span class="p">(</span><span class="n">coulomb_matrix</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">CoulombMatrix</span><span class="p">()),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">BagofBonds</span><span class="p">(</span><span class="n">coulomb_matrix</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">SineCoulombMatrix</span><span class="p">()),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">CoulombMatrix</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">BondFractions</span><span class="p">(),</span>
+
+            <span class="c1"># Non vector</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">CoulombMatrix</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>  <span class="c1"># returns matrix</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">SineCoulombMatrix</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>  <span class="c1"># returns matrix</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">RadialDistributionFunction</span><span class="p">(),</span>  <span class="c1"># returns dict</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">MinimumRelativeDistances</span><span class="p">(),</span>  <span class="c1"># returns a list</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">ElectronicRadialDistributionFunction</span><span class="p">(),</span>  <span class="c1"># returns ??</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">PartialRadialDistributionFunction</span><span class="p">(),</span>  <span class="c1"># returns ??</span>
+        <span class="p">]</span>
+        <span class="n">fs</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heavy</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">([</span><span class="n">sf</span><span class="o">.</span><span class="n">SineCoulombMatrix</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">need_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">PartialRadialDistributionFunction</span><span class="p">(),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">BondFractions</span><span class="p">(),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">BagofBonds</span><span class="p">(</span><span class="n">coulomb_matrix</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">CoulombMatrix</span><span class="p">()),</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">BagofBonds</span><span class="p">(</span><span class="n">coulomb_matrix</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">SineCoulombMatrix</span><span class="p">()),</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DOSFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.DOSFeaturizers.html#automatminer.featurization.sets.DOSFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">DOSFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Featurizer set containing density of states featurizers.</span>
+
+<span class="sd">    See the FeaturizerSet documentation for details of each property (sublist</span>
+<span class="sd">    of featurizers).</span>
+
+<span class="sd">    Example usage::</span>
+
+<span class="sd">        dos_featurizers = DOSFeaturizers().express</span>
+
+<span class="sd">    Density of states featurizers should work on the entire density of states</span>
+<span class="sd">    if they are in express or heavy. If they are in &quot;all&quot; they may work on</span>
+<span class="sd">    sites or return matrices.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
+<span class="sd">            will be excluded from the set of featurizers returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DOSFeaturizers</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of all density of states based featurizers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">heavy</span> <span class="o">+</span> <span class="p">[</span><span class="n">dosf</span><span class="o">.</span><span class="n">SiteDOS</span><span class="p">()]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">express</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">dosf</span><span class="o">.</span><span class="n">DOSFeaturizer</span><span class="p">(),</span>
+            <span class="n">dosf</span><span class="o">.</span><span class="n">DopingFermi</span><span class="p">(),</span>
+            <span class="n">dosf</span><span class="o">.</span><span class="n">Hybridization</span><span class="p">(),</span>
+            <span class="n">dosf</span><span class="o">.</span><span class="n">DosAsymmetry</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">heavy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">express</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">([</span><span class="n">dosf</span><span class="o">.</span><span class="n">DOSFeaturizer</span><span class="p">()])</span></div>
+
+
+<div class="viewcode-block" id="BSFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.BSFeaturizers.html#automatminer.featurization.sets.BSFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">BSFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Featurizer set containing band structure featurizers.</span>
+
+<span class="sd">    See the FeaturizerSet documentation for details of each property (sublist</span>
+<span class="sd">    of featurizers).</span>
+
+<span class="sd">    Example usage::</span>
+
+<span class="sd">        bs_featurizers = BSFeaturizers().express</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
+<span class="sd">            will be excluded from the set of featurizers returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BSFeaturizers</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">express</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span><span class="n">bf</span><span class="o">.</span><span class="n">BandFeaturizer</span><span class="p">(),</span> <span class="n">bf</span><span class="o">.</span><span class="n">BranchPointEnergy</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">heavy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">express</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of all band structure based featurizers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">heavy</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">([</span><span class="n">bf</span><span class="o">.</span><span class="n">BandFeaturizer</span><span class="p">()])</span></div>
 
 
 <div class="viewcode-block" id="AllFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.AllFeaturizers.html#automatminer.featurization.sets.AllFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">AllFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
@@ -116,7 +312,7 @@
 
 <span class="sd">    This class provides subsets for composition, structure, density of states</span>
 <span class="sd">    and band structure based featurizers. Additional sets containing all</span>
-<span class="sd">    featurizers and the set of best featurizers are provided.</span>
+<span class="sd">    featurizers and the set of express/heavy/etc. featurizers are provided.</span>
 
 <span class="sd">    Example usage::</span>
 
@@ -158,326 +354,24 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_featurizer_sets</span><span class="p">[</span><span class="s1">&#39;dos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">all</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">featurizers</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">all</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_featurizer_sets</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">featurizers</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">express</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">express</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_featurizer_sets</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">best</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">featurizers</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">best</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_featurizer_sets</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">featurizers</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">robust</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_featurizer_sets</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">featurizers</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="CompositionFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.CompositionFeaturizers.html#automatminer.featurization.sets.CompositionFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">CompositionFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Featurizer set containing composition featurizers.</span>
-
-<span class="sd">    This class provides subsets for featurizers that require the composition</span>
-<span class="sd">    to have oxidation states, as well as robust, and slow featurizers. Additional</span>
-<span class="sd">    sets containing all featurizers and the set of best featurizers are</span>
-<span class="sd">    provided.</span>
-
-<span class="sd">    Example usage::</span>
-
-<span class="sd">        fast_featurizers = CompositionFeaturizers().robust</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
-<span class="sd">            will be excluded from the set of featurizers returned.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">CompositionFeaturizers</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fast_featurizers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">AtomicOrbitals</span><span class="p">(),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">ElementProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;matminer&quot;</span><span class="p">),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">ElementProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;magpie&quot;</span><span class="p">),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">ElementProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;matscholar_el&quot;</span><span class="p">),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">ElementProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;deml&quot;</span><span class="p">),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">ElementFraction</span><span class="p">(),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">Stoichiometry</span><span class="p">(),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">TMetalFraction</span><span class="p">(),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">BandCenter</span><span class="p">(),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">ValenceOrbital</span><span class="p">()</span>
-        <span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_slow_featurizers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">Miedema</span><span class="p">(),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">AtomicPackingEfficiency</span><span class="p">(),</span>  <span class="c1"># slower than the rest</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">CohesiveEnergy</span><span class="p">()</span>  <span class="c1"># requires mpid present</span>
-        <span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_need_oxi_featurizers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">YangSolidSolution</span><span class="p">(),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">CationProperty</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="n">preset_name</span><span class="o">=</span><span class="s1">&#39;deml&#39;</span><span class="p">),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">OxidationStates</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="n">preset_name</span><span class="o">=</span><span class="s1">&#39;deml&#39;</span><span class="p">),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">ElectronAffinity</span><span class="p">(),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">ElectronegativityDiff</span><span class="p">(),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">IonProperty</span><span class="p">()</span>
-        <span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_intermetallics_only</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">YangSolidSolution</span><span class="p">(),</span>
-            <span class="n">cf</span><span class="o">.</span><span class="n">Miedema</span><span class="p">(),</span>
-        <span class="p">]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">intermetallics_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of featurizers that applies only to intermetallics.</span>
-<span class="sd">        Will probably be removed by valid_fraction checking if not actally</span>
-<span class="sd">        applicable to the dataset.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_intermetallics_only</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of featurizers that are generally quick to featurize.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fast_featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">slow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of featurizers that are generally slow to featurize.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_slow_featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">need_oxi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Featurizers that require the composition to have oxidation states.</span>
-
-<span class="sd">        If the composition is not decorated with oxidation states the</span>
-<span class="sd">        oxidation states will be guessed. This can cause a significant increase</span>
-<span class="sd">        in featurization time.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_need_oxi_featurizers</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">heavy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">heavy</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_featurizer_sets</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of all composition based featurizers.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_oxi</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">all</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_featurizer_sets</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">best</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">intermetallics_only</span></div>
-
-
-<div class="viewcode-block" id="StructureFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.StructureFeaturizers.html#automatminer.featurization.sets.StructureFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">StructureFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Featurizer set containing structure featurizers.</span>
-
-<span class="sd">    This class provides subsets for featurizers that require fitting,</span>
-<span class="sd">    return matrices rather than vectors, and produce many features, as well as</span>
-<span class="sd">    robust, and slow featurizers. Additional sets containing all featurizers and</span>
-<span class="sd">    the set of best featurizers are provided.</span>
-
-<span class="sd">    Example usage::</span>
-
-<span class="sd">        fast_featurizers = StructureFeaturizers().robust</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
-<span class="sd">            will be excluded from the set of featurizers returned.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">StructureFeaturizers</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fast_featurizers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">DensityFeatures</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">GlobalSymmetryFeatures</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">EwaldEnergy</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">CoulombMatrix</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">SineCoulombMatrix</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="p">]</span>
-
-        <span class="n">ssf</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">SiteStatsFingerprint</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_slow_featurizers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s1">&#39;CrystalNNFingerprint_ops&#39;</span><span class="p">),</span>
-            <span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;BondLength-dejong2016&quot;</span><span class="p">),</span>
-            <span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;BondAngle-dejong2016&quot;</span><span class="p">),</span>
-            <span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;Composition-dejong2016_SD&quot;</span><span class="p">),</span>
-            <span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;Composition-dejong2016_AD&quot;</span><span class="p">),</span>
-            <span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;CoordinationNumber_ward-prb-2017&quot;</span><span class="p">),</span>
-            <span class="n">ssf</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;LocalPropertyDifference_ward-prb-2017&quot;</span><span class="p">),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">ChemicalOrdering</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">StructuralHeterogeneity</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">MaximumPackingEfficiency</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">XRDPowderPattern</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">Dimensionality</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">OrbitalFieldMatrix</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">JarvisCFID</span><span class="p">(),</span>
-        <span class="p">]</span>
-
-        <span class="c1"># Prevent import errors</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_require_external</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">torch</span> <span class="ow">and</span> <span class="n">cgcnn</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_require_external</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">CGCNNFeaturizer</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">dscribe</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_require_external</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">SOAP</span><span class="p">())</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_need_fitting_featurizers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">PartialRadialDistributionFunction</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">BondFractions</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">BagofBonds</span><span class="p">(</span><span class="n">coulomb_matrix</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">CoulombMatrix</span><span class="p">()),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">BagofBonds</span><span class="p">(</span><span class="n">coulomb_matrix</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">SineCoulombMatrix</span><span class="p">()),</span>
-        <span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_matrix_featurizers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">RadialDistributionFunction</span><span class="p">(),</span>  <span class="c1"># returns dict</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">MinimumRelativeDistances</span><span class="p">(),</span>  <span class="c1"># returns a list</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">ElectronicRadialDistributionFunction</span><span class="p">()</span>
-        <span class="p">]</span>
-
-        <span class="c1"># these are the same as _need_fitting_featurizers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_many_features_featurizers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">PartialRadialDistributionFunction</span><span class="p">(),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">BondFractions</span><span class="p">(</span><span class="n">approx_bonds</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">BagofBonds</span><span class="p">(</span><span class="n">coulomb_matrix</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">CoulombMatrix</span><span class="p">()),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">BagofBonds</span><span class="p">(</span><span class="n">coulomb_matrix</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">SineCoulombMatrix</span><span class="p">()),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">OrbitalFieldMatrix</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="n">sf</span><span class="o">.</span><span class="n">JarvisCFID</span><span class="p">()</span>
-        <span class="p">]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of featurizers that are generally robust to featurize.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fast_featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">slow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of featurizers that are generally slow to featurize.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_slow_featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">need_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of featurizers which must be fit before featurizing.</span>
-
-<span class="sd">        Fitting can be performed using the `Featurizer.fit()` method.</span>
-<span class="sd">        Alternatively, the `Featurizer.fit_featurize_dataframe()` can be used</span>
-<span class="sd">        to fit and featurize simultaneously.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_need_fitting_featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of featurizers that return matrices as features.</span>
-
-<span class="sd">        These featurizers are not useful for vectorized representations of</span>
-<span class="sd">        crystal structures.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_matrix_featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">many_features</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of featurizers that return many features.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_many_features_featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">require_external</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Featurizers which require external software not installable via</span>
-<span class="sd">        Pypi</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_require_external</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">all_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_fit</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_external</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_vector</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">all_including_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of all structure based featurizers.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_vector</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">best</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">slow</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_external</span></div>
-
-
-<div class="viewcode-block" id="DOSFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.DOSFeaturizers.html#automatminer.featurization.sets.DOSFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">DOSFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Featurizer set containing density of states featurizers.</span>
-
-<span class="sd">    This class provides subsets all featurizers and the set of best featurizers.</span>
-
-<span class="sd">    Example usage::</span>
-
-<span class="sd">        dos_featurizers = DOSFeaturizers().best</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
-<span class="sd">            will be excluded from the set of featurizers returned.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">DOSFeaturizers</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
-
-        <span class="c1"># Best featurizers work on the entire DOS</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_best_featurizers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">dosf</span><span class="o">.</span><span class="n">DOSFeaturizer</span><span class="p">(),</span>
-            <span class="n">dosf</span><span class="o">.</span><span class="n">DopingFermi</span><span class="p">(),</span>
-            <span class="n">dosf</span><span class="o">.</span><span class="n">Hybridization</span><span class="p">(),</span>
-            <span class="n">dosf</span><span class="o">.</span><span class="n">DosAsymmetry</span><span class="p">()</span>
-        <span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_site_featurizers</span> <span class="o">=</span> <span class="p">[</span><span class="n">dosf</span><span class="o">.</span><span class="n">SiteDOS</span><span class="p">()]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of all density of states based featurizers.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">best</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">best</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">site</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_site_featurizers</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="BSFeaturizers"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.BSFeaturizers.html#automatminer.featurization.sets.BSFeaturizers">[docs]</a><span class="k">class</span> <span class="nc">BSFeaturizers</span><span class="p">(</span><span class="n">FeaturizerSet</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Featurizer set containing band structure featurizers.</span>
-
-<span class="sd">    This class provides subsets all featurizers and the set of best featurizers.</span>
-
-<span class="sd">    Example usage::</span>
-
-<span class="sd">        bs_featurizers = BSFeaturizers().best</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
-<span class="sd">            will be excluded from the set of featurizers returned.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">BSFeaturizers</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_best_featurizers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">bf</span><span class="o">.</span><span class="n">BandFeaturizer</span><span class="p">(),</span>
-            <span class="n">bf</span><span class="o">.</span><span class="n">BranchPointEnergy</span><span class="p">(),</span>
-        <span class="p">]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of all band structure based featurizers.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">best</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">best</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_featurizers</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">robust</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_best_featurizers</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">debug</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_featurizer_sets</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_featurizers</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -489,7 +383,7 @@
       &copy;2019, Alex Dunn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

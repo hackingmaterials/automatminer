@@ -167,8 +167,7 @@ hyperparameters of your model.
    :width: 70%
 
 But if the model's hyperparameters are adjusted
-to improve its CV score, reporting the CV score as the generalization error is
-incorrect, because the model may have been overfit to the training dataset.
+to improve its CV score, reporting the CV score as the generalization error introduces model selection bias into the error estimate. In other words, you are implicitly introducing test set knowledge into the model's training.
 
 .. image:: _static/cv_overfit.png
    :alt: cv_overfit

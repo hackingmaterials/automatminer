@@ -1,12 +1,10 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>automatminer.presets &#8212; automatminer 2019.03.27_beta documentation</title>
+    <meta charset="utf-8" />
+    <title>automatminer.presets &#8212; automatminer 2019.05.14_beta0 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -84,26 +82,30 @@
 
     <span class="k">if</span> <span class="n">preset</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span><span class="p">:</span>
         <span class="n">production_config</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">720</span><span class="p">,</span>
+            <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">1440</span><span class="p">,</span>
                                    <span class="n">max_eval_time_mins</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
-            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;pca&#39;</span><span class="p">,)),</span>
-            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,</span> <span class="s1">&#39;tree&#39;</span><span class="p">),</span>
+                                      <span class="n">tree_importance_percentile</span><span class="o">=</span><span class="mf">0.99</span><span class="p">),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;express&quot;</span><span class="p">,</span>
+                                             <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
             <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">production_config</span>
     <span class="k">elif</span> <span class="n">preset</span> <span class="o">==</span> <span class="s2">&quot;heavy&quot;</span><span class="p">:</span>
         <span class="n">heavy_config</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">1440</span><span class="p">),</span>
+            <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">2880</span><span class="p">),</span>
             <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;corr&quot;</span><span class="p">,</span> <span class="s2">&quot;rebate&quot;</span><span class="p">)),</span>
-            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;heavy&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
             <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">heavy_config</span>
     <span class="k">elif</span> <span class="n">preset</span> <span class="o">==</span> <span class="s2">&quot;express&quot;</span><span class="p">:</span>
         <span class="n">express_config</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;learner&quot;</span><span class="p">:</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">population_size</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
-            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,)),</span>
-            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;robust&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,</span> <span class="s1">&#39;tree&#39;</span><span class="p">),</span>
+                                      <span class="n">tree_importance_percentile</span><span class="o">=</span><span class="mf">0.99</span><span class="p">),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;express&quot;</span><span class="p">,</span>
+                                             <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
             <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">express_config</span>
@@ -114,7 +116,8 @@
                 <span class="n">regressor</span><span class="o">=</span><span class="n">XGBRegressor</span><span class="p">(</span><span class="o">**</span><span class="n">xgb_kwargs</span><span class="p">),</span>
                 <span class="n">classifier</span><span class="o">=</span><span class="n">XGBClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">xgb_kwargs</span><span class="p">)),</span>
             <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,)),</span>
-            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;robust&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;express&quot;</span><span class="p">,</span>
+                                             <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
             <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">express_config</span>
@@ -124,7 +127,7 @@
                                    <span class="n">max_eval_time_mins</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                    <span class="n">population_size</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
             <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,</span> <span class="s1">&#39;tree&#39;</span><span class="p">)),</span>
-            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;robust&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
             <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">debug_config</span>
@@ -135,7 +138,7 @@
                 <span class="n">classifier</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">rf_kwargs</span><span class="p">),</span>
                 <span class="n">regressor</span><span class="o">=</span><span class="n">RandomForestRegressor</span><span class="p">(</span><span class="o">**</span><span class="n">rf_kwargs</span><span class="p">)),</span>
             <span class="s2">&quot;reducer&quot;</span><span class="p">:</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;corr&#39;</span><span class="p">,)),</span>
-            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;robust&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;autofeaturizer&quot;</span><span class="p">:</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">preset</span><span class="o">=</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">caching_kwargs</span><span class="p">),</span>
             <span class="s2">&quot;cleaner&quot;</span><span class="p">:</span> <span class="n">DataCleaner</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">debug_single_config</span>
@@ -152,7 +155,7 @@
       &copy;2019, Alex Dunn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
