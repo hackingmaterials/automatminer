@@ -245,13 +245,13 @@ if __name__ == "__main__":
 
 
         # "reducer_kwargs": {"reducers": ("corr",)},
-        "reducer_kwargs": {"reducers": ("tree",), "tree_importance_percentile": 0.99},
+        "reducer_kwargs": {"reducers": ("corr", "tree",), "tree_importance_percentile": 0.99},
         # "reducer_kwargs": {"reducers": ("pca",), "n_pca_features": 0.3},
         # "reducer_kwargs": {"reducers": ("rebate",), "n_rebate_features": 0.3},
 
         # "reducer_kwargs": {"reducers": ()},
-        "autofeaturizer_kwargs": {"preset": "express", "n_jobs": 10},
-        \
+        # "autofeaturizer_kwargs": {"preset": "express", "n_jobs": 10},
+        "autofeaturizer_kwargs": {"preset": "heavy", "n_jobs": 10},
         # "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"},
         "cleaner_kwargs": {"max_na_frac": 0.1, "feature_na_method": "drop", "na_method_fit": "mean", "na_method_transform": "mean"}
     }
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     #                        include_tests=False, cache=True, tags=tags)
 
     # wf = wf_benchmark("lrc", pipe_config, **GFA, cache=True, tags=tags)
-    wf = wf_evaluate_build("cori", "diff impute long tpot 2", BENCHMARK_FULL_SET,
+    wf = wf_evaluate_build("cori", "heavy diff impute long tpot 2", BENCHMARK_FULL_SET,
                            pipe_config, include_tests=False, cache=True, tags=tags)
 
 
