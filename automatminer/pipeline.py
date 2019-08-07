@@ -103,6 +103,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.post_fit_df = None
         self.is_fit = False
         self.ml_type = None
+        self.target = None
 
     @set_fitted
     def fit(self, df, target):
@@ -139,13 +140,14 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.learner.fit(df, target)
         self.logger.info("MatPipe successfully fit.")
         self.post_fit_df = df
+        self.target = target
         return self
 
-    def transform(self, df, target, **transform_kwargs):
-        return self.predict(df, target, **transform_kwargs)
+    def transform(self, df, **transform_kwargs):
+        return self.predict(df, **transform_kwargs)
 
     @check_fitted
-    def predict(self, df, target):
+    def predict(self, df):
         """
         Predict a target property of a set of materials.
 
@@ -164,10 +166,10 @@ class MatPipe(DFTransformer, LoggableMixin):
             (pandas.DataFrame): The dataframe with target property predictions.
         """
         self.logger.info("Beginning MatPipe prediction using fitted pipeline.")
-        df = self.autofeaturizer.transform(df, target)
-        df = self.cleaner.transform(df, target)
-        df = self.reducer.transform(df, target)
-        predictions = self.learner.predict(df, target)
+        df = self.autofeaturizer.transform(df, self.target)
+        df = self.cleaner.transform(df, self.target)
+        df = self.reducer.transform(df, self.target)
+        predictions = self.learner.predict(df, self.target)
         self.logger.info("MatPipe prediction completed.")
         return predictions
 
@@ -254,7 +256,7 @@ class MatPipe(DFTransformer, LoggableMixin):
                 train = df[~df.index.isin(test.index)].sample(frac=1)
                 self.fit(train, target)
                 self.logger.info("Predicting fold index {}".format(fold))
-                test = self.predict(test, target)
+                test = self.predict(test)
                 results.append(test)
             fold += 1
         return results

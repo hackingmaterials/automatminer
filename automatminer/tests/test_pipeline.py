@@ -57,7 +57,7 @@ class TestMatPipe(unittest.TestCase):
         df_train = self.df.iloc[:200]
         df_test = self.df.iloc[201:250]
         self.pipe.fit(df_train, self.target)
-        df_test = self.pipe.predict(df_test, self.target)
+        df_test = self.pipe.predict(df_test)
         true = df_test[self.target]
         test = df_test[self.target + " predicted"]
         self.assertTrue("composition" not in df_test.columns)
@@ -67,7 +67,7 @@ class TestMatPipe(unittest.TestCase):
         df_train2 = self.df.iloc[250:450]
         df_test2 = self.df.iloc[451:500]
         self.pipe.fit(df_train2, self.target)
-        df_test2 = self.pipe.predict(df_test2, self.target)
+        df_test2 = self.pipe.predict(df_test2)
         true2 = df_test2[self.target]
         test2 = df_test2[self.target + " predicted"]
         self.assertTrue("composition" not in df_test2.columns)
@@ -85,7 +85,7 @@ class TestMatPipe(unittest.TestCase):
         # If shear modulus is included as a feature it should probably show up
         # in the final pipeline
         self.assertTrue("G_VRH" in self.pipe.learner.features)
-        df_test = self.pipe.predict(df_test, self.target)
+        df_test = self.pipe.predict(df_test)
         true = df_test[self.target]
         test = df_test[self.target + " predicted"]
         self.assertTrue(r2_score(true, test) > 0.75)
@@ -119,7 +119,7 @@ class TestMatPipe(unittest.TestCase):
         filename = os.path.join(test_dir, PIPE_PATH)
         self.pipe.save(filename=filename)
         self.pipe = MatPipe.load(filename, logger=False)
-        df_test = self.pipe.predict(self.df[-220:-201], self.target)
+        df_test = self.pipe.predict(self.df[-220:-201])
         self.assertTrue(self.target in df_test.columns)
         self.assertTrue(self.target + " predicted" in df_test.columns)
 
