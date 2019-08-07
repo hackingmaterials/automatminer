@@ -51,7 +51,8 @@ disk, or used to make predictions on new materials.
    :align: center
 
 
-Here's an example of training on known data, and extending the model to out of sample data.
+Here's an example of training on known data, and extending the model to out of
+sample data.
 
 .. code-block:: python
 
@@ -86,7 +87,8 @@ User manual
 What's new?
 -----------
 
-Track changes to automatminer through the `changelog <https://github.com/hackingmaterials/automatminer/blob/master/CHANGELOG.md>`_.
+Track changes to automatminer through the `changelog
+<https://github.com/hackingmaterials/automatminer/blob/master/CHANGELOG.md>`_.
 
 Contributing / Contact / Support
 --------------------------------
@@ -98,8 +100,12 @@ Want to see something added or changed? Some ways to get involved are:
 - Let us know if you'd like to see certain features.
 - Point us to areas of the code that are difficult to understand or use.
 - Contribute code. You can do this by forking
-  `Automatminer on Github <https://github.com/hackingmaterials/automatminer>`_ and submitting
-  a pull request.
+  `Automatminer on Github <https://github.com/hackingmaterials/automatminer>`_
+  and submitting a pull request.
+
+See our `contribution guidelines
+<https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md>`_
+for more details.
 
 API documentation
 ------------------
