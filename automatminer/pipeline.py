@@ -36,7 +36,7 @@ class MatPipe(DFTransformer, LoggableMixin):
     Note: This pipeline should function the same regardless of which
     "component" classes it is made out of. E.g. the steps for each method should
     remain the same whether using the TPOTAdaptor class as the learner or
-    using an AutoKerasAdaptor class as the learner. To use a preset config,
+    using an SinglePipelineAdaptor class as the learner. To use a preset config,
     import a config from automatminer.configs and do MatPipe(**config).
     ----------------------------------------------------------------------------
 
@@ -84,7 +84,7 @@ class MatPipe(DFTransformer, LoggableMixin):
                                         "reducer, and cleaner), or none (to use"
                                         "default).")
             else:
-                config = get_preset_config("production")
+                config = get_preset_config("express")
                 autofeaturizer = config["autofeaturizer"]
                 cleaner = config["cleaner"]
                 reducer = config["reducer"]
