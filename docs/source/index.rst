@@ -63,7 +63,7 @@ sample data.
     pipe.fit(train_df, "band gap")
 
     # Predict bandgap of some unknown materials
-    predicted_df = pipe.predict(unknown_df, "band gap")
+    predicted_df = pipe.predict(unknown_df)
 
 User manual
 --------------
