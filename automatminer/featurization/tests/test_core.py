@@ -131,7 +131,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertIn("ElementProperty", af.exclude)
         self.assertFalse(any([f in df.columns for f in ep_feats]))
 
-    def test_featurize_bsdos(self, refresh_df_init=False, limit=1):
+    def test_featurize_bsdos(self, refresh_df_init=True, limit=1):
         """
         Tests featurize_dos and featurize_bandstructure.
 

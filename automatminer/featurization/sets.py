@@ -74,6 +74,7 @@ class CompositionFeaturizers(FeaturizerSet):
             cf.ElementProperty.from_preset("magpie"),
             cf.ElementProperty.from_preset("matscholar_el"),
             cf.ElementProperty.from_preset("deml"),
+            cf.Meredig(),
             cf.ElementFraction(),
             cf.Stoichiometry(),
             cf.TMetalFraction(),

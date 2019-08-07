@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>automatminer &#8212; Automatminer 2019.05.14_beta0 documentation</title>
+    <title>automatminer documentation &#8212; Automatminer 2019.05.14_beta0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -55,18 +55,18 @@
 
 </style><a class="reference internal image-reference" href="_static/logo.svg"><div align="center" class="align-center"><img alt="server" src="_static/logo.svg" width="600px" /></div>
 </a>
-<div class="section" id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<style> .red {color:#aa0060; font-weight:bold; font-size:16px} </style><p><span class="red">WARNING! These docs and examples are a work in progress.
-Read and use at your own risk!`</span></p>
 <p>Automatminer is a tool for <em>automatically</em> creating <strong>complete</strong> machine
 learning pipelines for materials science, including automatic featurization
 with <a class="reference external" href="https://github.com/hackingmaterials/matminer">matminer</a>, feature
 reduction, and an AutoML backend. Put in a materials dataset, get out a machine
 that predicts materials properties.</p>
 <div class="section" id="how-it-works">
-<h2>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this headline">¶</a></h2>
-<p>Automatminer automatically decorates a dataset using hundreds of descriptor techniques from matminer’s descriptor library, picks the most useful features for learning, and runs a separate AutoML pipeline using TPOT. Once a pipeline has been fit, it can be examined with skater’s interpretability tools, summarized in a text file, saved to disk, or used to make new predictions.</p>
+<h1>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this headline">¶</a></h1>
+<p>Automatminer automatically decorates a dataset using hundreds of descriptor
+techniques from matminer’s descriptor library, picks the most useful
+features for learning, and runs a separate AutoML pipeline using TPOT.
+Once a pipeline has been fit, it can be summarized in a text file, saved to
+disk, or used to make predictions on new materials.</p>
 <img alt="server" class="align-center" src="_static/automatminer_big.jpg" />
 <p>Here’s an example of training on known data, and extending the model to out of sample data.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer.pipeline</span> <span class="kn">import</span> <span class="n">MatPipe</span>
@@ -79,10 +79,8 @@ that predicts materials properties.</p>
 <span class="n">predicted_df</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">unknown_df</span><span class="p">,</span> <span class="s2">&quot;band gap&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
 <div class="section" id="user-manual">
-<h1>User manual<a class="headerlink" href="#user-manual" title="Permalink to this headline">¶</a></h1>
+<h2>User manual<a class="headerlink" href="#user-manual" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><div class="toctree-wrapper compound">
 <ul>
@@ -104,11 +102,11 @@ that predicts materials properties.</p>
 </div>
 </div>
 <div class="section" id="what-s-new">
-<h1>What’s new?<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
-<p>Track changes to AMSET through the <span class="xref std std-doc">changelog</span>.</p>
+<h2>What’s new?<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h2>
+<p>Track changes to automatminer through the <cite>changelog &lt;https://github.com/hackingmaterials/automatminer/chang</cite>.</p>
 </div>
 <div class="section" id="contributing-contact-support">
-<h1>Contributing / Contact / Support<a class="headerlink" href="#contributing-contact-support" title="Permalink to this headline">¶</a></h1>
+<h2>Contributing / Contact / Support<a class="headerlink" href="#contributing-contact-support" title="Permalink to this headline">¶</a></h2>
 <p>Want to see something added or changed? Some ways to get involved are:</p>
 <ul class="simple">
 <li><p>Help us improve the documentation – tell us where you got stuck and improve
@@ -119,17 +117,18 @@ the install process for everyone.</p></li>
 <a class="reference external" href="https://github.com/hackingmaterials/amset">AMSET on Github</a> and submitting
 a pull request.</p></li>
 </ul>
-<p>The list of contributors to AMSET can be found <span class="xref std std-doc">here</span>.
-Read more about contributing code to AMSET <span class="xref std std-doc">here</span>.</p>
+<p>The list of contributors to AMSET can be found .
+Read more about contributing code to AMSET .</p>
 </div>
 <div class="section" id="api-documentation">
-<h1>API documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
+<h2>API documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h2>
 <p>Autogenerated API documentation below:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
+</div>
 </div>
 
 

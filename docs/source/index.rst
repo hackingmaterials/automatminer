@@ -23,25 +23,12 @@
 
   </style>
 
-.. title:: automatminer
+.. title:: automatminer documentation
 
 .. image:: _static/logo.svg
    :alt: server
    :align: center
    :width: 600px
-
-Introduction
-------------
-
-.. raw:: html
-
-    <style> .red {color:#aa0060; font-weight:bold; font-size:16px} </style>
-
-.. role:: red
-
-:red:`WARNING! These docs and examples are a work in progress.
-Read and use at your own risk!`
-
 
 
 Automatminer is a tool for *automatically* creating **complete** machine
@@ -97,7 +84,7 @@ User manual
 What's new?
 -----------
 
-Track changes to AMSET through the :doc:`changelog`.
+Track changes to automatminer through the `changelog <https://github.com/hackingmaterials/automatminer/chang`.
 
 Contributing / Contact / Support
 --------------------------------
@@ -112,8 +99,8 @@ Want to see something added or changed? Some ways to get involved are:
   `AMSET on Github <https://github.com/hackingmaterials/amset>`_ and submitting
   a pull request.
 
-The list of contributors to AMSET can be found :doc:`here </contributors>`.
-Read more about contributing code to AMSET :doc:`here </contributing>`.
+The list of contributors to AMSET can be found .
+Read more about contributing code to AMSET .
 
 API documentation
 ------------------
