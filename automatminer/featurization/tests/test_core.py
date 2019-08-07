@@ -279,6 +279,8 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("structure" not in df.columns)
         self.assertTrue(custom_struc_key not in df.columns)
 
+    # todo: re-enable this test_functionalization
+    @unittest.skip("Functionalization part of autofeaturizer needs rewriting")
     def test_functionalization(self):
         target = "K_VRH"
         flimit = 2
