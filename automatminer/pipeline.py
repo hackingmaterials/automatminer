@@ -49,7 +49,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         # on new materials
         pipe = MatPipe()
         pipe.fit(training_df, "target_property")
-        predictions = pipe.predict(unknown_df, "target_property")
+        predictions = pipe.predict(unknown_df)
 
     Args:
         logger (Logger, bool): A custom logger object to use for logging.
@@ -159,8 +159,6 @@ class MatPipe(DFTransformer, LoggableMixin):
 
         Args:
             df (pandas.DataFrame): Pipe will be fit to this dataframe.
-            target (str): The column in the dataframe containing the target
-                property of interest
 
         Returns:
             (pandas.DataFrame): The dataframe with target property predictions.
