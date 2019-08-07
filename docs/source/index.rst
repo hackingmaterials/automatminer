@@ -38,7 +38,7 @@ reduction, and an AutoML backend. Put in a materials dataset, get out a machine
 that predicts materials properties.
 
 How it works
-=============
+------------
 
 Automatminer automatically decorates a dataset using hundreds of descriptor
 techniques from matminer's descriptor library, picks the most useful
@@ -46,7 +46,7 @@ features for learning, and runs a separate AutoML pipeline using TPOT.
 Once a pipeline has been fit, it can be summarized in a text file, saved to
 disk, or used to make predictions on new materials.
 
-.. image:: _static/automatminer_big.jpg
+.. image:: _static/pipe.png
    :alt: server
    :align: center
 
@@ -71,20 +71,22 @@ User manual
     :maxdepth: 2
 
     installation.rst
-    using.rst
+    basic.rst
+    advanced.rst
+    datasets.rst
+    license.rst
 
 
 .. toctree::
    :hidden:
    :maxdepth: 2
 
-   changelog
    Python API <modules>
 
 What's new?
 -----------
 
-Track changes to automatminer through the `changelog <https://github.com/hackingmaterials/automatminer/chang`.
+Track changes to automatminer through the `changelog <https://github.com/hackingmaterials/automatminer/blob/master/CHANGELOG.md>`_.
 
 Contributing / Contact / Support
 --------------------------------
@@ -96,11 +98,8 @@ Want to see something added or changed? Some ways to get involved are:
 - Let us know if you'd like to see certain features.
 - Point us to areas of the code that are difficult to understand or use.
 - Contribute code. You can do this by forking
-  `AMSET on Github <https://github.com/hackingmaterials/amset>`_ and submitting
+  `Automatminer on Github <https://github.com/hackingmaterials/automatminer>`_ and submitting
   a pull request.
-
-The list of contributors to AMSET can be found .
-Read more about contributing code to AMSET .
 
 API documentation
 ------------------

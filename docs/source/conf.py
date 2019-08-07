@@ -4,6 +4,7 @@ import os
 from docutils.parsers.rst import Directive
 
 import automatminer
+import sphinx_bootstrap_theme
 
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
@@ -149,11 +150,21 @@ latex_documents = [
 html_theme = 'alabaster'
 
 html_theme_options = {
-    'logo': 'logo_lowres.png',
+    # 'logo': 'logo_lowres.png',
     'github_repo': 'hackingmaterials/automatminer',
     'github_button': 'true',
     'link': '#aa560c',
     'show_powered_by': 'false',
+    'fixed_sidebar': 'true',
+    'font_family': 'Nunito',
+    'head_font_family': 'Nunito',
+    'caption_font_family': 'Nunito',
+    'description_font_style': 'Nunito',
+    'description': "An autoML tool for materials",
+    'font_size': 12,
+
+    # 'page_width': 300,
+    # 'sidebar_width': 150,
     # "relbarbgcolor": "#333",
     # "sidebarlinkcolor": "#e15617",
     # "sidebarbgcolor": "#000",
@@ -163,6 +174,10 @@ html_theme_options = {
     # "headtextcolor": "#643200",
     # "codebgcolor": "#f5efe7",
 }
+
+# Activate the theme.
+# html_theme = 'bootstrap'
+# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # imgmath_image_format = "svg"  # use svg for math
 # imgmath_dvisvgm_args = ['--no-fonts', '--exact']

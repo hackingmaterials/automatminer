@@ -1,4 +1,4 @@
-Using Automatminer
+Basic Usage
 ==================
 
 
@@ -12,12 +12,12 @@ Making predictions
 
 
 Running a benchmark
--------------------
+--------------------
 
 
 
-Customizing a pipeline
-----------------------
+Using different presets
+-----------------------
 
 
 

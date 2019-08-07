@@ -16,16 +16,39 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation" href="installation.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
 
   </head><body>
-  
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Automatminer</a></h1>
 
-    <div class="document">
+
+
+<p class="blurb">An autoML tool for materials</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Python API</a></li>
+</ul>
+
+
+        </div>
+      </div>
       <div class="documentwrapper">
         <div class="bodywrapper">
           
@@ -67,7 +90,7 @@ techniques from matminer’s descriptor library, picks the most useful
 features for learning, and runs a separate AutoML pipeline using TPOT.
 Once a pipeline has been fit, it can be summarized in a text file, saved to
 disk, or used to make predictions on new materials.</p>
-<img alt="server" class="align-center" src="_static/automatminer_big.jpg" />
+<img alt="server" class="align-center" src="_images/pipe.png" />
 <p>Here’s an example of training on known data, and extending the model to out of sample data.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer.pipeline</span> <span class="kn">import</span> <span class="n">MatPipe</span>
 
@@ -79,22 +102,35 @@ disk, or used to make predictions on new materials.</p>
 <span class="n">predicted_df</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">unknown_df</span><span class="p">,</span> <span class="s2">&quot;band gap&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
 <div class="section" id="user-manual">
-<h2>User manual<a class="headerlink" href="#user-manual" title="Permalink to this headline">¶</a></h2>
+<h1>User manual<a class="headerlink" href="#user-manual" title="Permalink to this headline">¶</a></h1>
 <blockquote>
 <div><div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#from-pypi-using-pip">From PyPi (using pip)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#from-source">From source</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="using.html">Using AMSET</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="using.html#from-the-command-line">From the command-line</a></li>
-<li class="toctree-l2"><a class="reference internal" href="using.html#from-the-python-api">From the Python API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="using.html#output-files">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="using.html#convergence">Convergence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic.html#training-a-pipeline">Training a pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic.html#making-predictions">Making predictions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic.html#running-a-benchmark">Running a benchmark</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic.html#using-different-presets">Using different presets</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#customizing-pipelines">Customizing pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#using-dftransformers-individually">Using DFTransformers individually</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html#some-heading">Some heading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html#some-heading-2">Some heading 2</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 </ul>
 </div>
 </div></blockquote>
@@ -102,11 +138,11 @@ disk, or used to make predictions on new materials.</p>
 </div>
 </div>
 <div class="section" id="what-s-new">
-<h2>What’s new?<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h2>
-<p>Track changes to automatminer through the <cite>changelog &lt;https://github.com/hackingmaterials/automatminer/chang</cite>.</p>
+<h1>What’s new?<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
+<p>Track changes to automatminer through the <a class="reference external" href="https://github.com/hackingmaterials/automatminer/blob/master/CHANGELOG.md">changelog</a>.</p>
 </div>
 <div class="section" id="contributing-contact-support">
-<h2>Contributing / Contact / Support<a class="headerlink" href="#contributing-contact-support" title="Permalink to this headline">¶</a></h2>
+<h1>Contributing / Contact / Support<a class="headerlink" href="#contributing-contact-support" title="Permalink to this headline">¶</a></h1>
 <p>Want to see something added or changed? Some ways to get involved are:</p>
 <ul class="simple">
 <li><p>Help us improve the documentation – tell us where you got stuck and improve
@@ -114,14 +150,12 @@ the install process for everyone.</p></li>
 <li><p>Let us know if you’d like to see certain features.</p></li>
 <li><p>Point us to areas of the code that are difficult to understand or use.</p></li>
 <li><p>Contribute code. You can do this by forking
-<a class="reference external" href="https://github.com/hackingmaterials/amset">AMSET on Github</a> and submitting
+<a class="reference external" href="https://github.com/hackingmaterials/automatminer">Automatminer on Github</a> and submitting
 a pull request.</p></li>
 </ul>
-<p>The list of contributors to AMSET can be found .
-Read more about contributing code to AMSET .</p>
 </div>
 <div class="section" id="api-documentation">
-<h2>API documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h2>
+<h1>API documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
 <p>Autogenerated API documentation below:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
@@ -129,40 +163,14 @@ Read more about contributing code to AMSET .</p>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
-</div>
 
 
           </div>
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<p class="logo">
-  <a href="#">
-    <img class="logo" src="_static/logo_lowres.png" alt="Logo"/>
-    
-  </a>
-</p>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="using.html">Using AMSET</a></li>
-</ul>
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
+    <div class="clearer"></div>
+  </div>
     <div class="footer">
       &copy;HackingMaterials 2019.
       

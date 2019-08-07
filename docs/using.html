@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Using AMSET &#8212; Automatminer 2019.05.14_beta0 documentation</title>
+    <title>Using Automatminer &#8212; Automatminer 2019.05.14_beta0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -15,116 +15,13 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="MatBench benchmark" href="datasets.html" />
     <link rel="prev" title="Installation" href="installation.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
 
   </head><body>
-  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          
-
-          <div class="body" role="main">
-            
-  <div class="section" id="using-amset">
-<h1>Using AMSET<a class="headerlink" href="#using-amset" title="Permalink to this headline">¶</a></h1>
-<p>AMSET can be used from the command-line as a standalone program or from the
-Python API. In both cases, the primary input is a <code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code> file from a
-uniform band structure calculation (i.e., on a regular k-point grid and not
-along high-symmetry lines).</p>
-<p>Temperature and doping ranges, scattering rates, and calculation performance
-parameters are controlled through the settings file. More details on the
-available settings are provided in the <a class="reference external" href="settings">settings section</a> of the
-documentation. An example settings file is given <span class="xref std std-ref">here</span>.</p>
-<div class="section" id="from-the-command-line">
-<h2>From the command-line<a class="headerlink" href="#from-the-command-line" title="Permalink to this headline">¶</a></h2>
-<p>AMSET can be run from the command-line using the <code class="docutils literal notranslate"><span class="pre">amset</span></code> command. The help
-menu listing a summary of the command-line options can be printed using:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>amset -h
-</pre></div>
-</div>
-<p>By default, AMSET will look for a <code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code> file and <code class="docutils literal notranslate"><span class="pre">settings.yaml</span></code>
-file in the current directory. A different directory can be specified using
-the <code class="docutils literal notranslate"><span class="pre">directory</span></code> option, e.g.:
-v
-.. code-block:: bash</p>
-<blockquote>
-<div><p>amset –directory path/to/files</p>
-</div></blockquote>
-<p>Any settings specified via the command line will override those in the settings
-file. For example, the interpolation factor can be easily controlled using:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>amset --interpolation-factor <span class="m">20</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="from-the-python-api">
-<h2>From the Python API<a class="headerlink" href="#from-the-python-api" title="Permalink to this headline">¶</a></h2>
-<p>Greater configurability is available when running AMSET from the Python API.
-For example, the following snippet will look for a <code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code> and
-<code class="docutils literal notranslate"><span class="pre">settings.yaml</span></code> file in the current directory, then run AMSET.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">amset.run</span> <span class="kn">import</span> <span class="n">AmsetRunner</span>
-
-<span class="n">runner</span> <span class="o">=</span> <span class="n">AmsetRunner</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
-<span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>The API allows for easily converging performance parameters. For example,
-the following snippet will run AMSET using multiple interpolation parameters.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">amset.run</span> <span class="kn">import</span> <span class="n">AmsetRunner</span>
-
-<span class="n">settings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;general&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;interpolation_factor&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}}</span>
-
-<span class="k">for</span> <span class="n">i_factor</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
-    <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;general&quot;</span><span class="p">][</span><span class="s2">&quot;interpolation_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">i_factor</span>
-
-    <span class="n">runner</span> <span class="o">=</span> <span class="n">AmsetRunner</span><span class="o">.</span><span class="n">from_directory</span><span class="p">(</span>
-        <span class="n">directory</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">settings_override</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
-    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>When running AMSET from the API, it is not necessary to use a settings file
-at all. Instead the settings can be passed as a dictionary. For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">amset.run</span> <span class="kn">import</span> <span class="n">AmsetRunner</span>
-
-<span class="n">settings</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;general&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;interpolation_factor&quot;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span>
-        <span class="s2">&quot;doping&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.99e+14</span><span class="p">,</span> <span class="mf">2.20e+15</span><span class="p">,</span> <span class="mf">1.72e+16</span><span class="p">,</span>
-                   <span class="mf">1.86e+17</span><span class="p">,</span> <span class="mf">1.46e+18</span><span class="p">,</span> <span class="mf">4.39e+18</span><span class="p">],</span>
-        <span class="s2">&quot;temperatures&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">300</span><span class="p">]</span>
-    <span class="p">},</span>
-
-    <span class="s2">&quot;material&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;deformation_potential&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">),</span>
-        <span class="s2">&quot;elastic_constant&quot;</span><span class="p">:</span> <span class="mi">190</span><span class="p">,</span>
-        <span class="s2">&quot;static_dielectric&quot;</span><span class="p">:</span> <span class="mf">13.1</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">}</span>
-
-<span class="n">runner</span> <span class="o">=</span> <span class="n">AmsetRunner</span><span class="o">.</span><span class="n">from_vasprun_and_settings</span><span class="p">(</span><span class="s2">&quot;vasprun.xml.gz&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
-<span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="output-files">
-<h2>Output files<a class="headerlink" href="#output-files" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="convergence">
-<h2>Convergence<a class="headerlink" href="#convergence" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
-
-
-          </div>
-          
-        </div>
-      </div>
+  <div class="document">
+    
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <p class="logo">
@@ -136,6 +33,8 @@ at all. Instead the settings can be passed as a dictionary. For example:</p>
 
 
 
+<p class="blurb">An autoML tool for materials</p>
+
 
 
 
@@ -144,20 +43,48 @@ at all. Instead the settings can be passed as a dictionary. For example:</p>
 <h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Using AMSET</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#from-the-command-line">From the command-line</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#from-the-python-api">From the Python API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#output-files">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#convergence">Convergence</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using Automatminer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#training-a-pipeline">Training a pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#making-predictions">Making predictions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-a-benchmark">Running a benchmark</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#customizing-a-pipeline">Customizing a pipeline</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
 </ul>
 
 
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="using-automatminer">
+<h1>Using Automatminer<a class="headerlink" href="#using-automatminer" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="training-a-pipeline">
+<h2>Training a pipeline<a class="headerlink" href="#training-a-pipeline" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="making-predictions">
+<h2>Making predictions<a class="headerlink" href="#making-predictions" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="running-a-benchmark">
+<h2>Running a benchmark<a class="headerlink" href="#running-a-benchmark" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="customizing-a-pipeline">
+<h2>Customizing a pipeline<a class="headerlink" href="#customizing-a-pipeline" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
     <div class="footer">
       &copy;HackingMaterials 2019.
       

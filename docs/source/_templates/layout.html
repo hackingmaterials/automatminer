@@ -1,19 +1,24 @@
 {% extends '!layout.html' %}
 
-<!--{%- block sidebarsourcelink %}-->
-<!--{% endblock %}-->
 
-<!--{%- block sidebarsearch %}-->
-<!--    <hr/>-->
-<!--{{ super() }}-->
-<!--    <hr/>-->
-<!--    <div>-->
-<!--	<h3>Support</h3>-->
-<!--	<a href="https://groups.google.com/forum/#!forum/atomate">AMSET Forum</a>-->
-<!--    <p class="searchtip" style="font-size: 80%">-->
-<!--    Send an email to subscribe</p>-->
+{% block extrahead %}
+    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
+{% endblock %}
 
-<!--    </div>-->
-<!--<hr/>-->
-<!--{% endblock %}-->
+{%- block sidebarsourcelink %}
+{% endblock %}
+
+{%- block sidebarsearch %}
+    <hr/>
+{{ super() }}
+    <hr/>
+    <div>
+	<h3>Support</h3>
+	<a href="https://groups.google.com/forum/#!forum/matminer">Automatminer forum</a>
+    <p class="searchtip" style="font-size: 80%">
+    Send an email to subscribe</p>
+
+    </div>
+<hr/>
+{% endblock %}
 
