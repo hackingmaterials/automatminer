@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>automatminer.featurization.base &#8212; automatminer 2019.05.14_beta0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for automatminer.featurization.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Base classes for sets of featurizers.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
+
+<span class="n">__authors__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Alex Dunn &lt;ardunn@lbl.gov&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;Alex Ganose &lt;aganose@lbl.gov&gt;&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="FeaturizerSet"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.FeaturizerSet.html#automatminer.featurization.sets.FeaturizerSet">[docs]</a><span class="k">class</span> <span class="nc">FeaturizerSet</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract class for defining sets of featurizers.</span>
+
+<span class="sd">    All FeaturizerSets should implement at least fours sets of featurizers:</span>
+
+<span class="sd">        - express - The &quot;go-to&quot; set of featurizers</span>
+<span class="sd">        - heavy - A more expensive and complete (though not necessarily</span>
+<span class="sd">            better) version of express.</span>
+<span class="sd">        - all - All featurizers available for the intended featurization type(s)</span>
+<span class="sd">        - debug - An ultra-minimal set of featurizers for debugging purposes.</span>
+
+<span class="sd">    Each set returned is a list of matminer featurizer objects. The choice of</span>
+<span class="sd">    featurizers for a given set is at the discrtetion of the implementor.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exclude (list of str, optional): A list of featurizer class names that</span>
+<span class="sd">            will be excluded from the set of featurizers returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="n">exclude</span> <span class="k">if</span> <span class="n">exclude</span> <span class="k">else</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="FeaturizerSet.__call__"><a class="viewcode-back" href="../../../api/automatminer.featurization.sets.FeaturizerSet.html#automatminer.featurization.sets.FeaturizerSet.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">all</span></div>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">express</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;A focused set of featurizers which should:</span>
+
+<span class="sd">        * be reasonably fast to featurize</span>
+<span class="sd">        * be not prone to errors/nans</span>
+<span class="sd">        * provide informative learning features</span>
+<span class="sd">        * do not include many irrelevant features making ML expensive</span>
+<span class="sd">        * have each featurizer return a vector</span>
+<span class="sd">        * allow the recognized type (structure, composition, etc.) as input.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">heavy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;A more expensive and complete (though not necessarily better)</span>
+<span class="sd">        version of express.</span>
+
+<span class="sd">        Similar to express, all featurizers selected should return useful</span>
+<span class="sd">        learning features. However the selected featurizers may now:</span>
+
+<span class="sd">        * generate many (thousands+) features</span>
+<span class="sd">        * be expensive to featurize (1s+ per item)</span>
+<span class="sd">        * be prone to NaNs on certain datasets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;All featurizers available for this featurization type. These</span>
+<span class="sd">        featurizers are allowed to:</span>
+
+<span class="sd">        * have multiple, highly similar versions of the same featurizer,</span>
+<span class="sd">        * not work on standard versions of the input types (e.g., SiteDOS works</span>
+<span class="sd">            on the DOS for a single site, not structure</span>
+<span class="sd">        * return non-vectorized outputs (e.g., matrices, other data types).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;An ultra-minimal set of featurizers for debugging.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_get_featurizers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">featurizers</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Utility function for getting featurizers not in the ignore list.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">featurizers</span>
+                <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span><span class="p">]</span></div>
+</pre></div>
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

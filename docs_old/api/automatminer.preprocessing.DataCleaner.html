@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>DataCleaner &#8212; automatminer 2019.05.14_beta0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="datacleaner">
+<h1>DataCleaner<a class="headerlink" href="#datacleaner" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="automatminer.preprocessing.DataCleaner">
+<em class="property">class </em><code class="descclassname">automatminer.preprocessing.</code><code class="descname">DataCleaner</code><span class="sig-paren">(</span><em>max_na_frac=0.01</em>, <em>feature_na_method='drop'</em>, <em>encode_categories=True</em>, <em>encoder='one-hot'</em>, <em>drop_na_targets=True</em>, <em>na_method_fit='drop'</em>, <em>na_method_transform='fill'</em>, <em>logger=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/core.html#DataCleaner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.preprocessing.DataCleaner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="automatminer.base.DFTransformer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.base.LoggableMixin.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<p>Transform a featurized dataframe into an ML-ready dataframe.</p>
+<p>Works by first removing samples not having a target value (if desired), then
+dropping features with high nan rates. Finally, removing or otherwise
+handling nans for individual samples (a relatively uncommon occurrence).</p>
+<dl>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>max_na_frac (float): The maximum fraction (0.0 - 1.0) of samples for a</dt><dd><p>given feature allowed. Columns containing a higher nan fraction are
+handled according to feature_na_method.</p>
+</dd>
+<dt>feature_na_method (str): Defines how to handle features (column) with</dt><dd><p>higher na fraction than max_na_frac. “drop” for dropping these
+features. “fill” for filling these features with pandas bfill and
+ffill. “mean” to fill categorical variables and mean for numerical
+variables. Alternatively, specify a number to replace the nans,
+e.g. 0. If all samples are nan, feature will be dropped regardless.</p>
+</dd>
+<dt>encode_categories (bool): If True, retains features which are</dt><dd><p>categorical (data type is string or object) and then
+one-hot encodes them. If False, drops them.</p>
+</dd>
+<dt>encoder (str): choose a method for encoding the categorical</dt><dd><p>variables. Current options: ‘one-hot’ and ‘label’.</p>
+</dd>
+<dt>drop_na_targets (bool): Drop samples containing target values which are</dt><dd><p>na.</p>
+</dd>
+<dt>na_method_fit (str, float, int): Set the na_method for samples in fit.</dt><dd><p>Select one of the following methods: “fill” (use pandas fillna with
+ffill and bfill, sequentially), “ignore” (totally ignore nans in
+samples), “drop” (drop any remaining samples having a nan feature),
+“mean” (fills categorical variables, takes means of numerical).
+Alternatively, specify a number to replace the nans, e.g. 0.</p>
+</dd>
+<dt>na_method_transform (str, float, int): The same as na_method_fit, but</dt><dd><p>for transform.</p>
+</dd>
+<dt>logger (Logger, bool): A custom logger object to use for logging.</dt><dd><p>Alternatively, if set to True, the default automatminer logger will
+be used. If set to False, then no logging will occur.</p>
+</dd>
+</dl>
+</dd>
+<dt>Attributes:</dt><dd><blockquote>
+<div><p>The following attrs are set during fitting.</p>
+</div></blockquote>
+<p>retained_features (list): The features which were retained
+object_cols (list): The features identified as objects/categories
+number_cols (list): The features identified as numerical
+fitted_df (pd.DataFrame): The fitted dataframe
+is_fit (bool): If true, this object has been fit to a dataframe</p>
+<blockquote>
+<div><p>The following attrs are set during fitting and/or transformation. Ie
+they are only relevant to the most recent transform.</p>
+</div></blockquote>
+<p>dropped_features (list): The features which were dropped.
+dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped</p>
+</dd>
+</dl>
+<p class="rubric">Attributes Summary</p>
+<table class="longtable docutils align-center">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#automatminer.preprocessing.DataCleaner.retained_features" title="automatminer.preprocessing.DataCleaner.retained_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">retained_features</span></code></a></p></td>
+<td><p>The features retained during fitting, which may be used to craft the dataframe during transform.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table class="longtable docutils align-center">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#automatminer.preprocessing.DataCleaner.fit" title="automatminer.preprocessing.DataCleaner.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(**kwargs)</p></td>
+<td><p>Wrapper for a method to log.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#automatminer.preprocessing.DataCleaner.fit_transform" title="automatminer.preprocessing.DataCleaner.fit_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_transform</span></code></a>(df, target, **fit_kwargs)</p></td>
+<td><p>Combines the fitting and transformation of a dataframe.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#automatminer.preprocessing.DataCleaner.handle_na" title="automatminer.preprocessing.DataCleaner.handle_na"><code class="xref py py-obj docutils literal notranslate"><span class="pre">handle_na</span></code></a>(df, target, na_method[, …])</p></td>
+<td><p>First pass for handling cells without values (null or nan).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#automatminer.preprocessing.DataCleaner.to_numerical" title="automatminer.preprocessing.DataCleaner.to_numerical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_numerical</span></code></a>(df, target)</p></td>
+<td><p>Transforms non-numerical columns to numerical columns which are machine learning-friendly.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#automatminer.preprocessing.DataCleaner.transform" title="automatminer.preprocessing.DataCleaner.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a>(**kwargs)</p></td>
+<td><p>Wrapper for a method to log.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="attribute">
+<dt id="automatminer.preprocessing.DataCleaner.retained_features">
+<code class="descname">retained_features</code><a class="headerlink" href="#automatminer.preprocessing.DataCleaner.retained_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>The features retained during fitting, which may be used to craft the
+dataframe during transform.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>(list): The list of features retained.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="automatminer.preprocessing.DataCleaner.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.DataCleaner.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>operation (str): The operation to be logging.</p>
+</dd>
+<dt>Return:</dt><dd><p>result: The method result.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.DataCleaner.fit_transform">
+<code class="descname">fit_transform</code><span class="sig-paren">(</span><em>df</em>, <em>target</em>, <em>**fit_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/core.html#DataCleaner.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.preprocessing.DataCleaner.fit_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines the fitting and transformation of a dataframe.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>df (pandas.DataFrame): The pandas dataframe to be fit.
+target (str): the target string specifying the ML target.</p>
+</dd>
+<dt>Returns:</dt><dd><p>(pandas.DataFrame): The transformed dataframe.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.DataCleaner.handle_na">
+<code class="descname">handle_na</code><span class="sig-paren">(</span><em>df</em>, <em>target</em>, <em>na_method</em>, <em>coerce_mismatch=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/core.html#DataCleaner.handle_na"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.preprocessing.DataCleaner.handle_na" title="Permalink to this definition">¶</a></dt>
+<dd><p>First pass for handling cells without values (null or nan). Additional
+preprocessing may be necessary as one column may be filled with
+median while the other with mean or mode, etc.</p>
+<dl>
+<dt>Args:</dt><dd><p>df (pandas.DataFrame): The dataframe containing features
+target (str): The key defining the ML target.
+coerce_mismatch (bool): If there is a mismatch between the fitted</p>
+<blockquote>
+<div><p>dataframe columns and the argument dataframe columns, create
+and drop mismatch columns so the dataframes are matching. If
+False, raises an error. New columns are instantiated as all
+zeros, as most of the time this is a onehot encoding issue.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>na_method (str): How to deal with samples still containing nans</dt><dd><p>after troublesome columns are already dropped. Default is
+‘drop’. Other options are from pandas.DataFrame.fillna:
+{‘bfill’, ‘pad’, ‘ffill’}, or ‘ignore’ to ignore nans.
+Alternatively, specify a value to replace the nans, e.g. 0.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>(pandas.DataFrame) The cleaned df</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.DataCleaner.to_numerical">
+<code class="descname">to_numerical</code><span class="sig-paren">(</span><em>df</em>, <em>target</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/core.html#DataCleaner.to_numerical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.preprocessing.DataCleaner.to_numerical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms non-numerical columns to numerical columns which are
+machine learning-friendly.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>df (pandas.DataFrame): The dataframe containing features
+target (str): The key defining the ML target.</p>
+</dd>
+<dt>Returns:</dt><dd><p>(pandas.DataFrame) The numerical df</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.DataCleaner.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.DataCleaner.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>operation (str): The operation to be logging.</p>
+</dd>
+<dt>Return:</dt><dd><p>result: The method result.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/automatminer.preprocessing.DataCleaner.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

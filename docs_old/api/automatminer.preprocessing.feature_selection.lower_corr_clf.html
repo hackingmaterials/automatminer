@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>lower_corr_clf &#8212; automatminer 2019.05.14_beta0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="lower-corr-clf">
+<h1>lower_corr_clf<a class="headerlink" href="#lower-corr-clf" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="automatminer.preprocessing.feature_selection.lower_corr_clf">
+<code class="descclassname">automatminer.preprocessing.feature_selection.</code><code class="descname">lower_corr_clf</code><span class="sig-paren">(</span><em>df</em>, <em>target</em>, <em>f1</em>, <em>f2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/feature_selection.html#lower_corr_clf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.preprocessing.feature_selection.lower_corr_clf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train a simple linear model on the data to decide on the worse of two
+features. The feature which should be dropped is returned.</p>
+<dl>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>df (pd.DataFrame): The dataframe containing the target values and</dt><dd><p>features in question</p>
+</dd>
+</dl>
+<p>target (str): The key for the target column
+f1 (str): The key for the first feature.
+f2 (str): The key for the second feature.</p>
+</dd>
+<dt>Returns:</dt><dd><p>(str): The name of the feature to be dropped (worse score).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/automatminer.preprocessing.feature_selection.lower_corr_clf.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

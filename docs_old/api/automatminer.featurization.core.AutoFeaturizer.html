@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>AutoFeaturizer &#8212; automatminer 2019.05.14_beta0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="autofeaturizer">
+<h1>AutoFeaturizer<a class="headerlink" href="#autofeaturizer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="automatminer.featurization.core.AutoFeaturizer">
+<em class="property">class </em><code class="descclassname">automatminer.featurization.core.</code><code class="descname">AutoFeaturizer</code><span class="sig-paren">(</span><em>cache_src=None</em>, <em>preset=None</em>, <em>featurizers=None</em>, <em>exclude=None</em>, <em>functionalize=False</em>, <em>ignore_cols=None</em>, <em>ignore_errors=True</em>, <em>drop_inputs=True</em>, <em>guess_oxistates=True</em>, <em>multiindex=False</em>, <em>do_precheck=True</em>, <em>n_jobs=None</em>, <em>logger=True</em>, <em>composition_col='composition'</em>, <em>structure_col='structure'</em>, <em>bandstructure_col='bandstructure'</em>, <em>dos_col='dos'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/featurization/core.html#AutoFeaturizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="automatminer.base.DFTransformer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.base.LoggableMixin.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<p>Automatically featurize a dataframe.</p>
+<p>Use this object first by calling fit, then by calling transform.</p>
+<dl>
+<dt>AutoFeaturizer requires you to specify the column names for each type of</dt><dd><p>featurization, or just use the defaults:</p>
+<p>“composition”: To use composition features
+“structure”: To use structure features
+“bandstructure”: To use bandstructure features
+“dos”: To use density of states features</p>
+</dd>
+</dl>
+<p>The featurizers corresponding to each featurizer type cannot be used if
+the correct column name is not present.</p>
+<dl>
+<dt>Args:</dt><dd><dl>
+<dt>cache_src (str): An absolute path to a json file holding feature</dt><dd><p>information. If file exists, will read features (loc indexwise)
+from this file instead of featurizing. If this file does not exist,
+AutoFeaturizer will featurize normally, then save the features to a
+new file. Only features (not featurizer input objects) will be saved</p>
+</dd>
+<dt>preset (str): “express” or “heavy” or “debug” or “all. Determines by</dt><dd><p>preset the featurizers that should be applied. See the Featurizer
+sets for specifics of each. Default is “express”. Incompatible with
+the featurizers arg.</p>
+</dd>
+<dt>featurizers (dict): Use this option if you want to manually specify</dt><dd><p>the featurizers to use. Keys are the featurizer types you want
+applied (e.g., “structure”, “composition”). The corresponding values
+are lists of featurizer objects you want for each featurizer type.</p>
+<dl>
+<dt>Example:</dt><dd><dl>
+<dt>{“composition”: [ElementProperty.from_preset(“matminer”),</dt><dd><blockquote>
+<div><p>EwaldEnergy()]</p>
+</div></blockquote>
+<p>“structure”: [BagofBonds(), GlobalSymmetryFeatures()]}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt>exclude ([str]): Class names of featurizers to exclude. Only used if</dt><dd><p>you use a preset.</p>
+</dd>
+<dt>ignore_cols ([str]): Column names to be ignored/removed from any</dt><dd><p>dataframe undergoing fitting or transformation. If columns are
+not ignored, they may be used later on for learning.</p>
+</dd>
+<dt>ignore_errors (bool): If True, each featurizer will ignore all errors</dt><dd><p>during featurization.</p>
+</dd>
+<dt>drop_inputs (bool): Drop the columns containing input objects for</dt><dd><p>featurization after they are featurized.</p>
+</dd>
+<dt>guess_oxistates (bool): If True, try to decorate sites with oxidation</dt><dd><p>state.</p>
+</dd>
+<dt>multiiindex (bool): If True, returns a multiindexed dataframe. Not</dt><dd><p>recommended for use in MatPipe.</p>
+</dd>
+<dt>n_jobs (int): The number of parallel jobs to use during featurization</dt><dd><p>for each featurizer. Default is n_cores</p>
+</dd>
+<dt>logger (Logger, bool): A custom logger object to use for logging.</dt><dd><p>Alternatively, if set to True, the default automatminer logger will
+be used. If set to False, then no logging will occur.</p>
+</dd>
+</dl>
+</dd>
+<dt>Attributes:</dt><dd><p>These attributes are set during fitting</p>
+<dl class="simple">
+<dt>featurizers (dict): Same format as input dictionary in Args. Values</dt><dd><p>contain the actual objects being used for featurization. Featurizers
+can be removed if check_validity=True and the featurizer is not
+valid for more than self.min_precheck_frac fraction of the fitting
+dataset.</p>
+</dd>
+<dt>features (dict): The features generated from the application of all</dt><dd><p>featurizers.</p>
+</dd>
+<dt>auto_featurizer (bool): whether the featurizers are set automatically,</dt><dd><p>or passed by the users.</p>
+</dd>
+</dl>
+<p>fitted_input_df (pd.DataFrame): The dataframe which was fitted on
+converted_input_df (pd.DataFrame): The converted dataframe which</p>
+<blockquote>
+<div><p>was fitted on (i.e., strings converted to compositions).</p>
+</div></blockquote>
+<dl class="simple">
+<dt>removed_featurizers ([BaseFeaturizer]): A list of featurizers removed</dt><dd><p>by prechecking methods, if applicable</p>
+</dd>
+</dl>
+<p>Attributes not set during fitting and not specified by arguments:</p>
+<dl class="simple">
+<dt>min_precheck_frac (float): The minimum fraction of a featuriser’s input</dt><dd><p>that can be valid (via featurizer.precheck(data).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods Summary</p>
+<table class="longtable docutils align-center">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#automatminer.featurization.core.AutoFeaturizer.fit" title="automatminer.featurization.core.AutoFeaturizer.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(**kwargs)</p></td>
+<td><p>Wrapper for a method to log.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#automatminer.featurization.core.AutoFeaturizer.transform" title="automatminer.featurization.core.AutoFeaturizer.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a>(**kwargs)</p></td>
+<td><p>Wrapper for a method to log.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="automatminer.featurization.core.AutoFeaturizer.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>operation (str): The operation to be logging.</p>
+</dd>
+<dt>Return:</dt><dd><p>result: The method result.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.core.AutoFeaturizer.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>operation (str): The operation to be logging.</p>
+</dd>
+<dt>Return:</dt><dd><p>result: The method result.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/automatminer.featurization.core.AutoFeaturizer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

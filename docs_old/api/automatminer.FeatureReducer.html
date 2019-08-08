@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>FeatureReducer &#8212; automatminer 2019.05.14_beta0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="featurereducer">
+<h1>FeatureReducer<a class="headerlink" href="#featurereducer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="automatminer.FeatureReducer">
+<em class="property">class </em><code class="descclassname">automatminer.</code><code class="descname">FeatureReducer</code><span class="sig-paren">(</span><em>reducers=('pca'</em>, <em>)</em>, <em>corr_threshold=0.95</em>, <em>tree_importance_percentile=0.9</em>, <em>n_pca_features='auto'</em>, <em>n_rebate_features=0.3</em>, <em>keep_features=None</em>, <em>remove_features=None</em>, <em>logger=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/core.html#FeatureReducer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.FeatureReducer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="automatminer.base.DFTransformer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.base.LoggableMixin.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<p>Perform feature reduction on a clean dataframe.</p>
+<dl>
+<dt>Args:</dt><dd><dl>
+<dt>reducers ((str)): The set of feature reduction operations to be</dt><dd><p>performed on the data. The order of strings determines the order
+in which the reducers will be applied. Valid reducer strings are
+the following:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>‘corr’: Removes any cross-correlated features having corr.</dt><dd><p>coefficients larger than a threshold value. Retains
+feature names.</p>
+</dd>
+<dt>‘tree’: Perform iterative feature reduction via a tree-based</dt><dd><p>feature reduction, using ._feature_importances implemented
+in sklearn. Retains feature names.</p>
+</dd>
+<dt>‘rebate’: Perform ReliefF feature reduction using the skrebate</dt><dd><p>package. Retains feature names.</p>
+</dd>
+<dt>‘pca’: Perform Principal Component Analysis via</dt><dd><p>eigendecomposition. Note the feature labels will be renamed
+to “PCA Feature X” if pca is present anywhere in the feature
+reduction scheme!</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Example: Apply tree-based feature reduction, then pca:</dt><dd><p>reducers = (‘tree’, ‘pca’)</p>
+</dd>
+</dl>
+</dd>
+<dt>corr_threshold (float): The correlation threshold between any two</dt><dd><p>features needed for one to be removed (calculated with R).</p>
+</dd>
+<dt>tree_importance_percentile (float): the selected percentile (between 0.0</dt><dd><p>and 1.0)of the features sorted (descending) based on their
+importance.</p>
+</dd>
+<dt>n_pca_features (int, float): If int, the number of features to be</dt><dd><p>retained by PCA. If float, the fraction of features to be retained
+by PCA once the dataframe is passed to it (i.e., 0.5 means PCA
+retains half of the features it is passed). PCA must be present in
+the reducers. ‘auto’ automatically determines the number of features
+to retain.</p>
+</dd>
+<dt>n_rebate_features (int, float): If int, the number of ReBATE relief</dt><dd><p>features to be retained. If float, the fraction of features to be
+retained by ReBATE once it is passed the dataframe (i.e., 0.5 means
+ReBATE retains half of the features it is passed). ReBATE must be
+present in the reducers.</p>
+</dd>
+<dt>keep_features (list, None): A list of features that will not be removed.</dt><dd><p>This option does nothing if PCA feature removal is present.</p>
+</dd>
+<dt>remove_features (list, None): A list of features that will be removed.</dt><dd><p>This option does nothing if PCA feature removal is present.</p>
+</dd>
+<dt>logger (Logger, bool): A custom logger object to use for logging.</dt><dd><p>Alternatively, if set to True, the default automatminer logger will
+be used. If set to False, then no logging will occur.</p>
+</dd>
+</dl>
+</dd>
+<dt>Attributes:</dt><dd><p>The following attrs are set during fitting.</p>
+<dl class="simple">
+<dt>removed_features (dict): The keys are the feature reduction methods</dt><dd><p>applied. The values are the feature labels removed by that feature
+reduction method.</p>
+</dd>
+</dl>
+<p>retained_features (list): The features retained.
+reducer_params (dict): The keys are the feature reduction methods</p>
+<blockquote>
+<div><p>applied. The values are the parameters used by each feature reducer.</p>
+</div></blockquote>
+</dd>
+</dl>
+<p class="rubric">Methods Summary</p>
+<table class="longtable docutils align-center">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#automatminer.FeatureReducer.fit" title="automatminer.FeatureReducer.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(**kwargs)</p></td>
+<td><p>Wrapper for a method to log.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#automatminer.FeatureReducer.rm_correlated" title="automatminer.FeatureReducer.rm_correlated"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_correlated</span></code></a>(df, target[, r_max])</p></td>
+<td><p>A feature selection method that remove those that are cross correlated by more than threshold.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#automatminer.FeatureReducer.transform" title="automatminer.FeatureReducer.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a>(**kwargs)</p></td>
+<td><p>Wrapper for a method to log.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="automatminer.FeatureReducer.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.FeatureReducer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>operation (str): The operation to be logging.</p>
+</dd>
+<dt>Return:</dt><dd><p>result: The method result.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.FeatureReducer.rm_correlated">
+<code class="descname">rm_correlated</code><span class="sig-paren">(</span><em>df</em>, <em>target</em>, <em>r_max=0.95</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/automatminer/preprocessing/core.html#FeatureReducer.rm_correlated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.FeatureReducer.rm_correlated" title="Permalink to this definition">¶</a></dt>
+<dd><p>A feature selection method that remove those that are cross correlated
+by more than threshold.</p>
+<dl>
+<dt>Args:</dt><dd><p>df (pandas.DataFrame): The dataframe containing features, target_key
+target (str): the name of the target column/feature
+r_max (0&lt;float&lt;=1): if R is greater than this value, the</p>
+<blockquote>
+<div><p>feature that has lower correlation with the target is removed.</p>
+</div></blockquote>
+</dd>
+<dt>Returns (pandas.DataFrame):</dt><dd><p>the dataframe with the highly cross-correlated features removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.FeatureReducer.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.FeatureReducer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>operation (str): The operation to be logging.</p>
+</dd>
+<dt>Return:</dt><dd><p>result: The method result.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/automatminer.FeatureReducer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>get_preset_config &#8212; automatminer 2019.05.14_beta0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="get-preset-config">
+<h1>get_preset_config<a class="headerlink" href="#get-preset-config" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="automatminer.get_preset_config">
+<code class="descclassname">automatminer.</code><code class="descname">get_preset_config</code><span class="sig-paren">(</span><em>preset: str = 'express'</em>, <em>**powerups</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="../_modules/automatminer/presets.html#get_preset_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automatminer.get_preset_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Preset configs for MatPipe.</p>
+<p>USER:
+“production”: Used for making production predictions and benchmarks.</p>
+<blockquote>
+<div><p>Balances accuracy and timeliness.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>“heavy” - When high accuracy is required, and you have access to</dt><dd><p>(very) powerful computing resources. May be buggier and more difficult
+to run than production.</p>
+</dd>
+</dl>
+<p>“express” - Good for quick benchmarks with moderate accuracy.
+“express_single” - Same as express but uses XGB trees as single models</p>
+<blockquote>
+<div><p>instead of automl TPOT. Good for even more express results.</p>
+</div></blockquote>
+<p>DEBUG:
+“debug” - Debugging with automl enabled.
+“debug_single” - Debugging with a single model.</p>
+<dl>
+<dt>Args:</dt><dd><p>preset (str): The name of the preset config you’d like to use.
+<a href="#id1"><span class="problematic" id="id2">**</span></a>powerups: Various modifications as kwargs.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>cache_src (str): A file path. If specified, Autofeaturizer will use</dt><dd><p>feature caching with a file stored at this location. See
+Autofeaturizer’s cache_src argument for more information.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>(dict) The desired preset config.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Alex Dunn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/automatminer.get_preset_config.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
