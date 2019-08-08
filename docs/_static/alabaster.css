@@ -182,7 +182,7 @@ div.sphinxsidebar h3.donation {
 /* -- body styles ----------------------------------------------------------- */
 
 a {
-    color: #aa560c;
+    color: #0c7baa;
     text-decoration: underline;
 }
 
@@ -327,8 +327,8 @@ p.admonition-title:after {
 }
 
 pre, tt, code {
-    font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
-    font-size: 0.9em;
+    font-family: Ubuntu Mono;
+    font-size: 16;
 }
 
 .hll {
@@ -467,7 +467,7 @@ tt.xref, code.xref, a tt {
 
 a.reference {
     text-decoration: none;
-    border-bottom: 1px dotted #aa560c;
+    border-bottom: 1px dotted #0c7baa;
 }
 
 /* Don't put an underline on images */
@@ -483,7 +483,7 @@ a.footnote-reference {
     text-decoration: none;
     font-size: 0.7em;
     vertical-align: top;
-    border-bottom: 1px dotted #aa560c;
+    border-bottom: 1px dotted #0c7baa;
 }
 
 a.footnote-reference:hover {

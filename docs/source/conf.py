@@ -152,7 +152,7 @@ html_theme_options = {
     # 'logo': 'logo_lowres.png',
     'github_repo': 'hackingmaterials/automatminer',
     'github_button': 'true',
-    'link': '#aa560c',
+    'link': '#0c7baa',
     'show_powered_by': 'false',
     'fixed_sidebar': 'true',
     'font_family': 'Nunito',
@@ -161,6 +161,8 @@ html_theme_options = {
     'description_font_style': 'Nunito',
     'description': "An autoML tool for materials",
     'font_size': 12,
+    'code_font_family': 'Ubuntu Mono',
+    'code_font_size': 16,
 
     # 'page_width': 300,
     # 'sidebar_width': 150,

@@ -75,6 +75,7 @@ User manual
     basic.rst
     advanced.rst
     datasets.rst
+    tutorials.rst
     license.rst
 
 
