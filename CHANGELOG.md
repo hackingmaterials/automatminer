@@ -1,5 +1,21 @@
 # Change Log
 
+## [v2019.08.07_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.08.07_beta) (2019-08-08)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.08.07_betaK...v2019.08.07_beta)
+
+## [v2019.08.07_betaK](https://github.com/hackingmaterials/automatminer/tree/v2019.08.07_betaK) (2019-08-08)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.05.14_beta0...v2019.08.07_betaK)
+
+**Closed issues:**
+
+- fix failing tests [\#215](https://github.com/hackingmaterials/automatminer/issues/215)
+- remove target from predict? [\#214](https://github.com/hackingmaterials/automatminer/issues/214)
+- Cannot rebuild docs? [\#213](https://github.com/hackingmaterials/automatminer/issues/213)
+- Consider replacing XGBoost with Catboost [\#195](https://github.com/hackingmaterials/automatminer/issues/195)
+- TPOT will, on occasion, randomly fail [\#181](https://github.com/hackingmaterials/automatminer/issues/181)
+- Make an autokeras adaptor [\#147](https://github.com/hackingmaterials/automatminer/issues/147)
+- Look at skater rule based models as a solution for small datasets [\#145](https://github.com/hackingmaterials/automatminer/issues/145)
+
 ## [v2019.05.14_beta0](https://github.com/hackingmaterials/automatminer/tree/v2019.05.14_beta0) (2019-05-15)
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.03.27_beta...v2019.05.14_beta0)
 
