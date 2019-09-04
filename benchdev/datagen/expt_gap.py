@@ -34,11 +34,11 @@ excluded_compositions = []
 # Prevent differences in order of formula symbols from corrupting the actual number of unique compositions
 df = StrToComposition(target_col_id="composition_obj").featurize_dataframe(df, "composition")
 df["composition"] = [c.reduced_formula for c in df["composition_obj"]]
+df = df.drop(columns=["composition_obj"])
 
 unique = df["composition"].unique()
 print("Number of unique compositions:", len(unique))
-
-
+# raise ValueError
 
 new_df_dict = {"composition": [], "gap expt": []}
 for c in tqdm(unique):
@@ -55,8 +55,8 @@ for c in tqdm(unique):
         min_gap_diff = gap_diffs.min()
         min_gap_diff_index = gap_diffs.tolist().index(min_gap_diff)
         actual_gap_diff = per_comp_gaps.tolist()[min_gap_diff_index]
-        if len(per_comp_gaps) > 1:
-            print(f"{c} decided on {actual_gap_diff} from \n {per_comp_gaps} \n\n")
+        # if len(per_comp_gaps) > 1:
+        #     print(f"{c} decided on {actual_gap_diff} from \n {per_comp_gaps} \n\n")
         new_df_dict["composition"].append(c)
         new_df_dict["gap expt"].append(actual_gap_diff)
 
@@ -64,6 +64,7 @@ for c in tqdm(unique):
 df_new = pd.DataFrame(new_df_dict)
 df_new = df_new.sort_values(by="composition")
 df_new = df_new.reset_index(drop=True)
+
 
 store_dataframe_as_json(df_new, "expt_gap.json.gz", compression="gz")
 
