@@ -29,6 +29,11 @@ print(df)
 df["is_metal"] = df["gap expt"] == 0
 df = df.drop(columns=["gap expt"])
 
+# print("Ground truth")
+# print(df[df["composition"]=="ZrSe3"]) # should be False in final dataframe also
+# print(df[df["composition"]=="ZrW2"]) # should be True in final dataframe also
+# raise ValueError
+
 df = StrToComposition(target_col_id="composition_obj").featurize_dataframe(df, "composition")
 df["composition"] = [c.reduced_formula for c in df["composition_obj"]]
 df = df.drop(columns=["composition_obj"])
@@ -64,7 +69,7 @@ df_new = pd.DataFrame(new_df_dict)
 df_new = df_new.sort_values(by="composition")
 df_new = df_new.reset_index(drop=True)
 
-df_new["is_metal"] = df_new["is_metal"] == 0
+df_new["is_metal"] = df_new["is_metal"] == 1
 
 store_dataframe_as_json(df_new, "expt_is_metal.json.gz", compression="gz")
 
