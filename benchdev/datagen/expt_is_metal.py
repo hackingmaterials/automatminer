@@ -32,6 +32,7 @@ df = df.drop(columns=["gap expt"])
 # print("Ground truth")
 # print(df[df["composition"]=="ZrSe3"]) # should be False in final dataframe also
 # print(df[df["composition"]=="ZrW2"]) # should be True in final dataframe also
+# print(df["is_metal"].value_counts())   # proportion is about 2500 metals to 4k nonmetals
 # raise ValueError
 
 df = StrToComposition(target_col_id="composition_obj").featurize_dataframe(df, "composition")

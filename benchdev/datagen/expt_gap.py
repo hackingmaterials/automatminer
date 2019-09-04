@@ -26,7 +26,12 @@ df = load_dataset("expt_gap")
 df = df.rename(columns={"formula": "composition"})
 
 
-# print(df[df["gap expt"]==3.2])
+
+# print("Ground Truth")
+# print(df[df["composition"] == "ZrW2"])  # should be 0.00
+# print(df[df["composition"] == "ZrSe2"]) # should be 2.00
+# raise ValueError
+
 
 excluded_compositions = []
 

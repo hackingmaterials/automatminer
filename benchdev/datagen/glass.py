@@ -33,6 +33,7 @@ df = df.drop(columns=["composition_obj"])
 # print("Ground truth")
 # print(df[df["composition"]=="ZrTi9"])  # should be False in final dataframe also!!
 # print(df[df["composition"]=="ZrVCo8"]) # should be True in final dataframe also!
+# print(df["gfa"].value_counts())    # proportion is about 5000 GFA 2054 no GFA
 # raise ValueError
 
 unique = df["composition"].unique()
@@ -47,7 +48,7 @@ for c in tqdm(unique):
     any_gfa = any(per_comp_gfa)
     all_gfa = any(per_comp_gfa)
     gfa = None
-    if not all_gfa and any_gfa:
+    if any_gfa and not all_gfa:
         print(f"Problem composition {c}: {df_per_comp_gfa}\n")
         problem_compositions.append(c)
         continue
