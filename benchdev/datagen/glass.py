@@ -2,7 +2,11 @@
 This file makes the following benchmarking datasets:
     - glass
 
-From matminer's dataset library.
+This is mainly a check to make sure there are no compositions for which multiple
+reports differ on whether a composition is gfa or not.
+
+The problem compositions (those having multiple conflicting reports) are printed
+out at the end. It appears there are none.
 """
 
 from matminer.datasets.dataset_retrieval import load_dataset
