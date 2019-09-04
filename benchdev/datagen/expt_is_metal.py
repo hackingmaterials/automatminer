@@ -64,10 +64,10 @@ df_new = pd.DataFrame(new_df_dict)
 df_new = df_new.sort_values(by="composition")
 df_new = df_new.reset_index(drop=True)
 
-print(df_new["is_metal"].value_counts())
+df_new["is_metal"] = df_new["is_metal"] == 0
 
 store_dataframe_as_json(df_new, "expt_is_metal.json.gz", compression="gz")
 
 print(df_new)
-
+print(df_new["is_metal"].value_counts())
 print(f"Problem compositions: {problem_compositions}")
