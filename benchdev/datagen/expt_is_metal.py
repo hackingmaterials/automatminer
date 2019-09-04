@@ -2,6 +2,13 @@
 This file makes the following benchmarking datasets:
     - expt_is_metal
 
+
+This is mainly a check to make sure there are no compositions for which multiple
+reports differ on whether a composition is metallic or not.
+
+The problem compositions (those having multiple conflicting reports are printed
+out at the end. It appears there are none.
+
 From matminer's dataset library.
 """
 from matminer.datasets.dataset_retrieval import load_dataset
@@ -62,3 +69,5 @@ print(df_new["is_metal"].value_counts())
 store_dataframe_as_json(df_new, "expt_is_metal.json.gz", compression="gz")
 
 print(df_new)
+
+print(f"Problem compositions: {problem_compositions}")
