@@ -85,7 +85,7 @@ class CompositionFeaturizers(FeaturizerSet):
             cf.OxidationStates.from_preset(preset_name='deml'),
             cf.ElectronAffinity(),
             cf.ElectronegativityDiff(),
-            cf.IonProperty(),
+            cf.IonProperty(fast=True),
             cf.Miedema(),
             cf.AtomicPackingEfficiency(),  # slower than the rest
             cf.CohesiveEnergy()  # requires mpid present
