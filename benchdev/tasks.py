@@ -12,6 +12,7 @@ from fireworks import FireTaskBase, explicit_serialize
 from sklearn.metrics import f1_score, r2_score, mean_squared_error, \
     mean_absolute_error, roc_auc_score, accuracy_score
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from matminer.utils.io import load_dataframe_from_json
 
 from automatminer.featurization import AutoFeaturizer
 from automatminer.preprocessing import DataCleaner, FeatureReducer
@@ -37,7 +38,7 @@ class RunPipe(FireTaskBase):
         fold = fw_spec["fold"]
         kfold_config = fw_spec["kfold_config"]
         target = fw_spec["target"]
-        data_pickle = fw_spec["data_pickle"]
+        data_file = fw_spec["data_file"]
         clf_pos_label = fw_spec["clf_pos_label"]
         problem_type = fw_spec["problem_type"]
         learner_name = pipe_config_dict["learner_name"]
@@ -47,9 +48,9 @@ class RunPipe(FireTaskBase):
         cleaner_kwargs = pipe_config_dict["cleaner_kwargs"]
         autofeaturizer_kwargs = pipe_config_dict["autofeaturizer_kwargs"]
 
-        # Modify data_pickle based on computing resource
+        # Modify data_file based on computing resource
         data_dir = os.environ['AMM_DATASET_DIR']
-        data_file = os.path.join(data_dir, data_pickle)
+        data_file = os.path.join(data_dir, data_file)
 
         # Modify save_dir based on computing resource
         bench_dir = os.environ['AMM_BENCH_DIR']
@@ -94,11 +95,11 @@ class RunPipe(FireTaskBase):
         pipe = MatPipe(**pipe_config, logger=logger)
 
         # Set up dataset
-        # Dataset should already be set up correctly as pickle beforehand.
+        # Dataset should already be set up correctly as json beforehand.
         # this includes targets being converted to classification, removing
         # extra columns, having the names of featurization cols set to the
         # same as the matpipe config, etc.
-        df = pd.read_pickle(data_file)
+        df = load_dataframe_from_json(data_file)
 
         # Check other parameters that would otherwise not be checked until after
         # benchmarking, hopefully saves some errors at the end during scoring.
@@ -283,7 +284,6 @@ class ConsolidateBenchmarksToBuild(FireTaskBase):
     Builds are identified uniquely by their build_id (e.g., 'Warp Fen Kras').
     """
     _fw_name = "ConsolidateBenchmarksToBuild"
-
     def run_task(self, fw_spec):
         benchmark_hashes = fw_spec["benchmark_hashes"]
         benchmarks = LP.db.automatminer_benchmarks
@@ -362,11 +362,11 @@ class RunSingleFit(FireTaskBase):
         pipe = MatPipe(**pipe_config, logger=logger)
 
         # Set up dataset
-        # Dataset should already be set up correctly as pickle beforehand.
+        # Dataset should already be set up correctly as json beforehand.
         # this includes targets being converted to classification, removing
         # extra columns, having the names of featurization cols set to the
         # same as the matpipe config, etc.
-        df = pd.read_pickle(data_file)
+        df = load_dataframe_from_json(data_file)
 
         pipe.fit(df, target)
         pipe.save(os.path.join(base_save_dir, "pipe.p"))
