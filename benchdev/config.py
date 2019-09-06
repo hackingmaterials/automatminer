@@ -25,7 +25,7 @@ EXPORT_COV_CMD = "coverage xml && python-codacy-coverage -r coverage.xml"
 # Local testing configuration...
 LOCAL_DEBUG_REG = {
     "name": "debug_local_reg",
-    "data_pickle": "debug_jdft2d.pickle.gz",
+    "data_file": "debug_jdft2d.json.gz",
     "target": "exfoliation_en",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -33,7 +33,7 @@ LOCAL_DEBUG_REG = {
 
 LOCAL_DEBUG_CLF = {
     "name": "debug_local_clf",
-    "data_pickle": "debug_expt_is_metal.pickle.gz",
+    "data_file": "debug_expt_is_metal.json.gz",
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True
@@ -42,41 +42,26 @@ LOCAL_DEBUG_CLF = {
 LOCAL_DEBUG_SET = [LOCAL_DEBUG_CLF, LOCAL_DEBUG_REG]
 
 # Real benchmark sets
-BULK = {
-    "name": "mp_bulk",
-    "data_pickle": "elasticity_K_VRH.pickle.gz",
-    "target": "K_VRH",
-    "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
-}
 
-SHEAR = {
-    "name": "mp_shear",
-    "data_pickle": "elasticity_G_VRH.pickle.gz",
-    "target": "G_VRH",
-    "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
-}
-
-LOG_BULK = {
-    "name": "mp_log_bulk",
-    "data_pickle": "elasticity_log10(K_VRH).pickle.gz",
+LOG_KVRH = {
+    "name": "log_kvrh",
+    "data_file": "log_kvrh.json.gz",
     "target": "log10(K_VRH)",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
 }
 
-LOG_SHEAR = {
-    "name": "mp_log_shear",
-    "data_pickle": "elasticity_log10(G_VRH).pickle.gz",
+LOG_GVRH = {
+    "name": "log_gvrh",
+    "data_file": "log_gvrh.json.gz",
     "target": "log10(G_VRH)",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
 }
 
-REFRACTIVE = {
-    "name": "refractive_index",
-    "data_pickle": "dielectric.pickle.gz",
+DIELECTRIC = {
+    "name": "dielectric",
+    "data_file": "dielectric.json.gz",
     "target": "n",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -84,7 +69,7 @@ REFRACTIVE = {
 
 JDFT2D = {
     "name": "jdft2d",
-    "data_pickle": "jdft2d.pickle.gz",
+    "data_file": "jdft2d.json.gz",
     "target": "exfoliation_en",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -92,7 +77,7 @@ JDFT2D = {
 
 MP_GAP = {
     "name": "mp_gap",
-    "data_pickle": "mp_gap.pickle.gz",
+    "data_file": "mp_gap.json.gz",
     "target": "gap pbe",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -100,7 +85,7 @@ MP_GAP = {
 
 MP_IS_METAL = {
     "name": "mp_is_metal",
-    "data_pickle": "mp_is_metal.pickle.gz",
+    "data_file": "mp_is_metal.json.gz",
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True
@@ -108,23 +93,23 @@ MP_IS_METAL = {
 
 MP_E_FORM = {
     "name": "mp_e_form",
-    "data_pickle": "mp_e_form.pickle.gz",
+    "data_file": "mp_e_form.json.gz",
     "target": "e_form",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
 }
 
-CASTELLI_E_FORM = {
-    "name": "castelli",
-    "data_pickle": "castelli.pickle.gz",
+PEROVSKITES = {
+    "name": "perovskites",
+    "data_file": "perovskites.json.gz",
     "target": "e_form",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
 }
 
-GFA = {
-    "name": "glass_formation",
-    "data_pickle": "glass.pickle.gz",
+GLASS = {
+    "name": "glass",
+    "data_file": "glass.json.gz",
     "target": "gfa",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True
@@ -132,7 +117,7 @@ GFA = {
 
 EXPT_IS_METAL = {
     "name": "expt_is_metal",
-    "data_pickle": "expt_is_metal.pickle.gz",
+    "data_file": "expt_is_metal.json.gz",
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True
@@ -140,7 +125,7 @@ EXPT_IS_METAL = {
 
 EXPT_GAP = {
     "name": "expt_gap",
-    "data_pickle": "expt_gap.pickle.gz",
+    "data_file": "expt_gap.json.gz",
     "target": "gap expt",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -148,21 +133,39 @@ EXPT_GAP = {
 
 PHONONS = {
     "name": "phonons",
-    "data_pickle": "phonons.pickle.gz",
+    "data_file": "phonons.json.gz",
     "target": "last phdos peak",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
 }
 
-STEELS_YIELD = {
-    "name": "steels_yield",
-    "data_pickle": "steels_yield.pickle.gz",
+STEELS = {
+    "name": "steels",
+    "data_file": "steels.json.gz",
     "target": "yield strength",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
 }
 
-BENCHMARK_DEBUG_SET = [JDFT2D, PHONONS, EXPT_IS_METAL, STEELS_YIELD]
-BENCHMARK_FULL_SET = [BULK, SHEAR, LOG_BULK, LOG_SHEAR, REFRACTIVE, JDFT2D,
-                      MP_GAP, MP_IS_METAL, MP_E_FORM, CASTELLI_E_FORM, GFA,
-                      EXPT_IS_METAL, EXPT_GAP, STEELS_YIELD, PHONONS]
+BENCHMARK_DEBUG_SET = [JDFT2D, PHONONS, EXPT_IS_METAL, STEELS]
+BENCHMARK_FULL_SET = [LOG_KVRH, LOG_GVRH, DIELECTRIC, JDFT2D,
+                      MP_GAP, MP_IS_METAL, MP_E_FORM, PEROVSKITES, GLASS,
+                      EXPT_IS_METAL, EXPT_GAP, STEELS, PHONONS]
+
+# Extra datasets, probably not present
+# BULK = {
+#     "name": "mp_bulk",
+#     "data_file": "elasticity_K_VRH.json.gz",
+#     "target": "K_VRH",
+#     "problem_type": AMM_REG_NAME,
+#     "clf_pos_label": None
+# }
+#
+# SHEAR = {
+#     "name": "mp_shear",
+#     "data_file": "elasticity_G_VRH.json.gz",
+#     "target": "G_VRH",
+#     "problem_type": AMM_REG_NAME,
+#     "clf_pos_label": None
+# }
+# EXTRAS = [SHEAR, BULK]

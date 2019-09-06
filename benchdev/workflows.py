@@ -38,7 +38,7 @@ def check_pipe_config(pipe_config):
         raise ValueError("Logger is set internally by tasks.")
 
 
-def wf_single_fit(fworker, fit_name, pipe_config, name, data_pickle, target, *args,
+def wf_single_fit(fworker, fit_name, pipe_config, name, data_file, target, *args,
                   tags=None, **kwargs):
     """
     Submit a dataset to be fit for a single pipeline (i.e., to train on a
@@ -56,7 +56,7 @@ def wf_single_fit(fworker, fit_name, pipe_config, name, data_pickle, target, *ar
     spec = {
         "pipe_config": pipe_config,
         "base_save_dir": base_save_dir,
-        "data_pickle": data_pickle,
+        "data_file": data_file,
         "target": target,
         "automatminer_commit": get_last_commit(),
         "tags": tags if tags else [],
@@ -140,7 +140,7 @@ def wf_evaluate_build(fworker, build_name, dataset_set, pipe_config,
     return wf
 
 
-def wf_benchmark(fworker, pipe_config, name, data_pickle, target, problem_type,
+def wf_benchmark(fworker, pipe_config, name, data_file, target, problem_type,
                  clf_pos_label,
                  cache=True, kfold_config=KFOLD_DEFAULT, tags=None,
                  return_fireworks=False, add_dataset_to_names=True,
@@ -157,11 +157,11 @@ def wf_benchmark(fworker, pipe_config, name, data_pickle, target, problem_type,
     #     pipe_config["autofeaturizer_kwargs"]["n_jobs"] = n_cori_jobs
 
     # Single (run) hash is the combination of pipe configuration + last commit
-    # + data_pickle
+    # + data_file
     last_commit = get_last_commit()
     benchmark_config_for_hash = copy.deepcopy(pipe_config)
     benchmark_config_for_hash["last_commit"] = last_commit
-    benchmark_config_for_hash["data_pickle"] = data_pickle
+    benchmark_config_for_hash["data_file"] = data_file
     benchmark_config_for_hash["worker"] = fworker
     benchmark_config_for_hash = str(benchmark_config_for_hash).encode("UTF-8")
     benchmark_hash = hashlib.sha1(benchmark_config_for_hash).hexdigest()[:10]
@@ -171,7 +171,7 @@ def wf_benchmark(fworker, pipe_config, name, data_pickle, target, problem_type,
         "pipe_config": pipe_config,
         "base_save_dir": base_save_dir,
         "kfold_config": kfold_config,
-        "data_pickle": data_pickle,
+        "data_file": data_file,
         "target": target,
         "clf_pos_label": clf_pos_label,
         "problem_type": problem_type,
@@ -287,7 +287,7 @@ if __name__ == "__main__":
         # "debug"
     ]
 
-    from benchdev.config import MP_E_FORM, JDFT2D, BULK, GFA
+    from benchdev.config import MP_E_FORM, JDFT2D, BULK, GLASS
     # wf = wf_evaluate_build("lrc", "set generation size", BENCHMARK_FULL_SET, pipe_config,
     #                        include_tests=False, cache=True, tags=tags)
 

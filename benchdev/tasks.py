@@ -324,16 +324,16 @@ class RunSingleFit(FireTaskBase):
         # Read data from fw_spec
         pipe_config_dict = fw_spec["pipe_config"]
         target = fw_spec["target"]
-        data_pickle = fw_spec["data_pickle"]
+        data_file = fw_spec["data_file"]
         learner_name = pipe_config_dict["learner_name"]
         learner_kwargs = pipe_config_dict["learner_kwargs"]
         reducer_kwargs = pipe_config_dict["reducer_kwargs"]
         cleaner_kwargs = pipe_config_dict["cleaner_kwargs"]
         autofeaturizer_kwargs = pipe_config_dict["autofeaturizer_kwargs"]
 
-        # Modify data_pickle based on computing resource
+        # Modify data_file based on computing resource
         data_dir = os.environ['AMM_DATASET_DIR']
-        data_file = os.path.join(data_dir, data_pickle)
+        data_file = os.path.join(data_dir, data_file)
 
         # Modify save_dir based on computing resource
         bench_dir = os.environ['AMM_MODEL_DIR']
