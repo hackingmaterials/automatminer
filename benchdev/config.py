@@ -45,7 +45,7 @@ LOCAL_DEBUG_SET = [LOCAL_DEBUG_CLF, LOCAL_DEBUG_REG]
 
 LOG_KVRH = {
     "name": "log_kvrh",
-    "data_file": "log_kvrh.json.gz",
+    "data_file": "matbench_log_kvrh.json.gz",
     "target": "log10(K_VRH)",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -53,7 +53,7 @@ LOG_KVRH = {
 
 LOG_GVRH = {
     "name": "log_gvrh",
-    "data_file": "log_gvrh.json.gz",
+    "data_file": "matbench_log_gvrh.json.gz",
     "target": "log10(G_VRH)",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -61,7 +61,7 @@ LOG_GVRH = {
 
 DIELECTRIC = {
     "name": "dielectric",
-    "data_file": "dielectric.json.gz",
+    "data_file": "matbench_dielectric.json.gz",
     "target": "n",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -69,7 +69,7 @@ DIELECTRIC = {
 
 JDFT2D = {
     "name": "jdft2d",
-    "data_file": "jdft2d.json.gz",
+    "data_file": "matbench_jdft2d.json.gz",
     "target": "exfoliation_en",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -77,7 +77,7 @@ JDFT2D = {
 
 MP_GAP = {
     "name": "mp_gap",
-    "data_file": "mp_gap.json.gz",
+    "data_file": "matbench_mp_gap.json.gz",
     "target": "gap pbe",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -85,7 +85,7 @@ MP_GAP = {
 
 MP_IS_METAL = {
     "name": "mp_is_metal",
-    "data_file": "mp_is_metal.json.gz",
+    "data_file": "matbench_mp_is_metal.json.gz",
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True
@@ -93,7 +93,7 @@ MP_IS_METAL = {
 
 MP_E_FORM = {
     "name": "mp_e_form",
-    "data_file": "mp_e_form.json.gz",
+    "data_file": "matbench_mp_e_form.json.gz",
     "target": "e_form",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -101,7 +101,7 @@ MP_E_FORM = {
 
 PEROVSKITES = {
     "name": "perovskites",
-    "data_file": "perovskites.json.gz",
+    "data_file": "pmatbench_erovskites.json.gz",
     "target": "e_form",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -109,7 +109,7 @@ PEROVSKITES = {
 
 GLASS = {
     "name": "glass",
-    "data_file": "glass.json.gz",
+    "data_file": "matbench_glass.json.gz",
     "target": "gfa",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True
@@ -117,7 +117,7 @@ GLASS = {
 
 EXPT_IS_METAL = {
     "name": "expt_is_metal",
-    "data_file": "expt_is_metal.json.gz",
+    "data_file": "matbench_expt_is_metal.json.gz",
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True
@@ -125,7 +125,7 @@ EXPT_IS_METAL = {
 
 EXPT_GAP = {
     "name": "expt_gap",
-    "data_file": "expt_gap.json.gz",
+    "data_file": "matbench_expt_gap.json.gz",
     "target": "gap expt",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -133,7 +133,7 @@ EXPT_GAP = {
 
 PHONONS = {
     "name": "phonons",
-    "data_file": "phonons.json.gz",
+    "data_file": "matbench_phonons.json.gz",
     "target": "last phdos peak",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
@@ -141,7 +141,7 @@ PHONONS = {
 
 STEELS = {
     "name": "steels",
-    "data_file": "steels.json.gz",
+    "data_file": "matbench_steels.json.gz",
     "target": "yield strength",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
