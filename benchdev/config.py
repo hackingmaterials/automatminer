@@ -101,7 +101,7 @@ MP_E_FORM = {
 
 PEROVSKITES = {
     "name": "perovskites",
-    "data_file": "pmatbench_erovskites.json.gz",
+    "data_file": "matbench_perovskites.json.gz",
     "target": "e_form",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None
