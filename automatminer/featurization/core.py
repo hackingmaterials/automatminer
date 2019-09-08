@@ -498,7 +498,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                                  multiindex=self.multiindex,
                                                  inplace=False)
                 except Exception as e:
-                    self.logger.info(self._log_prefix +
+                    self.logger.warning(self._log_prefix +
                                      "Could not decorate oxidation states due "
                                      "to {}. Excluding featurizers based on "
                                      "composition oxistates".format(e))
