@@ -1,6 +1,9 @@
 Advanced Usage
 ==================
 
+Running a benchmark
+--------------------
+
 
 Customizing pipelines
 ---------------------
