@@ -521,25 +521,25 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                    target_col_id=featurizer_type)
                 df = dto.featurize_dataframe(df, featurizer_type, inplace=False)
 
-                # Decorate with oxidstates
-                if featurizer_type == self.structure_col and \
-                        self.guess_oxistates:
+            # Decorate with oxidstates
+            if featurizer_type == self.structure_col and \
+                    self.guess_oxistates:
+                self.logger.info(
+                    self._log_prefix +
+                    "Guessing oxidation states of structures if they were "
+                    "not present in input.")
+                sto = StructureToOxidStructure(
+                    target_col_id=featurizer_type, overwrite_data=True,
+                    return_original_on_error=True, max_sites=30)
+                try:
+                    df = sto.featurize_dataframe(df, featurizer_type,
+                                                 multiindex=self.multiindex,
+                                                 inplace=False)
+                except Exception as e:
                     self.logger.info(
                         self._log_prefix +
-                        "Guessing oxidation states of structures if they were "
-                        "not present in input.")
-                    sto = StructureToOxidStructure(
-                        target_col_id=featurizer_type, overwrite_data=True,
-                        return_original_on_error=True, max_sites=-50)
-                    try:
-                        df = sto.featurize_dataframe(df, featurizer_type,
-                                                     multiindex=self.multiindex,
-                                                     inplace=False)
-                    except Exception as e:
-                        self.logger.info(
-                            self._log_prefix +
-                            "Could not decorate oxidation states on structures "
-                            "due to {}.".format(e))
+                        "Could not decorate oxidation states on structures "
+                        "due to {}.".format(e))
         return df
 
     def _add_composition_from_structure(self, df, overwrite=True):
