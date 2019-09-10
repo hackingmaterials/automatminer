@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Basic Usage &#8212; Automatminer 2019.05.14_beta0 documentation</title>
+    <title>Basic Usage &#8212; Automatminer 2019.08.07_beta documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -40,6 +40,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Basic Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#initializing-a-matpipe">Initializing a MatPipe</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#training-a-pipeline">Training a pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#making-predictions">Making predictions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-a-benchmark">Running a benchmark</a></li>
@@ -66,8 +67,47 @@
             
   <div class="section" id="basic-usage">
 <h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
+<p>Basic usage of Automatminer requires using only one class - <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code>.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> works with dataframes as input and output. It is able to train
+on training data using it’s <code class="code docutils literal notranslate"><span class="pre">fit</span></code> method, predict on new data using
+<code class="code docutils literal notranslate"><span class="pre">predict</span></code>, and run benchmarks using <code class="code docutils literal notranslate"><span class="pre">benchmark</span></code> - all in an
+automatic and end-to-end fashion.</p>
+<p>Materials primitives (e.g., crystal structures go in one end, and property
+predictions come out the other). <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> handles the intermediate
+operations such as assigning descriptors, cleaning problematic data, data
+conversions, imputation, and machine learning.</p>
+<p>This is just a quick overview of the basic functionality. For a detailed and
+comprehensive tutorial, see the jupyter notebooks in the  automatminer directory</p>
+<blockquote>
+<div><p>of the</p>
+</div></blockquote>
+<p><a class="reference external" href="https://github.com/hackingmaterials/matminer_examples">matminer_examples</a>
+repository.</p>
+<div class="section" id="initializing-a-matpipe">
+<h2>Initializing a MatPipe<a class="headerlink" href="#initializing-a-matpipe" title="Permalink to this headline">¶</a></h2>
+<p>The easiest way to initialize a matpipe is using a preset.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">get_preset_config</span><span class="p">,</span> <span class="n">MatPipe</span>
+
+<span class="n">express_config</span> <span class="o">=</span> <span class="n">get_preset_config</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span><span class="o">**</span><span class="n">express_config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This preset is a dictionary of options specifying exactly how each of
+<code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code>’s constituent classes are set up. Typically, the “express”
+preset will give you results with a moderate degree of accuracy and relatively
+quick training, so we’ll use that here.</p>
+</div>
 <div class="section" id="training-a-pipeline">
 <h2>Training a pipeline<a class="headerlink" href="#training-a-pipeline" title="Permalink to this headline">¶</a></h2>
+<p>MatPipe has similar fit/transform syntax to scikit-learn. Your dataframe might
+be of the form:</p>
+<div class="line-block">
+<div class="line">a | b | c | d |   |</div>
+</div>
+<p><a href="#id1"><span class="problematic" id="id2">|:-:|</span></a>—<a href="#id3"><span class="problematic" id="id4">|---|</span></a>:-:<a href="#id5"><span class="problematic" id="id6">|---|</span></a>
+|   |   |   |   |   |
+|   |   |   |   |   |
+|   |   |   |   |   |</p>
 </div>
 <div class="section" id="making-predictions">
 <h2>Making predictions<a class="headerlink" href="#making-predictions" title="Permalink to this headline">¶</a></h2>

@@ -42,7 +42,7 @@ How it works
 
 Automatminer automatically decorates a dataset using hundreds of descriptor
 techniques from matminer's descriptor library, picks the most useful
-features for learning, and runs a separate AutoML pipeline using TPOT.
+features for learning, and runs a separate AutoML pipeline.
 Once a pipeline has been fit, it can be summarized in a text file, saved to
 disk, or used to make predictions on new materials.
 
@@ -64,6 +64,28 @@ sample data.
 
     # Predict bandgap of some unknown materials
     predicted_df = pipe.predict(unknown_df)
+
+Scope
+------
+
+**Automatminer can work with many kinds of data:**
+
+-   both computational and experimental data
+-   small (~100 samples) to moderate (~100k samples) sized datasets
+-   crystalline datasets
+-   composition-only (i.e., unknown phases) datasets
+-   datasets containing electronic bandstructures or density of states
+
+**Many kinds of target properties:**
+
+-   electronic
+-   mechanical
+-   thermodynamic
+-   any other kind of property
+
+**And many featurization (descriptor) techniques:**
+
+See `matminer's Table of Featurizers <https://hackingmaterials.github.io/matminer/featurizer_summary.html>`_ for a full (and growing) list.
 
 User manual
 --------------

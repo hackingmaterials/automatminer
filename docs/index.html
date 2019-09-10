@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>automatminer documentation &#8212; Automatminer 2019.05.14_beta0 documentation</title>
+    <title>automatminer documentation &#8212; Automatminer 2019.08.07_beta documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -89,7 +89,7 @@ that predicts materials properties.</p>
 <h1>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this headline">¶</a></h1>
 <p>Automatminer automatically decorates a dataset using hundreds of descriptor
 techniques from matminer’s descriptor library, picks the most useful
-features for learning, and runs a separate AutoML pipeline using TPOT.
+features for learning, and runs a separate AutoML pipeline.
 Once a pipeline has been fit, it can be summarized in a text file, saved to
 disk, or used to make predictions on new materials.</p>
 <img alt="server" class="align-center" src="_images/pipe.png" />
@@ -106,6 +106,26 @@ sample data.</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="scope">
+<h1>Scope<a class="headerlink" href="#scope" title="Permalink to this headline">¶</a></h1>
+<p><strong>Automatminer can work with many kinds of data:</strong></p>
+<ul class="simple">
+<li><p>both computational and experimental data</p></li>
+<li><p>small (~100 samples) to moderate (~100k samples) sized datasets</p></li>
+<li><p>crystalline datasets</p></li>
+<li><p>composition-only (i.e., unknown phases) datasets</p></li>
+<li><p>datasets containing electronic bandstructures or density of states</p></li>
+</ul>
+<p><strong>Many kinds of target properties:</strong></p>
+<ul class="simple">
+<li><p>electronic</p></li>
+<li><p>mechanical</p></li>
+<li><p>thermodynamic</p></li>
+<li><p>any other kind of property</p></li>
+</ul>
+<p><strong>And many featurization (descriptor) techniques:</strong></p>
+<p>See <a class="reference external" href="https://hackingmaterials.github.io/matminer/featurizer_summary.html">matminer’s Table of Featurizers</a> for a full (and growing) list.</p>
+</div>
 <div class="section" id="user-manual">
 <h1>User manual<a class="headerlink" href="#user-manual" title="Permalink to this headline">¶</a></h1>
 <blockquote>
@@ -117,6 +137,7 @@ sample data.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic.html#initializing-a-matpipe">Initializing a MatPipe</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html#training-a-pipeline">Training a pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html#making-predictions">Making predictions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html#running-a-benchmark">Running a benchmark</a></li>
