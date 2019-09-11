@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased](https://github.com/hackingmaterials/automatminer/tree/HEAD)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.08.07_beta...HEAD)
+
+**Closed issues:**
+
+- benchdev needs to be updated with newest matbench v0.1 names [\#222](https://github.com/hackingmaterials/automatminer/issues/222)
+- benchdev infrastructure changes [\#220](https://github.com/hackingmaterials/automatminer/issues/220)
+
 ## [v2019.08.07_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.08.07_beta) (2019-08-08)
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.08.07_betaK...v2019.08.07_beta)
 
