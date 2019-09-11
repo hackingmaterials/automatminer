@@ -70,6 +70,7 @@ def full_tests_circleci(ctx):
 
 @task
 def release(ctx):
+    version_check(ctx)
     payload = {
         "tag_name": "v" + __version__,
         "target_commitish": "master",
@@ -88,6 +89,7 @@ def release(ctx):
 
 @task
 def publish(ctx):
-    ctx.run("rm dist/*.*", warn=True)
+    version_check(ctx)
+    ctx.run("rm -r dist build", warn=True)
     ctx.run("python3 setup.py sdist bdist_wheel")
     ctx.run("twine upload dist/* --verbose")
