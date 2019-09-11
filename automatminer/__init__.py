@@ -1,5 +1,3 @@
-import os
-
 from automatminer.preprocessing import DataCleaner, FeatureReducer
 from automatminer.automl import TPOTAdaptor
 from automatminer.featurization import AutoFeaturizer
@@ -9,8 +7,4 @@ from automatminer.presets import get_preset_config
 __author__ = 'Alex Dunn, Qi Wang, Alex Ganose, Alireza Faghaninia, Anubhav Jain'
 __author_email__ = 'ardunn@lbl.gov'
 __license__ = 'Modified BSD'
-
-with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                       "../VERSION"), "r") as f:
-    version = f.read()
-__version__ = version
+__version__ = "2019.9.11"

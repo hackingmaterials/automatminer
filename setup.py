@@ -5,13 +5,9 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 reqs_raw = open(os.path.join(module_dir, "requirements.txt")).read()
 # reqs_list = [r.replace("==", ">=") for r in reqs_raw.split("\n")]
 reqs_list = [r for r in reqs_raw.split("\n")]
-
+version = "2019.9.11"
 
 if __name__ == "__main__":
-
-    with open(os.path.join(module_dir, "VERSION"), "r") as f:
-        version = f.read()
-
     setup(
         name='automatminer',
         version=version,
@@ -23,8 +19,8 @@ if __name__ == "__main__":
                 'Anubhav Jain'],
         author_email='ardunn@lbl.gov',
         license='modified BSD',
-        packages=find_packages(where=".", exclude=("benchdev", "benchdev.*")),
-        package_data={},
+        # packages=find_packages(where=".", exclude=("benchdev", "benchdev.*")),
+        # package_data={},
         zip_safe=False,
         install_requires=reqs_list,
         extras_require={},
@@ -37,5 +33,6 @@ if __name__ == "__main__":
                      'Topic :: Other/Nonlisted Topic',
                      'Topic :: Scientific/Engineering'],
         test_suite='automatminer',
-        tests_require='tests'
+        tests_require='tests',
+        include_package_data=True
     )

@@ -1,7 +1,7 @@
 include LICENSE
 include CHANGELOG.md
 include CONTRIBUTING.md
-include VERSION
-recursive-include tutorials
 recursive-include automatminer
-recursive-exclude dev
+recursive-exclude benchdev
+recursive-exclude benchdev/*
+recursive-exclude benchdev*
