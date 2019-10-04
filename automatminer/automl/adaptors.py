@@ -8,7 +8,9 @@ Current adaptor classes are:
 """
 from collections import OrderedDict
 
+from sklearn.pipeline import Pipeline
 from tpot import TPOTClassifier, TPOTRegressor
+from tpot.base import TPOTBase
 
 from automatminer.automl.config.tpot_configs import TPOT_CLASSIFIER_CONFIG, \
     TPOT_REGRESSOR_CONFIG
@@ -194,7 +196,12 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
 
     @property
     def best_pipeline(self):
-        return self._backend.fitted_pipeline_
+        if isinstance(self._backend, TPOTBase):
+            return self._backend.fitted_pipeline_
+        elif isinstance(self._backend, Pipeline):
+            return self._backend
+        else:
+            raise TypeError("Backend type not recognized as TPOT or Pipeline")
 
     @property
     def features(self):
