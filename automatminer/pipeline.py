@@ -1,12 +1,12 @@
 """
 The highest level classes for pipelines.
 """
+import json
 import os
 import pickle
 from pprint import pformat
-import json
-import yaml
 
+import yaml
 from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
@@ -279,14 +279,17 @@ class MatPipe(DFTransformer, LoggableMixin):
         """
         attrs = return_attrs_recursively(self)
 
-        if (
+        def format_one_of(fmts):
+            return (
             filename
-            and filename.lower().endswith((".json", ".yaml", ".yml"))
-            or output_format in ("json", "yaml", "yml")
-        ):
-            digeststr = json.dumps(attrs, default=lambda x: "<not serializable>")
-            if filename.lower().endswith((".yaml", ".yml")) or output_format in ("yaml", "yml"):
-                digeststr = yaml.dump(yaml.load(digeststr))
+                and filename.lower().endswith(tuple(["." + f for f in fmts]))
+                or output_format in fmts
+            )
+
+        if format_one_of(("json", "yaml", "yml")):
+            digeststr = json.dumps(attrs, default=lambda x: str(x))
+            if format_one_of(("yaml", "yml")):
+                digeststr = yaml.dump(yaml.safe_load(digeststr))
         else:
             digeststr = pformat(attrs)
 

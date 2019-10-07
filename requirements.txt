@@ -4,6 +4,7 @@ xlrd==1.1.0
 xgboost==0.80
 tpot==0.10.1
 skrebate==0.6
+pyyaml==5.1.2
 
 # Also requirements of matminer
 numpy

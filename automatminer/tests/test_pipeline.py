@@ -17,7 +17,8 @@ from automatminer.utils.pkg import AutomatminerError
 
 test_dir = os.path.dirname(__file__)
 CACHE_SRC = os.path.join(test_dir, "cache.json")
-DIGEST_PATH = os.path.join(test_dir, "matdigest.txt")
+DIGEST_PATH = os.path.join(test_dir, "matdigest.")
+DIGEST_EXTS = ['txt', 'json', 'yml', 'yaml']
 PIPE_PATH = os.path.join(test_dir, "test_pipe.p")
 
 
@@ -124,9 +125,13 @@ class TestMatPipe(unittest.TestCase):
         self.assertTrue(self.target + " predicted" in df_test.columns)
 
         digest_file = os.path.join(test_dir, DIGEST_PATH)
-        digest = self.pipe.digest(filename=digest_file)
-        self.assertTrue(os.path.isfile(digest_file))
-        self.assertTrue(isinstance(digest, str))
+        for ext in DIGEST_EXTS:
+            digest = self.pipe.digest(filename=digest_file + ext)
+            self.assertTrue(os.path.isfile(digest_file + ext))
+            self.assertTrue(isinstance(digest, str))
+            
+            digest = self.pipe.digest(output_format=ext)
+            self.assertTrue(isinstance(digest, str))
 
     def _run_benchmark(self, cache, pipe):
         # Test static, regular benchmark (no fittable featurizers)
@@ -146,6 +151,6 @@ class TestMatPipe(unittest.TestCase):
         self.assertEqual(len(df_tests2), 2)
 
     def tearDown(self):
-        for remnant in [CACHE_SRC, PIPE_PATH, DIGEST_PATH]:
+        for remnant in [CACHE_SRC, PIPE_PATH, *[DIGEST_PATH + ext for ext in DIGEST_EXTS]]:
             if os.path.exists(remnant):
                 os.remove(remnant)
