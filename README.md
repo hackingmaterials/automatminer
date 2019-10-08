@@ -13,5 +13,5 @@ automatminer is an automatic prediction engine for materials properties.
 #### Automatminer requires the newest version of [matminer](https://github.com/hackingmaterials/matminer) (from git) to work properly!
 
 - **Website (including work-in-progress documentation):** <http://hackingmaterials.lbl.gov/automatminer/>
-- **Help/Support:** <https://groups.google.com/forum/#!forum/matminer>
+- **Help/Support:** https://hackingmaterials.discourse.group/c/matminer
 - **Source:** <https://github.com/hackingmaterials/automatminer>
