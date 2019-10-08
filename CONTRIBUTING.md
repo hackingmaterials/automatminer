@@ -7,7 +7,7 @@ We love your input! We want to make contributing to automatminer as easy and tra
 *   Becoming a maintainer
 
 ## Reporting bugs, getting help, and discussion
-At any time, feel free to start a thread on the matminer [Google Group](https://groups.google.com/forum/#!forum/matminer).
+At any time, feel free to start a thread on the automatminer [Discourse forum](https://hackingmaterials.discourse.group/c/matminer/automatminer).
 
 If you are making a bug report, incorporate as many elements of the following as possible to ensure a timely response and avoid the need for followups:
 *   A quick summary and/or background
