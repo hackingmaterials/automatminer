@@ -1,10 +1,12 @@
 """
 The highest level classes for pipelines.
 """
+import json
 import os
 import pickle
 from pprint import pformat
 
+import yaml
 from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
@@ -260,18 +262,37 @@ class MatPipe(DFTransformer, LoggableMixin):
         return results
 
     @check_fitted
-    def digest(self, filename=None):
+    def digest(self, filename=None, output_format="txt"):
         """
         Save a text digest (summary) of the fitted pipeline. Similar to the log
-        but contains more detail in a structured format.
+        but contains more detail in a structured format. Returns digest in JSON
+        or YAML format if specified via output_format or if the provided filename
+        ends in one of ".json", ".yaml" or ".yml".
 
         Args:
             filename (str): The filename.
+            output_format (str): Recognizes "json", "yaml" and "yml". Else falls
+                back to "txt" behavior.
 
         Returns:
             digeststr (str): The formatted pipeline digest.
         """
-        digeststr = pformat(return_attrs_recursively(self))
+        attrs = return_attrs_recursively(self)
+
+        def format_one_of(fmts):
+            return (
+            filename
+                and filename.lower().endswith(tuple(["." + f for f in fmts]))
+                or output_format in fmts
+            )
+
+        if format_one_of(("json", "yaml", "yml")):
+            digeststr = json.dumps(attrs, default=lambda x: str(x))
+            if format_one_of(("yaml", "yml")):
+                digeststr = yaml.dump(yaml.safe_load(digeststr))
+        else:
+            digeststr = pformat(attrs)
+
         if filename:
             with open(filename, "w") as f:
                 f.write(digeststr)
