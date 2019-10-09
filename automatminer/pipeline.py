@@ -92,15 +92,13 @@ class MatPipe(DFTransformer, LoggableMixin):
                 reducer = config["reducer"]
                 learner = config["learner"]
 
-        self._logger = self.get_logger(logger, level=log_level)
         self.autofeaturizer = autofeaturizer
         self.cleaner = cleaner
         self.reducer = reducer
         self.learner = learner
-        self.autofeaturizer._logger = self.get_logger(logger)
-        self.cleaner._logger = self.get_logger(logger)
-        self.reducer._logger = self.get_logger(logger)
-        self.learner._logger = self.get_logger(logger)
+        self.logger = logger
+        if log_level:
+            self.logger.setLevel(log_level)
         self.pre_fit_df = None
         self.post_fit_df = None
         self.is_fit = False
@@ -340,9 +338,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         with open(filename, 'rb') as f:
             pipe = pickle.load(f)
 
-        for obj in [pipe, pipe.learner, pipe.reducer, pipe.cleaner,
-                    pipe.autofeaturizer]:
-            obj._logger = cls.get_logger(logger)
+        pipe.logger = logger
 
         pipe.logger.info("Loaded MatPipe from file {}.".format(filename))
         pipe.logger.warning("Only use this model to make predictions (do not "

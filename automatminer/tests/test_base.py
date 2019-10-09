@@ -77,7 +77,7 @@ class TestLoggableMixin(LoggableMixin):
     """
 
     def __init__(self, logger=True):
-        self._logger = self.get_logger(logger)
+        self.logger = logger
 
 
 class TestBaseTransformers(unittest.TestCase):
