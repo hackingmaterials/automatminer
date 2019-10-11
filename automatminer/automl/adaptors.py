@@ -163,6 +163,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             evaluated_models = []
             for key in self.backend.evaluated_individuals_.keys():
                 evaluated_models.append(key.split('(')[0])
+                # evaluated_models.append(key)
 
             model_names = list(set(evaluated_models))
             models = OrderedDict({model: [] for model in model_names})
@@ -195,7 +196,6 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                        key=lambda x: x[1],
                        reverse=self.greater_score_is_better))
             self.models = models
-            self._best_models = best_models_and_scores
             return best_models_and_scores
 
     @property
@@ -227,9 +227,11 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                 it serializable.
 
         """
-        self._from_serialized = True
         _adaptor_tmp_backend = self._backend
+        # Necessary for getting best models post serialization
+        self._best_models = self.best_models
         self._backend = self.best_pipeline
+        self._from_serialized = True
 
     def deserialize(self) -> None:
         """
@@ -239,9 +241,9 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         Returns:
             None
         """
-        self._from_serialized = False
         self._backend = _adaptor_tmp_backend
         _tmp_backend = None
+        self._from_serialized = False
 
 
 class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):

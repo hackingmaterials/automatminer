@@ -8,6 +8,8 @@ import pickle
 from pprint import pformat
 
 import yaml
+from automatminer import TPOTAdaptor, SinglePipelineAdaptor, FeatureReducer, \
+    AutoFeaturizer, DataCleaner
 from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
@@ -105,6 +107,102 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.is_fit = False
         self.ml_type = None
         self.target = None
+
+    # @staticmethod
+    # def from_preset(preset: str = 'express', **powerups):
+    #     """
+    #     Preset configs for MatPipe.
+    #
+    #     USER:
+    #     "production": Used for making production predictions and benchmarks.
+    #         Balances accuracy and timeliness.
+    #     "heavy" - When high accuracy is required, and you have access to
+    #         (very) powerful computing resources. May be buggier and more difficult
+    #         to run than production.
+    #     "express" - Good for quick benchmarks with moderate accuracy.
+    #     "express_single" - Same as express but uses XGB trees as single models
+    #         instead of automl TPOT. Good for even more express results.
+    #
+    #     DEBUG:
+    #     "debug" - Debugging with automl enabled.
+    #     "debug_single" - Debugging with a single model.
+    #
+    #     Args:
+    #         preset (str): The name of the preset config you'd like to use.
+    #         **powerups: Various modifications as kwargs.
+    #             cache_src (str): A file path. If specified, Autofeaturizer will use
+    #                 feature caching with a file stored at this location. See
+    #                 Autofeaturizer's cache_src argument for more information.
+    #     Returns:
+    #         (dict) The desired preset config.
+    #
+    #     """
+    #     caching_kwargs = {"cache_src": powerups.get("cache_src", None)}
+    #
+    #     if preset == "production":
+    #         production_config = {
+    #             "learner": TPOTAdaptor(max_time_mins=1440,
+    #                                    max_eval_time_mins=20),
+    #             "reducer": FeatureReducer(reducers=('corr', 'tree'),
+    #                                       tree_importance_percentile=0.99),
+    #             "autofeaturizer": AutoFeaturizer(preset="express",
+    #                                              **caching_kwargs),
+    #             "cleaner": DataCleaner()
+    #         }
+    #         return production_config
+    #     elif preset == "heavy":
+    #         heavy_config = {
+    #             "learner": TPOTAdaptor(max_time_mins=2880),
+    #             "reducer": FeatureReducer(reducers=("corr", "rebate")),
+    #             "autofeaturizer": AutoFeaturizer(preset="heavy", **caching_kwargs),
+    #             "cleaner": DataCleaner()
+    #         }
+    #         return heavy_config
+    #     elif preset == "express":
+    #         express_config = {
+    #             "learner": TPOTAdaptor(max_time_mins=60, population_size=20),
+    #             "reducer": FeatureReducer(reducers=('corr', 'tree'),
+    #                                       tree_importance_percentile=0.99),
+    #             "autofeaturizer": AutoFeaturizer(preset="express",
+    #                                              **caching_kwargs),
+    #             "cleaner": DataCleaner()
+    #         }
+    #         return express_config
+    #     elif preset == "express_single":
+    #         xgb_kwargs = {"n_estimators": 300, "max_depth": 3, "n_jobs": -1}
+    #         express_config = {
+    #             "learner": SinglePipelineAdaptor(
+    #                 regressor=XGBRegressor(**xgb_kwargs),
+    #                 classifier=XGBClassifier(**xgb_kwargs)),
+    #             "reducer": FeatureReducer(reducers=('corr',)),
+    #             "autofeaturizer": AutoFeaturizer(preset="express",
+    #                                              **caching_kwargs),
+    #             "cleaner": DataCleaner()
+    #         }
+    #         return express_config
+    #     elif preset == "debug":
+    #         debug_config = {
+    #             "learner": TPOTAdaptor(max_time_mins=2,
+    #                                    max_eval_time_mins=1,
+    #                                    population_size=10),
+    #             "reducer": FeatureReducer(reducers=('corr', 'tree')),
+    #             "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
+    #             "cleaner": DataCleaner()
+    #         }
+    #         return debug_config
+    #     elif preset == "debug_single":
+    #         rf_kwargs = {"n_estimators": 10, "n_jobs": -1}
+    #         debug_single_config = {
+    #             "learner": SinglePipelineAdaptor(
+    #                 classifier=RandomForestClassifier(**rf_kwargs),
+    #                 regressor=RandomForestRegressor(**rf_kwargs)),
+    #             "reducer": FeatureReducer(reducers=('corr',)),
+    #             "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
+    #             "cleaner": DataCleaner()
+    #         }
+    #         return debug_single_config
+    #     else:
+    #         raise ValueError("{} unknown preset.".format(preset))
 
     @set_fitted
     def fit(self, df, target):
@@ -280,9 +378,10 @@ class MatPipe(DFTransformer, LoggableMixin):
 
         def format_one_of(fmts):
             return (
-            filename
-                and filename.lower().endswith(tuple(["." + f for f in fmts]))
-                or output_format in fmts
+                    filename
+                    and filename.lower().endswith(
+                tuple(["." + f for f in fmts]))
+                    or output_format in fmts
             )
 
         if format_one_of(("json", "yaml", "yml")):
@@ -329,7 +428,6 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.learner.deserialize()
         for loggable in loggables:
             loggable._logger = temp_logger
-
 
     @classmethod
     def load(cls, filename, logger=True):
