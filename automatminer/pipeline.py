@@ -1,8 +1,9 @@
 """
 The highest level classes for pipelines.
 """
-import json
 import os
+import json
+import copy
 import pickle
 from pprint import pformat
 
@@ -312,14 +313,23 @@ class MatPipe(DFTransformer, LoggableMixin):
         Returns:
             None
         """
-        temp_backend = self.learner.backend
-        self.learner._backend = self.learner.best_pipeline
-        for obj in [self, self.learner, self.reducer, self.cleaner,
-                    self.autofeaturizer]:
-            obj._logger = None
+        self.learner.serialize()
+
+        temp_logger = copy.deepcopy(self._logger)
+        loggables = [
+            self, self.learner, self.reducer, self.cleaner, self.autofeaturizer
+        ]
+        for loggable in loggables:
+            loggable._logger = None
+
         with open(filename, 'wb') as f:
             pickle.dump(self, f)
-        self.learner._backend = temp_backend
+
+        # Reassign live memory objects for further use in this object
+        self.learner.deserialize()
+        for loggable in loggables:
+            loggable._logger = temp_logger
+
 
     @classmethod
     def load(cls, filename, logger=True):
