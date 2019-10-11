@@ -78,7 +78,7 @@ class DataCleaner(DFTransformer, LoggableMixin):
                  encode_categories=True, encoder='one-hot',
                  drop_na_targets=True, na_method_fit="drop",
                  na_method_transform="fill", logger=True):
-        self._logger = self.get_logger(logger)
+        self.logger = logger
         self.max_na_frac = max_na_frac
         self.feature_na_method = feature_na_method
         self.encoder = encoder
@@ -482,7 +482,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
         self.n_pca_features = n_pca_features
         self.tree_importance_percentile = tree_importance_percentile
         self.n_rebate_features = n_rebate_features
-        self._logger = self.get_logger(logger)
+        self.logger = logger
         self._keep_features = keep_features or []
         self._remove_features = remove_features or []
         self.removed_features = {}

@@ -39,7 +39,7 @@ class TreeFeatureReducer(DFTransformer, LoggableMixin):
 
     def __init__(self, mode, importance_percentile=0.95,
                  logger=True, random_state=0):
-        self._logger = self.get_logger(logger)
+        self.logger = logger
         self.mode = mode
         self.importance_percentile = importance_percentile
         self.selected_features = None

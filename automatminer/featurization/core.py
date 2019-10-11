@@ -128,7 +128,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
 
         self.cache_src = cache_src
         self.preset = "express" if preset is None else preset
-        self._logger = self.get_logger(logger)
+        self.logger = logger
         self.featurizers = featurizers
         self.exclude = exclude if exclude else []
         self.functionalize = functionalize

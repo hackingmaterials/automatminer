@@ -78,7 +78,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self._fitted_target = None
         self._backend = None
         self._features = None
-        self._logger = self.get_logger(logger)
+        self.logger = logger
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
@@ -245,7 +245,7 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
 
     def __init__(self, regressor, classifier, logger=True):
         self.mode = None
-        self._logger = self.get_logger(logger)
+        self.logger = logger
         self._regressor = regressor
         self._classifier = classifier
         self._features = None
@@ -294,5 +294,4 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     @check_fitted
     def fitted_target(self):
         return self._fitted_target
-
 
