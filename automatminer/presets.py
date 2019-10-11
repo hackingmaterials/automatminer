@@ -15,6 +15,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from automatminer.featurization import AutoFeaturizer
 from automatminer.preprocessing import FeatureReducer, DataCleaner
 from automatminer.automl import TPOTAdaptor, SinglePipelineAdaptor
+from automatminer.utils.log import AMM_DEFAULT_LOGLVL, AMM_DEFAULT_LOGGER
 
 
 def get_preset_config(preset: str = 'express', **powerups) -> dict:
@@ -48,7 +49,7 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
     caching_kwargs = {"cache_src": powerups.get("cache_src", None)}
 
     if preset == "production":
-        production_config = {
+        config = {
             "learner": TPOTAdaptor(max_time_mins=1440,
                                    max_eval_time_mins=20),
             "reducer": FeatureReducer(reducers=('corr', 'tree'),
@@ -57,17 +58,15 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
                                              **caching_kwargs),
             "cleaner": DataCleaner()
         }
-        return production_config
     elif preset == "heavy":
-        heavy_config = {
+        config = {
             "learner": TPOTAdaptor(max_time_mins=2880),
             "reducer": FeatureReducer(reducers=("corr", "rebate")),
             "autofeaturizer": AutoFeaturizer(preset="heavy", **caching_kwargs),
             "cleaner": DataCleaner()
         }
-        return heavy_config
     elif preset == "express":
-        express_config = {
+        config = {
             "learner": TPOTAdaptor(max_time_mins=60, population_size=20),
             "reducer": FeatureReducer(reducers=('corr', 'tree'),
                                       tree_importance_percentile=0.99),
@@ -75,10 +74,9 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
                                              **caching_kwargs),
             "cleaner": DataCleaner()
         }
-        return express_config
     elif preset == "express_single":
         xgb_kwargs = {"n_estimators": 300, "max_depth": 3, "n_jobs": -1}
-        express_config = {
+        config = {
             "learner": SinglePipelineAdaptor(
                 regressor=XGBRegressor(**xgb_kwargs),
                 classifier=XGBClassifier(**xgb_kwargs)),
@@ -87,9 +85,8 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
                                              **caching_kwargs),
             "cleaner": DataCleaner()
         }
-        return express_config
     elif preset == "debug":
-        debug_config = {
+        config = {
             "learner": TPOTAdaptor(max_time_mins=2,
                                    max_eval_time_mins=1,
                                    population_size=10),
@@ -97,10 +94,9 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
             "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
             "cleaner": DataCleaner()
         }
-        return debug_config
     elif preset == "debug_single":
         rf_kwargs = {"n_estimators": 10, "n_jobs": -1}
-        debug_single_config = {
+        config = {
             "learner": SinglePipelineAdaptor(
                 classifier=RandomForestClassifier(**rf_kwargs),
                 regressor=RandomForestRegressor(**rf_kwargs)),
@@ -108,6 +104,9 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
             "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
             "cleaner": DataCleaner()
         }
-        return debug_single_config
     else:
         raise ValueError("{} unknown preset.".format(preset))
+
+    config["logger"] = powerups.get("logger", AMM_DEFAULT_LOGGER)
+    config["log_lvl"] = powerups.get("log_lvl", AMM_DEFAULT_LOGLVL)
+    return config
