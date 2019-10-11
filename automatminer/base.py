@@ -31,10 +31,11 @@ class LoggableMixin:
             logger will be used. If set to False, then no logging will occur.
         """
         new_logger = self.get_logger(new_logger)
-        assert isinstance(
-            new_logger, logging.Logger
-        ), "The new logger must be an instance of the logger class."
+        if not isinstance(new_logger, logging.Logger):
+            TypeError("The new logger must be an instance of the logger class.")
+
         self._logger = new_logger
+
         if hasattr(self, "autofeaturizer"):
             for x in ["autofeaturizer", "cleaner", "reducer", "learner"]:
                 getattr(self, x)._logger = new_logger
