@@ -8,6 +8,8 @@ import pickle
 from pprint import pformat
 
 import yaml
+
+from automatminer import __version__
 from automatminer import TPOTAdaptor, SinglePipelineAdaptor, FeatureReducer, \
     AutoFeaturizer, DataCleaner
 from automatminer.base import LoggableMixin, DFTransformer
@@ -77,6 +79,8 @@ class MatPipe(DFTransformer, LoggableMixin):
 
         is_fit (bool): If True, the matpipe is fit. The matpipe should be
             fit before being used to predict data.
+        version (str): The automatminer version used for serialization and
+            deserialization.
     """
 
     def __init__(self, autofeaturizer=None, cleaner=None, reducer=None,
@@ -107,6 +111,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.is_fit = False
         self.ml_type = None
         self.target = None
+        self.version = __version__
 
     # @staticmethod
     # def from_preset(preset: str = 'express', **powerups):
@@ -430,7 +435,7 @@ class MatPipe(DFTransformer, LoggableMixin):
             loggable._logger = temp_logger
 
     @staticmethod
-    def load(filename, logger=True):
+    def load(filename, logger=True, supress_version_mismatch=False):
         """
         Loads a matpipe that was saved.
 
@@ -439,6 +444,9 @@ class MatPipe(DFTransformer, LoggableMixin):
                 using save).
             logger (bool or logging.Logger): The logger to use for the loaded
                 matpipe.
+            supress_version_mismatch (bool): If False, throws an error when
+                there is a version mismatch between a serialized MatPipe and the
+                current automatminer version. If True, supresses this error.
 
         Returns:
             pipe (MatPipe): A MatPipe object.
@@ -446,12 +454,15 @@ class MatPipe(DFTransformer, LoggableMixin):
         with open(filename, 'rb') as f:
             pipe = pickle.load(f)
 
+        if pipe.version != __version__ and not supress_version_mismatch:
+            raise AutomatminerError("Version mismatch")
+
         pipe.logger = logger
 
         pipe.logger.info("Loaded MatPipe from file {}.".format(filename))
 
         if hasattr(pipe.learner, "from_serialized"):
-            if pipe.learner._from_serialized:
+            if pipe.learner.from_serialized:
                 pipe.logger.warning(
                     "Only use this model to make predictions (do not "
                     "retrain!). Backend was serialzed as only the top model, "

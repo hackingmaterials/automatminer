@@ -156,7 +156,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
 
         """
 
-        if self._from_serialized:
+        if self.from_serialized:
             return self._best_models
         else:
             self.greater_score_is_better = is_greater_better(
@@ -208,7 +208,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
 
     @property
     def best_pipeline(self):
-        if self._from_serialized:
+        if self.from_serialized:
             # The TPOT backend is replaced by the best pipeline.
             return self._backend
         else:
@@ -235,7 +235,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         # Necessary for getting best models post serialization
         self._best_models = self.best_models
         self._backend = self.best_pipeline
-        self._from_serialized = True
+        self.from_serialized = True
 
     def deserialize(self) -> None:
         """
@@ -247,7 +247,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         """
         self._backend = _adaptor_tmp_backend
         _tmp_backend = None
-        self._from_serialized = False
+        self.from_serialized = False
 
 
 class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
