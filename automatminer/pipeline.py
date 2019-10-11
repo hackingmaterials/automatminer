@@ -429,8 +429,8 @@ class MatPipe(DFTransformer, LoggableMixin):
         for loggable in loggables:
             loggable._logger = temp_logger
 
-    @classmethod
-    def load(cls, filename, logger=True):
+    @staticmethod
+    def load(filename, logger=True):
         """
         Loads a matpipe that was saved.
 
