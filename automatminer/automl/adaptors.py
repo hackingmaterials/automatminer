@@ -61,6 +61,10 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         best_models (OrderedDict): The best model names and their scores.
         backend (TPOTBase): The TPOT object interface used for ML training.
         models (OrderedDict): The raw sklearn-style models output by TPOT.
+
+        from_serialized (bool): Whether the backend is loaded from a serialized
+            instance. If True, the previous full TPOT data will not be available
+            due to pickling problems.
     """
 
     def __init__(self, logger=True, **tpot_kwargs):
@@ -80,7 +84,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self._features = None
         self.logger = logger
 
-        self._from_serialized = False
+        self.from_serialized = False
         self._best_models = None
 
     @log_progress(AMM_LOG_FIT_STR)

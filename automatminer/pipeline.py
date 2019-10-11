@@ -449,7 +449,12 @@ class MatPipe(DFTransformer, LoggableMixin):
         pipe.logger = logger
 
         pipe.logger.info("Loaded MatPipe from file {}.".format(filename))
-        pipe.logger.warning("Only use this model to make predictions (do not "
-                            "retrain!). Backend was serialzed as only the top "
-                            "model, not the full automl backend. ")
+
+        if hasattr(pipe.learner, "from_serialized"):
+            if pipe.learner._from_serialized:
+                pipe.logger.warning(
+                    "Only use this model to make predictions (do not "
+                    "retrain!). Backend was serialzed as only the top model, "
+                    "not the full automl backend. "
+                )
         return pipe
