@@ -1,5 +1,5 @@
 # Requirements of this project alone
-matminer==0.6.0
+matminer==0.6.1
 xlrd==1.1.0
 xgboost==0.80
 tpot==0.10.1
