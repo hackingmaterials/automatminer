@@ -11,6 +11,7 @@ from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     StructureToComposition, StructureToOxidStructure, \
     CompositionToOxidComposition
 from matminer.featurizers.function import FunctionFeaturizer
+from matminer.utils.io import store_dataframe_as_json, load_dataframe_from_json
 
 from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR, \
     AMM_LOG_TRANSFORM_STR
@@ -335,7 +336,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         if self.cache_src and os.path.exists(self.cache_src):
             self.logger.debug(self._log_prefix +
                               "Reading cache_src {}".format(self.cache_src))
-            cached_df = pd.read_json(self.cache_src)
+            cached_df = load_dataframe_from_json(self.cache_src)
             if not all([loc in cached_df.index for loc in df.index]):
                 raise AutomatminerError("Feature cache does not contain all "
                                         "entries (by DataFrame index) needed "
@@ -423,7 +424,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                                 multiindex=self.multiindex,
                                                 inplace=False)
             if self.cache_src and not os.path.exists(self.cache_src):
-                df.to_json(self.cache_src)
+                store_dataframe_as_json(df, self.cache_src)
             return df
 
     def _prescreen_df(self, df, inplace=True):
