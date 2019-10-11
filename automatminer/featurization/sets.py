@@ -129,7 +129,8 @@ class StructureFeaturizers(FeaturizerSet):
             sf.GlobalSymmetryFeatures(),
             sf.EwaldEnergy(),
             sf.SineCoulombMatrix(flatten=True),
-            sf.GlobalInstabilityIndex()
+            sf.GlobalInstabilityIndex(),
+            sf.StructuralComplexity()
         ]
         return self._get_featurizers(fs)
 
