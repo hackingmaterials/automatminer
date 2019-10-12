@@ -231,8 +231,10 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                 it serializable.
 
         """
+        global _adaptor_tmp_backend
         _adaptor_tmp_backend = self._backend
         # Necessary for getting best models post serialization
+        print("ADAPTOR TEMP BACKEND SERIALIZE IS", _adaptor_tmp_backend)
         self._best_models = self.best_models
         self._backend = self.best_pipeline
         self.from_serialized = True
@@ -245,8 +247,10 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         Returns:
             None
         """
+        global _adaptor_tmp_backend
         self._backend = _adaptor_tmp_backend
-        _tmp_backend = None
+        print("ADAPTOR TEMP BACKEND DESERIALIZE IS", _adaptor_tmp_backend)
+        _adaptor_tmp_backend = None
         self.from_serialized = False
 
 
