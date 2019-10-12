@@ -1,3 +1,4 @@
+#encoding utf-8
 """
 Top level preprocessing classes.
 """

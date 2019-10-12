@@ -108,5 +108,5 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
         raise ValueError("{} unknown preset.".format(preset))
 
     config["logger"] = powerups.get("logger", AMM_DEFAULT_LOGGER)
-    config["log_lvl"] = powerups.get("log_lvl", AMM_DEFAULT_LOGLVL)
+    config["log_level"] = powerups.get("log_lvl", AMM_DEFAULT_LOGLVL)
     return config

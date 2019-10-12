@@ -9,12 +9,11 @@ from pprint import pformat
 
 import yaml
 
-from automatminer import __version__
 from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.pkg import check_fitted, set_fitted, \
-    return_attrs_recursively, AutomatminerError
+    return_attrs_recursively, AutomatminerError, get_version
 from automatminer.utils.log import AMM_DEFAULT_LOGGER, AMM_DEFAULT_LOGLVL
 
 
@@ -114,7 +113,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.is_fit = False
         self.ml_type = None
         self.target = None
-        self.version = __version__
+        self.version = get_version()
 
     @staticmethod
     def from_preset(preset: str = 'express', **powerups):
@@ -138,7 +137,7 @@ class MatPipe(DFTransformer, LoggableMixin):
                  - cache_src (str): The cache source if you want to save
                     features.
                  - logger (logging.Logger): The logger to use.
-                 - log_lvl (int or str): Sets the log level of the logger.
+                 - log_level (int or str): Sets the log level of the logger.
         """
         config = get_preset_config(preset, **powerups)
         return MatPipe(**config)
@@ -365,6 +364,7 @@ class MatPipe(DFTransformer, LoggableMixin):
 
         # Reassign live memory objects for further use in this object
         self.learner.deserialize()
+        print(self.learner.best_pipeline)
         for loggable in loggables:
             loggable._logger = temp_logger
 
@@ -388,7 +388,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         with open(filename, 'rb') as f:
             pipe = pickle.load(f)
 
-        if pipe.version != __version__ and not supress_version_mismatch:
+        if pipe.version != get_version() and not supress_version_mismatch:
             raise AutomatminerError("Version mismatch")
 
         pipe.logger = logger

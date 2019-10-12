@@ -1,6 +1,7 @@
 """
 Utils specific to this package.
 """
+import os
 
 import pandas as pd
 from sklearn.exceptions import NotFittedError
@@ -116,4 +117,23 @@ def return_attrs_recursively(obj) -> dict:
             if "ml_data" not in attr:
                 attrdict[attr] = value
     return attrdict
+
+
+def get_version():
+    """
+    Get the version of automatminer without worrying about circular imports in
+    __init__.
+
+    Returns:
+        (str): the version
+
+    """
+    thisdir = os.path.dirname(os.path.realpath(__file__))
+    version_reference = os.path.join(thisdir, "../__init__.py")
+    with open(version_reference, "r") as f:
+        init_file = f.readlines()
+        v = [v for v in init_file if "__version__" in v][0]
+    v = v.replace("__version__", "").replace("\"", "").replace("=", "").strip()
+    return v
+
 

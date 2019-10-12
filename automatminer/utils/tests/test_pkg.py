@@ -7,8 +7,9 @@ import unittest
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 
+from automatminer import __version__
 from automatminer.utils.pkg import compare_columns, check_fitted, \
-    set_fitted
+    set_fitted, get_version
 from automatminer.base import DFTransformer
 
 
@@ -54,6 +55,10 @@ class TestPackageTools(unittest.TestCase):
 
         mt2 = MyTransformer()
         self.assertRaises(NotFittedError, mt2.transform, [df, ""])
+
+    def test_get_version(self):
+        v = get_version()
+        self.assertEqual(v, __version__)
 
 
 if __name__ == "__main__":

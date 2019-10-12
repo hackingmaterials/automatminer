@@ -20,6 +20,7 @@ CACHE_SRC = os.path.join(test_dir, "cache.json")
 DIGEST_PATH = os.path.join(test_dir, "matdigest.")
 DIGEST_EXTS = ['txt', 'json', 'yml', 'yaml']
 PIPE_PATH = os.path.join(test_dir, "test_pipe.p")
+VERSION_PIPE_PATH = os.path.join(test_dir, "data/example.p")
 
 
 class TestMatPipeSetup(unittest.TestCase):
@@ -133,6 +134,10 @@ class TestMatPipe(unittest.TestCase):
             digest = self.pipe.digest(output_format=ext)
             self.assertTrue(isinstance(digest, str))
 
+    def test_persistence_version(self):
+        with self.assertRaises(AutomatminerError):
+            MatPipe.load(VERSION_PIPE_PATH)
+
     def _run_benchmark(self, cache, pipe):
         # Test static, regular benchmark (no fittable featurizers)
         df = self.df.iloc[500:600]
@@ -151,6 +156,7 @@ class TestMatPipe(unittest.TestCase):
         self.assertEqual(len(df_tests2), 2)
 
     def tearDown(self):
-        for remnant in [CACHE_SRC, PIPE_PATH, *[DIGEST_PATH + ext for ext in DIGEST_EXTS]]:
+        digests = [DIGEST_PATH + ext for ext in DIGEST_EXTS]
+        for remnant in [CACHE_SRC, PIPE_PATH, *digests]:
             if os.path.exists(remnant):
                 os.remove(remnant)
