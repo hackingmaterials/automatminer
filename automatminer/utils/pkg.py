@@ -135,5 +135,3 @@ def get_version():
         v = [v for v in init_file if "__version__" in v][0]
     v = v.replace("__version__", "").replace("\"", "").replace("=", "").strip()
     return v
-
-

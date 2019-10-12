@@ -392,9 +392,7 @@ class MatPipe(DFTransformer, LoggableMixin):
             raise AutomatminerError("Version mismatch")
 
         pipe.logger = logger
-
         pipe.logger.info("Loaded MatPipe from file {}.".format(filename))
-
         if hasattr(pipe.learner, "from_serialized"):
             if pipe.learner.from_serialized:
                 pipe.logger.warning(
