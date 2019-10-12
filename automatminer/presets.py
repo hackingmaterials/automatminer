@@ -48,7 +48,10 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
     """
     caching_kwargs = {"cache_src": powerups.get("cache_src", None)}
 
-    if preset == "production":
+    if preset not in get_available_presets():
+        raise ValueError("{} unknown preset.".format(preset))
+
+    elif preset == "production":
         config = {
             "learner": TPOTAdaptor(max_time_mins=1440,
                                    max_eval_time_mins=20),
@@ -104,9 +107,24 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
             "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
             "cleaner": DataCleaner()
         }
-    else:
-        raise ValueError("{} unknown preset.".format(preset))
 
     config["logger"] = powerups.get("logger", AMM_DEFAULT_LOGGER)
     config["log_level"] = powerups.get("log_lvl", AMM_DEFAULT_LOGLVL)
     return config
+
+
+def get_available_presets():
+    """
+    Return all available presets for MatPipes.
+
+    Returns:
+        ([str]): A list of preset names.
+    """
+    return [
+        "production",
+        "heavy",
+        "express",
+        "express_single",
+        "debug",
+        "debug_single"
+    ]
