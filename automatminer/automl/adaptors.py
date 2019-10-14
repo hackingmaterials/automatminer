@@ -284,11 +284,6 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
 
         mode (str): Either AMM_REG_NAME (regression) or AMM_CLF_NAME
             (classification)
-        _regressor (BaseEstimator): The single pipeline to be used for
-            regression
-        _classifier (BaseEstimator): The single pipeline to be used for
-            classification
-
     """
 
     def __init__(self, regressor, classifier, logger=True):

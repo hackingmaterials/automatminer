@@ -202,7 +202,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.needs_fit = needs_fit
 
         if self.needs_fit and self.cache_src:
-            self.logger.warn(self._log_prefix +
+            self.logger.critical(self._log_prefix +
                              "Using cached features on fittable featurizers! "
                              "Please make sure you are not benchmarking with "
                              "these options enabled; it is likely you will be"

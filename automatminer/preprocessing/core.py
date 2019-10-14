@@ -60,19 +60,19 @@ class DataCleaner(DFTransformer, LoggableMixin):
             be used. If set to False, then no logging will occur.
 
     Attributes:
-            The following attrs are set during fitting.
+        max_problem_col_warning_threshold (float): The max number of
+            "problematic" columns (as a fraction of total columns) which are nan
+            which are allowed before logging a warning.
 
-        retained_features (list): The features which were retained
+        The following attrs are set during fitting.
+
         object_cols (list): The features identified as objects/categories
         number_cols (list): The features identified as numerical
         fitted_df (pd.DataFrame): The fitted dataframe
-        is_fit (bool): If true, this object has been fit to a dataframe
-
-            The following attrs are set during fitting and/or transformation. Ie
-            they are only relevant to the most recent transform.
-
+        fitted_target (str): The target variable in the dataframe.
         dropped_features (list): The features which were dropped.
         dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped
+        warnings ([str]): A list of warnings accumulated during fitting.
     """
 
     def __init__(self, max_na_frac=0.01, feature_na_method="drop",

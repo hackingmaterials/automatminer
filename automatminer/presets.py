@@ -1,10 +1,5 @@
 """
-Various configurations for MatPipe.
-
-Use them like so:
-
-    config = get_preset_config()
-    pipe = MatPipe(**config)
+Configurations for MatPipe.
 """
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>"]
@@ -23,14 +18,14 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
     Preset configs for MatPipe.
 
     USER:
+    "express" - Good for quick benchmarks with moderate accuracy.
+    "express_single" - Same as express but uses XGB trees as single models
+        instead of automl TPOT. Good for even more express results.
     "production": Used for making production predictions and benchmarks.
         Balances accuracy and timeliness.
     "heavy" - When high accuracy is required, and you have access to
         (very) powerful computing resources. May be buggier and more difficult
         to run than production.
-    "express" - Good for quick benchmarks with moderate accuracy.
-    "express_single" - Same as express but uses XGB trees as single models
-        instead of automl TPOT. Good for even more express results.
 
     DEBUG:
     "debug" - Debugging with automl enabled.
@@ -42,9 +37,10 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
             cache_src (str): A file path. If specified, Autofeaturizer will use
                 feature caching with a file stored at this location. See
                 Autofeaturizer's cache_src argument for more information.
+            logger (logging.Logger): The logging object to use.
+
     Returns:
         (dict) The desired preset config.
-
     """
     caching_kwargs = {"cache_src": powerups.get("cache_src", None)}
 

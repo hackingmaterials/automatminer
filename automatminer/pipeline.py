@@ -33,16 +33,17 @@ class MatPipe(DFTransformer, LoggableMixin):
     predictions (e.g., predicting material properties for which you have
     no data) use "fit" and "predict".
 
-    The pipeline is transferrable. So it can be fit on one dataset and used
-    to predict the properties of another. Furthermore, the entire pipeline and
-    all constituent objects can be summarized in text with "digest".
+    The pipeline is transferrable. It can be fit on one dataset and used
+    to predict the properties of another. The entire pipeline and
+    all constituent objects can be summarized (via "summarize") or inspected
+    (via "inspect") in human readable formats.
 
     ----------------------------------------------------------------------------
     Note: This pipeline should function the same regardless of which
     "component" classes it is made out of. E.g. the steps for each method should
     remain the same whether using the TPOTAdaptor class as the learner or
     using an SinglePipelineAdaptor class as the learner. To use a preset config,
-    import a config from automatminer.configs and do MatPipe(**config).
+    use MatPipe.from_preset(preset)
     ----------------------------------------------------------------------------
 
     Examples:
@@ -74,13 +75,17 @@ class MatPipe(DFTransformer, LoggableMixin):
             be used. If set to False, then no logging will occur.
 
     Attributes:
+        version (str): The automatminer version used for serialization and
+            deserialization.
+
         The following attributes are set during fitting. Each has their own set
         of attributes which defines more specifically how the pipeline works.
 
-        is_fit (bool): If True, the matpipe is fit. The matpipe should be
-            fit before being used to predict data.
-        version (str): The automatminer version used for serialization and
-            deserialization.
+        pre_fit_df (pd.DataFrame): The dataframe on which the pipeline was fit.
+        post_fit_df (pd.DataFrame): The dataframe transformed into the ML-ready
+            form.
+        ml_type (str): Specifies regression or classification.
+        target (str): The name of the column where target values are held.
     """
 
     def __init__(self, autofeaturizer=None, cleaner=None, reducer=None,
@@ -133,7 +138,6 @@ class MatPipe(DFTransformer, LoggableMixin):
                  - cache_src (str): The cache source if you want to save
                     features.
                  - logger (logging.Logger): The logger to use.
-                 - log_level (int or str): Sets the log level of the logger.
         """
         config = get_preset_config(preset, **powerups)
         return MatPipe(**config)
@@ -188,7 +192,8 @@ class MatPipe(DFTransformer, LoggableMixin):
         used for fitting. The dataframe should also have the same materials
         property types at the dataframe used for fitting (e.g., if you fit a
         matpipe to a df containing composition, your prediction df should have
-        a column for composition).
+        a column for composition). If you used custom features, make sure those
+        are included in your prediction df as well.
 
         Args:
             df (pandas.DataFrame): Pipe will be fit to this dataframe.
@@ -425,16 +430,16 @@ class MatPipe(DFTransformer, LoggableMixin):
     @staticmethod
     def load(filename, logger=True, supress_version_mismatch=False):
         """
-        Loads a matpipe that was saved.
+        Loads a MatPipe that was saved.
 
         Args:
-            filename (str): The pickled matpipe object (should have been saved
+            filename (str): The pickled MatPipe object (should have been saved
                 using save).
             logger (bool or logging.Logger): The logger to use for the loaded
-                matpipe.
+                MatPipe.
             supress_version_mismatch (bool): If False, throws an error when
                 there is a version mismatch between a serialized MatPipe and the
-                current automatminer version. If True, supresses this error.
+                current Automatminer version. If True, suppresses this error.
 
         Returns:
             pipe (MatPipe): A MatPipe object.
