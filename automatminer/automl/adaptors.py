@@ -286,7 +286,7 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
             (classification)
         _regressor (BaseEstimator): The single pipeline to be used for
             regression
-        _classifier (BaseEstimator)L The single pipeline to be used for
+        _classifier (BaseEstimator): The single pipeline to be used for
             classification
 
     """
@@ -326,7 +326,7 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     @property
     @check_fitted
     def backend(self):
-        return None
+        return self.best_pipeline
 
     @property
     @check_fitted

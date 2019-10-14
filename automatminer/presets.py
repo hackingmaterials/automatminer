@@ -15,7 +15,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from automatminer.featurization import AutoFeaturizer
 from automatminer.preprocessing import FeatureReducer, DataCleaner
 from automatminer.automl import TPOTAdaptor, SinglePipelineAdaptor
-from automatminer.utils.log import AMM_DEFAULT_LOGLVL, AMM_DEFAULT_LOGGER
+from automatminer.utils.log import AMM_DEFAULT_LOGGER
 
 
 def get_preset_config(preset: str = 'express', **powerups) -> dict:
@@ -39,7 +39,6 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
     Args:
         preset (str): The name of the preset config you'd like to use.
         **powerups: Various modifications as kwargs.
-            ignore ([str]): Column names for the pipeline to ignore.
             cache_src (str): A file path. If specified, Autofeaturizer will use
                 feature caching with a file stored at this location. See
                 Autofeaturizer's cache_src argument for more information.
@@ -111,7 +110,6 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
 
     logger = powerups.get("logger", AMM_DEFAULT_LOGGER)
     config["logger"] = logger
-    config["ignore"] = powerups.get("ignore", None)
     return config
 
 

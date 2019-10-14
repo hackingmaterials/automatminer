@@ -71,9 +71,6 @@ class MatPipe(DFTransformer, LoggableMixin):
         logger (Logger, bool): A custom logger object to use for logging.
             Alternatively, if set to True, the default automatminer logger will
             be used. If set to False, then no logging will occur.
-        ignore ([str]): String names of columns in all dataframes to ignore.
-            This will not stop samples from being dropped, but will preserve
-            columns.
 
     Attributes:
         The following attributes are set during fitting. Each has their own set
@@ -86,7 +83,7 @@ class MatPipe(DFTransformer, LoggableMixin):
     """
 
     def __init__(self, autofeaturizer=None, cleaner=None, reducer=None,
-                 learner=None, logger=AMM_DEFAULT_LOGGER, ignore=None):
+                 learner=None, logger=AMM_DEFAULT_LOGGER):
         transformers = [autofeaturizer, cleaner, reducer, learner]
         if not all(transformers):
             if any(transformers):
@@ -106,7 +103,6 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.reducer = reducer
         self.learner = learner
         self.logger = logger
-        self.ignore = ignore
         self.pre_fit_df = None
         self.post_fit_df = None
         self.ml_type = None
@@ -183,7 +179,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         return self.predict(df, **transform_kwargs)
 
     @check_fitted
-    def predict(self, df):
+    def predict(self, df, ignore=None):
         """
         Predict a target property of a set of materials.
 
@@ -195,11 +191,18 @@ class MatPipe(DFTransformer, LoggableMixin):
 
         Args:
             df (pandas.DataFrame): Pipe will be fit to this dataframe.
+            ignore ([str]): String names of columns in all dataframes to ignore.
+                This will not stop samples from being dropped.
 
         Returns:
             (pandas.DataFrame): The dataframe with target property predictions.
         """
-        ignored_df = df[self.ignore] if self.ignore else None
+        if ignore:
+            ignored_df = df[ignore]
+            df = df.drop(columns=ignored_df)
+        else:
+            ignored_df = pd.DataFrame()
+
         self.logger.info("Beginning MatPipe prediction using fitted pipeline.")
         df = self.autofeaturizer.transform(df, self.target)
         df = self.cleaner.transform(df, self.target)
