@@ -1,7 +1,6 @@
 # Requirements of this project alone
 # matminer==0.6.1
 -e git://github.com/hackingmaterials/matminer.git#egg=matminer
-xlrd==1.1.0
 xgboost==0.80
 tpot==0.10.2
 skrebate==0.6
