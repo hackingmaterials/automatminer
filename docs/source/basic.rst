@@ -184,37 +184,45 @@ To load your file, use the :code:`MatPipe.load` static method.
 Examine your pipeline
 ---------------------
 
-For an executive summarize of your pipeline, use :code:`MatPipe.summarize()`.
+**Summarize**
+
+For a human-readable executive summary of your pipeline, use
+:code:`MatPipe.summarize()`.
 
 .. code-block:: python
 
-    summarize = pipe.summarize()
+    summary = pipe.summarize()
 
-To print out a full description of the pipeline (with all arguments to
-automatminer's objects and its imported sub-objects specified) as text to a
-file, use :code:`MatPipe.inspect()`.
+The dict returned by summarize specifies the top-level information as strings.
+An analogy: if your pipeline were a plumbing system, :code:`summarize` would
+tell you how long each section of pipe is and the pump model.
+
+
+**Inspect**
+
+To get comprehensive details on a pipeline, use :code:`MatPipe.inspect()`.
 
 .. code-block:: python
 
-    my_output_file = "digest.txt"
-    pipe.digest(my_output_file)
+    details = pipe.inspect()
+
+Inspection specifies all parameters to all Automatminer objects needed to
+construct the pipeline and specify all of its internal operations. It is
+typically very long, though human readable. An analogy: if your pipeline were
+a plumbing system, :code:`inspect` would tell you everything :code:`summarize`
+tells you, plus the model numbers of all the bolts, joints, and valves.
 
 
-:code:`digest.txt` has the info:
+**Save to a file**
 
-.. code-block::
+Both :code:`summarize` and :code:`inspect` accept a filename argument if you'd
+like to save their outputs to JSON, YAML, or text.
 
-    {'_logger': None,
-    'autofeaturizer': {'autofeaturizer': {'_logger': None,
-            'auto_featurizer': True,
-            'bandstruct_col': 'bandstructure',
-            'cache_src': '~/features.json',
-            'composition_col': 'composition',
-            'converted_input_df': None,
-            'do_precheck': True,
-            'dos_col': 'dos',
-            'drop_inputs': True
-    ...
+.. code-block:: python
+
+    summary = pipe.summarize("my_summary.yaml")
+    details = pipe.inspect("my_details.json")
+
 
 Monitoring the log
 ------------------
