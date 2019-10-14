@@ -297,42 +297,61 @@ class MatPipe(DFTransformer, LoggableMixin):
         return results
 
     @check_fitted
-    def digest(self, filename=None, output_format="txt"):
+    def digest(self, verbose=False, filename=None):
         """
-        Save a text digest (summary) of the fitted pipeline. Similar to the log
-        but contains more detail in a structured format. Returns digest in JSON
-        or YAML format if specified via output_format or if the provided filename
-        ends in one of ".json", ".yaml" or ".yml".
+        Save a digest (summary) of the fitted pipeline. Set the verbose=True to
+        include all the details; set it to False for an executive summary.
+
+        Also can save the digest in text, JSON, or YAML formats if specified
+        via output_format or if the provided filename ends in one of ".json",
+        ".txt", ".yaml" or ".yml".
 
         Args:
-            filename (str): The filename.
+            verbose (bool): If False, returns an executive summary on the
+                pipeline - only the most important information. If True, returns
+                all available objects and subobjects and all their parameters
+                (within the automatminer namespace).
             output_format (str): Recognizes "json", "yaml" and "yml". Else falls
                 back to "txt" behavior.
 
         Returns:
             digeststr (str): The formatted pipeline digest.
         """
-        attrs = return_attrs_recursively(self)
-
-        def format_one_of(fmts):
-            return (
-                    filename
-                    and filename.lower().endswith(
-                tuple(["." + f for f in fmts]))
-                    or output_format in fmts
-            )
-
-        if format_one_of(("json", "yaml", "yml")):
-            digeststr = json.dumps(attrs, default=lambda x: str(x))
-            if format_one_of(("yaml", "yml")):
-                digeststr = yaml.dump(yaml.safe_load(digeststr))
+        if verbose:
+            attrs = return_attrs_recursively(self)
         else:
-            digeststr = pformat(attrs)
+            cleaner_attrs = [
+                "encoder",
+                "feature_na_method",
+                "na_method_fit",
+                "na_method_transform",
 
-        if filename:
-            with open(filename, "w") as f:
-                f.write(digeststr)
-        return digeststr
+            ]
+            attrs = {
+                "featurizers": self.autofeaturizer.featurizers,
+                "ml_model": str(self.learner.best_pipeline),
+                "feature_reduction":
+            }
+
+        # def format_one_of(fmts):
+        #     return (
+        #             filename
+        #             and filename.lower().endswith(
+        #         tuple(["." + f for f in fmts]))
+        #             or output_format in fmts
+        #     )
+        #
+        # if format_one_of(("json", "yaml", "yml")):
+        #     digeststr = json.dumps(attrs, default=lambda x: str(x))
+        #     if format_one_of(("yaml", "yml")):
+        #         digeststr = yaml.dump(yaml.safe_load(digeststr))
+        # else:
+        #     digeststr = pformat(attrs)
+        #
+        # if filename:
+        #     with open(filename, "w") as f:
+        #         f.write(digeststr)
+        # return digeststr
 
     @check_fitted
     def save(self, filename="mat.pipe"):
