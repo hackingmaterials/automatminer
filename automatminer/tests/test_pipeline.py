@@ -216,8 +216,8 @@ class MatPipeDebugTest(make_matpipe_test("debug")):
     pass
 
 
-# class MatPipeDebugSingleTest(make_matpipe_test("debug_single")):
-#     pass
+class MatPipeDebugSingleTest(make_matpipe_test("debug_single")):
+    pass
 
 
 if __name__ == "__main__":

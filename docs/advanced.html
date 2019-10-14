@@ -67,6 +67,20 @@
 <h1>Advanced Usage<a class="headerlink" href="#advanced-usage" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="running-a-benchmark">
 <h2>Running a benchmark<a class="headerlink" href="#running-a-benchmark" title="Permalink to this headline">¶</a></h2>
+<p><strong>Introduction to benchmarking</strong></p>
+<p>Automatminer can be used for benchmarking ML performance on materials
+problems in a standardized fashion. A common example use case is comparing one
+published method to another; another use is getting a rough idea how an
+Automatminer model will generalize to making “real” predictions. To mitigate
+unfair model advantages from biased splits or hyperparameter tuning,
+Automatminer uses nested cross validation with identical
+outer splits for benchmarking:</p>
+<a class="reference internal image-reference" href="_images/cv_nested.png"><img alt="server" class="align-center" src="_images/cv_nested.png" style="width: 600px;" /></a>
+<p><strong>Usage</strong></p>
+<p><cite>MatPipe</cite> has a <cite>benchmark</cite> method which can be used for automatic benchmarking.</p>
+<p>` Matminer &lt;<a class="reference external" href="https://github.com/hackingmaterials/matminer">https://github.com/hackingmaterials/matminer</a>&gt;`_
+provides access to the MatBench benchmark suite, a curated set of 13 diverse
+materials ML problems which work in Automatminer benchmarks. Learn more here:</p>
 </div>
 <div class="section" id="customizing-pipelines">
 <h2>Customizing pipelines<a class="headerlink" href="#customizing-pipelines" title="Permalink to this headline">¶</a></h2>
