@@ -25,7 +25,7 @@
 
 .. title:: automatminer documentation
 
-.. image:: _static/logo.svg
+.. image:: _static/logo.png
    :alt: server
    :align: center
    :width: 600px
