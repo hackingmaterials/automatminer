@@ -368,7 +368,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         AutoML backends can't serialize.
 
         Note that the saved object should only be used for prediction, and
-        should not be refit. The automl backend is removed and replaced with
+        should not be refit. The AutoML backend is removed and replaced with
         the best pipeline, so the other evaluated pipelines may not be saved!
 
         Args:

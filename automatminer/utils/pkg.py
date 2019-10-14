@@ -11,7 +11,8 @@ from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 
 
-AMM_SUPPORTED_EXTS = [".txt", ".json", ".yaml", ".yml", None]
+AMM_SUPPORTED_EXTS = [".txt", ".json", ".yaml", ".yml", ""]
+
 
 class AutomatminerError(BaseException):
     """

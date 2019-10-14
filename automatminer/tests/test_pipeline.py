@@ -13,14 +13,13 @@ from sklearn.model_selection import KFold
 
 from automatminer.pipeline import MatPipe
 from automatminer.presets import get_preset_config, get_available_presets
-from automatminer.utils.pkg import AutomatminerError
+from automatminer.utils.pkg import AutomatminerError, AMM_SUPPORTED_EXTS
 
 test_dir = os.path.dirname(__file__)
 CACHE_SRC = os.path.join(test_dir, "cache.json")
-DIGEST_PATH = os.path.join(test_dir, "matdigest.")
-DIGEST_EXTS = ['txt', 'json', 'yml', 'yaml']
 PIPE_PATH = os.path.join(test_dir, "test_pipe.p")
 VERSION_PIPE_PATH = os.path.join(test_dir, "version_test.p")
+DIGEST_PATH = os.path.join(test_dir, "matdigest")
 
 
 class TestMatPipeSetup(unittest.TestCase):
@@ -171,17 +170,19 @@ def make_matpipe_test(config_preset, skip=None):
                 MatPipe.load(VERSION_PIPE_PATH)
 
         @unittest.skipIf("digest" in skip, reason)
-        def test_digest(self):
+        def test_summary_and_details(self):
             df = self.df[-200:]
             self.pipe.fit(df, self.target)
 
-            for ext in DIGEST_EXTS:
-                digest = self.pipe.digest(filename=DIGEST_PATH + ext)
+            for ext in AMM_SUPPORTED_EXTS:
+                digest = self.pipe.details(filename=DIGEST_PATH + ext)
                 self.assertTrue(os.path.isfile(DIGEST_PATH + ext))
-                self.assertTrue(isinstance(digest, str))
+                self.assertTrue(isinstance(digest, dict))
 
-                digest = self.pipe.digest(output_format=ext)
-                self.assertTrue(isinstance(digest, str))
+            for ext in AMM_SUPPORTED_EXTS:
+                digest = self.pipe.summary(filename=DIGEST_PATH + ext)
+                self.assertTrue(os.path.isfile(DIGEST_PATH + ext))
+                self.assertTrue(isinstance(digest, dict))
 
         def _run_benchmark(self, cache, pipe):
             # Test static, regular benchmark (no fittable featurizers)
@@ -201,7 +202,7 @@ def make_matpipe_test(config_preset, skip=None):
             self.assertEqual(len(df_tests2), 2)
 
         def tearDown(self) -> None:
-            digests = [DIGEST_PATH + ext for ext in DIGEST_EXTS]
+            digests = [DIGEST_PATH + ext for ext in AMM_SUPPORTED_EXTS]
             for remnant in [CACHE_SRC, PIPE_PATH, VERSION_PIPE_PATH, *digests]:
                 if os.path.exists(remnant):
                     os.remove(remnant)
@@ -211,12 +212,18 @@ def make_matpipe_test(config_preset, skip=None):
 
 @unittest.skipIf(int(os.environ.get("SKIP_INTENSIVE", 0)),
                      "Test too intensive for CircleCI commit builds.")
-class MatPipeDebugTest(make_matpipe_test("debug")):
+class MatPipeDebugTest(make_matpipe_test("debug", skip=[
+        "transferability",
+        "user_features",
+        "benchmarking",
+        "persistence",
+        # "digest",
+    ])):
     pass
 
 
-class MatPipeDebugSingleTest(make_matpipe_test("debug_single")):
-    pass
+# class MatPipeDebugSingleTest(make_matpipe_test("debug_single")):
+#     pass
 
 
 if __name__ == "__main__":

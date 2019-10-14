@@ -78,10 +78,7 @@ class TestPackageTools(unittest.TestCase):
                 os.remove(remnant)
 
     def _get_remnant_path(self, ext):
-        if ext is not None:
-            relative_fname = self.remant_file_prefix + ext
-        else:
-            relative_fname = self.remant_file_prefix
+        relative_fname = self.remant_file_prefix + ext
         filename = os.path.join(self.remant_base_path, relative_fname)
         return filename
 
