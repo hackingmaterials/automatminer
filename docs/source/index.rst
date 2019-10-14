@@ -130,7 +130,7 @@ Want to see something added or changed? Some ways to get involved are:
 
 See our `contribution guidelines
 <https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md>`_
-for more details.
+for more inspect.
 
 API documentation
 ------------------

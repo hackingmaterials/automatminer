@@ -118,7 +118,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         Get a preset MatPipe from a string using
         automatminer.presets.get_preset_config
 
-        See get_preeset_config for more details.
+        See get_preeset_config for more inspect.
 
         Args:
             preset (str): The preset configuration to use.
@@ -294,15 +294,15 @@ class MatPipe(DFTransformer, LoggableMixin):
         return results
 
     @check_fitted
-    def details(self, filename=None):
+    def inspect(self, filename=None):
         """
         Get all details of the pipeline in human-readable format.
 
-        For a shorter human-readable representation, use MatPipe.summary.
+        For a shorter human-readable representation, use MatPipe.summarize().
 
         Args:
             filename (str): An optional  '.txt', '.yaml', '.yml', or '.json'
-                filename to use for saving the pipeline details.
+                filename to use for saving the pipeline inspect.
 
         Returns:
             (dict): A dict of strings in human readable format. Contains a
@@ -314,16 +314,16 @@ class MatPipe(DFTransformer, LoggableMixin):
         return attrs
 
     @check_fitted
-    def summary(self, filename=None):
+    def summarize(self, filename=None):
         """
         Get an executive summary of the most important parts of the pipeline.
         Useful for understanding the pipeline at a high level.
 
-        For a more detailed human-readable representation, use MatPipe.details.
+        For a more detailed human-readable representation, use MatPipe.inspect.
 
         Args:
             filename (str): An optional  '.txt', '.yaml', '.yml', or '.json'
-                filename to use for saving the pipeline summary.
+                filename to use for saving the pipeline summarize.
 
         Returns:
             (dict): A dict of strings in human readable format. Contains a

@@ -67,7 +67,7 @@ def make_matpipe_test(config_preset, skip=None):
         "user_features",
         "benchmarking",
         "persistence",
-        "digest",
+        "digests",
     ]
     if not skip:
         skip = []
@@ -169,18 +169,18 @@ def make_matpipe_test(config_preset, skip=None):
             with self.assertRaises(AutomatminerError):
                 MatPipe.load(VERSION_PIPE_PATH)
 
-        @unittest.skipIf("digest" in skip, reason)
-        def test_summary_and_details(self):
+        @unittest.skipIf("digests" in skip, reason)
+        def test_summarize_and_inspect(self):
             df = self.df[-200:]
             self.pipe.fit(df, self.target)
 
             for ext in AMM_SUPPORTED_EXTS:
-                digest = self.pipe.details(filename=DIGEST_PATH + ext)
+                digest = self.pipe.inspect(filename=DIGEST_PATH + ext)
                 self.assertTrue(os.path.isfile(DIGEST_PATH + ext))
                 self.assertTrue(isinstance(digest, dict))
 
             for ext in AMM_SUPPORTED_EXTS:
-                digest = self.pipe.summary(filename=DIGEST_PATH + ext)
+                digest = self.pipe.summarize(filename=DIGEST_PATH + ext)
                 self.assertTrue(os.path.isfile(DIGEST_PATH + ext))
                 self.assertTrue(isinstance(digest, dict))
 

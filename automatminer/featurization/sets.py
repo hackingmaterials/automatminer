@@ -30,7 +30,7 @@ __authors__ = ["Alex Dunn", "Alex Ganose"]
 class CompositionFeaturizers(FeaturizerSet):
     """Featurizer set containing composition featurizers.
 
-    See the FeaturizerSet documentation for details of each property (sublist
+    See the FeaturizerSet documentation for inspect of each property (sublist
     of featurizers).
 
     Example usage::
@@ -97,7 +97,7 @@ class CompositionFeaturizers(FeaturizerSet):
 class StructureFeaturizers(FeaturizerSet):
     """Featurizer set containing structure featurizers.
 
-    See the FeaturizerSet documentation for details of each property (sublist
+    See the FeaturizerSet documentation for inspect of each property (sublist
     of featurizers).
 
     Example usage::
@@ -196,7 +196,7 @@ class StructureFeaturizers(FeaturizerSet):
 class DOSFeaturizers(FeaturizerSet):
     """Featurizer set containing density of states featurizers.
 
-    See the FeaturizerSet documentation for details of each property (sublist
+    See the FeaturizerSet documentation for inspect of each property (sublist
     of featurizers).
 
     Example usage::
@@ -242,7 +242,7 @@ class DOSFeaturizers(FeaturizerSet):
 class BSFeaturizers(FeaturizerSet):
     """Featurizer set containing band structure featurizers.
 
-    See the FeaturizerSet documentation for details of each property (sublist
+    See the FeaturizerSet documentation for inspect of each property (sublist
     of featurizers).
 
     Example usage::

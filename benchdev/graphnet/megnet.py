@@ -5,7 +5,7 @@ i) pass y_scaler to ModelCheckpointMAE in train_from_graphs/train;
 ii) make ReduceLRUponNan read the best model in same logic with
 ModelCheckpointMAE, namely reads the best file not the latest file
 
-Please check the official megnet repo for more details.
+Please check the official megnet repo for more inspect.
 """
 import os
 import gzip

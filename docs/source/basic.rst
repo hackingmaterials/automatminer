@@ -184,16 +184,15 @@ To load your file, use the :code:`MatPipe.load` static method.
 Examine your pipeline
 ---------------------
 
-For an executive summary of your pipeline, use :code:`MatPipe.summary()`.
+For an executive summarize of your pipeline, use :code:`MatPipe.summarize()`.
+
 .. code-block:: python
 
-    my_output_file = "digest.txt"
-    pipe.digest(my_output_file)
-
+    summarize = pipe.summarize()
 
 To print out a full description of the pipeline (with all arguments to
 automatminer's objects and its imported sub-objects specified) as text to a
-file, use :code:`digest`.
+file, use :code:`MatPipe.inspect()`.
 
 .. code-block:: python
 
