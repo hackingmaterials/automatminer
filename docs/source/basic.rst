@@ -207,10 +207,13 @@ To get comprehensive details on a pipeline, use :code:`MatPipe.inspect()`.
     details = pipe.inspect()
 
 Inspection specifies all parameters to all Automatminer objects needed to
-construct the pipeline and specify all of its internal operations. It is
-typically very long, though human readable. An analogy: if your pipeline were
-a plumbing system, :code:`inspect` would tell you everything :code:`summarize`
-tells you, plus the model numbers of all the bolts, joints, and valves.
+construct the pipeline and all of its internal operations. In contrast to the
+summary which provides a more human interpretable digest, inspection generates
+the true attribute names and values of each object in the MatPipe heirarchy.
+It is typically very long, though human readable. An analogy: if your pipeline
+were a plumbing system, :code:`inspect` would tell you everything
+:code:`summarize` tells you, plus the model numbers of all the bolts, joints,
+and valves.
 
 
 **Save to a file**

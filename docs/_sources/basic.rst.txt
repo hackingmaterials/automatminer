@@ -233,6 +233,7 @@ the pipeline. We recommend you monitor it closely as the pipeline runs.
 Here's an example of an automatminer log when fitting on a dataset.
 
 .. code-block::
+
     2019-10-11 16:05:41 INFO     Problem type is: regression
     2019-10-11 16:05:41 INFO     Fitting MatPipe pipeline to data.
     2019-10-11 16:05:41 INFO     AutoFeaturizer: Starting fitting.
