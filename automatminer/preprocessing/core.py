@@ -224,8 +224,8 @@ class DataCleaner(DFTransformer, LoggableMixin):
                              "with method '{}'.".format(self.max_na_frac,
                                                         self.feature_na_method))
             threshold = int((1 - self.max_na_frac) * len(df))
-            problem_cols = df.columns[df.isnull().mean() > self.max_na_frac]
-            n_problem_cols = problem_cols.shape[0]
+            all_problem_cols = df.columns[df.isnull().mean() > self.max_na_frac]
+            n_problem_cols = all_problem_cols.shape[0]
             n_total_cols = df.shape[1]
             problem_col_frac = n_problem_cols/n_total_cols
             if problem_col_frac >= self.max_problem_col_warning_threshold:
@@ -243,6 +243,7 @@ class DataCleaner(DFTransformer, LoggableMixin):
                 df = df.dropna(axis=1, thresh=threshold)
             else:
                 df = df.dropna(axis=1, thresh=1)
+                problem_cols = df.columns[df.isnull().mean() > self.max_na_frac]
                 dfp = df[problem_cols]
                 if self.feature_na_method == "fill":
                     dfp = dfp.fillna(method="ffill")
