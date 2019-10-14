@@ -11,7 +11,7 @@ from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 
 
-AMM_SUPPORTED_EXTS = ["txt", "json", "yaml", "yml", None]
+AMM_SUPPORTED_EXTS = [".txt", ".json", ".yaml", ".yml", None]
 
 class AutomatminerError(BaseException):
     """
@@ -152,11 +152,11 @@ def save_dict_to_file(d, filename) -> None:
     """
     fname, ext = os.path.splitext(filename)
 
-    if ext in ("json", "yaml", "yml"):
+    if ext in (".json", ".yaml", ".yml"):
         digest = json.dumps(d, default=lambda x: str(x))
-        if ext in ("yaml", "yml"):
+        if ext in (".yaml", ".yml"):
             digest = yaml.dump(yaml.safe_load(digest))
-    elif ext in ("txt", "", None):
+    elif ext in (".txt", "", None):
         digest = pformat(d)
     else:
         raise ValueError(

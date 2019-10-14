@@ -30,6 +30,7 @@ class TestPackageTools(unittest.TestCase):
 
     def setUp(self) -> None:
         self.remant_base_path = os.path.dirname(__file__)
+        self.remant_file_prefix = "saved"
 
     def test_compare_columns(self):
         df1 = pd.DataFrame({"a": [1, 2], "b": [2, 3]})
@@ -62,14 +63,27 @@ class TestPackageTools(unittest.TestCase):
     def test_save_dict_to_file(self):
         test_dict = {"a": "A", "b": 1, "c": [1, "q"], "d": {"m": [3, 4]}}
         for ext in AMM_SUPPORTED_EXTS:
-            relative_fname = "saved" + ext if ext is not None else "saved"
-            filename = os.path.join(self.remant_base_path, relative_fname)
+            filename = self._get_remnant_path(ext)
             save_dict_to_file(test_dict, filename=filename)
             self.assertTrue(os.path.isfile(filename))
 
     def test_get_version(self):
         v = get_version()
         self.assertEqual(v, __version__)
+
+    def tearDown(self) -> None:
+        remnants = [self._get_remnant_path(ext) for ext in AMM_SUPPORTED_EXTS]
+        for remnant in remnants:
+            if os.path.exists(remnant):
+                os.remove(remnant)
+
+    def _get_remnant_path(self, ext):
+        if ext is not None:
+            relative_fname = self.remant_file_prefix + ext
+        else:
+            relative_fname = self.remant_file_prefix
+        filename = os.path.join(self.remant_base_path, relative_fname)
+        return filename
 
 
 if __name__ == "__main__":
