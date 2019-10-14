@@ -114,7 +114,100 @@ materials ML problems which work in Automatminer benchmarks. Learn more here:
 </div>
 <div class="section" id="time-savers-and-practical-tools">
 <h2>Time Savers and Practical Tools<a class="headerlink" href="#time-savers-and-practical-tools" title="Permalink to this headline">¶</a></h2>
-<p>ignoring a column</p>
+<p><strong>Using user-defined features</strong></p>
+<p>Often, there will be important features associated with your data which
+automatminer has not implemented. To use your own features for learning,
+simply:</p>
+<ol class="arabic simple">
+<li><p>include them in <strong>both</strong> your training and prediction dataframes</p></li>
+</ol>
+<p>2. do not name the columns the same as AutoFeaturizer inputs (by default,
+“structure”, “composition”, “bandstructure”, and “dos”).</p>
+<p>Thats it! Your features have been included in the pipeline, although depending
+on the pipeline configuration (such as feature reduction), the features may
+be dropped if needed. If you want to ensure your features are used for learning,
+see the section on customizing pipelines.</p>
+<p><strong>Ignoring columns</strong></p>
+<p>During prediction, MatPipe automatically handles dropping problematic columns
+and materials inputs (e.g., structures) for inputs to ML. If you want to keep
+columns in your predictions and prevent them from being used for learning,
+specify the <code class="code docutils literal notranslate"><span class="pre">ignore</span></code> argument to <code class="code docutils literal notranslate"><span class="pre">predict</span></code>.</p>
+<p>Let’s say this is the dataframe you’d like to predict on:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">test_df</span></code></p>
+<table class="docutils align-left">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="code docutils literal notranslate"><span class="pre">structure</span></code></p></th>
+<th class="head"><p><code class="code docutils literal notranslate"><span class="pre">material-id</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-12345</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-5983</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-029393</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+</tbody>
+</table>
+<p>In this example, we want to keep the <code class="code docutils literal notranslate"><span class="pre">material-id</span></code> column for identifying
+our predicted samples and we don’t want to use it as a learning feature. This
+is the intended use case for <code class="code docutils literal notranslate"><span class="pre">ignore</span></code>.</p>
+<p>Assuming you’ve already fit a <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code>, specify you’d like to ignore:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_folds</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_df</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;material-id&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Your output will look like this:</p>
+<blockquote>
+<div><ul class="simple">
+<li><ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">structure</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">material-id</span></code></p></li>
+<li><p>…</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">my_property</span> <span class="pre">predicted</span></code></p></li>
+</ul>
+</li>
+<li><ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">m-12345</span></code></p></li>
+<li><p>…</p></li>
+<li><p>0.449</p></li>
+</ul>
+</li>
+<li><ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">m-5983</span></code></p></li>
+<li><p>…</p></li>
+<li><p>-0.573</p></li>
+</ul>
+</li>
+<li><ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">m-029393</span></code></p></li>
+<li><p>…</p></li>
+<li><p>-0.005</p></li>
+</ul>
+</li>
+<li><ul>
+<li><p>…</p></li>
+<li><p>…</p></li>
+<li><p>…</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<p><strong>Warning</strong></p>
+<p>Ignoring columns in MatPipe supercedes all inner operations. If inner operations
+require a feature ignored in the MatPipe predict, the pipeline will fail.</p>
 </div>
 <div class="section" id="customizing-pipelines">
 <h2>Customizing pipelines<a class="headerlink" href="#customizing-pipelines" title="Permalink to this headline">¶</a></h2>

@@ -231,7 +231,11 @@ Monitoring the log
 ------------------
 
 The Automatminer log is a powerful tool for determining what is happening within
-the pipeline. We recommend you monitor it closely as the pipeline runs.
+the pipeline in real time. We recommend you monitor it closely as the pipeline
+runs.
+
+In addition to the stdout, automatminer writes a log file in the current
+working directory (:code:`automatminer.log`, timestamped if duplicates).
 
 Here's an example of an automatminer log when fitting on a dataset.
 
@@ -254,6 +258,11 @@ Here's an example of an automatminer log when fitting on a dataset.
     2019-10-11 16:05:49 INFO     TPOTAdaptor: Starting fitting.
     2019-10-11 16:07:50 INFO     TPOTAdaptor: Finished fitting.
     2019-10-11 16:07:50 INFO     MatPipe successfully fit.
+
+If you see :code:`WARNING` or :code:`ERROR`, you should inspect the pipeline
+to make sure everything is configured as intended. If you see a :code:`CRITICAL`,
+it is likely something is misconfigured within the pipeline and should be
+looked into in detail!
 
 
 Quick reminders

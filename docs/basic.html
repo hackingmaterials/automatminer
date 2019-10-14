@@ -253,10 +253,13 @@ tell you how long each section of pipe is and the pump model.</p>
 </pre></div>
 </div>
 <p>Inspection specifies all parameters to all Automatminer objects needed to
-construct the pipeline and specify all of its internal operations. It is
-typically very long, though human readable. An analogy: if your pipeline were
-a plumbing system, <code class="code docutils literal notranslate"><span class="pre">inspect</span></code> would tell you everything <code class="code docutils literal notranslate"><span class="pre">summarize</span></code>
-tells you, plus the model numbers of all the bolts, joints, and valves.</p>
+construct the pipeline and all of its internal operations. In contrast to the
+summary which provides a more human interpretable digest, inspection generates
+the true attribute names and values of each object in the MatPipe heirarchy.
+It is typically very long, though human readable. An analogy: if your pipeline
+were a plumbing system, <code class="code docutils literal notranslate"><span class="pre">inspect</span></code> would tell you everything
+<code class="code docutils literal notranslate"><span class="pre">summarize</span></code> tells you, plus the model numbers of all the bolts, joints,
+and valves.</p>
 <p><strong>Save to a file</strong></p>
 <p>Both <code class="code docutils literal notranslate"><span class="pre">summarize</span></code> and <code class="code docutils literal notranslate"><span class="pre">inspect</span></code> accept a filename argument if you’d
 like to save their outputs to JSON, YAML, or text.</p>
@@ -268,7 +271,10 @@ like to save their outputs to JSON, YAML, or text.</p>
 <div class="section" id="monitoring-the-log">
 <h2>Monitoring the log<a class="headerlink" href="#monitoring-the-log" title="Permalink to this headline">¶</a></h2>
 <p>The Automatminer log is a powerful tool for determining what is happening within
-the pipeline. We recommend you monitor it closely as the pipeline runs.</p>
+the pipeline in real time. We recommend you monitor it closely as the pipeline
+runs.</p>
+<p>In addition to the stdout, automatminer writes a log file in the current
+working directory (<code class="code docutils literal notranslate"><span class="pre">automatminer.log</span></code>, timestamped if duplicates).</p>
 <p>Here’s an example of an automatminer log when fitting on a dataset.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">41</span> <span class="n">INFO</span>     <span class="n">Problem</span> <span class="nb">type</span> <span class="ow">is</span><span class="p">:</span> <span class="n">regression</span>
 <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">41</span> <span class="n">INFO</span>     <span class="n">Fitting</span> <span class="n">MatPipe</span> <span class="n">pipeline</span> <span class="n">to</span> <span class="n">data</span><span class="o">.</span>
@@ -289,6 +295,10 @@ the pipeline. We recommend you monitor it closely as the pipeline runs.</p>
 <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">07</span><span class="p">:</span><span class="mi">50</span> <span class="n">INFO</span>     <span class="n">MatPipe</span> <span class="n">successfully</span> <span class="n">fit</span><span class="o">.</span>
 </pre></div>
 </div>
+<p>If you see <code class="code docutils literal notranslate"><span class="pre">WARNING</span></code> or <code class="code docutils literal notranslate"><span class="pre">ERROR</span></code>, you should inspect the pipeline
+to make sure everything is configured as intended. If you see a <code class="code docutils literal notranslate"><span class="pre">CRITICAL</span></code>,
+it is likely something is misconfigured within the pipeline and should be
+looked into in detail!</p>
 </div>
 <div class="section" id="quick-reminders">
 <h2>Quick reminders<a class="headerlink" href="#quick-reminders" title="Permalink to this headline">¶</a></h2>

@@ -64,11 +64,89 @@ materials ML problems which work in Automatminer benchmarks. Learn more here:
 
 Time Savers and Practical Tools
 -------------------------------
-ignoring a column
+**Using user-defined features**
 
+Often, there will be important features associated with your data which
+automatminer has not implemented. To use your own features for learning,
+simply:
+
+1. include them in **both** your training and prediction dataframes
+
+2. do not name the columns the same as AutoFeaturizer inputs (by default,
+"structure", "composition", "bandstructure", and "dos").
+
+Thats it! Your features have been included in the pipeline, although depending
+on the pipeline configuration (such as feature reduction), the features may
+be dropped if needed. If you want to ensure your features are used for learning,
+see the section on customizing pipelines.
+
+
+**Ignoring columns**
+
+During prediction, MatPipe automatically handles dropping problematic columns
+and materials inputs (e.g., structures) for inputs to ML. If you want to keep
+columns in your predictions and prevent them from being used for learning,
+specify the :code:`ignore` argument to :code:`predict`.
+
+Let's say this is the dataframe you'd like to predict on:
+
+:code:`test_df`
+
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - :code:`structure`
+     - :code:`material-id`
+   * - :code:`<structure object>`
+     - :code:`m-12345`
+   * - :code:`<structure object>`
+     - :code:`m-5983`
+   * - :code:`<structure object>`
+     - :code:`m-029393`
+   * - ...
+     - ...
+
+In this example, we want to keep the :code:`material-id` column for identifying
+our predicted samples and we don't want to use it as a learning feature. This
+is the intended use case for :code:`ignore`.
+
+Assuming you've already fit a :code:`MatPipe`, specify you'd like to ignore:
+
+.. code-block:: python
+
+    predicted_folds = pipe.predict(test_df, ignore=["material-id"])
+
+Your output will look like this:
+
+   * - :code:`structure`
+     - :code:`material-id`
+     - ...
+     - :code:`my_property predicted`
+   * - :code:`<structure object>`
+     - :code:`m-12345`
+     - ...
+     - 0.449
+   * - :code:`<structure object>`
+     - :code:`m-5983`
+     - ...
+     - -0.573
+   * - :code:`<structure object>`
+     - :code:`m-029393`
+     - ...
+     - -0.005
+   * - ...
+     - ...
+     - ...
+
+**Warning**
+
+Ignoring columns in MatPipe supercedes all inner operations. If inner operations
+require a feature ignored in the MatPipe predict, the pipeline will fail.
 
 Customizing pipelines
 ---------------------
+
 
 
 Using DFTransformers individually

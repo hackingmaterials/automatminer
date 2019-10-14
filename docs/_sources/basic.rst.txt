@@ -207,10 +207,13 @@ To get comprehensive details on a pipeline, use :code:`MatPipe.inspect()`.
     details = pipe.inspect()
 
 Inspection specifies all parameters to all Automatminer objects needed to
-construct the pipeline and specify all of its internal operations. It is
-typically very long, though human readable. An analogy: if your pipeline were
-a plumbing system, :code:`inspect` would tell you everything :code:`summarize`
-tells you, plus the model numbers of all the bolts, joints, and valves.
+construct the pipeline and all of its internal operations. In contrast to the
+summary which provides a more human interpretable digest, inspection generates
+the true attribute names and values of each object in the MatPipe heirarchy.
+It is typically very long, though human readable. An analogy: if your pipeline
+were a plumbing system, :code:`inspect` would tell you everything
+:code:`summarize` tells you, plus the model numbers of all the bolts, joints,
+and valves.
 
 
 **Save to a file**
@@ -228,7 +231,11 @@ Monitoring the log
 ------------------
 
 The Automatminer log is a powerful tool for determining what is happening within
-the pipeline. We recommend you monitor it closely as the pipeline runs.
+the pipeline in real time. We recommend you monitor it closely as the pipeline
+runs.
+
+In addition to the stdout, automatminer writes a log file in the current
+working directory (:code:`automatminer.log`, timestamped if duplicates).
 
 Here's an example of an automatminer log when fitting on a dataset.
 
@@ -251,6 +258,11 @@ Here's an example of an automatminer log when fitting on a dataset.
     2019-10-11 16:05:49 INFO     TPOTAdaptor: Starting fitting.
     2019-10-11 16:07:50 INFO     TPOTAdaptor: Finished fitting.
     2019-10-11 16:07:50 INFO     MatPipe successfully fit.
+
+If you see :code:`WARNING` or :code:`ERROR`, you should inspect the pipeline
+to make sure everything is configured as intended. If you see a :code:`CRITICAL`,
+it is likely something is misconfigured within the pipeline and should be
+looked into in detail!
 
 
 Quick reminders
