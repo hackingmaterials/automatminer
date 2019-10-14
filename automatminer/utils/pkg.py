@@ -2,7 +2,10 @@
 Utils specific to this package.
 """
 import os
+import json
+from pprint import pformat
 
+import yaml
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
@@ -127,6 +130,43 @@ def return_attrs_recursively(obj) -> dict:
             if "ml_data" not in attr:
                 attrdict[attr] = value
     return attrdict
+
+
+def save_dict_to_file(d, filename) -> None:
+    """
+    Save a dictionary to a persistent file. Supported formats and extensions are
+    text ('.txt'), JSON ('.json'), and YAML ('.yaml', '.yml').
+
+    Args:
+        d (dict): A dictionary of strings or objects castable to python native
+            objects (e.g., NumPy integers).
+        filename (str): The filename and extension to save the file. For
+            example, "mydict.json".
+
+    Returns:
+        None
+    """
+
+
+    def format_one_of(fmts):
+        return (
+                filename
+                and filename.lower().endswith(
+            tuple(["." + f for f in fmts]))
+                or output_format in fmts
+        )
+
+    if format_one_of(("json", "yaml", "yml")):
+        digeststr = json.dumps(d, default=lambda x: str(x))
+        if format_one_of(("yaml", "yml")):
+            digeststr = yaml.dump(yaml.safe_load(digeststr))
+    else:
+        digeststr = pformat(d)
+
+    if filename:
+        with open(filename, "w") as f:
+            f.write(digeststr)
+    return digeststr
 
 
 def get_version():

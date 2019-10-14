@@ -2,18 +2,15 @@
 The highest level classes for pipelines.
 """
 import os
-import json
 import copy
 import pickle
-from pprint import pformat
-
-import yaml
 
 from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.pkg import check_fitted, set_fitted, \
-    return_attrs_recursively, AutomatminerError, VersionError, get_version
+    return_attrs_recursively, AutomatminerError, VersionError, get_version, \
+    save_dict_to_file
 from automatminer.utils.log import AMM_DEFAULT_LOGGER, AMM_DEFAULT_LOGLVL
 
 
@@ -297,61 +294,72 @@ class MatPipe(DFTransformer, LoggableMixin):
         return results
 
     @check_fitted
-    def digest(self, verbose=False, filename=None):
+    def details(self, filename=None):
         """
-        Save a digest (summary) of the fitted pipeline. Set the verbose=True to
-        include all the details; set it to False for an executive summary.
+        Get all details of the pipeline in human-readable format.
 
-        Also can save the digest in text, JSON, or YAML formats if specified
-        via output_format or if the provided filename ends in one of ".json",
-        ".txt", ".yaml" or ".yml".
+        For a shorter human-readable representation, use MatPipe.summary.
 
         Args:
-            verbose (bool): If False, returns an executive summary on the
-                pipeline - only the most important information. If True, returns
-                all available objects and subobjects and all their parameters
-                (within the automatminer namespace).
-            output_format (str): Recognizes "json", "yaml" and "yml". Else falls
-                back to "txt" behavior.
+            filename (str): An optional  '.txt', '.yaml', '.yml', or '.json'
+                filename to use for saving the pipeline details.
 
         Returns:
-            digeststr (str): The formatted pipeline digest.
+            (dict): A dict of strings in human readable format. Contains a
+                string representation of every object and user parameter.
         """
-        if verbose:
-            attrs = return_attrs_recursively(self)
-        else:
-            cleaner_attrs = [
-                "encoder",
-                "feature_na_method",
-                "na_method_fit",
-                "na_method_transform",
+        attrs = return_attrs_recursively(self)
+        if filename:
+            save_dict_to_file(attrs, filename)
+        return attrs
 
-            ]
-            attrs = {
-                "featurizers": self.autofeaturizer.featurizers,
-                "ml_model": str(self.learner.best_pipeline),
-                "feature_reduction":
-            }
+    @check_fitted
+    def summary(self, filename=None):
+        """
+        Get an executive summary of the most important parts of the pipeline.
+        Useful for understanding the pipeline at a high level.
 
-        # def format_one_of(fmts):
-        #     return (
-        #             filename
-        #             and filename.lower().endswith(
-        #         tuple(["." + f for f in fmts]))
-        #             or output_format in fmts
-        #     )
-        #
-        # if format_one_of(("json", "yaml", "yml")):
-        #     digeststr = json.dumps(attrs, default=lambda x: str(x))
-        #     if format_one_of(("yaml", "yml")):
-        #         digeststr = yaml.dump(yaml.safe_load(digeststr))
-        # else:
-        #     digeststr = pformat(attrs)
-        #
-        # if filename:
-        #     with open(filename, "w") as f:
-        #         f.write(digeststr)
-        # return digeststr
+        For a more detailed human-readable representation, use MatPipe.details.
+
+        Args:
+            filename (str): An optional  '.txt', '.yaml', '.yml', or '.json'
+                filename to use for saving the pipeline summary.
+
+        Returns:
+            (dict): A dict of strings in human readable format. Contains a
+                string representation of every object and user parameter.
+        """
+        cleaner_attrs = [
+            "encoder",
+            "feature_na_method",
+            "na_method_fit",
+            "na_method_transform",
+            "drop_na_targets",
+        ]
+        cleaner_data = {
+            attr: str(getattr(self.cleaner, attr))
+            for attr in cleaner_attrs
+        }
+
+        reducer_attrs = [
+            "reducers",
+            "reducer_params",
+        ]
+        reducer_data = {
+            attr: str(getattr(self.reducer, attr))
+            for attr in reducer_attrs
+        }
+
+        attrs = {
+            "featurizers": self.autofeaturizer.featurizers,
+            "ml_model": str(self.learner.best_pipeline),
+            "feature_reduction": reducer_data,
+            "data_cleaning": cleaner_data,
+            "features": self.learner.features
+        }
+        if filename:
+            save_dict_to_file(attrs, filename)
+        return attrs
 
     @check_fitted
     def save(self, filename="mat.pipe"):
