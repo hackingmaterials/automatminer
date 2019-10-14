@@ -29,15 +29,19 @@ The easiest way to initialize a matpipe is using a preset.
 
 .. code-block:: python
 
-    from automatminer import get_preset_config, MatPipe
+    from automatminer import MatPipe
 
-    express_config = get_preset_config("express")
-    pipe = MatPipe(**express_config)
+    pipe = MatPipe.from_preset("express")
 
-This preset is a dictionary of options specifying exactly how each of
+This preset is a set of options specifying exactly how each of
 :code:`MatPipe`'s constituent classes are set up. Typically, the "express"
 preset will give you results with a moderate degree of accuracy and relatively
 quick training, so we'll use that here.
+
+*Note: The default :code:`MatPipe()` is equivalent to
+:code:`MatPipe.from_preset("express")`; other presets have different
+configuration options!*
+
 
 
 Training a pipeline
@@ -71,10 +75,9 @@ used above, you'd do:
 
 .. code-block:: python
 
-    from automatminer import get_preset_config, MatPipe
+    from automatminer import MatPipe
 
-    express_config = get_preset_config("express")
-    pipe = MatPipe(**express_config)
+    pipe = MatPipe.from_preset("express")
 
     # Fitting pipe on train_df using "my_property" as target
     pipe.fit(train_df, "my_property")
@@ -105,10 +108,9 @@ Use :code:`predict` to predict new data.
 
 .. code-block:: python
 
-    from automatminer import get_preset_config, MatPipe
+    from automatminer import MatPipe
 
-    express_config = get_preset_config("express")
-    pipe = MatPipe(**express_config)
+    pipe = MatPipe.from_preset("express")
     pipe.fit(train_df, "my_property")
 
     # Predicting my_property values of some unknown prediction_df structures
@@ -147,25 +149,31 @@ longer training times.
 
 .. code-block:: python
 
-    from automatminer import get_preset_config, MatPipe
+    from automatminer import MatPipe
 
-    express_config = get_preset_config("heavy")
-    pipe = MatPipe(**express_config)
+    pipe = MatPipe.from_preset("heavy")
 
 
 In contrast, use "debug" if you want very quick predictions.
 
 .. code-block:: python
 
-    from automatminer import get_preset_config, MatPipe
+    from automatminer import MatPipe
 
-    express_config = get_preset_config("debug")
-    pipe = MatPipe(**express_config)
+    pipe = MatPipe.from_preset("debug")
 
+
+
+Saving your pipeline for later
+------------------------------
 
 
 Examine your pipeline
 ---------------------
+
+For an executive summary of your pipeline, use :code:`MatPipe.summary()`.
+
+
 
 To print out a full description of the pipeline (with all arguments to
 automatminer's objects and its imported sub-objects specified) as text to a
@@ -193,6 +201,11 @@ file, use :code:`digest`.
             'drop_inputs': True
     ...
 
+Monitoring the log
+------------------
+
+The Automatminer log is a powerful tool for determining what is happening within
+the pipeline. We recommend you monitor it closely as the pipeline runs.
 
 
 Quick reminders

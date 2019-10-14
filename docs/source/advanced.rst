@@ -19,30 +19,52 @@ outer splits for benchmarking:
    :align: center
    :width: 600px
 
+Nested CV is analagous to using multiple hold-out test sets.
+
+*Note: Nested CV is a computationally expensive benchmarking procedure!*
+
 **Usage**
 
 :code:`MatPipe` has a :code:`benchmark` method which can be used for
-automatically benchmarking a pipeline on a dataset.
+automatically benchmarking a pipeline on a dataset. Once you have your
+data loaded in a dataframe, the procedure is:
+
+1. Define a k-fold cross validation scheme (to use as outer test folds).
+
+2. Use the :code:`benchmark` method of :code:`MatPipe` to get predictions for
+each outer fold
+
+3. Use your scoring function of choice to evaluate each fold.
 
 .. code-block:: python
 
     from sklearn.model_evaluation import KFold
 
+    # We recommend KFold for regression problems and StratifiedKFold
+    # for classification
+    kf = KFold(n_splits=5, shuffle=True)
+
     from automatminer.pipeline import MatPipe
 
-    # Fit a pipeline to training data to predict band gap
-    pipe = MatPipe()
-    pipe.fit(train_df, "band gap")
+    pipe = MatPipe.from_preset("express")
+    predicted_folds = pipe.benchmark(my_df, "my_property", kf)
 
-    # Predict bandgap of some unknown materials
-    predicted_df = pipe.predict(unknown_df)
-
-
+:code:`benchmark` returns a list of the predicted test folds (i.e., your
+entire dataset as if it were test folds). These test folds can then be used
+to get estimates of error, compare to other pipelines, etc.
 
 
-` Matminer <https://github.com/hackingmaterials/matminer>`_
+**Matbench**
+
+`Matminer <https://github.com/hackingmaterials/matminer>`_
 provides access to the MatBench benchmark suite, a curated set of 13 diverse
 materials ML problems which work in Automatminer benchmarks. Learn more here:
+:doc:`MatBench </datasets>`
+
+
+Time Savers and Practical Tools
+-------------------------------
+ignoring a column
 
 
 Customizing pipelines
@@ -51,6 +73,7 @@ Customizing pipelines
 
 Using DFTransformers individually
 ---------------------------------
+
 
 
 

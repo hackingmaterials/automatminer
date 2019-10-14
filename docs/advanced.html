@@ -42,6 +42,7 @@
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Advanced Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#running-a-benchmark">Running a benchmark</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-savers-and-practical-tools">Time Savers and Practical Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#customizing-pipelines">Customizing pipelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-dftransformers-individually">Using DFTransformers individually</a></li>
 </ul>
@@ -76,11 +77,42 @@ unfair model advantages from biased splits or hyperparameter tuning,
 Automatminer uses nested cross validation with identical
 outer splits for benchmarking:</p>
 <a class="reference internal image-reference" href="_images/cv_nested.png"><img alt="server" class="align-center" src="_images/cv_nested.png" style="width: 600px;" /></a>
+<p>Nested CV is analagous to using multiple hold-out test sets.</p>
+<p><em>Note: Nested CV is a computationally expensive benchmarking procedure!</em></p>
 <p><strong>Usage</strong></p>
-<p><cite>MatPipe</cite> has a <cite>benchmark</cite> method which can be used for automatic benchmarking.</p>
-<p>` Matminer &lt;<a class="reference external" href="https://github.com/hackingmaterials/matminer">https://github.com/hackingmaterials/matminer</a>&gt;`_
+<p><code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> has a <code class="code docutils literal notranslate"><span class="pre">benchmark</span></code> method which can be used for
+automatically benchmarking a pipeline on a dataset. Once you have your
+data loaded in a dataframe, the procedure is:</p>
+<ol class="arabic simple">
+<li><p>Define a k-fold cross validation scheme (to use as outer test folds).</p></li>
+</ol>
+<p>2. Use the <code class="code docutils literal notranslate"><span class="pre">benchmark</span></code> method of <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> to get predictions for
+each outer fold
+3. Use your scoring function of choice to evaluate each fold.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_evaluation</span> <span class="kn">import</span> <span class="n">KFold</span>
+
+<span class="c1"># We recommend KFold for regression problems and StratifiedKFold</span>
+<span class="c1"># for classification</span>
+<span class="n">kf</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">automatminer.pipeline</span> <span class="kn">import</span> <span class="n">MatPipe</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
+<span class="n">predicted_folds</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">benchmark</span><span class="p">(</span><span class="n">my_df</span><span class="p">,</span> <span class="s2">&quot;my_property&quot;</span><span class="p">,</span> <span class="n">kf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">benchmark</span></code> returns a list of the predicted test folds (i.e., your
+entire dataset as if it were test folds). These test folds can then be used
+to get estimates of error, compare to other pipelines, etc.</p>
+<p><strong>Matbench</strong></p>
+<p><a class="reference external" href="https://github.com/hackingmaterials/matminer">Matminer</a>
 provides access to the MatBench benchmark suite, a curated set of 13 diverse
-materials ML problems which work in Automatminer benchmarks. Learn more here:</p>
+materials ML problems which work in Automatminer benchmarks. Learn more here:
+<a class="reference internal" href="datasets.html"><span class="doc">MatBench</span></a></p>
+</div>
+<div class="section" id="time-savers-and-practical-tools">
+<h2>Time Savers and Practical Tools<a class="headerlink" href="#time-savers-and-practical-tools" title="Permalink to this headline">¶</a></h2>
+<p>ignoring a column</p>
 </div>
 <div class="section" id="customizing-pipelines">
 <h2>Customizing pipelines<a class="headerlink" href="#customizing-pipelines" title="Permalink to this headline">¶</a></h2>
