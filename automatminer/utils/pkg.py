@@ -11,6 +11,8 @@ from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 
 
+AMM_SUPPORTED_EXTS = ["txt", "json", "yaml", "yml", None]
+
 class AutomatminerError(BaseException):
     """
     Exception specific to automatminer methods.
@@ -27,10 +29,10 @@ class VersionError(AutomatminerError):
     """
     Version errors
     """
+
     def __str__(self):
         base_str = super(VersionError, self).__str__()
         return base_str + " (VersionError)"
-
 
 
 def compare_columns(df1, df2, ignore=None) -> dict:
@@ -137,6 +139,8 @@ def save_dict_to_file(d, filename) -> None:
     Save a dictionary to a persistent file. Supported formats and extensions are
     text ('.txt'), JSON ('.json'), and YAML ('.yaml', '.yml').
 
+    If no extension is provided, text format will be used.
+
     Args:
         d (dict): A dictionary of strings or objects castable to python native
             objects (e.g., NumPy integers).
@@ -146,27 +150,22 @@ def save_dict_to_file(d, filename) -> None:
     Returns:
         None
     """
+    fname, ext = os.path.splitext(filename)
 
-
-    def format_one_of(fmts):
-        return (
-                filename
-                and filename.lower().endswith(
-            tuple(["." + f for f in fmts]))
-                or output_format in fmts
+    if ext in ("json", "yaml", "yml"):
+        digest = json.dumps(d, default=lambda x: str(x))
+        if ext in ("yaml", "yml"):
+            digest = yaml.dump(yaml.safe_load(digest))
+    elif ext in ("txt", "", None):
+        digest = pformat(d)
+    else:
+        raise ValueError(
+            f"The extension {ext} in filename {fname} is no supported. Use a "
+            f"supported extension: {AMM_SUPPORTED_EXTS}"
         )
 
-    if format_one_of(("json", "yaml", "yml")):
-        digeststr = json.dumps(d, default=lambda x: str(x))
-        if format_one_of(("yaml", "yml")):
-            digeststr = yaml.dump(yaml.safe_load(digeststr))
-    else:
-        digeststr = pformat(d)
-
-    if filename:
-        with open(filename, "w") as f:
-            f.write(digeststr)
-    return digeststr
+    with open(filename, "w") as f:
+        f.write(digest)
 
 
 def get_version():

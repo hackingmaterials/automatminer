@@ -1,7 +1,7 @@
 """
 Assorted package utils.
 """
-
+import os
 import unittest
 
 import pandas as pd
@@ -9,7 +9,7 @@ from sklearn.exceptions import NotFittedError
 
 from automatminer import __version__
 from automatminer.utils.pkg import compare_columns, check_fitted, \
-    set_fitted, get_version
+    set_fitted, get_version, save_dict_to_file, AMM_SUPPORTED_EXTS
 from automatminer.base import DFTransformer
 
 
@@ -27,6 +27,9 @@ class MyTransformer(DFTransformer):
 
 
 class TestPackageTools(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.remant_base_path = os.path.dirname(__file__)
 
     def test_compare_columns(self):
         df1 = pd.DataFrame({"a": [1, 2], "b": [2, 3]})
@@ -55,6 +58,14 @@ class TestPackageTools(unittest.TestCase):
 
         mt2 = MyTransformer()
         self.assertRaises(NotFittedError, mt2.transform, [df, ""])
+
+    def test_save_dict_to_file(self):
+        test_dict = {"a": "A", "b": 1, "c": [1, "q"], "d": {"m": [3, 4]}}
+        for ext in AMM_SUPPORTED_EXTS:
+            relative_fname = "saved" + ext if ext is not None else "saved"
+            filename = os.path.join(self.remant_base_path, relative_fname)
+            save_dict_to_file(test_dict, filename=filename)
+            self.assertTrue(os.path.isfile(filename))
 
     def test_get_version(self):
         v = get_version()
