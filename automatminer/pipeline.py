@@ -184,7 +184,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         return self.predict(df, **transform_kwargs)
 
     @check_fitted
-    def predict(self, df, ignore="all"):
+    def predict(self, df, ignore=None):
         """
         Predict a target property of a set of materials.
 
