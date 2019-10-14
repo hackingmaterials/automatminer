@@ -238,7 +238,8 @@ class MatPipe(DFTransformer, LoggableMixin):
         return merged_df
 
     @set_fitted
-    def benchmark(self, df, target, kfold, fold_subset=None, cache=False):
+    def benchmark(self, df, target, kfold, fold_subset=None, cache=False,
+                  ignore=None):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
@@ -279,6 +280,8 @@ class MatPipe(DFTransformer, LoggableMixin):
                 autofeaturizer must have a cache_src defined if allow_caching is
                 enabled (do this either through the AutoFeaturizer class or
                 using the cache_src argument to get_preset_config.
+            ignore ([str], None): Ignore columns during prediction for each
+                outer fold. See .predict --> ignore argument for more details.
 
         Returns:
             results ([pd.DataFrame]): Dataframes containing each fold's
@@ -320,7 +323,7 @@ class MatPipe(DFTransformer, LoggableMixin):
                 train = df[~df.index.isin(test.index)].sample(frac=1)
                 self.fit(train, target)
                 self.logger.info("Predicting fold index {}".format(fold))
-                test = self.predict(test)
+                test = self.predict(test, ignore=ignore)
                 results.append(test)
             fold += 1
         return results
