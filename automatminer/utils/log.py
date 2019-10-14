@@ -16,26 +16,23 @@ AMM_DEFAULT_LOGGER = True
 AMM_DEFAULT_LOGLVL = None
 
 
-def initialize_logger(name, filepath='.', filebase=None,
-                      level=None) -> logging.Logger:
+def initialize_logger(logger_name, log_dir='.', level=None) -> logging.Logger:
     """Initialize the default logger with stdout and file handlers.
 
     Args:
-        name (str): The package name.
-        filepath (str): Path to the folder where the log file will be written.
-        filebase (str): The log filename.
+        logger_name (str): The package name.
+        log_dir (str): Path to the folder where the log file will be written.
         level (int): The log level. For example logging.DEBUG.
     Returns:
         (Logger): A logging instance with customized formatter and handlers.
     """
     level = level or logging.INFO
 
-    logger = logging.getLogger(name)
+    logger = logging.getLogger(logger_name)
     formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
                                   datefmt='%Y-%m-%d %H:%M:%S')
 
-    filebase = filebase or name
-    logpath = os.path.join(filepath, filebase)
+    logpath = os.path.join(log_dir, logger_name)
     if os.path.exists(logpath + ".log"):
         logpath += "_" + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     logpath += ".log"
