@@ -227,29 +227,41 @@ longer training times.</p>
 </div>
 <div class="section" id="saving-your-pipeline-for-later">
 <h2>Saving your pipeline for later<a class="headerlink" href="#saving-your-pipeline-for-later" title="Permalink to this headline">¶</a></h2>
+<p>Once fit, you can save your pipeline as a pickle file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;my_pipeline.p&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To load your file, use the <code class="code docutils literal notranslate"><span class="pre">MatPipe.load</span></code> static method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_pipeline.p&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="examine-your-pipeline">
 <h2>Examine your pipeline<a class="headerlink" href="#examine-your-pipeline" title="Permalink to this headline">¶</a></h2>
-<p>For an executive summarize of your pipeline, use <code class="code docutils literal notranslate"><span class="pre">MatPipe.summarize()</span></code>.</p>
-<p>To print out a full description of the pipeline (with all arguments to
-automatminer’s objects and its imported sub-objects specified) as text to a
-file, use <code class="code docutils literal notranslate"><span class="pre">digest</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_output_file</span> <span class="o">=</span> <span class="s2">&quot;digest.txt&quot;</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">digest</span><span class="p">(</span><span class="n">my_output_file</span><span class="p">)</span>
+<p><strong>Summarize</strong></p>
+<p>For a human-readable executive summary of your pipeline, use
+<code class="code docutils literal notranslate"><span class="pre">MatPipe.summarize()</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">summary</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">summarize</span><span class="p">()</span>
 </pre></div>
 </div>
-<p><code class="code docutils literal notranslate"><span class="pre">digest.txt</span></code> has the info:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;_logger&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-<span class="s1">&#39;autofeaturizer&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;autofeaturizer&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;_logger&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s1">&#39;auto_featurizer&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s1">&#39;bandstruct_col&#39;</span><span class="p">:</span> <span class="s1">&#39;bandstructure&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;cache_src&#39;</span><span class="p">:</span> <span class="s1">&#39;~/features.json&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;composition_col&#39;</span><span class="p">:</span> <span class="s1">&#39;composition&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;converted_input_df&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s1">&#39;do_precheck&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s1">&#39;dos_col&#39;</span><span class="p">:</span> <span class="s1">&#39;dos&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;drop_inputs&#39;</span><span class="p">:</span> <span class="kc">True</span>
-<span class="o">...</span>
+<p>The dict returned by summarize specifies the top-level information as strings.
+An analogy: if your pipeline were a plumbing system, <code class="code docutils literal notranslate"><span class="pre">summarize</span></code> would
+tell you how long each section of pipe is and the pump model.</p>
+<p><strong>Inspect</strong></p>
+<p>To get comprehensive details on a pipeline, use <code class="code docutils literal notranslate"><span class="pre">MatPipe.inspect()</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">details</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">inspect</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Inspection specifies all parameters to all Automatminer objects needed to
+construct the pipeline and specify all of its internal operations. It is
+typically very long, though human readable. An analogy: if your pipeline were
+a plumbing system, <code class="code docutils literal notranslate"><span class="pre">inspect</span></code> would tell you everything <code class="code docutils literal notranslate"><span class="pre">summarize</span></code>
+tells you, plus the model numbers of all the bolts, joints, and valves.</p>
+<p><strong>Save to a file</strong></p>
+<p>Both <code class="code docutils literal notranslate"><span class="pre">summarize</span></code> and <code class="code docutils literal notranslate"><span class="pre">inspect</span></code> accept a filename argument if you’d
+like to save their outputs to JSON, YAML, or text.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">summary</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">summarize</span><span class="p">(</span><span class="s2">&quot;my_summary.yaml&quot;</span><span class="p">)</span>
+<span class="n">details</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="s2">&quot;my_details.json&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

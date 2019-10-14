@@ -30,8 +30,10 @@ automatically benchmarking a pipeline on a dataset. Once you have your
 data loaded in a dataframe, the procedure is:
 
 1. Define a k-fold cross validation scheme (to use as outer test folds).
+
 2. Use the :code:`benchmark` method of :code:`MatPipe` to get predictions for
 each outer fold
+
 3. Use your scoring function of choice to evaluate each fold.
 
 .. code-block:: python

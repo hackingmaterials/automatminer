@@ -82,7 +82,7 @@ used above, you'd do:
     # Fitting pipe on train_df using "my_property" as target
     pipe.fit(train_df, "my_property")
 
-The MatPipe is now fit.
+The MatPipe is now fit and can be used to make predictions on new data!
 
 
 Making predictions
@@ -229,6 +229,27 @@ Monitoring the log
 
 The Automatminer log is a powerful tool for determining what is happening within
 the pipeline. We recommend you monitor it closely as the pipeline runs.
+
+Here's an example of an automatminer log when fitting on a dataset.
+
+.. code-block::
+    2019-10-11 16:05:41 INFO     Problem type is: regression
+    2019-10-11 16:05:41 INFO     Fitting MatPipe pipeline to data.
+    2019-10-11 16:05:41 INFO     AutoFeaturizer: Starting fitting.
+    2019-10-11 16:05:41 INFO     AutoFeaturizer: Adding compositions from structures.
+    ...
+    2019-10-11 16:05:47 INFO     DataCleaner: Handling feature na by max na threshold of 0.01 with method 'drop'.
+    2019-10-11 16:05:47 INFO     DataCleaner: After handling na: 636 samples, 168 features
+    2019-10-11 16:05:47 INFO     DataCleaner: Finished fitting.
+    2019-10-11 16:05:47 INFO     FeatureReducer: Starting fitting.
+    2019-10-11 16:05:47 INFO     FeatureReducer: 57 features removed due to cross correlation more than 0.95
+    2019-10-11 16:05:49 INFO     TreeFeatureReducer: Finished tree-based feature reduction of 110 initial features to 13
+    2019-10-11 16:05:49 INFO     FeatureReducer: Finished fitting.
+    2019-10-11 16:05:49 INFO     FeatureReducer: Starting transforming.
+    2019-10-11 16:05:49 INFO     FeatureReducer: Finished transforming.
+    2019-10-11 16:05:49 INFO     TPOTAdaptor: Starting fitting.
+    2019-10-11 16:07:50 INFO     TPOTAdaptor: Finished fitting.
+    2019-10-11 16:07:50 INFO     MatPipe successfully fit.
 
 
 Quick reminders
