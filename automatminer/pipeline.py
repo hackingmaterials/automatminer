@@ -5,13 +5,15 @@ import os
 import copy
 import pickle
 
+import pandas as pd
+
 from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.pkg import check_fitted, set_fitted, \
     return_attrs_recursively, AutomatminerError, VersionError, get_version, \
     save_dict_to_file
-from automatminer.utils.log import AMM_DEFAULT_LOGGER, AMM_DEFAULT_LOGLVL
+from automatminer.utils.log import AMM_DEFAULT_LOGGER
 
 
 class MatPipe(DFTransformer, LoggableMixin):
@@ -57,10 +59,6 @@ class MatPipe(DFTransformer, LoggableMixin):
         pipe = MatPipe.from_preset("debug")
 
     Args:
-        logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will
-            be used. If set to False, then no logging will occur.
-        log_level (int): The log level. For example logging.DEBUG or 2.
         autofeaturizer (AutoFeaturizer): The autofeaturizer object used to
             automatically decorate the dataframe with descriptors.
         cleaner (DataCleaner): The data cleaner object used to get a
@@ -70,6 +68,12 @@ class MatPipe(DFTransformer, LoggableMixin):
         learner (DFMLAdaptor): The auto ml adaptor object used to
             actually run a auto-ml pipeline on the clean, reduced, featurized
             dataframe.
+        logger (Logger, bool): A custom logger object to use for logging.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
+        ignore ([str]): String names of columns in all dataframes to ignore.
+            This will not stop samples from being dropped, but will preserve
+            columns.
 
     Attributes:
         The following attributes are set during fitting. Each has their own set
@@ -82,8 +86,7 @@ class MatPipe(DFTransformer, LoggableMixin):
     """
 
     def __init__(self, autofeaturizer=None, cleaner=None, reducer=None,
-                 learner=None, logger=AMM_DEFAULT_LOGGER,
-                 log_level=AMM_DEFAULT_LOGLVL):
+                 learner=None, logger=AMM_DEFAULT_LOGGER, ignore=None):
         transformers = [autofeaturizer, cleaner, reducer, learner]
         if not all(transformers):
             if any(transformers):
@@ -103,8 +106,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.reducer = reducer
         self.learner = learner
         self.logger = logger
-        if log_level:
-            self.logger.setLevel(log_level)
+        self.ignore = ignore
         self.pre_fit_df = None
         self.post_fit_df = None
         self.ml_type = None
@@ -197,13 +199,15 @@ class MatPipe(DFTransformer, LoggableMixin):
         Returns:
             (pandas.DataFrame): The dataframe with target property predictions.
         """
+        ignored_df = df[self.ignore] if self.ignore else None
         self.logger.info("Beginning MatPipe prediction using fitted pipeline.")
         df = self.autofeaturizer.transform(df, self.target)
         df = self.cleaner.transform(df, self.target)
         df = self.reducer.transform(df, self.target)
         predictions = self.learner.predict(df, self.target)
         self.logger.info("MatPipe prediction completed.")
-        return predictions
+        merged_df = predictions.join(ignored_df, how="left")
+        return merged_df
 
     @set_fitted
     def benchmark(self, df, target, kfold, fold_subset=None, cache=False):

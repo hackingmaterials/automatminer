@@ -39,6 +39,7 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
     Args:
         preset (str): The name of the preset config you'd like to use.
         **powerups: Various modifications as kwargs.
+            ignore ([str]): Column names for the pipeline to ignore.
             cache_src (str): A file path. If specified, Autofeaturizer will use
                 feature caching with a file stored at this location. See
                 Autofeaturizer's cache_src argument for more information.
@@ -108,8 +109,9 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
             "cleaner": DataCleaner()
         }
 
-    config["logger"] = powerups.get("logger", AMM_DEFAULT_LOGGER)
-    config["log_level"] = powerups.get("log_lvl", AMM_DEFAULT_LOGLVL)
+    logger = powerups.get("logger", AMM_DEFAULT_LOGGER)
+    config["logger"] = logger
+    config["ignore"] = powerups.get("ignore", None)
     return config
 
 

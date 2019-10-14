@@ -13,7 +13,6 @@ AMM_LOG_TRANSFORM_STR = "transforming"
 AMM_LOG_PREDICT_STR = "predicting"
 
 AMM_DEFAULT_LOGGER = True
-AMM_DEFAULT_LOGLVL = None
 
 
 def initialize_logger(logger_name, log_dir='.', level=None) -> logging.Logger:
