@@ -48,18 +48,36 @@ class TestMatPipeSetup(unittest.TestCase):
         MatPipe.from_preset("debug", log_level=1)
 
 
-def make_matpipe_test(config_preset):
+def make_matpipe_test(config_preset, skip=None):
     """
     Create a full matpipe test suite for a particular preset.
 
     Args:
         config_preset (str): A preset to test.
+        skip ([str]): Names of skippable tests. Check skippables for current
+            lists of tests to skip. Useful for debugging where you only want to
+            run a certain test.
 
     Returns:
         TestMatPipe (unittest): A unittest for MatPipe as specifically
             implemented by a preset.
 
     """
+    skippables = [
+        "transferability",
+        "user_features",
+        "benchmarking",
+        "persistence",
+        "digest",
+    ]
+    if not skip:
+        skip = []
+    for s in skip:
+        if s not in skippables:
+            raise ValueError(
+                f"{s} is not a skippable test. Choose from {skippables}"
+            )
+    reason = "Skip was requested."
 
     class TestMatPipe(unittest.TestCase):
         def setUp(self):
@@ -75,6 +93,7 @@ def make_matpipe_test(config_preset):
             self.pipe = MatPipe(**self.config)
             self.pipe_cached = MatPipe(**self.config_cached)
 
+        @unittest.skipIf("transferability" in skip, reason)
         def test_transferability(self):
             df_train = self.df.iloc[:200]
             df_test = self.df.iloc[201:250]
@@ -95,6 +114,7 @@ def make_matpipe_test(config_preset):
             self.assertTrue("composition" not in df_test2.columns)
             self.assertTrue(r2_score(true2, test2) > 0.5)
 
+        @unittest.skipIf("user_features" in skip, reason)
         def test_user_features(self):
             df = self.df
             df["G_VRH"] = self.extra_features
@@ -112,6 +132,7 @@ def make_matpipe_test(config_preset):
             test = df_test[self.target + " predicted"]
             self.assertTrue(r2_score(true, test) > 0.75)
 
+        @unittest.skipIf("benchmarking" in skip, reason)
         def test_benchmarking_no_cache(self):
             pipe = self.pipe
             # Make sure we can't run a cached run with no cache AF and cache pipe
@@ -120,6 +141,7 @@ def make_matpipe_test(config_preset):
 
             self._run_benchmark(cache=False, pipe=pipe)
 
+        @unittest.skipIf("benchmarking" in skip, reason)
         def test_benchmarking_cache(self):
             pipe = self.pipe_cached
 
@@ -128,17 +150,30 @@ def make_matpipe_test(config_preset):
                 self._run_benchmark(cache=False, pipe=pipe)
             self._run_benchmark(cache=True, pipe=pipe)
 
-        def test_persistence_and_digest(self):
+        @unittest.skipIf("persistence" in skip, reason)
+        def test_persistence(self):
             with self.assertRaises(NotFittedError):
                 self.pipe.save()
             df = self.df[-200:]
             self.pipe.fit(df, self.target)
 
+            # Load test
             self.pipe.save(filename=PIPE_PATH)
             self.pipe = MatPipe.load(PIPE_PATH, logger=False)
             df_test = self.pipe.predict(self.df[-220:-201])
             self.assertTrue(self.target in df_test.columns)
             self.assertTrue(self.target + " predicted" in df_test.columns)
+
+            # Version test
+            self.pipe.version = "not a real version"
+            self.pipe.save(VERSION_PIPE_PATH)
+            with self.assertRaises(AutomatminerError):
+                MatPipe.load(VERSION_PIPE_PATH)
+
+        @unittest.skipIf("digest" in skip, reason)
+        def test_digest(self):
+            df = self.df[-200:]
+            self.pipe.fit(df, self.target)
 
             for ext in DIGEST_EXTS:
                 digest = self.pipe.digest(filename=DIGEST_PATH + ext)
@@ -147,12 +182,6 @@ def make_matpipe_test(config_preset):
 
                 digest = self.pipe.digest(output_format=ext)
                 self.assertTrue(isinstance(digest, str))
-
-            # Version test
-            self.pipe.version = "not a real version"
-            self.pipe.save(VERSION_PIPE_PATH)
-            with self.assertRaises(AutomatminerError):
-                MatPipe.load(VERSION_PIPE_PATH)
 
         def _run_benchmark(self, cache, pipe):
             # Test static, regular benchmark (no fittable featurizers)
@@ -171,7 +200,7 @@ def make_matpipe_test(config_preset):
                                        fold_subset=[0, 3], cache=cache)
             self.assertEqual(len(df_tests2), 2)
 
-        def tearDown(self):
+        def tearDown(self) -> None:
             digests = [DIGEST_PATH + ext for ext in DIGEST_EXTS]
             for remnant in [CACHE_SRC, PIPE_PATH, *digests]:
                 if os.path.exists(remnant):
@@ -182,9 +211,11 @@ def make_matpipe_test(config_preset):
 
 @unittest.skipIf(int(os.environ.get("SKIP_INTENSIVE", 0)),
                      "Test too intensive for CircleCI commit builds.")
-class MatPipeDebugTest(make_matpipe_test("debug")):
+class MatPipeDebugTest(make_matpipe_test("debug", skip=["transferability",
+        "user_features",
+        "benchmarking"])):
     pass
 
 
-class MatPipeDebugSingleTest(make_matpipe_test("debug_single")):
-    pass
+# class MatPipeDebugSingleTest(make_matpipe_test("debug_single")):
+#     pass

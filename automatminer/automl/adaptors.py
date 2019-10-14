@@ -6,7 +6,6 @@ Current adaptor classes are:
     TPOTAdaptor: Uses the backend from the automl project TPOT, which can be
         found at https://github.com/EpistasisLab/tpot
 """
-import copy
 from collections import OrderedDict
 
 from tpot import TPOTClassifier, TPOTRegressor
@@ -231,12 +230,13 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                 it serializable.
 
         """
-        global _adaptor_tmp_backend
-        _adaptor_tmp_backend = self._backend
-        # Necessary for getting best models post serialization
-        self._best_models = self.best_models
-        self._backend = self.best_pipeline
-        self.from_serialized = True
+        if not self.from_serialized:
+            global _adaptor_tmp_backend
+            _adaptor_tmp_backend = self._backend
+            # Necessary for getting best models post serialization
+            self._best_models = self.best_models
+            self._backend = self.best_pipeline
+            self.from_serialized = True
 
     def deserialize(self) -> None:
         """
