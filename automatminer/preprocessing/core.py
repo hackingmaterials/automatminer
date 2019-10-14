@@ -94,7 +94,7 @@ class DataCleaner(DFTransformer, LoggableMixin):
         self.fitted_df = None
         self.fitted_target = None
         self.dropped_samples = None
-        self.is_fit = False
+        super(DataCleaner, self).__init__()
 
     @property
     def retained_features(self):
@@ -491,6 +491,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
         self.reducer_params = {}
         self._pca = None
         self._pca_feats = None
+        super(FeatureReducer, self).__init__()
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted

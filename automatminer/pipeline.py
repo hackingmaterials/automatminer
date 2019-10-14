@@ -107,10 +107,10 @@ class MatPipe(DFTransformer, LoggableMixin):
             self.logger.setLevel(log_level)
         self.pre_fit_df = None
         self.post_fit_df = None
-        self.is_fit = False
         self.ml_type = None
         self.target = None
         self.version = get_version()
+        super(MatPipe, self).__init__()
 
     @staticmethod
     def from_preset(preset: str = 'express', **powerups):

@@ -76,6 +76,9 @@ class DFTransformer(abc.ABC, BaseEstimator):
     and @set_fitted if necessary!
     """
 
+    def __init__(self):
+        self.is_fit = False
+
     @abc.abstractmethod
     def fit(self, df, target, **fit_kwargs):
         """

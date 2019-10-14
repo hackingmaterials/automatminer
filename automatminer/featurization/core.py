@@ -134,7 +134,6 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.exclude = exclude if exclude else []
         self.functionalize = functionalize
         self.ignore_cols = ignore_cols or []
-        self.is_fit = False
         self.fitted_input_df = None
         self.converted_input_df = None
         self.ignore_errors = ignore_errors
@@ -150,6 +149,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.structure_col = structure_col
         self.bandstruct_col = bandstructure_col
         self.dos_col = dos_col
+        super(AutoFeaturizer, self).__init__()
 
         _supported_featurizers = {composition_col: CompositionFeaturizers,
                                   structure_col: StructureFeaturizers,

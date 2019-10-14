@@ -9,6 +9,7 @@ Current adaptor classes are:
 from collections import OrderedDict
 
 from tpot import TPOTClassifier, TPOTRegressor
+import joblib
 
 from automatminer.automl.config.tpot_configs import TPOT_CLASSIFIER_CONFIG, \
     TPOT_REGRESSOR_CONFIG
@@ -85,6 +86,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
 
         self.from_serialized = False
         self._best_models = None
+        super(DFMLAdaptor, self).__init__()
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
@@ -202,10 +204,12 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             return best_models_and_scores
 
     @property
+    @check_fitted
     def backend(self):
         return self._backend
 
     @property
+    @check_fitted
     def best_pipeline(self):
         if self.from_serialized:
             # The TPOT backend is replaced by the best pipeline.
@@ -214,13 +218,16 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             return self._backend.fitted_pipeline_
 
     @property
+    @check_fitted
     def features(self):
         return self._features
 
     @property
+    @check_fitted
     def fitted_target(self):
         return self._fitted_target
 
+    @check_fitted
     def serialize(self) -> None:
         """
         Avoid TPOT pickling issues. Used by MatPipe during save.
@@ -238,6 +245,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             self._backend = self.best_pipeline
             self.from_serialized = True
 
+    @check_fitted
     def deserialize(self) -> None:
         """
         Get the original TPOTAdaptor image back after serializing, with

@@ -15,7 +15,7 @@ from automatminer.base import DFTransformer
 
 class MyTransformer(DFTransformer):
     def __init__(self):
-        self.is_fit = False
+        super(MyTransformer, self).__init__()
 
     @set_fitted
     def fit(self, df, target):

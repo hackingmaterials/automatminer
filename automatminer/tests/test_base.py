@@ -22,7 +22,7 @@ class TestTransformerGood(DFTransformer):
     def __init__(self, config_attr):
         self.config_attr = config_attr
         self.target = None
-        self.is_fit = False
+        super(TestTransformerGood, self).__init__()
 
     @set_fitted
     def fit(self, df, target):
