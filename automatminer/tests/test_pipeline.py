@@ -212,13 +212,7 @@ def make_matpipe_test(config_preset, skip=None):
 
 @unittest.skipIf(int(os.environ.get("SKIP_INTENSIVE", 0)),
                      "Test too intensive for CircleCI commit builds.")
-class MatPipeDebugTest(make_matpipe_test("debug", skip=[
-        "transferability",
-        "user_features",
-        "benchmarking",
-        "persistence",
-        # "digest",
-    ])):
+class MatPipeDebugTest(make_matpipe_test("debug")):
     pass
 
 
