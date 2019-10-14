@@ -20,6 +20,16 @@ class AutomatminerError(BaseException):
         return "AutomatminerError : " + self.msg
 
 
+class VersionError(AutomatminerError):
+    """
+    Version errors
+    """
+    def __str__(self):
+        base_str = super(VersionError, self).__str__()
+        return base_str + " (VersionError)"
+
+
+
 def compare_columns(df1, df2, ignore=None) -> dict:
     """
     Compare the columns of a dataframe.

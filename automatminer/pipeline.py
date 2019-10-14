@@ -13,7 +13,7 @@ from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.pkg import check_fitted, set_fitted, \
-    return_attrs_recursively, AutomatminerError, get_version
+    return_attrs_recursively, AutomatminerError, VersionError, get_version
 from automatminer.utils.log import AMM_DEFAULT_LOGGER, AMM_DEFAULT_LOGLVL
 
 
@@ -389,7 +389,7 @@ class MatPipe(DFTransformer, LoggableMixin):
             pipe = pickle.load(f)
 
         if pipe.version != get_version() and not supress_version_mismatch:
-            raise AutomatminerError("Version mismatch")
+            raise VersionError("Version mismatch")
 
         pipe.logger = logger
         pipe.logger.info("Loaded MatPipe from file {}.".format(filename))

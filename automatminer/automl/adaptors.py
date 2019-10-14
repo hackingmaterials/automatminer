@@ -246,10 +246,11 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         Returns:
             None
         """
-        global _adaptor_tmp_backend
-        self._backend = _adaptor_tmp_backend
-        _adaptor_tmp_backend = None
-        self.from_serialized = False
+        if not self.from_serialized:
+            global _adaptor_tmp_backend
+            self._backend = _adaptor_tmp_backend
+            _adaptor_tmp_backend = None
+            self.from_serialized = False
 
 
 class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
