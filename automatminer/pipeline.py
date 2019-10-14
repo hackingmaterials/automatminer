@@ -4,6 +4,7 @@ The highest level classes for pipelines.
 import os
 import copy
 import pickle
+from typing import Dict
 
 import pandas as pd
 
@@ -179,7 +180,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         return self.predict(df, **transform_kwargs)
 
     @check_fitted
-    def predict(self, df, ignore=None):
+    def predict(self, df, ignore="all"):
         """
         Predict a target property of a set of materials.
 
@@ -191,17 +192,36 @@ class MatPipe(DFTransformer, LoggableMixin):
 
         Args:
             df (pandas.DataFrame): Pipe will be fit to this dataframe.
-            ignore ([str]): String names of columns in all dataframes to ignore.
-                This will not stop samples from being dropped.
+            ignore ([str], None): Select which columns to ignore.
+                These columns will not be used for learning/prediction, but will
+                simply be appended back to the predicted df at the end of
+                prediction REGARDLESS of the pipeline configuration.
+
+                This will not stop samples from being dropped. If
+                columns not present in the fitting are not ignored, they will
+                be automatically dropped. Similarly, if the AutoFeaturizer
+                is not configured to preserve inputs and they are not ignored,
+                they will be automatically dropped. Ignoring columns supercedes
+                all inner operations.
+
+                Select columns using:
+                - [str]: String names of columns to ignore.
+                - None: input columns will be automatically dropped if they are
+                    inputs. User defined features will be preserved if usable
+                    as ML input.
 
         Returns:
             (pandas.DataFrame): The dataframe with target property predictions.
         """
         if ignore:
-            ignored_df = df[ignore]
-            df = df.drop(columns=ignored_df)
+            self.logger.warning(
+                f"MatPipe will ignore and append (after prediction) the "
+                f"following columns: \n{ignore}"
+            )
+            ignore_df = df[list(ignore)]
+            df = df.drop(columns=ignore_df)
         else:
-            ignored_df = pd.DataFrame()
+            ignore_df = pd.DataFrame()
 
         self.logger.info("Beginning MatPipe prediction using fitted pipeline.")
         df = self.autofeaturizer.transform(df, self.target)
@@ -209,7 +229,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         df = self.reducer.transform(df, self.target)
         predictions = self.learner.predict(df, self.target)
         self.logger.info("MatPipe prediction completed.")
-        merged_df = predictions.join(ignored_df, how="left")
+        merged_df = predictions.join(ignore_df, how="left")
         return merged_df
 
     @set_fitted
@@ -301,7 +321,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         return results
 
     @check_fitted
-    def inspect(self, filename=None):
+    def inspect(self, filename=None) -> Dict[str, str]:
         """
         Get all details of the pipeline in human-readable format.
 
@@ -321,7 +341,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         return attrs
 
     @check_fitted
-    def summarize(self, filename=None):
+    def summarize(self, filename=None) -> Dict[str, str]:
         """
         Get an executive summary of the most important parts of the pipeline.
         Useful for understanding the pipeline at a high level.

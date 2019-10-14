@@ -66,9 +66,12 @@ Time Savers and Practical Tools
 -------------------------------
 ignoring a column
 
+using user defined features
+
 
 Customizing pipelines
 ---------------------
+
 
 
 Using DFTransformers individually

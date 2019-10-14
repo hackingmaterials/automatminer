@@ -65,6 +65,7 @@ def make_matpipe_test(config_preset, skip=None):
     skippables = [
         "transferability",
         "user_features",
+        "ignore",
         "benchmarking",
         "persistence",
         "digests",
@@ -130,6 +131,39 @@ def make_matpipe_test(config_preset, skip=None):
             true = df_test[self.target]
             test = df_test[self.target + " predicted"]
             self.assertTrue(r2_score(true, test) > 0.75)
+
+
+        @unittest.skipIf("ignore" in skip, reason)
+        def test_ignore(self):
+            df = self.df
+            # pd.set_option('display.max_rows', 500)
+            # pd.set_option('display.max_columns', 500)
+            # pd.set_option('display.width', 1000)
+            # print(df)
+
+            df_train = df.iloc[:200]
+            df_test = df.iloc[201:250]
+            ef = "ExtraFeature"
+            df_test[ef] = [i + 100 for i in range(df_test.shape[0])]
+            self.pipe.fit(df_train, self.target)
+
+            self.assertTrue(ef in df_test.columns)
+            self.assertTrue("composition" in df_test.columns)
+
+            ignore = [ef, "composition"]
+            predicted_ignored = self.pipe.predict(df_test, ignore=ignore)
+            self.assertTrue(ef in predicted_ignored.columns)
+            self.assertTrue("composition" in predicted_ignored.columns)
+
+            predicted_none = self.pipe.predict(df_test, ignore=None)
+            self.assertFalse(ef in predicted_none.columns)
+            self.assertFalse("composition" in predicted_none.columns)
+
+            some = ["composition"]
+            predicted_some = self.pipe.predict(df_test, ignore=some)
+            self.assertFalse(ef in predicted_some.columns)
+            self.assertTrue("composition" in predicted_some.columns)
+
 
         @unittest.skipIf("benchmarking" in skip, reason)
         def test_benchmarking_no_cache(self):
@@ -212,11 +246,18 @@ def make_matpipe_test(config_preset, skip=None):
 
 @unittest.skipIf(int(os.environ.get("SKIP_INTENSIVE", 0)),
                      "Test too intensive for CircleCI commit builds.")
-class MatPipeDebugTest(make_matpipe_test("debug")):
-    pass
+# class MatPipeDebugTest(make_matpipe_test("debug")):
+#     pass
 
 
-class MatPipeDebugSingleTest(make_matpipe_test("debug_single")):
+class MatPipeDebugSingleTest(make_matpipe_test("debug_single", skip=[
+        "transferability",
+        "user_features",
+        # "ignore",
+        "benchmarking",
+        "persistence",
+        "digests",
+    ])):
     pass
 
 
