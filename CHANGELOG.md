@@ -1,8 +1,54 @@
 # Change Log
 
-## [Unreleased](https://github.com/hackingmaterials/automatminer/tree/HEAD)
+## [v2019.10.14](https://github.com/hackingmaterials/automatminer/tree/v2019.10.14) (2019-10-15)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.11...v2019.10.14)
 
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.08.07_beta...HEAD)
+**Implemented enhancements:**
+
+- More pipeline diagnostics [\#239](https://github.com/hackingmaterials/automatminer/issues/239)
+- add dependabot [\#236](https://github.com/hackingmaterials/automatminer/issues/236)
+- Add .from\_preset method to MatPipe [\#232](https://github.com/hackingmaterials/automatminer/issues/232)
+- Change or add to digest to make it easier to read [\#221](https://github.com/hackingmaterials/automatminer/issues/221)
+- Featurizer sets can be more easily rewritten as dataclasses [\#209](https://github.com/hackingmaterials/automatminer/issues/209)
+- rm /tutorials and add to matminer\_examples [\#205](https://github.com/hackingmaterials/automatminer/issues/205)
+- Add warning when large numbers of samples imputed/handled [\#199](https://github.com/hackingmaterials/automatminer/issues/199)
+
+**Fixed bugs:**
+
+- Code docs need overhaul [\#244](https://github.com/hackingmaterials/automatminer/issues/244)
+- Pipeline save/load with TPOT backend doesn't attrs in intuitive way [\#241](https://github.com/hackingmaterials/automatminer/issues/241)
+- MatPipe.load should refuse to load from class instance [\#234](https://github.com/hackingmaterials/automatminer/issues/234)
+- Automatminer save/load needs more robust test [\#231](https://github.com/hackingmaterials/automatminer/issues/231)
+- Add warning for mismatched versions of automatminer on save/load [\#230](https://github.com/hackingmaterials/automatminer/issues/230)
+- Fix requirements [\#229](https://github.com/hackingmaterials/automatminer/issues/229)
+- Autofeaturizer caching needs to use matminer utils, not pd.json [\#226](https://github.com/hackingmaterials/automatminer/issues/226)
+- initialize\_logger has confusing arguments [\#204](https://github.com/hackingmaterials/automatminer/issues/204)
+
+**Closed issues:**
+
+- Reassign pipe logger [\#242](https://github.com/hackingmaterials/automatminer/issues/242)
+- fix joblib warning from importlib [\#240](https://github.com/hackingmaterials/automatminer/issues/240)
+- MatPipe save/load does not work on TPOTAdaptor pipelines [\#235](https://github.com/hackingmaterials/automatminer/issues/235)
+- Add ability to MatPipe to suppress internal warnings [\#233](https://github.com/hackingmaterials/automatminer/issues/233)
+- Make it easier to ignore entire columns but keep them in returned df [\#228](https://github.com/hackingmaterials/automatminer/issues/228)
+- Benchdev needs a workflow for predicting properties [\#227](https://github.com/hackingmaterials/automatminer/issues/227)
+- add function to matpipe to output pipeline as simple script? [\#224](https://github.com/hackingmaterials/automatminer/issues/224)
+- VERSION FileNotFoundError on import [\#223](https://github.com/hackingmaterials/automatminer/issues/223)
+- Add automatminer citation to all matbench datasets [\#218](https://github.com/hackingmaterials/automatminer/issues/218)
+- Docs suck [\#216](https://github.com/hackingmaterials/automatminer/issues/216)
+- Rewrite analytics to MatPipe [\#186](https://github.com/hackingmaterials/automatminer/issues/186)
+
+**Merged pull requests:**
+
+- serialize backend and test improvements [\#246](https://github.com/hackingmaterials/automatminer/pull/246) ([ardunn](https://github.com/ardunn))
+- refactor setting loggers [\#243](https://github.com/hackingmaterials/automatminer/pull/243) ([janosh](https://github.com/janosh))
+- Add support for pipeline digest in JSON and YAML format [\#238](https://github.com/hackingmaterials/automatminer/pull/238) ([janosh](https://github.com/janosh))
+
+## [v2019.9.11](https://github.com/hackingmaterials/automatminer/tree/v2019.9.11) (2019-09-11)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.12...v2019.9.11)
+
+## [v2019.9.12](https://github.com/hackingmaterials/automatminer/tree/v2019.9.12) (2019-09-11)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.08.07_beta...v2019.9.12)
 
 **Closed issues:**
 
