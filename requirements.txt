@@ -1,6 +1,6 @@
 # Requirements of this project alone
 matminer==0.6.2
-xgboost==0.80
+xgboost==0.90
 tpot==0.10.2
 skrebate==0.6
 pyyaml==5.1.2
