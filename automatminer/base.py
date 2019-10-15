@@ -3,9 +3,13 @@ Base classes, mixins, and other inheritables.
 """
 import abc
 import logging
+
+from automatminer.utils.log import (
+    AMM_LOGGER_BASENAME,
+    initialize_logger,
+    initialize_null_logger,
+)
 from sklearn.base import BaseEstimator
-from automatminer.utils.log import initialize_logger, \
-    initialize_null_logger, AMM_LOGGER_BASENAME
 
 __authors__ = ["Alex Dunn <ardunn@lbl.gov>", "Alex Ganose <aganose@lbl.gov>"]
 
@@ -24,7 +28,7 @@ class LoggableMixin:
     @logger.setter
     def logger(self, new_logger):
         """Set a new logger.
-        
+
         Args:
             new_logger (Logger, bool): A boolean or custom logger object to use
             for logging. Alternatively, if set to True, the default automatminer

@@ -1,20 +1,25 @@
 """
 The highest level classes for pipelines.
 """
-import os
 import copy
+import os
 import pickle
 from typing import Dict
 
 import pandas as pd
-
-from automatminer.base import LoggableMixin, DFTransformer
+from automatminer.base import DFTransformer, LoggableMixin
 from automatminer.presets import get_preset_config
-from automatminer.utils.ml import regression_or_classification
-from automatminer.utils.pkg import check_fitted, set_fitted, \
-    return_attrs_recursively, AutomatminerError, VersionError, get_version, \
-    save_dict_to_file
 from automatminer.utils.log import AMM_DEFAULT_LOGGER
+from automatminer.utils.ml import regression_or_classification
+from automatminer.utils.pkg import (
+    AutomatminerError,
+    VersionError,
+    check_fitted,
+    get_version,
+    return_attrs_recursively,
+    save_dict_to_file,
+    set_fitted,
+)
 
 
 class MatPipe(DFTransformer, LoggableMixin):
@@ -88,15 +93,23 @@ class MatPipe(DFTransformer, LoggableMixin):
         target (str): The name of the column where target values are held.
     """
 
-    def __init__(self, autofeaturizer=None, cleaner=None, reducer=None,
-                 learner=None, logger=AMM_DEFAULT_LOGGER):
+    def __init__(
+        self,
+        autofeaturizer=None,
+        cleaner=None,
+        reducer=None,
+        learner=None,
+        logger=AMM_DEFAULT_LOGGER,
+    ):
         transformers = [autofeaturizer, cleaner, reducer, learner]
         if not all(transformers):
             if any(transformers):
-                raise AutomatminerError("Please specify all dataframe"
-                                        "transformers (autofeaturizer, learner,"
-                                        "reducer, and cleaner), or none (to use"
-                                        "default).")
+                raise AutomatminerError(
+                    "Please specify all dataframe"
+                    "transformers (autofeaturizer, learner,"
+                    "reducer, and cleaner), or none (to use"
+                    "default)."
+                )
             else:
                 config = get_preset_config("express")
                 autofeaturizer = config["autofeaturizer"]
@@ -117,7 +130,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         super(MatPipe, self).__init__()
 
     @staticmethod
-    def from_preset(preset: str = 'express', **powerups):
+    def from_preset(preset: str = "express", **powerups):
         """
         Get a preset MatPipe from a string using
         automatminer.presets.get_preset_config
@@ -238,8 +251,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         return merged_df
 
     @set_fitted
-    def benchmark(self, df, target, kfold, fold_subset=None, cache=False,
-                  ignore=None):
+    def benchmark(self, df, target, kfold, fold_subset=None, cache=False, ignore=None):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
@@ -292,22 +304,26 @@ class MatPipe(DFTransformer, LoggableMixin):
             if os.path.exists(cache_src):
                 self.logger.warning(
                     "Cache src {} already found! Ensure this featurized data "
-                    "matches the df being benchmarked.".format(cache_src))
+                    "matches the df being benchmarked.".format(cache_src)
+                )
             self.logger.warning("Running pre-featurization for caching.")
             self.autofeaturizer.fit_transform(df, target)
         elif cache_src and not cache:
             raise AutomatminerError(
                 "Caching was enabled in AutoFeaturizer but not in benchmark. "
                 "Either disable caching in AutoFeaturizer or enable it by "
-                "passing cache=True to benchmark.")
+                "passing cache=True to benchmark."
+            )
         elif cache and not cache_src:
             raise AutomatminerError(
                 "MatPipe cache is enabled, but no cache_src was defined in "
                 "autofeaturizer. Pass the cache_src argument to AutoFeaturizer "
-                "or use the cache_src get_preset_config powerup.")
+                "or use the cache_src get_preset_config powerup."
+            )
         else:
-            self.logger.debug("No caching being used in AutoFeaturizer or "
-                              "benchmark.")
+            self.logger.debug(
+                "No caching being used in AutoFeaturizer or " "benchmark."
+            )
 
         if not fold_subset:
             fold_subset = list(range(kfold.n_splits))
@@ -372,17 +388,12 @@ class MatPipe(DFTransformer, LoggableMixin):
             "drop_na_targets",
         ]
         cleaner_data = {
-            attr: str(getattr(self.cleaner, attr))
-            for attr in cleaner_attrs
+            attr: str(getattr(self.cleaner, attr)) for attr in cleaner_attrs
         }
 
-        reducer_attrs = [
-            "reducers",
-            "reducer_params",
-        ]
+        reducer_attrs = ["reducers", "reducer_params"]
         reducer_data = {
-            attr: str(getattr(self.reducer, attr))
-            for attr in reducer_attrs
+            attr: str(getattr(self.reducer, attr)) for attr in reducer_attrs
         }
 
         attrs = {
@@ -390,7 +401,7 @@ class MatPipe(DFTransformer, LoggableMixin):
             "ml_model": str(self.learner.best_pipeline),
             "feature_reduction": reducer_data,
             "data_cleaning": cleaner_data,
-            "features": self.learner.features
+            "features": self.learner.features,
         }
         if filename:
             save_dict_to_file(attrs, filename)
@@ -416,12 +427,16 @@ class MatPipe(DFTransformer, LoggableMixin):
 
         temp_logger = copy.deepcopy(self._logger)
         loggables = [
-            self, self.learner, self.reducer, self.cleaner, self.autofeaturizer
+            self,
+            self.learner,
+            self.reducer,
+            self.cleaner,
+            self.autofeaturizer,
         ]
         for loggable in loggables:
             loggable._logger = AMM_DEFAULT_LOGGER
 
-        with open(filename, 'wb') as f:
+        with open(filename, "wb") as f:
             pickle.dump(self, f)
 
         # Reassign live memory objects for further use in this object
@@ -446,7 +461,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         Returns:
             pipe (MatPipe): A MatPipe object.
         """
-        with open(filename, 'rb') as f:
+        with open(filename, "rb") as f:
             pipe = pickle.load(f)
 
         if pipe.version != get_version() and not supress_version_mismatch:

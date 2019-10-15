@@ -2,19 +2,16 @@
 Test logging related utils.
 """
 
-import unittest
-import os
-
 import logging
+import os
+import unittest
 
-from automatminer.utils.log import initialize_logger, \
-    initialize_null_logger
+from automatminer.utils.log import initialize_logger, initialize_null_logger
 
 run_dir = os.getcwd()
 
 
 class TestLogTools(unittest.TestCase):
-
     def test_logger_initialization(self):
         logger_base_name = "TESTING"
         log = initialize_logger(logger_base_name, level=logging.DEBUG)
@@ -27,7 +24,7 @@ class TestLogTools(unittest.TestCase):
         log_file = os.path.join(run_dir, logger_base_name + ".log")
         self.assertTrue(os.path.isfile(log_file))
 
-        with open(log_file, 'r') as f:
+        with open(log_file, "r") as f:
             lines = f.readlines()
 
         self.assertTrue("logging" in lines[0])
