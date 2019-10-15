@@ -158,7 +158,7 @@ class RunPipe(FireTaskBase):
             raise ValueError("Scoring method for problem type {} not supported"
                              "".format(problem_type))
 
-        # Extract important details for storage
+        # Extract important inspect for storage
         try:
             # TPOT Adaptor
             best_pipeline = [str(step) for step in pipe.learner.best_pipeline.steps]

@@ -16,7 +16,7 @@ __author__ = ["Alex Dunn", "Shyue Ping Ong", "Anubhav Jain"]
 @task
 def make_doc(ctx):
     with cd("docs"):
-        ctx.run("sphinx-apidoc -o . -f .")
+        ctx.run("sphinx-apidoc -o ./source -f ../automatminer")
         ctx.run("make html")
         # ctx.run("cp _static/* ../docs/html/_static")
         ctx.run("cp -r build/html/* .")

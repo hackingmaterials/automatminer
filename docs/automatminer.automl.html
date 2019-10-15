@@ -1,0 +1,456 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>automatminer.automl package &#8212; Automatminer 2019.10.11 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="automatminer.automl.config package" href="automatminer.automl.config.html" />
+    <link rel="prev" title="automatminer package" href="automatminer.html" />
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo_header.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">An autoML tool for materials</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="automatminer.html">automatminer package</a></li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="automatminer-automl-package">
+<h1>automatminer.automl package<a class="headerlink" href="#automatminer-automl-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.automl.config.html">automatminer.automl.config package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.config.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.config.html#module-automatminer.automl.config.tpot_configs">automatminer.automl.config.tpot_configs module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.config.html#module-automatminer.automl.config">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.automl.tests.html">automatminer.automl.tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.tests.html#module-automatminer.automl.tests.test_adaptors">automatminer.automl.tests.test_adaptors module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.tests.html#module-automatminer.automl.tests.test_base">automatminer.automl.tests.test_base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.tests.html#module-automatminer.automl.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-automatminer.automl.adaptors">
+<span id="automatminer-automl-adaptors-module"></span><h2>automatminer.automl.adaptors module<a class="headerlink" href="#module-automatminer.automl.adaptors" title="Permalink to this headline">¶</a></h2>
+<p>Adaptor classes for using AutoML packages in a Matbench pipeline.</p>
+<p>Current adaptor classes are:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>TPOTAdaptor: Uses the backend from the automl project TPOT, which can be</dt><dd><p>found at <a class="reference external" href="https://github.com/EpistasisLab/tpot">https://github.com/EpistasisLab/tpot</a></p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="class">
+<dt id="automatminer.automl.adaptors.SinglePipelineAdaptor">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.automl.adaptors.</code><code class="sig-name descname">SinglePipelineAdaptor</code><span class="sig-paren">(</span><em class="sig-param">regressor</em>, <em class="sig-param">classifier</em>, <em class="sig-param">logger=True</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.SinglePipelineAdaptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.automl.base.DFMLAdaptor" title="automatminer.automl.base.DFMLAdaptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.automl.base.DFMLAdaptor</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<p>For running single models or pipelines in a MatPipe pipeline using the same
+syntax as the AutoML adaptors.</p>
+<p>This adaptor should be able to fit into a MatPipe in similar fashion to
+TPOTAdaptor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>regressor</strong> (<em>sklearn Pipeline</em><em> or </em><em>BaseEstimator-like</em>) – The object you want
+to use for machine learning regression. Must implement
+fit/predict/transform methods analagously to BaseEstimator, but does
+not need to be a BaseEstimator or Pipeline.</p></li>
+<li><p><strong>classifier</strong> (<em>sklearn Pipeline</em><em> or </em><em>BaseEstimator-like</em>) – The object you want
+to use for machine learning classification.</p></li>
+<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.8)"><em>logging.Logger</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for
+logging. Alternatively, if set to True, the default automatminer
+logger will be used. If set to False, then no logging will occur.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">The following unique attributes are set during fitting.</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.automl.adaptors.SinglePipelineAdaptor.mode">
+<code class="sig-name descname">mode</code><a class="headerlink" href="#automatminer.automl.adaptors.SinglePipelineAdaptor.mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Either AMM_REG_NAME (regression) or AMM_CLF_NAME
+(classification)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.SinglePipelineAdaptor.backend">
+<em class="property">property </em><code class="sig-name descname">backend</code><a class="headerlink" href="#automatminer.automl.adaptors.SinglePipelineAdaptor.backend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.SinglePipelineAdaptor.best_pipeline">
+<em class="property">property </em><code class="sig-name descname">best_pipeline</code><a class="headerlink" href="#automatminer.automl.adaptors.SinglePipelineAdaptor.best_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.SinglePipelineAdaptor.features">
+<em class="property">property </em><code class="sig-name descname">features</code><a class="headerlink" href="#automatminer.automl.adaptors.SinglePipelineAdaptor.features" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.SinglePipelineAdaptor.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.SinglePipelineAdaptor.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The operation to be logging.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The method result.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.SinglePipelineAdaptor.fitted_target">
+<em class="property">property </em><code class="sig-name descname">fitted_target</code><a class="headerlink" href="#automatminer.automl.adaptors.SinglePipelineAdaptor.fitted_target" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.automl.adaptors.</code><code class="sig-name descname">TPOTAdaptor</code><span class="sig-paren">(</span><em class="sig-param">logger=True</em>, <em class="sig-param">**tpot_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.automl.base.DFMLAdaptor" title="automatminer.automl.base.DFMLAdaptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.automl.base.DFMLAdaptor</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<p>A dataframe adaptor for the TPOT classifiers and regressors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tpot_kwargs</strong> – <p>All kwargs accepted by a TPOTRegressor/TPOTClassifier
+or TPOTBase object.</p>
+<p>Note that for example, you can limit the models that TPOT explores
+by setting config_dict directly. For example, if you want to only
+use random forest:</p>
+</p></li>
+<li><p><strong>= {</strong> (<em>config_dict</em>) – <dl class="simple">
+<dt>‘sklearn.ensemble.RandomForestRegressor’: {</dt><dd><p>‘n_estimators’: [100],
+‘max_features’: np.arange(0.05, 1.01, 0.05),
+‘min_samples_split’: range(2, 21),
+‘min_samples_leaf’: range(1, 21),
+‘bootstrap’: [True, False]
+},</p>
+</dd>
+</dl>
+<p>}</p>
+</p></li>
+<li><p><strong>logger</strong> (<em>Logger</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for logging.
+Alternatively, if set to True, the default automatminer logger will
+be used. If set to False, then no logging will occur.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">The following unique attributes are set during fitting.</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.mode">
+<code class="sig-name descname">mode</code><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Either AMM_REG_NAME (regression) or AMM_CLF_NAME
+(classification)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.best_models">
+<code class="sig-name descname">best_models</code><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.best_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>The best model names and their scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>OrderedDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.backend">
+<code class="sig-name descname">backend</code><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>The TPOT object interface used for ML training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>TPOTBase</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.models">
+<code class="sig-name descname">models</code><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.models" title="Permalink to this definition">¶</a></dt>
+<dd><p>The raw sklearn-style models output by TPOT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>OrderedDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.from_serialized">
+<code class="sig-name descname">from_serialized</code><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.from_serialized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether the backend is loaded from a serialized
+instance. If True, the previous full TPOT data will not be available
+due to pickling problems.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">backend</code></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">best_models</code></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.best_pipeline">
+<em class="property">property </em><code class="sig-name descname">best_pipeline</code><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.best_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.deserialize">
+<code class="sig-name descname">deserialize</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.deserialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.features">
+<em class="property">property </em><code class="sig-name descname">features</code><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.features" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The operation to be logging.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The method result.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.fitted_target">
+<em class="property">property </em><code class="sig-name descname">fitted_target</code><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.fitted_target" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.adaptors.TPOTAdaptor.serialize">
+<code class="sig-name descname">serialize</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor.serialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.automl.base">
+<span id="automatminer-automl-base-module"></span><h2>automatminer.automl.base module<a class="headerlink" href="#module-automatminer.automl.base" title="Permalink to this headline">¶</a></h2>
+<p>Base classes for automl.</p>
+<dl class="class">
+<dt id="automatminer.automl.base.DFMLAdaptor">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.automl.base.</code><code class="sig-name descname">DFMLAdaptor</code><a class="headerlink" href="#automatminer.automl.base.DFMLAdaptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="automatminer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a></p>
+<p>A base class to adapt from an AutoML backend to a sklearn-style fit/predict
+scheme and add a few extensions for pandas dataframes.</p>
+<p>When implementing a base class adaptor, make sure to use &#64;check_fitted
+and &#64;set_fitted if necessary!</p>
+<dl class="method">
+<dt id="automatminer.automl.base.DFMLAdaptor.backend">
+<em class="property">abstract property </em><code class="sig-name descname">backend</code><a class="headerlink" href="#automatminer.automl.base.DFMLAdaptor.backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>The AutoML backend object. Does not need to implement any methods for
+compatibility with higher level classes. If no AutoML backend is present
+e.g., SinglePipelineAdaptor, backend = None.</p>
+<p>Does not need to be serializable, as matpipe.save will not save
+backends.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.base.DFMLAdaptor.best_pipeline">
+<em class="property">abstract property </em><code class="sig-name descname">best_pipeline</code><a class="headerlink" href="#automatminer.automl.base.DFMLAdaptor.best_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>The best ML pipeline found by the backend. Can be any type though
+BaseEstimator is preferred.</p>
+<blockquote>
+<div><p>1. MUST implement a .predict method unless DFMLAdaptor.predict is
+overridden!</p>
+<ol class="arabic simple" start="2">
+<li><p>MUST be serializable!</p></li>
+</ol>
+</div></blockquote>
+<p>Should be as close to the algorithm as possible - i.e., instead of
+calling TPOTClassifier.fit, calls <a href="#id1"><span class="problematic" id="id2">TPOTClassifier.fitted_pipeline_</span></a>, so
+that examining the true form of models is more straightforward.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.base.DFMLAdaptor.deserialize">
+<code class="sig-name descname">deserialize</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.base.DFMLAdaptor.deserialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.base.DFMLAdaptor.features">
+<em class="property">abstract property </em><code class="sig-name descname">features</code><a class="headerlink" href="#automatminer.automl.base.DFMLAdaptor.features" title="Permalink to this definition">¶</a></dt>
+<dd><p>The features being used for machine learning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The feature labels</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>([<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.base.DFMLAdaptor.fitted_target">
+<em class="property">abstract property </em><code class="sig-name descname">fitted_target</code><a class="headerlink" href="#automatminer.automl.base.DFMLAdaptor.fitted_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>The target (a string) on which the adaptor was fit on.
+:returns: The fitted target label.
+:rtype: (str)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.base.DFMLAdaptor.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.base.DFMLAdaptor.predict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.base.DFMLAdaptor.serialize">
+<code class="sig-name descname">serialize</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.base.DFMLAdaptor.serialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.automl.base.DFMLAdaptor.transform">
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.base.DFMLAdaptor.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms a dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The pandas dataframe to be fit.</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the target string specifying the ML target.</p></li>
+<li><p><strong>transform_kwargs</strong> – Keyword paramters for transforming</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The transformed dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(pandas.DataFrame)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.automl">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-automatminer.automl" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;HackingMaterials 2019.
+      
+      |
+      <a href="_sources/automatminer.automl.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

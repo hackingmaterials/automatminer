@@ -1,0 +1,599 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>automatminer package &#8212; Automatminer 2019.10.11 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="automatminer.automl package" href="automatminer.automl.html" />
+    <link rel="prev" title="automatminer" href="modules.html" />
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo_header.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">An autoML tool for materials</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">automatminer package</a></li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="automatminer-package">
+<h1>automatminer package<a class="headerlink" href="#automatminer-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.automl.html">automatminer.automl package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.automl.config.html">automatminer.automl.config package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.automl.config.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.automl.config.html#module-automatminer.automl.config.tpot_configs">automatminer.automl.config.tpot_configs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.automl.config.html#module-automatminer.automl.config">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.automl.tests.html">automatminer.automl.tests package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.automl.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.automl.tests.html#module-automatminer.automl.tests.test_adaptors">automatminer.automl.tests.test_adaptors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.automl.tests.html#module-automatminer.automl.tests.test_base">automatminer.automl.tests.test_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.automl.tests.html#module-automatminer.automl.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.html#module-automatminer.automl.adaptors">automatminer.automl.adaptors module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.html#module-automatminer.automl.base">automatminer.automl.base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.automl.html#module-automatminer.automl">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.featurization.html">automatminer.featurization package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.featurization.tests.html">automatminer.featurization.tests package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.featurization.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.featurization.tests.html#module-automatminer.featurization.tests.test_base">automatminer.featurization.tests.test_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.featurization.tests.html#module-automatminer.featurization.tests.test_core">automatminer.featurization.tests.test_core module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.featurization.tests.html#module-automatminer.featurization.tests.test_sets">automatminer.featurization.tests.test_sets module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.featurization.tests.html#module-automatminer.featurization.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#module-automatminer.featurization.base">automatminer.featurization.base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#module-automatminer.featurization.core">automatminer.featurization.core module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#module-automatminer.featurization.sets">automatminer.featurization.sets module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.html#module-automatminer.featurization">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.preprocessing.html">automatminer.preprocessing package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.preprocessing.tests.html">automatminer.preprocessing.tests package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.preprocessing.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.preprocessing.tests.html#module-automatminer.preprocessing.tests.test_core">automatminer.preprocessing.tests.test_core module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.preprocessing.tests.html#module-automatminer.preprocessing.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.html#module-automatminer.preprocessing.core">automatminer.preprocessing.core module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.html#module-automatminer.preprocessing.feature_selection">automatminer.preprocessing.feature_selection module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.html#module-automatminer.preprocessing">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.tests.html">automatminer.tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.tests.html#module-automatminer.tests.test_base">automatminer.tests.test_base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.tests.html#module-automatminer.tests.test_pipeline">automatminer.tests.test_pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.tests.html#module-automatminer.tests.test_presets">automatminer.tests.test_presets module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.tests.html#module-automatminer.tests">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.utils.html">automatminer.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="automatminer.utils.tests.html">automatminer.utils.tests package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.utils.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.utils.tests.html#module-automatminer.utils.tests.test_log">automatminer.utils.tests.test_log module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.utils.tests.html#module-automatminer.utils.tests.test_ml">automatminer.utils.tests.test_ml module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.utils.tests.html#module-automatminer.utils.tests.test_pkg">automatminer.utils.tests.test_pkg module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="automatminer.utils.tests.html#module-automatminer.utils.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.html#module-automatminer.utils.log">automatminer.utils.log module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.html#module-automatminer.utils.ml">automatminer.utils.ml module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.html#module-automatminer.utils.pkg">automatminer.utils.pkg module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.html#module-automatminer.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-automatminer.base">
+<span id="automatminer-base-module"></span><h2>automatminer.base module<a class="headerlink" href="#module-automatminer.base" title="Permalink to this headline">¶</a></h2>
+<p>Base classes, mixins, and other inheritables.</p>
+<dl class="class">
+<dt id="automatminer.base.DFTransformer">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.base.</code><code class="sig-name descname">DFTransformer</code><a class="headerlink" href="#automatminer.base.DFTransformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.base.BaseEstimator</span></code></p>
+<p>A base class to allow easy transformation in the same way as
+TransformerMixin and BaseEstimator in sklearn, but for pandas dataframes.</p>
+<p>When implementing a base class adaptor, make sure to use &#64;check_fitted
+and &#64;set_fitted if necessary!</p>
+<dl class="method">
+<dt id="automatminer.base.DFTransformer.fit">
+<em class="property">abstract </em><code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target</em>, <em class="sig-param">**fit_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.base.DFTransformer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits the transformer to a dataframe, given a target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The pandas dataframe to be fit.</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the target string specifying the ML target.</p></li>
+<li><p><strong>fit_kwargs</strong> – Keyword paramters for fitting</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(DataFrameTransformer) This object (self)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.base.DFTransformer.fit_transform">
+<code class="sig-name descname">fit_transform</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.base.DFTransformer.fit_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines the fitting and transformation of a dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The pandas dataframe to be fit.</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the target string specifying the ML target.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The transformed dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(pandas.DataFrame)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.base.DFTransformer.transform">
+<em class="property">abstract </em><code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target</em>, <em class="sig-param">**transform_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.base.DFTransformer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms a dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The pandas dataframe to be fit.</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the target string specifying the ML target.</p></li>
+<li><p><strong>transform_kwargs</strong> – Keyword paramters for transforming</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The transformed dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(pandas.DataFrame)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="automatminer.base.LoggableMixin">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.base.</code><code class="sig-name descname">LoggableMixin</code><a class="headerlink" href="#automatminer.base.LoggableMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A mixin class for easy logging (or absence of it).</p>
+<dl class="method">
+<dt id="automatminer.base.LoggableMixin.get_logger">
+<em class="property">static </em><code class="sig-name descname">get_logger</code><span class="sig-paren">(</span><em class="sig-param">logger</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.base.LoggableMixin.get_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle boolean logger.
+:param logger: A custom logger object to use for logging.</p>
+<blockquote>
+<div><p>Alternatively, if set to True, the default automatminer logger
+will be used. If set to False, then no logging will occur.</p>
+</div></blockquote>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.base.LoggableMixin.logger">
+<em class="property">property </em><code class="sig-name descname">logger</code><a class="headerlink" href="#automatminer.base.LoggableMixin.logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the class logger.
+If the logger is None, the logging calls will be redirected to a dummy
+logger that has no output.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.pipeline">
+<span id="automatminer-pipeline-module"></span><h2>automatminer.pipeline module<a class="headerlink" href="#module-automatminer.pipeline" title="Permalink to this headline">¶</a></h2>
+<p>The highest level classes for pipelines.</p>
+<dl class="class">
+<dt id="automatminer.pipeline.MatPipe">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.pipeline.</code><code class="sig-name descname">MatPipe</code><span class="sig-paren">(</span><em class="sig-param">autofeaturizer=None</em>, <em class="sig-param">cleaner=None</em>, <em class="sig-param">reducer=None</em>, <em class="sig-param">learner=None</em>, <em class="sig-param">logger=True</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<p>Establish an ML pipeline for transforming compositions, structures,
+bandstructures, and DOS objects into machine-learned properties.</p>
+<dl class="simple">
+<dt>The pipeline includes:</dt><dd><ul class="simple">
+<li><p>featurization</p></li>
+<li><p>ml-preprocessing</p></li>
+<li><p>automl model fitting and creation</p></li>
+</ul>
+</dd>
+</dl>
+<p>If you are using MatPipe for benchmarking, use the “benchmark” method.</p>
+<p>If you have some training data and want to use MatPipe for production
+predictions (e.g., predicting material properties for which you have
+no data) use “fit” and “predict”.</p>
+<p>The pipeline is transferrable. It can be fit on one dataset and used
+to predict the properties of another. The entire pipeline and
+all constituent objects can be summarized (via “summarize”) or inspected
+(via “inspect”) in human readable formats.</p>
+<p>Note: This pipeline should function the same regardless of which
+“component” classes it is made out of. E.g. the steps for each method should
+remain the same whether using the TPOTAdaptor class as the learner or
+using an SinglePipelineAdaptor class as the learner. To use a preset config,
+use MatPipe.from_preset(preset)
+—————————————————————————-</p>
+<p class="rubric">Examples</p>
+<p># A benchmarking experiment, where all property values are known
+pipe = MatPipe()
+test_predictions = pipe.benchmark(df, “target_property”)</p>
+<p># Creating a pipe with data containing known properties, then predicting
+# on new materials
+pipe = MatPipe()
+pipe.fit(training_df, “target_property”)
+predictions = pipe.predict(unknown_df)</p>
+<p># Getting a MatPipe from preset
+pipe = MatPipe.from_preset(“debug”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>autofeaturizer</strong> (<a class="reference internal" href="automatminer.featurization.html#automatminer.featurization.core.AutoFeaturizer" title="automatminer.featurization.core.AutoFeaturizer"><em>AutoFeaturizer</em></a>) – The autofeaturizer object used to
+automatically decorate the dataframe with descriptors.</p></li>
+<li><p><strong>cleaner</strong> (<a class="reference internal" href="automatminer.preprocessing.html#automatminer.preprocessing.core.DataCleaner" title="automatminer.preprocessing.core.DataCleaner"><em>DataCleaner</em></a>) – The data cleaner object used to get a
+featurized dataframe in ml-ready form.</p></li>
+<li><p><strong>reducer</strong> (<a class="reference internal" href="automatminer.preprocessing.html#automatminer.preprocessing.core.FeatureReducer" title="automatminer.preprocessing.core.FeatureReducer"><em>FeatureReducer</em></a>) – The feature reducer object used to
+select the best features from a “clean” dataframe.</p></li>
+<li><p><strong>learner</strong> (<a class="reference internal" href="automatminer.automl.html#automatminer.automl.base.DFMLAdaptor" title="automatminer.automl.base.DFMLAdaptor"><em>DFMLAdaptor</em></a>) – The auto ml adaptor object used to
+actually run a auto-ml pipeline on the clean, reduced, featurized
+dataframe.</p></li>
+<li><p><strong>logger</strong> (<em>Logger</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for logging.
+Alternatively, if set to True, the default automatminer logger will
+be used. If set to False, then no logging will occur.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="automatminer.pipeline.MatPipe.version">
+<code class="sig-name descname">version</code><a class="headerlink" href="#automatminer.pipeline.MatPipe.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>The automatminer version used for serialization and
+deserialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">The following attributes are set during fitting. Each has their own set</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">of attributes which defines more specifically how the pipeline works.</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.pipeline.MatPipe.pre_fit_df">
+<code class="sig-name descname">pre_fit_df</code><a class="headerlink" href="#automatminer.pipeline.MatPipe.pre_fit_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dataframe on which the pipeline was fit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.pipeline.MatPipe.post_fit_df">
+<code class="sig-name descname">post_fit_df</code><a class="headerlink" href="#automatminer.pipeline.MatPipe.post_fit_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dataframe transformed into the ML-ready
+form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.pipeline.MatPipe.ml_type">
+<code class="sig-name descname">ml_type</code><a class="headerlink" href="#automatminer.pipeline.MatPipe.ml_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies regression or classification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.pipeline.MatPipe.target">
+<code class="sig-name descname">target</code><a class="headerlink" href="#automatminer.pipeline.MatPipe.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the column where target values are held.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.pipeline.MatPipe.benchmark">
+<code class="sig-name descname">benchmark</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.benchmark" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.pipeline.MatPipe.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.pipeline.MatPipe.from_preset">
+<em class="property">static </em><code class="sig-name descname">from_preset</code><span class="sig-paren">(</span><em class="sig-param">preset='express'</em>, <em class="sig-param">**powerups</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.from_preset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a preset MatPipe from a string using
+automatminer.presets.get_preset_config</p>
+<p>See get_preeset_config for more inspect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>preset</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – <p>The preset configuration to use.
+Current presets are:</p>
+<blockquote>
+<div><ul>
+<li><p>production</p></li>
+<li><p>express (recommended for most problems)</p></li>
+<li><p>express_single (no AutoML, XGBoost only)</p></li>
+<li><p>heavy</p></li>
+<li><p>debug</p></li>
+<li><p>debug_single (no AutoML, XGBoost only)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>powerups</strong> (<em>kwargs</em>) – <p>General upgrades/changes to apply.
+Current powerups are:</p>
+<blockquote>
+<div><ul>
+<li><dl class="simple">
+<dt>cache_src (str): The cache source if you want to save</dt><dd><p>features.</p>
+</dd>
+</dl>
+</li>
+<li><p>logger (logging.Logger): The logger to use.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.pipeline.MatPipe.inspect">
+<code class="sig-name descname">inspect</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.inspect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.pipeline.MatPipe.load">
+<em class="property">static </em><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">logger=True</em>, <em class="sig-param">supress_version_mismatch=False</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a MatPipe that was saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The pickled MatPipe object (should have been saved
+using save).</p></li>
+<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.8)"><em>logging.Logger</em></a>) – The logger to use for the loaded
+MatPipe.</p></li>
+<li><p><strong>supress_version_mismatch</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If False, throws an error when
+there is a version mismatch between a serialized MatPipe and the
+current Automatminer version. If True, suppresses this error.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A MatPipe object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pipe (<a class="reference internal" href="#automatminer.pipeline.MatPipe" title="automatminer.pipeline.MatPipe">MatPipe</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.pipeline.MatPipe.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.predict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.pipeline.MatPipe.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.pipeline.MatPipe.summarize">
+<code class="sig-name descname">summarize</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.summarize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="automatminer.pipeline.MatPipe.transform">
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">**transform_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms a dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The pandas dataframe to be fit.</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the target string specifying the ML target.</p></li>
+<li><p><strong>transform_kwargs</strong> – Keyword paramters for transforming</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The transformed dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(pandas.DataFrame)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.presets">
+<span id="automatminer-presets-module"></span><h2>automatminer.presets module<a class="headerlink" href="#module-automatminer.presets" title="Permalink to this headline">¶</a></h2>
+<p>Configurations for MatPipe.</p>
+<dl class="function">
+<dt id="automatminer.presets.get_available_presets">
+<code class="sig-prename descclassname">automatminer.presets.</code><code class="sig-name descname">get_available_presets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.presets.get_available_presets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all available presets for MatPipes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of preset names.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>([<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.presets.get_preset_config">
+<code class="sig-prename descclassname">automatminer.presets.</code><code class="sig-name descname">get_preset_config</code><span class="sig-paren">(</span><em class="sig-param">preset='express'</em>, <em class="sig-param">**powerups</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.presets.get_preset_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Preset configs for MatPipe.</p>
+<p>USER:
+“express” - Good for quick benchmarks with moderate accuracy.
+“express_single” - Same as express but uses XGB trees as single models</p>
+<blockquote>
+<div><p>instead of automl TPOT. Good for even more express results.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>“production”: Used for making production predictions and benchmarks.</dt><dd><p>Balances accuracy and timeliness.</p>
+</dd>
+<dt>“heavy” - When high accuracy is required, and you have access to</dt><dd><p>(very) powerful computing resources. May be buggier and more difficult
+to run than production.</p>
+</dd>
+</dl>
+<p>DEBUG:
+“debug” - Debugging with automl enabled.
+“debug_single” - Debugging with a single model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>preset</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the preset config you’d like to use.</p></li>
+<li><p><strong>**powerups</strong> – <p>Various modifications as kwargs.
+cache_src (str): A file path. If specified, Autofeaturizer will use</p>
+<blockquote>
+<div><p>feature caching with a file stored at this location. See
+Autofeaturizer’s cache_src argument for more information.</p>
+</div></blockquote>
+<p>logger (logging.Logger): The logging object to use.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(dict) The desired preset config.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-automatminer" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;HackingMaterials 2019.
+      
+      |
+      <a href="_sources/automatminer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

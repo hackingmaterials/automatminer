@@ -11,6 +11,7 @@ from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     StructureToComposition, StructureToOxidStructure, \
     CompositionToOxidComposition
 from matminer.featurizers.function import FunctionFeaturizer
+from matminer.utils.io import store_dataframe_as_json, load_dataframe_from_json
 
 from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR, \
     AMM_LOG_TRANSFORM_STR
@@ -133,7 +134,6 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.exclude = exclude if exclude else []
         self.functionalize = functionalize
         self.ignore_cols = ignore_cols or []
-        self.is_fit = False
         self.fitted_input_df = None
         self.converted_input_df = None
         self.ignore_errors = ignore_errors
@@ -149,6 +149,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.structure_col = structure_col
         self.bandstruct_col = bandstructure_col
         self.dos_col = dos_col
+        super(AutoFeaturizer, self).__init__()
 
         _supported_featurizers = {composition_col: CompositionFeaturizers,
                                   structure_col: StructureFeaturizers,
@@ -201,7 +202,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.needs_fit = needs_fit
 
         if self.needs_fit and self.cache_src:
-            self.logger.warn(self._log_prefix +
+            self.logger.critical(self._log_prefix +
                              "Using cached features on fittable featurizers! "
                              "Please make sure you are not benchmarking with "
                              "these options enabled; it is likely you will be"
@@ -335,7 +336,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         if self.cache_src and os.path.exists(self.cache_src):
             self.logger.debug(self._log_prefix +
                               "Reading cache_src {}".format(self.cache_src))
-            cached_df = pd.read_json(self.cache_src)
+            cached_df = load_dataframe_from_json(self.cache_src)
             if not all([loc in cached_df.index for loc in df.index]):
                 raise AutomatminerError("Feature cache does not contain all "
                                         "entries (by DataFrame index) needed "
@@ -423,7 +424,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                                 multiindex=self.multiindex,
                                                 inplace=False)
             if self.cache_src and not os.path.exists(self.cache_src):
-                df.to_json(self.cache_src)
+                store_dataframe_as_json(df, self.cache_src)
             return df
 
     def _prescreen_df(self, df, inplace=True):

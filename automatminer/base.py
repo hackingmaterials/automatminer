@@ -31,10 +31,11 @@ class LoggableMixin:
             logger will be used. If set to False, then no logging will occur.
         """
         new_logger = self.get_logger(new_logger)
-        assert isinstance(
-            new_logger, logging.Logger
-        ), "The new logger must be an instance of the logger class."
+        if not isinstance(new_logger, logging.Logger):
+            TypeError("The new logger must be an instance of the logger class.")
+
         self._logger = new_logger
+
         if hasattr(self, "autofeaturizer"):
             for x in ["autofeaturizer", "cleaner", "reducer", "learner"]:
                 getattr(self, x)._logger = new_logger
@@ -68,12 +69,15 @@ class LoggableMixin:
 
 
 class DFTransformer(abc.ABC, BaseEstimator):
-    """ A base class to allow easy transformation in the same way as
+    """A base class to allow easy transformation in the same way as
     TransformerMixin and BaseEstimator in sklearn, but for pandas dataframes.
 
     When implementing a base class adaptor, make sure to use @check_fitted
     and @set_fitted if necessary!
     """
+
+    def __init__(self):
+        self.is_fit = False
 
     @abc.abstractmethod
     def fit(self, df, target, **fit_kwargs):

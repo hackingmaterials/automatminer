@@ -4,13 +4,271 @@ Advanced Usage
 Running a benchmark
 --------------------
 
+**Introduction to benchmarking**
+
+Automatminer can be used for benchmarking ML performance on materials
+problems in a standardized fashion. A common example use case is comparing one
+published method to another; another use is getting a rough idea how an
+Automatminer model will generalize to making "real" predictions. To mitigate
+unfair model advantages from biased splits or hyperparameter tuning,
+Automatminer uses nested cross validation with identical
+outer splits for benchmarking:
+
+.. image:: _static/cv_nested.png
+   :alt: server
+   :align: center
+   :width: 600px
+
+Nested CV is analagous to using multiple hold-out test sets.
+
+*Note: Nested CV is a computationally expensive benchmarking procedure!*
+
+**Usage**
+
+:code:`MatPipe` has a :code:`benchmark` method which can be used for
+automatically benchmarking a pipeline on a dataset. Once you have your
+data loaded in a dataframe, the procedure is:
+
+1. Define a k-fold cross validation scheme (to use as outer test folds).
+
+2. Use the :code:`benchmark` method of :code:`MatPipe` to get predictions for
+each outer fold
+
+3. Use your scoring function of choice to evaluate each fold.
+
+.. code-block:: python
+
+    from sklearn.model_evaluation import KFold
+
+    # We recommend KFold for regression problems and StratifiedKFold
+    # for classification
+    kf = KFold(n_splits=5, shuffle=True)
+
+    from automatminer.pipeline import MatPipe
+
+    pipe = MatPipe.from_preset("express")
+    predicted_folds = pipe.benchmark(my_df, "my_property", kf)
+
+:code:`benchmark` returns a list of the predicted test folds (i.e., your
+entire dataset as if it were test folds). These test folds can then be used
+to get estimates of error, compare to other pipelines, etc.
+
+
+**Matbench**
+
+`Matminer <https://github.com/hackingmaterials/matminer>`_
+provides access to the MatBench benchmark suite, a curated set of 13 diverse
+materials ML problems which work in Automatminer benchmarks. Learn more here:
+:doc:`MatBench </datasets>`
+
+
+Time Savers and Practical Tools
+-------------------------------
+
+**Using user-defined features**
+
+Often, there will be important features associated with your data which
+automatminer has not implemented. To use your own features for learning,
+simply:
+
+1. include them in **both** your training and prediction dataframes
+
+2. do not name the columns the same as AutoFeaturizer inputs (by default,
+"structure", "composition", "bandstructure", and "dos").
+
+Thats it! Your features have been included in the pipeline, although depending
+on the pipeline configuration (such as feature reduction), the features may
+be dropped if needed. If you want to ensure your features are used for learning,
+see the section on customizing pipelines.
+
+
+**Ignoring columns**
+
+During prediction, MatPipe automatically handles dropping problematic columns
+and materials inputs (e.g., structures) for inputs to ML. If you want to keep
+columns in your predictions and prevent them from being used for learning,
+specify the :code:`ignore` argument to :code:`predict`.
+
+Let's say this is the dataframe you'd like to predict on:
+
+:code:`test_df`
+
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - :code:`structure`
+     - :code:`material-id`
+   * - :code:`<structure object>`
+     - :code:`m-12345`
+   * - :code:`<structure object>`
+     - :code:`m-5983`
+   * - :code:`<structure object>`
+     - :code:`m-029393`
+   * - ...
+     - ...
+
+In this example, we want to keep the :code:`material-id` column for identifying
+our predicted samples and we don't want to use it as a learning feature. This
+is the intended use case for :code:`ignore`.
+
+Assuming you've already fit a :code:`MatPipe` on the target :code:`my_property`,
+specify you'd like to ignore the materials column:
+
+.. code-block:: python
+
+    predicted_df = pipe.predict(test_df, ignore=["material-id"])
+
+Your output will look like this:
+
+:code:`predicted_df`
+
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - :code:`structure`
+     - :code:`material-id`
+     - ...
+     - :code:`my_property predicted`
+   * - :code:`<structure object>`
+     - :code:`m-12345`
+     - ...
+     - 0.449
+   * - :code:`<structure object>`
+     - :code:`m-5983`
+     - ...
+     - -0.573
+   * - :code:`<structure object>`
+     - :code:`m-029393`
+     - ...
+     - -0.005
+   * - ...
+     - ...
+     - ...
+     - ...
+
+The ignore argument also works when benchmarking with :code:`MatPipe.benchmark`.
+
+**Warning**
+
+Ignoring columns in MatPipe supercedes all inner operations. If inner operations
+require a feature ignored in the MatPipe predict, the pipeline will fail.
+
 
 Customizing pipelines
 ---------------------
 
+**Overview**
+
+So far, we have only worked with the top level interface object, MatPipe,
+created through preset configurations. If you find the MatPipe presets are too
+restrictive, you can specify your own custom pipelines.
+
+Here is a (very incomplete) list of things you can do with custom pipelines:
+
+* choose your own matminer featurizer sets to use
+* customize AutoML parameters
+* add, remove, or modify feature reduction techniques
+* change the imputation behavior and NaN handling
+* change feature encoding
+* modify featurizer prechecking and other automatic matminer operations
+* customize multiprocessing parallelization
+* and much more!
+
+MatPipe is a container object for four sklearn BaseEstimator-like
+classes (called DFTransformers) doing all the real work:
+
+* :code:`AutoFeaturizer`: (:code:`MatPipe.autofeaturizer`) Creates and assigns features for each sample
+* :code:`DataCleaner`: (:code:`MatPipe.cleaner`) Prepares samples for input to ML algorithms
+* :code:`FeatureReducer`: (:code:`MatPipe.reducer`) Reduce the number of features with statistical learning.
+* :code:`DFMLAdaptor`: (:code:`MatPipe.learner`) A machine learning adaptor to make predictions using an ML backend (e.g., TPOT). As of this writing, there is :code:`TPOTAdaptor` and :code:`SinglePipelineAdaptor`
+
+
+The interface to MatPipe is the same regardless of the DFTransformers they
+are made of.
+**Define custom pipelines by initializing these classes individually, then
+passing them into MatPipe's __init__**.
+
+**Modifying a preset pipeline**
+
+The easiest way to start making custom pipelines is by modifying a preset
+config, then passing it into MatPipe. In this example, let's set the TPOT
+learning time to 1 hour and set the number of multiprocessing jobs to 4.
+
+.. code-block:: python
+
+    from automatminer import get_preset_config, TPOTAdaptor, MatPipe
+
+    # Get the config
+    config = get_preset_config("express")
+
+    # Define a custom TPOTAdaptor to replace the express one
+    config["learner"] = TPOTAdaptor(max_time_mins=60, n_jobs=4)
+
+    # Make a matpipe
+    pipe = MatPipe(**config)
+
+Your custom pipeline is now ready to fit, predict, and benchmark.
+
+**A fully custom pipeline**
+
+Here we'll show how to make a fully custom pipeline.
+
+.. code-block:: python
+
+    from xgboost import XGBRegressor, XGBClassifier
+
+    from automatminer import AutoFeaturizer, FeatureReducer, DataCleaner, \
+        SinglePipelineAdaptor
+
+    autofeaturizer = AutoFeaturizer(from_preset="production",
+                                    cache_src="./features.json",
+                                    exclude=["EwaldEnergy"])
+    cleaner = DataCleaner(max_na_frac=0.05)
+    reducer = FeatureReducer(reducers=("corr",))
+    learner = SinglePipelineAdaptor(classifier=XGBClassifier(n_estimators=500),
+                                    regressor=XGBRegressor(n_estimators=500))
+
+    # Make a matpipe
+    pipe = MatPipe(
+        autofeaturizer=autofeaturizer,
+        cleaner=cleaner,
+        reducer=reducer,
+        learner=learner
+    )
+
+
+We only specify a few options in this example, but each class is quite flexible.
+
 
 Using DFTransformers individually
 ---------------------------------
+
+DFTransformers can also be used outside of a MatPipe, if you only need part of a
+pipeline. Each implements a 'fit'/'transform' syntax, where the input and
+output are dataframes (the same as MatPipe).
+
+For example, if you are looking to generate features without any cleaning,
+feature reduction, or machine learning, do:
+
+.. code-block:: python
+
+    from automatminer import AutoFeaturizer
+
+    autofeaturizer = AutoFeaturizer(from_preset="express")
+
+    # Fit the DFTransformer
+    autofeaturizer.fit(my_input_df, target="my_target_property")
+
+    # Generate the features using the DFTransformer
+    df = autofeaturizer.transform(my_input_df, target="my_target_property")
+
+    # Or equivalently,
+    # df = autofeaturizer.fit_transform(my_input_df, target="my_target_property)
+
+
+
 
 
 

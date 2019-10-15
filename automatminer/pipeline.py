@@ -1,17 +1,20 @@
 """
 The highest level classes for pipelines.
 """
-import json
 import os
+import copy
 import pickle
-from pprint import pformat
+from typing import Dict
 
-import yaml
+import pandas as pd
+
 from automatminer.base import LoggableMixin, DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.pkg import check_fitted, set_fitted, \
-    return_attrs_recursively, AutomatminerError
+    return_attrs_recursively, AutomatminerError, VersionError, get_version, \
+    save_dict_to_file
+from automatminer.utils.log import AMM_DEFAULT_LOGGER
 
 
 class MatPipe(DFTransformer, LoggableMixin):
@@ -30,16 +33,17 @@ class MatPipe(DFTransformer, LoggableMixin):
     predictions (e.g., predicting material properties for which you have
     no data) use "fit" and "predict".
 
-    The pipeline is transferrable. So it can be fit on one dataset and used
-    to predict the properties of another. Furthermore, the entire pipeline and
-    all constituent objects can be summarized in text with "digest".
+    The pipeline is transferrable. It can be fit on one dataset and used
+    to predict the properties of another. The entire pipeline and
+    all constituent objects can be summarized (via "summarize") or inspected
+    (via "inspect") in human readable formats.
 
     ----------------------------------------------------------------------------
     Note: This pipeline should function the same regardless of which
     "component" classes it is made out of. E.g. the steps for each method should
     remain the same whether using the TPOTAdaptor class as the learner or
     using an SinglePipelineAdaptor class as the learner. To use a preset config,
-    import a config from automatminer.configs and do MatPipe(**config).
+    use MatPipe.from_preset(preset)
     ----------------------------------------------------------------------------
 
     Examples:
@@ -53,11 +57,10 @@ class MatPipe(DFTransformer, LoggableMixin):
         pipe.fit(training_df, "target_property")
         predictions = pipe.predict(unknown_df)
 
+        # Getting a MatPipe from preset
+        pipe = MatPipe.from_preset("debug")
+
     Args:
-        logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will
-            be used. If set to False, then no logging will occur.
-        log_level (int): The log level. For example logging.DEBUG or 2.
         autofeaturizer (AutoFeaturizer): The autofeaturizer object used to
             automatically decorate the dataframe with descriptors.
         cleaner (DataCleaner): The data cleaner object used to get a
@@ -67,17 +70,26 @@ class MatPipe(DFTransformer, LoggableMixin):
         learner (DFMLAdaptor): The auto ml adaptor object used to
             actually run a auto-ml pipeline on the clean, reduced, featurized
             dataframe.
+        logger (Logger, bool): A custom logger object to use for logging.
+            Alternatively, if set to True, the default automatminer logger will
+            be used. If set to False, then no logging will occur.
 
     Attributes:
+        version (str): The automatminer version used for serialization and
+            deserialization.
+
         The following attributes are set during fitting. Each has their own set
         of attributes which defines more specifically how the pipeline works.
 
-        is_fit (bool): If True, the matpipe is fit. The matpipe should be
-            fit before being used to predict data.
+        pre_fit_df (pd.DataFrame): The dataframe on which the pipeline was fit.
+        post_fit_df (pd.DataFrame): The dataframe transformed into the ML-ready
+            form.
+        ml_type (str): Specifies regression or classification.
+        target (str): The name of the column where target values are held.
     """
 
     def __init__(self, autofeaturizer=None, cleaner=None, reducer=None,
-                 learner=None, logger=True, log_level=None):
+                 learner=None, logger=AMM_DEFAULT_LOGGER):
         transformers = [autofeaturizer, cleaner, reducer, learner]
         if not all(transformers):
             if any(transformers):
@@ -97,13 +109,38 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.reducer = reducer
         self.learner = learner
         self.logger = logger
-        if log_level:
-            self.logger.setLevel(log_level)
         self.pre_fit_df = None
         self.post_fit_df = None
-        self.is_fit = False
         self.ml_type = None
         self.target = None
+        self.version = get_version()
+        super(MatPipe, self).__init__()
+
+    @staticmethod
+    def from_preset(preset: str = 'express', **powerups):
+        """
+        Get a preset MatPipe from a string using
+        automatminer.presets.get_preset_config
+
+        See get_preeset_config for more inspect.
+
+        Args:
+            preset (str): The preset configuration to use.
+                Current presets are:
+                 - production
+                 - express (recommended for most problems)
+                 - express_single (no AutoML, XGBoost only)
+                 - heavy
+                 - debug
+                 - debug_single (no AutoML, XGBoost only)
+            powerups (kwargs): General upgrades/changes to apply.
+                Current powerups are:
+                 - cache_src (str): The cache source if you want to save
+                    features.
+                 - logger (logging.Logger): The logger to use.
+        """
+        config = get_preset_config(preset, **powerups)
+        return MatPipe(**config)
 
     @set_fitted
     def fit(self, df, target):
@@ -147,7 +184,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         return self.predict(df, **transform_kwargs)
 
     @check_fitted
-    def predict(self, df):
+    def predict(self, df, ignore=None):
         """
         Predict a target property of a set of materials.
 
@@ -155,24 +192,54 @@ class MatPipe(DFTransformer, LoggableMixin):
         used for fitting. The dataframe should also have the same materials
         property types at the dataframe used for fitting (e.g., if you fit a
         matpipe to a df containing composition, your prediction df should have
-        a column for composition).
+        a column for composition). If you used custom features, make sure those
+        are included in your prediction df as well.
 
         Args:
             df (pandas.DataFrame): Pipe will be fit to this dataframe.
+            ignore ([str], None): Select which columns to ignore.
+                These columns will not be used for learning/prediction, but will
+                simply be appended back to the predicted df at the end of
+                prediction REGARDLESS of the pipeline configuration.
+
+                This will not stop samples from being dropped. If
+                columns not present in the fitting are not ignored, they will
+                be automatically dropped. Similarly, if the AutoFeaturizer
+                is not configured to preserve inputs and they are not ignored,
+                they will be automatically dropped. Ignoring columns supercedes
+                all inner operations.
+
+                Select columns using:
+                - [str]: String names of columns to ignore.
+                - None: input columns will be automatically dropped if they are
+                    inputs. User defined features will be preserved if usable
+                    as ML input.
 
         Returns:
             (pandas.DataFrame): The dataframe with target property predictions.
         """
+        if ignore:
+            self.logger.warning(
+                f"MatPipe will ignore and append (after prediction) the "
+                f"following columns: \n{ignore}"
+            )
+            ignore_df = df[list(ignore)]
+            df = df.drop(columns=ignore_df)
+        else:
+            ignore_df = pd.DataFrame()
+
         self.logger.info("Beginning MatPipe prediction using fitted pipeline.")
         df = self.autofeaturizer.transform(df, self.target)
         df = self.cleaner.transform(df, self.target)
         df = self.reducer.transform(df, self.target)
         predictions = self.learner.predict(df, self.target)
         self.logger.info("MatPipe prediction completed.")
-        return predictions
+        merged_df = predictions.join(ignore_df, how="left")
+        return merged_df
 
     @set_fitted
-    def benchmark(self, df, target, kfold, fold_subset=None, cache=False):
+    def benchmark(self, df, target, kfold, fold_subset=None, cache=False,
+                  ignore=None):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
@@ -213,6 +280,8 @@ class MatPipe(DFTransformer, LoggableMixin):
                 autofeaturizer must have a cache_src defined if allow_caching is
                 enabled (do this either through the AutoFeaturizer class or
                 using the cache_src argument to get_preset_config.
+            ignore ([str], None): Ignore columns during prediction for each
+                outer fold. See .predict --> ignore argument for more details.
 
         Returns:
             results ([pd.DataFrame]): Dataframes containing each fold's
@@ -254,47 +323,78 @@ class MatPipe(DFTransformer, LoggableMixin):
                 train = df[~df.index.isin(test.index)].sample(frac=1)
                 self.fit(train, target)
                 self.logger.info("Predicting fold index {}".format(fold))
-                test = self.predict(test)
+                test = self.predict(test, ignore=ignore)
                 results.append(test)
             fold += 1
         return results
 
     @check_fitted
-    def digest(self, filename=None, output_format="txt"):
+    def inspect(self, filename=None) -> Dict[str, str]:
         """
-        Save a text digest (summary) of the fitted pipeline. Similar to the log
-        but contains more detail in a structured format. Returns digest in JSON
-        or YAML format if specified via output_format or if the provided filename
-        ends in one of ".json", ".yaml" or ".yml".
+        Get all details of the pipeline in human-readable format.
+
+        For a shorter human-readable representation, use MatPipe.summarize().
 
         Args:
-            filename (str): The filename.
-            output_format (str): Recognizes "json", "yaml" and "yml". Else falls
-                back to "txt" behavior.
+            filename (str): An optional  '.txt', '.yaml', '.yml', or '.json'
+                filename to use for saving the pipeline inspect.
 
         Returns:
-            digeststr (str): The formatted pipeline digest.
+            (dict): A dict of strings in human readable format. Contains a
+                string representation of every object and user parameter.
         """
         attrs = return_attrs_recursively(self)
-
-        def format_one_of(fmts):
-            return (
-            filename
-                and filename.lower().endswith(tuple(["." + f for f in fmts]))
-                or output_format in fmts
-            )
-
-        if format_one_of(("json", "yaml", "yml")):
-            digeststr = json.dumps(attrs, default=lambda x: str(x))
-            if format_one_of(("yaml", "yml")):
-                digeststr = yaml.dump(yaml.safe_load(digeststr))
-        else:
-            digeststr = pformat(attrs)
-
         if filename:
-            with open(filename, "w") as f:
-                f.write(digeststr)
-        return digeststr
+            save_dict_to_file(attrs, filename)
+        return attrs
+
+    @check_fitted
+    def summarize(self, filename=None) -> Dict[str, str]:
+        """
+        Get an executive summary of the most important parts of the pipeline.
+        Useful for understanding the pipeline at a high level.
+
+        For a more detailed human-readable representation, use MatPipe.inspect.
+
+        Args:
+            filename (str): An optional  '.txt', '.yaml', '.yml', or '.json'
+                filename to use for saving the pipeline summarize.
+
+        Returns:
+            (dict): A dict of strings in human readable format. Contains a
+                string representation of every object and user parameter.
+        """
+        cleaner_attrs = [
+            "encoder",
+            "feature_na_method",
+            "na_method_fit",
+            "na_method_transform",
+            "drop_na_targets",
+        ]
+        cleaner_data = {
+            attr: str(getattr(self.cleaner, attr))
+            for attr in cleaner_attrs
+        }
+
+        reducer_attrs = [
+            "reducers",
+            "reducer_params",
+        ]
+        reducer_data = {
+            attr: str(getattr(self.reducer, attr))
+            for attr in reducer_attrs
+        }
+
+        attrs = {
+            "featurizers": self.autofeaturizer.featurizers,
+            "ml_model": str(self.learner.best_pipeline),
+            "feature_reduction": reducer_data,
+            "data_cleaning": cleaner_data,
+            "features": self.learner.features
+        }
+        if filename:
+            save_dict_to_file(attrs, filename)
+        return attrs
 
     @check_fitted
     def save(self, filename="mat.pipe"):
@@ -303,7 +403,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         AutoML backends can't serialize.
 
         Note that the saved object should only be used for prediction, and
-        should not be refit. The automl backend is removed and replaced with
+        should not be refit. The AutoML backend is removed and replaced with
         the best pipeline, so the other evaluated pipelines may not be saved!
 
         Args:
@@ -312,25 +412,37 @@ class MatPipe(DFTransformer, LoggableMixin):
         Returns:
             None
         """
-        temp_backend = self.learner.backend
-        self.learner._backend = self.learner.best_pipeline
-        for obj in [self, self.learner, self.reducer, self.cleaner,
-                    self.autofeaturizer]:
-            obj._logger = None
+        self.learner.serialize()
+
+        temp_logger = copy.deepcopy(self._logger)
+        loggables = [
+            self, self.learner, self.reducer, self.cleaner, self.autofeaturizer
+        ]
+        for loggable in loggables:
+            loggable._logger = AMM_DEFAULT_LOGGER
+
         with open(filename, 'wb') as f:
             pickle.dump(self, f)
-        self.learner._backend = temp_backend
 
-    @classmethod
-    def load(cls, filename, logger=True):
+        # Reassign live memory objects for further use in this object
+        self.learner.deserialize()
+        print(self.learner.best_pipeline)
+        for loggable in loggables:
+            loggable._logger = temp_logger
+
+    @staticmethod
+    def load(filename, logger=True, supress_version_mismatch=False):
         """
-        Loads a matpipe that was saved.
+        Loads a MatPipe that was saved.
 
         Args:
-            filename (str): The pickled matpipe object (should have been saved
+            filename (str): The pickled MatPipe object (should have been saved
                 using save).
             logger (bool or logging.Logger): The logger to use for the loaded
-                matpipe.
+                MatPipe.
+            supress_version_mismatch (bool): If False, throws an error when
+                there is a version mismatch between a serialized MatPipe and the
+                current Automatminer version. If True, suppresses this error.
 
         Returns:
             pipe (MatPipe): A MatPipe object.
@@ -338,10 +450,16 @@ class MatPipe(DFTransformer, LoggableMixin):
         with open(filename, 'rb') as f:
             pipe = pickle.load(f)
 
-        pipe.logger = logger
+        if pipe.version != get_version() and not supress_version_mismatch:
+            raise VersionError("Version mismatch")
 
+        pipe.logger = logger
         pipe.logger.info("Loaded MatPipe from file {}.".format(filename))
-        pipe.logger.warning("Only use this model to make predictions (do not "
-                            "retrain!). Backend was serialzed as only the top "
-                            "model, not the full automl backend. ")
+        if hasattr(pipe.learner, "from_serialized"):
+            if pipe.learner.from_serialized:
+                pipe.logger.warning(
+                    "Only use this model to make predictions (do not "
+                    "retrain!). Backend was serialzed as only the top model, "
+                    "not the full automl backend. "
+                )
         return pipe

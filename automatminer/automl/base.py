@@ -75,6 +75,38 @@ class DFMLAdaptor(DFTransformer):
         pass
 
     @check_fitted
+    def serialize(self) -> None:
+        """
+        Assign the adaptor components to be serializable.
+
+        For example, TPOTBase-based backends are not serializable themselves.
+        The adaptor attributes need to be reassigned in order to serialize the
+        entire pipeline as pickle.
+
+        If the backend serializes without extra effort, there is no need to
+        override this method.
+
+        Returns:
+            None
+        """
+        return None
+
+    @check_fitted
+    def deserialize(self) -> None:
+        """
+        Invert the operations in serialize, if necessary. Useful if you are
+        going to keep using this pipeline after saving it and want to retain
+        the full functionality before the main python process ends.
+
+        If the backend serializes without extra effort, there is no need to
+        override this method.
+
+        Returns:
+            None
+        """
+        return None
+
+    @check_fitted
     @log_progress(AMM_LOG_PREDICT_STR)
     def predict(self, df: pd.DataFrame, target: str) -> pd.DataFrame:
         """

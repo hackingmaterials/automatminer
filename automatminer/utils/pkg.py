@@ -1,10 +1,17 @@
 """
 Utils specific to this package.
 """
+import os
+import json
+from pprint import pformat
 
+import yaml
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
+
+
+AMM_SUPPORTED_EXTS = [".txt", ".json", ".yaml", ".yml", ""]
 
 
 class AutomatminerError(BaseException):
@@ -17,6 +24,16 @@ class AutomatminerError(BaseException):
 
     def __str__(self):
         return "AutomatminerError : " + self.msg
+
+
+class VersionError(AutomatminerError):
+    """
+    Version errors
+    """
+
+    def __str__(self):
+        base_str = super(VersionError, self).__str__()
+        return base_str + " (VersionError)"
 
 
 def compare_columns(df1, df2, ignore=None) -> dict:
@@ -117,3 +134,54 @@ def return_attrs_recursively(obj) -> dict:
                 attrdict[attr] = value
     return attrdict
 
+
+def save_dict_to_file(d, filename) -> None:
+    """
+    Save a dictionary to a persistent file. Supported formats and extensions are
+    text ('.txt'), JSON ('.json'), and YAML ('.yaml', '.yml').
+
+    If no extension is provided, text format will be used.
+
+    Args:
+        d (dict): A dictionary of strings or objects castable to python native
+            objects (e.g., NumPy integers).
+        filename (str): The filename and extension to save the file. For
+            example, "mydict.json".
+
+    Returns:
+        None
+    """
+    fname, ext = os.path.splitext(filename)
+
+    if ext in (".json", ".yaml", ".yml"):
+        digest = json.dumps(d, default=lambda x: str(x))
+        if ext in (".yaml", ".yml"):
+            digest = yaml.dump(yaml.safe_load(digest))
+    elif ext in (".txt", "", None):
+        digest = pformat(d)
+    else:
+        raise ValueError(
+            f"The extension {ext} in filename {fname} is no supported. Use a "
+            f"supported extension: {AMM_SUPPORTED_EXTS}"
+        )
+
+    with open(filename, "w") as f:
+        f.write(digest)
+
+
+def get_version():
+    """
+    Get the version of automatminer without worrying about circular imports in
+    __init__.
+
+    Returns:
+        (str): the version
+
+    """
+    thisdir = os.path.dirname(os.path.realpath(__file__))
+    version_reference = os.path.join(thisdir, "../__init__.py")
+    with open(version_reference, "r") as f:
+        init_file = f.readlines()
+        v = [v for v in init_file if "__version__" in v][0]
+    v = v.replace("__version__", "").replace("\"", "").replace("=", "").strip()
+    return v

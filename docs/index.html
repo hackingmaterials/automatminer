@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>automatminer documentation &#8212; Automatminer 2019.08.07_beta documentation</title>
+    <title>automatminer documentation &#8212; Automatminer 2019.10.11 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,15 +16,21 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation" href="installation.html" />
-    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
 
   </head><body>
   <div class="document">
     
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="#">Automatminer</a></h1>
+<p class="logo">
+  <a href="#">
+    <img class="logo" src="_static/logo_header.png" alt="Logo"/>
+    
+  </a>
+</p>
 
 
 
@@ -41,7 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 </ul>
 <ul>
@@ -78,8 +84,7 @@
       margin: 0 ;
   }
 
-</style><a class="reference internal image-reference" href="_static/logo.svg"><div align="center" class="align-center"><img alt="server" src="_static/logo.svg" width="600px" /></div>
-</a>
+</style><a class="reference internal image-reference" href="_images/logo.png"><img alt="server" class="align-center" src="_images/logo.png" style="width: 600px;" /></a>
 <p><a class="reference external" href="https://github.com/hackingmaterials/automatminer">Automatminer</a> is a tool for
 <em>automatically</em> creating <strong>complete</strong> machine
 learning pipelines for materials science, including automatic featurization
@@ -94,6 +99,8 @@ features for learning, and runs a separate AutoML pipeline.
 Once a pipeline has been fit, it can be summarized in a text file, saved to
 disk, or used to make predictions on new materials.</p>
 <img alt="server" class="align-center" src="_images/pipe.png" />
+<p>Automatminer uses <a class="reference external" href="https://pandas.pydata.org">pandas</a> dataframes for all of
+its working objects. Put dataframes in, get dataframes out.</p>
 <p>Here’s an example of training on known data, and extending the model to out of
 sample data.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer.pipeline</span> <span class="kn">import</span> <span class="n">MatPipe</span>
@@ -143,24 +150,27 @@ for a full (and growing) list.</p>
 <li class="toctree-l2"><a class="reference internal" href="basic.html#training-a-pipeline">Training a pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html#making-predictions">Making predictions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html#using-different-presets">Using different presets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic.html#saving-your-pipeline-for-later">Saving your pipeline for later</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html#examine-your-pipeline">Examine your pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic.html#monitoring-the-log">Monitoring the log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html#quick-reminders">Quick reminders</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="advanced.html#running-a-benchmark">Running a benchmark</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#time-savers-and-practical-tools">Time Savers and Practical Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="advanced.html#customizing-pipelines">Customizing pipelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="advanced.html#using-dftransformers-individually">Using DFTransformers individually</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html#some-heading">Some heading</a></li>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html#some-heading-2">Some heading 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html#accessing-matbench">Accessing MatBench</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-1">Tutorial 1:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-2">Tutorial 2:</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorials">Tutorials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#support">Support</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
@@ -182,19 +192,27 @@ for a full (and growing) list.</p>
 the install process for everyone.</p></li>
 <li><p>Let us know if you’d like to see certain features.</p></li>
 <li><p>Point us to areas of the code that are difficult to understand or use.</p></li>
-<li><p>Contribute code. You can do this by forking
+<li><p>Contribute code! You can do this by forking
 <a class="reference external" href="https://github.com/hackingmaterials/automatminer">Automatminer on Github</a>
 and submitting a pull request.</p></li>
+<li><p>Post to our <a class="reference external" href="https://hackingmaterials.discourse.group/c/matminer">support forum</a>. Don’t be shy, we look forward to feedback!</p></li>
 </ul>
 <p>See our <a class="reference external" href="https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md">contribution guidelines</a>
-for more details.</p>
+for more inspect. For a list of contributors, see our
+<a class="reference external" href="https://github.com/hackingmaterials/automatminer/graphs/contributors">GitHub page</a></p>
+</div>
+<div class="section" id="citing-automatminer-or-matbench">
+<h1>Citing Automatminer or MatBench<a class="headerlink" href="#citing-automatminer-or-matbench" title="Permalink to this headline">¶</a></h1>
+<p>If you find Automatminer or the MatBench benchmarks helpful in your research,
+please consider citing us. We have a publication under submission. For now,
+please cite our <a class="reference external" href="https://github.com/hackingmaterials/automatminer">Github repo</a>!</p>
 </div>
 <div class="section" id="api-documentation">
 <h1>API documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Autogenerated API documentation below:</p>
+<p>Autogenerated API documentation. Beware! Only for the brave.</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>

@@ -1,0 +1,345 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>automatminer.utils package &#8212; Automatminer 2019.10.11 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="automatminer.utils.tests package" href="automatminer.utils.tests.html" />
+    <link rel="prev" title="automatminer.tests package" href="automatminer.tests.html" />
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo_header.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">An autoML tool for materials</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="automatminer.html">automatminer package</a></li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="automatminer-utils-package">
+<h1>automatminer.utils package<a class="headerlink" href="#automatminer-utils-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.utils.tests.html">automatminer.utils.tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.tests.html#module-automatminer.utils.tests.test_log">automatminer.utils.tests.test_log module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.tests.html#module-automatminer.utils.tests.test_ml">automatminer.utils.tests.test_ml module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.tests.html#module-automatminer.utils.tests.test_pkg">automatminer.utils.tests.test_pkg module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.utils.tests.html#module-automatminer.utils.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-automatminer.utils.log">
+<span id="automatminer-utils-log-module"></span><h2>automatminer.utils.log module<a class="headerlink" href="#module-automatminer.utils.log" title="Permalink to this headline">¶</a></h2>
+<p>Utils for logging.</p>
+<dl class="function">
+<dt id="automatminer.utils.log.initialize_logger">
+<code class="sig-prename descclassname">automatminer.utils.log.</code><code class="sig-name descname">initialize_logger</code><span class="sig-paren">(</span><em class="sig-param">logger_name</em>, <em class="sig-param">log_dir='.'</em>, <em class="sig-param">level=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.log.initialize_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the default logger with stdout and file handlers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logger_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The package name.</p></li>
+<li><p><strong>log_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the folder where the log file will be written.</p></li>
+<li><p><strong>level</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The log level. For example logging.DEBUG.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A logging instance with customized formatter and handlers.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(Logger)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.utils.log.initialize_null_logger">
+<code class="sig-prename descclassname">automatminer.utils.log.</code><code class="sig-name descname">initialize_null_logger</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.log.initialize_null_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the a dummy logger which will swallow all logging commands.
+:returns: The package name.</p>
+<blockquote>
+<div><p>(Logger): A dummy logging instance with no output.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(Logger)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.utils.log.log_progress">
+<code class="sig-prename descclassname">automatminer.utils.log.</code><code class="sig-name descname">log_progress</code><span class="sig-paren">(</span><em class="sig-param">operation</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.log.log_progress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to auto-log progress before and after executing a method, such
+as fit and transform. Should only be applied to DataFrameTransformers.</p>
+<p>For example,</p>
+<p>INFO: Beginning AutoFeaturizer fitting.
+… autofeaturizer logs …
+INFO: Finished AutoFeaturizer fitting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Some info about the operation you want to log.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A wrapper for the input method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.utils.ml">
+<span id="automatminer-utils-ml-module"></span><h2>automatminer.utils.ml module<a class="headerlink" href="#module-automatminer.utils.ml" title="Permalink to this headline">¶</a></h2>
+<p>Tools and utils for machine learning.</p>
+<dl class="function">
+<dt id="automatminer.utils.ml.is_greater_better">
+<code class="sig-prename descclassname">automatminer.utils.ml.</code><code class="sig-name descname">is_greater_better</code><span class="sig-paren">(</span><em class="sig-param">scoring_function</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.ml.is_greater_better" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether scoring_function being greater is more favorable/better.
+:param scoring_function: the name of the scoring function supported by</p>
+<blockquote>
+<div><p>TPOT and sklearn. Please see below for more information.</p>
+</div></blockquote>
+<dl class="field-list simple">
+</dl>
+<dl class="simple">
+<dt>Returns (bool): Whether the scoring metric should be considered better if</dt><dd><p>it is larger or better if it is smaller</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.utils.ml.regression_or_classification">
+<code class="sig-prename descclassname">automatminer.utils.ml.</code><code class="sig-name descname">regression_or_classification</code><span class="sig-paren">(</span><em class="sig-param">series</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.ml.regression_or_classification" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if a series (target column) is numeric or categorical, to
+decide on the problem as regression or classification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>series</strong> (<em>pandas.Series</em>) – The target column.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>“regression” or “classification”</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.utils.pkg">
+<span id="automatminer-utils-pkg-module"></span><h2>automatminer.utils.pkg module<a class="headerlink" href="#module-automatminer.utils.pkg" title="Permalink to this headline">¶</a></h2>
+<p>Utils specific to this package.</p>
+<dl class="exception">
+<dt id="automatminer.utils.pkg.AutomatminerError">
+<em class="property">exception </em><code class="sig-prename descclassname">automatminer.utils.pkg.</code><code class="sig-name descname">AutomatminerError</code><span class="sig-paren">(</span><em class="sig-param">msg</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.pkg.AutomatminerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BaseException" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></a></p>
+<p>Exception specific to automatminer methods.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="automatminer.utils.pkg.VersionError">
+<em class="property">exception </em><code class="sig-prename descclassname">automatminer.utils.pkg.</code><code class="sig-name descname">VersionError</code><span class="sig-paren">(</span><em class="sig-param">msg</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.pkg.VersionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.utils.pkg.AutomatminerError" title="automatminer.utils.pkg.AutomatminerError"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.utils.pkg.AutomatminerError</span></code></a></p>
+<p>Version errors</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.utils.pkg.check_fitted">
+<code class="sig-prename descclassname">automatminer.utils.pkg.</code><code class="sig-name descname">check_fitted</code><span class="sig-paren">(</span><em class="sig-param">func</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.pkg.check_fitted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to check if a transformer has been fitted.
+:param func: A function or method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A wrapper function for the input function/method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.utils.pkg.compare_columns">
+<code class="sig-prename descclassname">automatminer.utils.pkg.</code><code class="sig-name descname">compare_columns</code><span class="sig-paren">(</span><em class="sig-param">df1</em>, <em class="sig-param">df2</em>, <em class="sig-param">ignore=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.pkg.compare_columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare the columns of a dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df1</strong> (<em>pandas.DataFrame</em>) – The first dataframe.</p></li>
+<li><p><strong>df2</strong> (<em>pandas.DataFrame</em>) – The second dataframe.</p></li>
+<li><p><strong>ignore</strong> (<em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>]</em>) – The feature labels to ignore in the analyis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>{“df1_not_in_df2”: [The columns in df1 not in df2],</dt><dd><p>”df2_not_in_df1”: [The columns in df2 not in df1],
+“mismatch”: (bool)}</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.utils.pkg.get_version">
+<code class="sig-prename descclassname">automatminer.utils.pkg.</code><code class="sig-name descname">get_version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.pkg.get_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the version of automatminer without worrying about circular imports in
+__init__.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the version</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.utils.pkg.return_attrs_recursively">
+<code class="sig-prename descclassname">automatminer.utils.pkg.</code><code class="sig-name descname">return_attrs_recursively</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.pkg.return_attrs_recursively" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns attributes of an object recursively. Stops recursion when
+attrs go outside of the automatminer library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – The object with attrs</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The dictionary containing attributes which can</dt><dd><p>be pretty-printed.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>attrdict (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.utils.pkg.save_dict_to_file">
+<code class="sig-prename descclassname">automatminer.utils.pkg.</code><code class="sig-name descname">save_dict_to_file</code><span class="sig-paren">(</span><em class="sig-param">d</em>, <em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.pkg.save_dict_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a dictionary to a persistent file. Supported formats and extensions are
+text (‘.txt’), JSON (‘.json’), and YAML (‘.yaml’, ‘.yml’).</p>
+<p>If no extension is provided, text format will be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A dictionary of strings or objects castable to python native
+objects (e.g., NumPy integers).</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The filename and extension to save the file. For
+example, “mydict.json”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.utils.pkg.set_fitted">
+<code class="sig-prename descclassname">automatminer.utils.pkg.</code><code class="sig-name descname">set_fitted</code><span class="sig-paren">(</span><em class="sig-param">func</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.pkg.set_fitted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to ensure a transformer is fitted properly.
+:param func: A function or method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A wrapper function for the input function/method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-automatminer.utils" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;HackingMaterials 2019.
+      
+      |
+      <a href="_sources/automatminer.utils.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

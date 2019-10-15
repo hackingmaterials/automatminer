@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Basic Usage &#8212; Automatminer 2019.08.07_beta documentation</title>
+    <title>Basic Usage &#8212; Automatminer 2019.10.11 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -17,15 +17,21 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Advanced Usage" href="advanced.html" />
     <link rel="prev" title="Installation" href="installation.html" />
-    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
 
   </head><body>
   <div class="document">
     
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">Automatminer</a></h1>
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo_header.png" alt="Logo"/>
+    
+  </a>
+</p>
 
 
 
@@ -44,13 +50,15 @@
 <li class="toctree-l2"><a class="reference internal" href="#training-a-pipeline">Training a pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#making-predictions">Making predictions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-different-presets">Using different presets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#saving-your-pipeline-for-later">Saving your pipeline for later</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#examine-your-pipeline">Examine your pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monitoring-the-log">Monitoring the log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#quick-reminders">Quick reminders</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 </ul>
 <ul>
@@ -69,7 +77,8 @@
   <div class="section" id="basic-usage">
 <h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
 <p>Basic usage of Automatminer requires using only one class - <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code>.</p>
-<p><code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> works with dataframes as input and output. It is able to train
+<p><code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> works with <strong>pandas dataframes as input and output</strong>. It is
+able to train
 on training data using it’s <code class="code docutils literal notranslate"><span class="pre">fit</span></code> method, predict on new data using
 <code class="code docutils literal notranslate"><span class="pre">predict</span></code>, and run benchmarks using <code class="code docutils literal notranslate"><span class="pre">benchmark</span></code> - all in an
 automatic and end-to-end fashion.</p>
@@ -85,16 +94,18 @@ repository.</p>
 <div class="section" id="initializing-a-pipeline">
 <h2>Initializing a pipeline<a class="headerlink" href="#initializing-a-pipeline" title="Permalink to this headline">¶</a></h2>
 <p>The easiest way to initialize a matpipe is using a preset.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">get_preset_config</span><span class="p">,</span> <span class="n">MatPipe</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">MatPipe</span>
 
-<span class="n">express_config</span> <span class="o">=</span> <span class="n">get_preset_config</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
-<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span><span class="o">**</span><span class="n">express_config</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This preset is a dictionary of options specifying exactly how each of
+<p>This preset is a set of options specifying exactly how each of
 <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code>’s constituent classes are set up. Typically, the “express”
 preset will give you results with a moderate degree of accuracy and relatively
 quick training, so we’ll use that here.</p>
+<p>Note: The default <code class="code docutils literal notranslate"><span class="pre">MatPipe()</span></code> is equivalent to
+<code class="code docutils literal notranslate"><span class="pre">MatPipe.from_preset(&quot;express&quot;)</span></code>; other presets have different
+configuration options!</p>
 </div>
 <div class="section" id="training-a-pipeline">
 <h2>Training a pipeline<a class="headerlink" href="#training-a-pipeline" title="Permalink to this headline">¶</a></h2>
@@ -130,16 +141,15 @@ might be of the form:</p>
 <span class="pre">the</span> <span class="pre">property</span> <span class="pre">column</span> <span class="pre">is</span> <span class="pre">the</span> <span class="pre">property</span> <span class="pre">you</span> <span class="pre">are</span> <span class="pre">interested</span> <span class="pre">in</span> <span class="pre">(the</span> <span class="pre">target).</span> <span class="pre">Use</span>
 <span class="pre">:code:`fit</span></code> to train, and specify the target column. For the dataframe we
 used above, you’d do:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">get_preset_config</span><span class="p">,</span> <span class="n">MatPipe</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">MatPipe</span>
 
-<span class="n">express_config</span> <span class="o">=</span> <span class="n">get_preset_config</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
-<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span><span class="o">**</span><span class="n">express_config</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
 
 <span class="c1"># Fitting pipe on train_df using &quot;my_property&quot; as target</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_df</span><span class="p">,</span> <span class="s2">&quot;my_property&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The MatPipe is now fit.</p>
+<p>The MatPipe is now fit and can be used to make predictions on new data!</p>
 </div>
 <div class="section" id="making-predictions">
 <h2>Making predictions<a class="headerlink" href="#making-predictions" title="Permalink to this headline">¶</a></h2>
@@ -166,10 +176,9 @@ that data has the same input types that our pipeline was trained on. For example
 </tbody>
 </table>
 <p>Use <code class="code docutils literal notranslate"><span class="pre">predict</span></code> to predict new data.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">get_preset_config</span><span class="p">,</span> <span class="n">MatPipe</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">MatPipe</span>
 
-<span class="n">express_config</span> <span class="o">=</span> <span class="n">get_preset_config</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
-<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span><span class="o">**</span><span class="n">express_config</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_df</span><span class="p">,</span> <span class="s2">&quot;my_property&quot;</span><span class="p">)</span>
 
 <span class="c1"># Predicting my_property values of some unknown prediction_df structures</span>
@@ -211,43 +220,92 @@ routines, quicker training, etc. by initializing MatPipe with a different
 config.</p>
 <p>The “heavy” preset typically includes more CPU-intensive featurization and
 longer training times.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">get_preset_config</span><span class="p">,</span> <span class="n">MatPipe</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">MatPipe</span>
 
-<span class="n">express_config</span> <span class="o">=</span> <span class="n">get_preset_config</span><span class="p">(</span><span class="s2">&quot;heavy&quot;</span><span class="p">)</span>
-<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span><span class="o">**</span><span class="n">express_config</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;heavy&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In contrast, use “debug” if you want very quick predictions.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">get_preset_config</span><span class="p">,</span> <span class="n">MatPipe</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">MatPipe</span>
 
-<span class="n">express_config</span> <span class="o">=</span> <span class="n">get_preset_config</span><span class="p">(</span><span class="s2">&quot;debug&quot;</span><span class="p">)</span>
-<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span><span class="o">**</span><span class="n">express_config</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;debug&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="saving-your-pipeline-for-later">
+<h2>Saving your pipeline for later<a class="headerlink" href="#saving-your-pipeline-for-later" title="Permalink to this headline">¶</a></h2>
+<p>Once fit, you can save your pipeline as a pickle file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;my_pipeline.p&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To load your file, use the <code class="code docutils literal notranslate"><span class="pre">MatPipe.load</span></code> static method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_pipeline.p&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="examine-your-pipeline">
 <h2>Examine your pipeline<a class="headerlink" href="#examine-your-pipeline" title="Permalink to this headline">¶</a></h2>
-<p>To print out a full description of the pipeline (with all arguments to
-automatminer’s objects and its imported sub-objects specified) as text to a
-file, use <code class="code docutils literal notranslate"><span class="pre">digest</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_output_file</span> <span class="o">=</span> <span class="s2">&quot;digest.txt&quot;</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">digest</span><span class="p">(</span><span class="n">my_output_file</span><span class="p">)</span>
+<p><strong>Summarize</strong></p>
+<p>For a human-readable executive summary of your pipeline, use
+<code class="code docutils literal notranslate"><span class="pre">MatPipe.summarize()</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">summary</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">summarize</span><span class="p">()</span>
 </pre></div>
 </div>
-<p><code class="code docutils literal notranslate"><span class="pre">digest.txt</span></code> has the info:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;_logger&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-<span class="s1">&#39;autofeaturizer&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;autofeaturizer&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;_logger&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s1">&#39;auto_featurizer&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s1">&#39;bandstruct_col&#39;</span><span class="p">:</span> <span class="s1">&#39;bandstructure&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;cache_src&#39;</span><span class="p">:</span> <span class="s1">&#39;~/features.json&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;composition_col&#39;</span><span class="p">:</span> <span class="s1">&#39;composition&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;converted_input_df&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s1">&#39;do_precheck&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s1">&#39;dos_col&#39;</span><span class="p">:</span> <span class="s1">&#39;dos&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;drop_inputs&#39;</span><span class="p">:</span> <span class="kc">True</span>
+<p>The dict returned by summarize specifies the top-level information as strings.
+An analogy: if your pipeline were a plumbing system, <code class="code docutils literal notranslate"><span class="pre">summarize</span></code> would
+tell you how long each section of pipe is and the pump model.</p>
+<p><strong>Inspect</strong></p>
+<p>To get comprehensive details on a pipeline, use <code class="code docutils literal notranslate"><span class="pre">MatPipe.inspect()</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">details</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">inspect</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Inspection specifies all parameters to all Automatminer objects needed to
+construct the pipeline and all of its internal operations. In contrast to the
+summary which provides a more human interpretable digest, inspection generates
+the true attribute names and values of each object in the MatPipe heirarchy.
+It is typically very long, though human readable. An analogy: if your pipeline
+were a plumbing system, <code class="code docutils literal notranslate"><span class="pre">inspect</span></code> would tell you everything
+<code class="code docutils literal notranslate"><span class="pre">summarize</span></code> tells you, plus the model numbers of all the bolts, joints,
+and valves.</p>
+<p><strong>Save to a file</strong></p>
+<p>Both <code class="code docutils literal notranslate"><span class="pre">summarize</span></code> and <code class="code docutils literal notranslate"><span class="pre">inspect</span></code> accept a filename argument if you’d
+like to save their outputs to JSON, YAML, or text.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">summary</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">summarize</span><span class="p">(</span><span class="s2">&quot;my_summary.yaml&quot;</span><span class="p">)</span>
+<span class="n">details</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="s2">&quot;my_details.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="monitoring-the-log">
+<h2>Monitoring the log<a class="headerlink" href="#monitoring-the-log" title="Permalink to this headline">¶</a></h2>
+<p>The Automatminer log is a powerful tool for determining what is happening within
+the pipeline in real time. We recommend you monitor it closely as the pipeline
+runs.</p>
+<p>In addition to the stdout, automatminer writes a log file in the current
+working directory (<code class="code docutils literal notranslate"><span class="pre">automatminer.log</span></code>, timestamped if duplicates).</p>
+<p>Here’s an example of an automatminer log when fitting on a dataset.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">41</span> <span class="n">INFO</span>     <span class="n">Problem</span> <span class="nb">type</span> <span class="ow">is</span><span class="p">:</span> <span class="n">regression</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">41</span> <span class="n">INFO</span>     <span class="n">Fitting</span> <span class="n">MatPipe</span> <span class="n">pipeline</span> <span class="n">to</span> <span class="n">data</span><span class="o">.</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">41</span> <span class="n">INFO</span>     <span class="n">AutoFeaturizer</span><span class="p">:</span> <span class="n">Starting</span> <span class="n">fitting</span><span class="o">.</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">41</span> <span class="n">INFO</span>     <span class="n">AutoFeaturizer</span><span class="p">:</span> <span class="n">Adding</span> <span class="n">compositions</span> <span class="kn">from</span> <span class="nn">structures.</span>
 <span class="o">...</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">47</span> <span class="n">INFO</span>     <span class="n">DataCleaner</span><span class="p">:</span> <span class="n">Handling</span> <span class="n">feature</span> <span class="n">na</span> <span class="n">by</span> <span class="nb">max</span> <span class="n">na</span> <span class="n">threshold</span> <span class="n">of</span> <span class="mf">0.01</span> <span class="k">with</span> <span class="n">method</span> <span class="s1">&#39;drop&#39;</span><span class="o">.</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">47</span> <span class="n">INFO</span>     <span class="n">DataCleaner</span><span class="p">:</span> <span class="n">After</span> <span class="n">handling</span> <span class="n">na</span><span class="p">:</span> <span class="mi">636</span> <span class="n">samples</span><span class="p">,</span> <span class="mi">168</span> <span class="n">features</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">47</span> <span class="n">INFO</span>     <span class="n">DataCleaner</span><span class="p">:</span> <span class="n">Finished</span> <span class="n">fitting</span><span class="o">.</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">47</span> <span class="n">INFO</span>     <span class="n">FeatureReducer</span><span class="p">:</span> <span class="n">Starting</span> <span class="n">fitting</span><span class="o">.</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">47</span> <span class="n">INFO</span>     <span class="n">FeatureReducer</span><span class="p">:</span> <span class="mi">57</span> <span class="n">features</span> <span class="n">removed</span> <span class="n">due</span> <span class="n">to</span> <span class="n">cross</span> <span class="n">correlation</span> <span class="n">more</span> <span class="n">than</span> <span class="mf">0.95</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">49</span> <span class="n">INFO</span>     <span class="n">TreeFeatureReducer</span><span class="p">:</span> <span class="n">Finished</span> <span class="n">tree</span><span class="o">-</span><span class="n">based</span> <span class="n">feature</span> <span class="n">reduction</span> <span class="n">of</span> <span class="mi">110</span> <span class="n">initial</span> <span class="n">features</span> <span class="n">to</span> <span class="mi">13</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">49</span> <span class="n">INFO</span>     <span class="n">FeatureReducer</span><span class="p">:</span> <span class="n">Finished</span> <span class="n">fitting</span><span class="o">.</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">49</span> <span class="n">INFO</span>     <span class="n">FeatureReducer</span><span class="p">:</span> <span class="n">Starting</span> <span class="n">transforming</span><span class="o">.</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">49</span> <span class="n">INFO</span>     <span class="n">FeatureReducer</span><span class="p">:</span> <span class="n">Finished</span> <span class="n">transforming</span><span class="o">.</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">49</span> <span class="n">INFO</span>     <span class="n">TPOTAdaptor</span><span class="p">:</span> <span class="n">Starting</span> <span class="n">fitting</span><span class="o">.</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">07</span><span class="p">:</span><span class="mi">50</span> <span class="n">INFO</span>     <span class="n">TPOTAdaptor</span><span class="p">:</span> <span class="n">Finished</span> <span class="n">fitting</span><span class="o">.</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">11</span> <span class="mi">16</span><span class="p">:</span><span class="mi">07</span><span class="p">:</span><span class="mi">50</span> <span class="n">INFO</span>     <span class="n">MatPipe</span> <span class="n">successfully</span> <span class="n">fit</span><span class="o">.</span>
 </pre></div>
 </div>
+<p>If you see <code class="code docutils literal notranslate"><span class="pre">WARNING</span></code> or <code class="code docutils literal notranslate"><span class="pre">ERROR</span></code>, you should inspect the pipeline
+to make sure everything is configured as intended. If you see a <code class="code docutils literal notranslate"><span class="pre">CRITICAL</span></code>,
+it is likely something is misconfigured within the pipeline and should be
+looked into in detail!</p>
 </div>
 <div class="section" id="quick-reminders">
 <h2>Quick reminders<a class="headerlink" href="#quick-reminders" title="Permalink to this headline">¶</a></h2>

@@ -162,7 +162,7 @@ class TestPreprocess(unittest.TestCase):
 
         Current implementation dictates this "emergency" be resolved by
         imputing with the mean of feature x from the fitted_df."""
-        dc = DataCleaner()   # should work regardless of default
+        dc = DataCleaner()  # should work regardless of default
         df = self.test_df
 
         fit_df = df.iloc[:150]
@@ -174,6 +174,21 @@ class TestPreprocess(unittest.TestCase):
         self.assertAlmostEqual(trs_df2["range X"].mean(),
                                fit_df["range X"].mean())
         self.assertAlmostEqual(trs_df2["range X"].std(), 0.0)
+
+    def test_DataCleaner_big_nan_handler_warning(self):
+        """Ensure the DataCleaner throws a warning or error when the
+        number of nan samples and fraction is high (i.e., something
+        has gone horribly wrong in featurization!)"""
+        dc = DataCleaner(max_na_frac=0.01)
+        df = pd.DataFrame(np.random.randint(0, 100, size=(100, 4)),
+                          columns=list('ABCD'))
+        dc.fit(df, "D")
+        self.assertEqual(len(dc.warnings), 0)
+
+        df["A"].iloc[10:20] = np.nan
+        df["B"].iloc[:99] = np.nan
+        dc.fit(df, "D")
+        self.assertEqual(len(dc.warnings), 1)
 
     def test_FeatureReducer_basic(self):
         fr = FeatureReducer(reducers=('corr', 'tree'))

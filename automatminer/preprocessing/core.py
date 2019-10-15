@@ -1,3 +1,4 @@
+#encoding utf-8
 """
 Top level preprocessing classes.
 """
@@ -59,19 +60,19 @@ class DataCleaner(DFTransformer, LoggableMixin):
             be used. If set to False, then no logging will occur.
 
     Attributes:
-            The following attrs are set during fitting.
+        max_problem_col_warning_threshold (float): The max number of
+            "problematic" columns (as a fraction of total columns) which are nan
+            which are allowed before logging a warning.
 
-        retained_features (list): The features which were retained
+        The following attrs are set during fitting.
+
         object_cols (list): The features identified as objects/categories
         number_cols (list): The features identified as numerical
         fitted_df (pd.DataFrame): The fitted dataframe
-        is_fit (bool): If true, this object has been fit to a dataframe
-
-            The following attrs are set during fitting and/or transformation. Ie
-            they are only relevant to the most recent transform.
-
+        fitted_target (str): The target variable in the dataframe.
         dropped_features (list): The features which were dropped.
         dropped_samples (pandas.DataFrame): A dataframe of samples to be dropped
+        warnings ([str]): A list of warnings accumulated during fitting.
     """
 
     def __init__(self, max_na_frac=0.01, feature_na_method="drop",
@@ -93,7 +94,9 @@ class DataCleaner(DFTransformer, LoggableMixin):
         self.fitted_df = None
         self.fitted_target = None
         self.dropped_samples = None
-        self.is_fit = False
+        self.max_problem_col_warning_threshold = 0.3
+        self.warnings = []
+        super(DataCleaner, self).__init__()
 
     @property
     def retained_features(self):
@@ -221,6 +224,21 @@ class DataCleaner(DFTransformer, LoggableMixin):
                              "with method '{}'.".format(self.max_na_frac,
                                                         self.feature_na_method))
             threshold = int((1 - self.max_na_frac) * len(df))
+            all_problem_cols = df.columns[df.isnull().mean() > self.max_na_frac]
+            n_problem_cols = all_problem_cols.shape[0]
+            n_total_cols = df.shape[1]
+            problem_col_frac = n_problem_cols/n_total_cols
+            if problem_col_frac >= self.max_problem_col_warning_threshold:
+                warning = \
+                    f"Fraction {problem_col_frac} of all columns had nan " \
+                    f"percentages exceeding the nan threshold of " \
+                    f"{self.max_na_frac}. It is likely featurization was not " \
+                    f"effective. Please ensure your featurization input " \
+                    f"objects (e.g., compositions) are applicable for " \
+                    f"AutoFeaturizer! Examine your input data and pipeline " \
+                    f"in detail."
+                self.logger.error(self._log_prefix + warning)
+                self.warnings.append(warning)
             if self.feature_na_method == "drop":
                 df = df.dropna(axis=1, thresh=threshold)
             else:
@@ -490,6 +508,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
         self.reducer_params = {}
         self._pca = None
         self._pca_feats = None
+        super(FeatureReducer, self).__init__()
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted

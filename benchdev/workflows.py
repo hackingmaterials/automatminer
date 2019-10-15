@@ -240,20 +240,22 @@ if __name__ == "__main__":
     pipe_config = {
         "learner_name": "TPOTAdaptor",
         # "learner_kwargs": {"generations": 100, "population_size": 100, "memory": "auto", "n_jobs": 10, "max_eval_time_mins": 5},
-        "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 20, "population_size": 100, "memory": "auto", "n_jobs": 6},
-        # "learner_kwargs": {"max_time_mins": 360, "max_eval_time_mins": 10, "population_size": 100, "memory": "auto", "n_jobs": 4},
+        # "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 20, "population_size": 100, "memory": "auto", "n_jobs": 10},
+        "learner_kwargs": {"max_time_mins": 1440, "max_eval_time_mins": 20, "population_size": 200, "memory": "auto", "n_jobs": 20},
 
 
         # "reducer_kwargs": {"reducers": ("corr",)},
         "reducer_kwargs": {"reducers": ("corr", "tree",), "tree_importance_percentile": 0.99},
+        # "reducer_kwargs": {"reducers": ("corr", "tree",), "tree_importance_percentile": 0.85},
+
         # "reducer_kwargs": {"reducers": ("pca",), "n_pca_features": 0.3},
         # "reducer_kwargs": {"reducers": ("rebate",), "n_rebate_features": 0.3},
 
         # "reducer_kwargs": {"reducers": ()},
-        # "autofeaturizer_kwargs": {"preset": "express", "n_jobs": 10},
-        "autofeaturizer_kwargs": {"preset": "heavy", "n_jobs": 10},
-        # "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"},
-        "cleaner_kwargs": {"max_na_frac": 0.1, "feature_na_method": "drop", "na_method_fit": "mean", "na_method_transform": "mean"}
+        "autofeaturizer_kwargs": {"preset": "express", "n_jobs": 20},
+        # "autofeaturizer_kwargs": {"preset": "heavy", "n_jobs": 20},
+        "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"},
+        # "cleaner_kwargs": {"max_na_frac": 0.1, "feature_na_method": "drop", "na_method_fit": "mean", "na_method_transform": "mean"}
     }
 
     # todo: change the feature_na_method!
@@ -284,17 +286,22 @@ if __name__ == "__main__":
         # "drop_mean",
         # "af_fast",
         # "tpot_generations",
-        # "debug"
+        "debug"
     ]
 
-    from benchdev.config import MP_E_FORM, JDFT2D, BULK, GLASS
+    from benchdev.config import MP_E_FORM, JDFT2D, GLASS
     # wf = wf_evaluate_build("lrc", "set generation size", BENCHMARK_FULL_SET, pipe_config,
     #                        include_tests=False, cache=True, tags=tags)
 
     # wf = wf_benchmark("lrc", pipe_config, **GFA, cache=True, tags=tags)
-    wf = wf_evaluate_build("cori", "heavy diff impute long tpot 2", BENCHMARK_FULL_SET,
+    # wf = wf_evaluate_build("lrc", "tpot heavy on lrc", BENCHMARK_FULL_SET,
+    #                        pipe_config, include_tests=False, cache=True, tags=tags)
+
+    wf = wf_evaluate_build("cori", "24 hr tpot production 99% reducing with drop cleaning samples", BENCHMARK_FULL_SET,
                            pipe_config, include_tests=False, cache=True, tags=tags)
 
+    # wf = wf_evaluate_build("cori", "rf for paper rerun", BENCHMARK_FULL_SET,
+    #                        pipe_config_debug, include_tests=False, cache=True, tags=tags)
 
     # ds = LOCAL_DEBUG_SET[0]
     # wf = wf_single_fit("local", "test fit", pipe_config, **ds, tags=["debug"])

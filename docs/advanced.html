@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Advanced Usage &#8212; Automatminer 2019.08.07_beta documentation</title>
+    <title>Advanced Usage &#8212; Automatminer 2019.10.11 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -17,15 +17,21 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="MatBench benchmark" href="datasets.html" />
     <link rel="prev" title="Basic Usage" href="basic.html" />
-    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
 
   </head><body>
   <div class="document">
     
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">Automatminer</a></h1>
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo_header.png" alt="Logo"/>
+    
+  </a>
+</p>
 
 
 
@@ -42,12 +48,13 @@
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Advanced Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#running-a-benchmark">Running a benchmark</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-savers-and-practical-tools">Time Savers and Practical Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#customizing-pipelines">Customizing pipelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-dftransformers-individually">Using DFTransformers individually</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 </ul>
 <ul>
@@ -67,12 +74,242 @@
 <h1>Advanced Usage<a class="headerlink" href="#advanced-usage" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="running-a-benchmark">
 <h2>Running a benchmark<a class="headerlink" href="#running-a-benchmark" title="Permalink to this headline">¶</a></h2>
+<p><strong>Introduction to benchmarking</strong></p>
+<p>Automatminer can be used for benchmarking ML performance on materials
+problems in a standardized fashion. A common example use case is comparing one
+published method to another; another use is getting a rough idea how an
+Automatminer model will generalize to making “real” predictions. To mitigate
+unfair model advantages from biased splits or hyperparameter tuning,
+Automatminer uses nested cross validation with identical
+outer splits for benchmarking:</p>
+<a class="reference internal image-reference" href="_images/cv_nested.png"><img alt="server" class="align-center" src="_images/cv_nested.png" style="width: 600px;" /></a>
+<p>Nested CV is analagous to using multiple hold-out test sets.</p>
+<p><em>Note: Nested CV is a computationally expensive benchmarking procedure!</em></p>
+<p><strong>Usage</strong></p>
+<p><code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> has a <code class="code docutils literal notranslate"><span class="pre">benchmark</span></code> method which can be used for
+automatically benchmarking a pipeline on a dataset. Once you have your
+data loaded in a dataframe, the procedure is:</p>
+<ol class="arabic simple">
+<li><p>Define a k-fold cross validation scheme (to use as outer test folds).</p></li>
+</ol>
+<p>2. Use the <code class="code docutils literal notranslate"><span class="pre">benchmark</span></code> method of <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> to get predictions for
+each outer fold</p>
+<ol class="arabic simple" start="3">
+<li><p>Use your scoring function of choice to evaluate each fold.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_evaluation</span> <span class="kn">import</span> <span class="n">KFold</span>
+
+<span class="c1"># We recommend KFold for regression problems and StratifiedKFold</span>
+<span class="c1"># for classification</span>
+<span class="n">kf</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">automatminer.pipeline</span> <span class="kn">import</span> <span class="n">MatPipe</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
+<span class="n">predicted_folds</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">benchmark</span><span class="p">(</span><span class="n">my_df</span><span class="p">,</span> <span class="s2">&quot;my_property&quot;</span><span class="p">,</span> <span class="n">kf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">benchmark</span></code> returns a list of the predicted test folds (i.e., your
+entire dataset as if it were test folds). These test folds can then be used
+to get estimates of error, compare to other pipelines, etc.</p>
+<p><strong>Matbench</strong></p>
+<p><a class="reference external" href="https://github.com/hackingmaterials/matminer">Matminer</a>
+provides access to the MatBench benchmark suite, a curated set of 13 diverse
+materials ML problems which work in Automatminer benchmarks. Learn more here:
+<a class="reference internal" href="datasets.html"><span class="doc">MatBench</span></a></p>
+</div>
+<div class="section" id="time-savers-and-practical-tools">
+<h2>Time Savers and Practical Tools<a class="headerlink" href="#time-savers-and-practical-tools" title="Permalink to this headline">¶</a></h2>
+<p><strong>Using user-defined features</strong></p>
+<p>Often, there will be important features associated with your data which
+automatminer has not implemented. To use your own features for learning,
+simply:</p>
+<ol class="arabic simple">
+<li><p>include them in <strong>both</strong> your training and prediction dataframes</p></li>
+</ol>
+<p>2. do not name the columns the same as AutoFeaturizer inputs (by default,
+“structure”, “composition”, “bandstructure”, and “dos”).</p>
+<p>Thats it! Your features have been included in the pipeline, although depending
+on the pipeline configuration (such as feature reduction), the features may
+be dropped if needed. If you want to ensure your features are used for learning,
+see the section on customizing pipelines.</p>
+<p><strong>Ignoring columns</strong></p>
+<p>During prediction, MatPipe automatically handles dropping problematic columns
+and materials inputs (e.g., structures) for inputs to ML. If you want to keep
+columns in your predictions and prevent them from being used for learning,
+specify the <code class="code docutils literal notranslate"><span class="pre">ignore</span></code> argument to <code class="code docutils literal notranslate"><span class="pre">predict</span></code>.</p>
+<p>Let’s say this is the dataframe you’d like to predict on:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">test_df</span></code></p>
+<table class="docutils align-left">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="code docutils literal notranslate"><span class="pre">structure</span></code></p></th>
+<th class="head"><p><code class="code docutils literal notranslate"><span class="pre">material-id</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-12345</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-5983</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-029393</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+</tbody>
+</table>
+<p>In this example, we want to keep the <code class="code docutils literal notranslate"><span class="pre">material-id</span></code> column for identifying
+our predicted samples and we don’t want to use it as a learning feature. This
+is the intended use case for <code class="code docutils literal notranslate"><span class="pre">ignore</span></code>.</p>
+<p>Assuming you’ve already fit a <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> on the target <code class="code docutils literal notranslate"><span class="pre">my_property</span></code>,
+specify you’d like to ignore the materials column:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_df</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_df</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;material-id&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Your output will look like this:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">predicted_df</span></code></p>
+<table class="docutils align-left">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="code docutils literal notranslate"><span class="pre">structure</span></code></p></th>
+<th class="head"><p><code class="code docutils literal notranslate"><span class="pre">material-id</span></code></p></th>
+<th class="head"><p>…</p></th>
+<th class="head"><p><code class="code docutils literal notranslate"><span class="pre">my_property</span> <span class="pre">predicted</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-12345</span></code></p></td>
+<td><p>…</p></td>
+<td><p>0.449</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-5983</span></code></p></td>
+<td><p>…</p></td>
+<td><p>-0.573</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-029393</span></code></p></td>
+<td><p>…</p></td>
+<td><p>-0.005</p></td>
+</tr>
+<tr class="row-odd"><td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+</tbody>
+</table>
+<p>The ignore argument also works when benchmarking with <code class="code docutils literal notranslate"><span class="pre">MatPipe.benchmark</span></code>.</p>
+<p><strong>Warning</strong></p>
+<p>Ignoring columns in MatPipe supercedes all inner operations. If inner operations
+require a feature ignored in the MatPipe predict, the pipeline will fail.</p>
 </div>
 <div class="section" id="customizing-pipelines">
 <h2>Customizing pipelines<a class="headerlink" href="#customizing-pipelines" title="Permalink to this headline">¶</a></h2>
+<p><strong>Overview</strong></p>
+<p>So far, we have only worked with the top level interface object, MatPipe,
+created through preset configurations. If you find the MatPipe presets are too
+restrictive, you can specify your own custom pipelines.</p>
+<p>Here is a (very incomplete) list of things you can do with custom pipelines:</p>
+<ul class="simple">
+<li><p>choose your own matminer featurizer sets to use</p></li>
+<li><p>customize AutoML parameters</p></li>
+<li><p>add, remove, or modify feature reduction techniques</p></li>
+<li><p>change the imputation behavior and NaN handling</p></li>
+<li><p>change feature encoding</p></li>
+<li><p>modify featurizer prechecking and other automatic matminer operations</p></li>
+<li><p>customize multiprocessing parallelization</p></li>
+<li><p>and much more!</p></li>
+</ul>
+<p>MatPipe is a container object for four sklearn BaseEstimator-like
+classes (called DFTransformers) doing all the real work:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">AutoFeaturizer</span></code>: (<code class="code docutils literal notranslate"><span class="pre">MatPipe.autofeaturizer</span></code>) Creates and assigns features for each sample</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">DataCleaner</span></code>: (<code class="code docutils literal notranslate"><span class="pre">MatPipe.cleaner</span></code>) Prepares samples for input to ML algorithms</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">FeatureReducer</span></code>: (<code class="code docutils literal notranslate"><span class="pre">MatPipe.reducer</span></code>) Reduce the number of features with statistical learning.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">DFMLAdaptor</span></code>: (<code class="code docutils literal notranslate"><span class="pre">MatPipe.learner</span></code>) A machine learning adaptor to make predictions using an ML backend (e.g., TPOT). As of this writing, there is <code class="code docutils literal notranslate"><span class="pre">TPOTAdaptor</span></code> and <code class="code docutils literal notranslate"><span class="pre">SinglePipelineAdaptor</span></code></p></li>
+</ul>
+<p>The interface to MatPipe is the same regardless of the DFTransformers they
+are made of.
+<strong>Define custom pipelines by initializing these classes individually, then
+passing them into MatPipe’s __init__</strong>.</p>
+<p><strong>Modifying a preset pipeline</strong></p>
+<p>The easiest way to start making custom pipelines is by modifying a preset
+config, then passing it into MatPipe. In this example, let’s set the TPOT
+learning time to 1 hour and set the number of multiprocessing jobs to 4.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">get_preset_config</span><span class="p">,</span> <span class="n">TPOTAdaptor</span><span class="p">,</span> <span class="n">MatPipe</span>
+
+<span class="c1"># Get the config</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">get_preset_config</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
+
+<span class="c1"># Define a custom TPOTAdaptor to replace the express one</span>
+<span class="n">config</span><span class="p">[</span><span class="s2">&quot;learner&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Make a matpipe</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Your custom pipeline is now ready to fit, predict, and benchmark.</p>
+<p><strong>A fully custom pipeline</strong></p>
+<p>Here we’ll show how to make a fully custom pipeline.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBRegressor</span><span class="p">,</span> <span class="n">XGBClassifier</span>
+
+<span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">AutoFeaturizer</span><span class="p">,</span> <span class="n">FeatureReducer</span><span class="p">,</span> <span class="n">DataCleaner</span><span class="p">,</span> \
+    <span class="n">SinglePipelineAdaptor</span>
+
+<span class="n">autofeaturizer</span> <span class="o">=</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">from_preset</span><span class="o">=</span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+                                <span class="n">cache_src</span><span class="o">=</span><span class="s2">&quot;./features.json&quot;</span><span class="p">,</span>
+                                <span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;EwaldEnergy&quot;</span><span class="p">])</span>
+<span class="n">cleaner</span> <span class="o">=</span> <span class="n">DataCleaner</span><span class="p">(</span><span class="n">max_na_frac</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;corr&quot;</span><span class="p">,))</span>
+<span class="n">learner</span> <span class="o">=</span> <span class="n">SinglePipelineAdaptor</span><span class="p">(</span><span class="n">classifier</span><span class="o">=</span><span class="n">XGBClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">500</span><span class="p">),</span>
+                                <span class="n">regressor</span><span class="o">=</span><span class="n">XGBRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">500</span><span class="p">))</span>
+
+<span class="c1"># Make a matpipe</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span>
+    <span class="n">autofeaturizer</span><span class="o">=</span><span class="n">autofeaturizer</span><span class="p">,</span>
+    <span class="n">cleaner</span><span class="o">=</span><span class="n">cleaner</span><span class="p">,</span>
+    <span class="n">reducer</span><span class="o">=</span><span class="n">reducer</span><span class="p">,</span>
+    <span class="n">learner</span><span class="o">=</span><span class="n">learner</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>We only specify a few options in this example, but each class is quite flexible.</p>
 </div>
 <div class="section" id="using-dftransformers-individually">
 <h2>Using DFTransformers individually<a class="headerlink" href="#using-dftransformers-individually" title="Permalink to this headline">¶</a></h2>
+<p>DFTransformers can also be used outside of a MatPipe, if you only need part of a
+pipeline. Each implements a ‘fit’/’transform’ syntax, where the input and
+output are dataframes (the same as MatPipe).</p>
+<p>For example, if you are looking to generate features without any cleaning,
+feature reduction, or machine learning, do:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">AutoFeaturizer</span>
+
+<span class="n">autofeaturizer</span> <span class="o">=</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">from_preset</span><span class="o">=</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
+
+<span class="c1"># Fit the DFTransformer</span>
+<span class="n">autofeaturizer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">my_input_df</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;my_target_property&quot;</span><span class="p">)</span>
+
+<span class="c1"># Generate the features using the DFTransformer</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">autofeaturizer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">my_input_df</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;my_target_property&quot;</span><span class="p">)</span>
+
+<span class="c1"># Or equivalently,</span>
+<span class="c1"># df = autofeaturizer.fit_transform(my_input_df, target=&quot;my_target_property)</span>
+</pre></div>
+</div>
 </div>
 </div>
 

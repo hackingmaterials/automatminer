@@ -148,28 +148,31 @@ latex_documents = [
 
 html_theme = 'alabaster'
 
+# find options here https://alabaster.readthedocs.io/en/latest/customization.html
+
 html_theme_options = {
-    # 'logo': 'logo_lowres.png',
+    'logo': 'logo_header.png',
     'github_repo': 'hackingmaterials/automatminer',
     'github_button': 'true',
     'link': '#0c7baa',
     'show_powered_by': 'false',
     'fixed_sidebar': 'true',
-    'font_family': 'Nunito',
-    'head_font_family': 'Nunito',
-    'caption_font_family': 'Nunito',
-    'description_font_style': 'Nunito',
+    'font_family': 'Ubuntu',
+    'head_font_family': 'Ubuntu',
+    'caption_font_family': 'Ubuntu',
+    'description_font_style': 'Ubuntu',
     'description': "An autoML tool for materials",
-    'font_size': 12,
-    'code_font_family': 'Ubuntu Mono',
-    'code_font_size': 16,
+    'font_size': "14px",
+    # 'code_font_family': 'Nanum Gothic Coding',
+    'code_font_size': "12px",
+    "sidebar_list": "#000",
 
     # 'page_width': 300,
-    # 'sidebar_width': 150,
+    'sidebar_width': "250px",
     # "relbarbgcolor": "#333",
     # "sidebarlinkcolor": "#e15617",
     # "sidebarbgcolor": "#000",
-    # "sidebartextcolor": "#333",
+    # "sidebartextcolor": "#5685f5",
     # "footerbgcolor": "#111",
     # "linkcolor": "#aa560c",
     # "headtextcolor": "#643200",

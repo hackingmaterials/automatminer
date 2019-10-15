@@ -4,7 +4,8 @@ Basic Usage
 Basic usage of Automatminer requires using only one class - :code:`MatPipe`.
 
 
-:code:`MatPipe` works with dataframes as input and output. It is able to train
+:code:`MatPipe` works with **pandas dataframes as input and output**. It is
+able to train
 on training data using it's :code:`fit` method, predict on new data using
 :code:`predict`, and run benchmarks using :code:`benchmark` - all in an
 automatic and end-to-end fashion.
@@ -29,15 +30,19 @@ The easiest way to initialize a matpipe is using a preset.
 
 .. code-block:: python
 
-    from automatminer import get_preset_config, MatPipe
+    from automatminer import MatPipe
 
-    express_config = get_preset_config("express")
-    pipe = MatPipe(**express_config)
+    pipe = MatPipe.from_preset("express")
 
-This preset is a dictionary of options specifying exactly how each of
+This preset is a set of options specifying exactly how each of
 :code:`MatPipe`'s constituent classes are set up. Typically, the "express"
 preset will give you results with a moderate degree of accuracy and relatively
 quick training, so we'll use that here.
+
+Note: The default :code:`MatPipe()` is equivalent to
+:code:`MatPipe.from_preset("express")`; other presets have different
+configuration options!
+
 
 
 Training a pipeline
@@ -71,15 +76,14 @@ used above, you'd do:
 
 .. code-block:: python
 
-    from automatminer import get_preset_config, MatPipe
+    from automatminer import MatPipe
 
-    express_config = get_preset_config("express")
-    pipe = MatPipe(**express_config)
+    pipe = MatPipe.from_preset("express")
 
     # Fitting pipe on train_df using "my_property" as target
     pipe.fit(train_df, "my_property")
 
-The MatPipe is now fit.
+The MatPipe is now fit and can be used to make predictions on new data!
 
 
 Making predictions
@@ -105,10 +109,9 @@ Use :code:`predict` to predict new data.
 
 .. code-block:: python
 
-    from automatminer import get_preset_config, MatPipe
+    from automatminer import MatPipe
 
-    express_config = get_preset_config("express")
-    pipe = MatPipe(**express_config)
+    pipe = MatPipe.from_preset("express")
     pipe.fit(train_df, "my_property")
 
     # Predicting my_property values of some unknown prediction_df structures
@@ -147,52 +150,120 @@ longer training times.
 
 .. code-block:: python
 
-    from automatminer import get_preset_config, MatPipe
+    from automatminer import MatPipe
 
-    express_config = get_preset_config("heavy")
-    pipe = MatPipe(**express_config)
+    pipe = MatPipe.from_preset("heavy")
 
 
 In contrast, use "debug" if you want very quick predictions.
 
 .. code-block:: python
 
-    from automatminer import get_preset_config, MatPipe
+    from automatminer import MatPipe
 
-    express_config = get_preset_config("debug")
-    pipe = MatPipe(**express_config)
+    pipe = MatPipe.from_preset("debug")
 
+
+
+Saving your pipeline for later
+------------------------------
+
+Once fit, you can save your pipeline as a pickle file:
+
+.. code-block:: python
+
+    pipe.save("my_pipeline.p")
+
+
+To load your file, use the :code:`MatPipe.load` static method.
+
+.. code-block:: python
+
+    pipe = MatPipe.load("my_pipeline.p")
 
 
 Examine your pipeline
 ---------------------
 
-To print out a full description of the pipeline (with all arguments to
-automatminer's objects and its imported sub-objects specified) as text to a
-file, use :code:`digest`.
+**Summarize**
+
+For a human-readable executive summary of your pipeline, use
+:code:`MatPipe.summarize()`.
 
 .. code-block:: python
 
-    my_output_file = "digest.txt"
-    pipe.digest(my_output_file)
+    summary = pipe.summarize()
+
+The dict returned by summarize specifies the top-level information as strings.
+An analogy: if your pipeline were a plumbing system, :code:`summarize` would
+tell you how long each section of pipe is and the pump model.
 
 
-:code:`digest.txt` has the info:
+**Inspect**
+
+To get comprehensive details on a pipeline, use :code:`MatPipe.inspect()`.
+
+.. code-block:: python
+
+    details = pipe.inspect()
+
+Inspection specifies all parameters to all Automatminer objects needed to
+construct the pipeline and all of its internal operations. In contrast to the
+summary which provides a more human interpretable digest, inspection generates
+the true attribute names and values of each object in the MatPipe heirarchy.
+It is typically very long, though human readable. An analogy: if your pipeline
+were a plumbing system, :code:`inspect` would tell you everything
+:code:`summarize` tells you, plus the model numbers of all the bolts, joints,
+and valves.
+
+
+**Save to a file**
+
+Both :code:`summarize` and :code:`inspect` accept a filename argument if you'd
+like to save their outputs to JSON, YAML, or text.
+
+.. code-block:: python
+
+    summary = pipe.summarize("my_summary.yaml")
+    details = pipe.inspect("my_details.json")
+
+
+Monitoring the log
+------------------
+
+The Automatminer log is a powerful tool for determining what is happening within
+the pipeline in real time. We recommend you monitor it closely as the pipeline
+runs.
+
+In addition to the stdout, automatminer writes a log file in the current
+working directory (:code:`automatminer.log`, timestamped if duplicates).
+
+Here's an example of an automatminer log when fitting on a dataset.
 
 .. code-block::
 
-    {'_logger': None,
-    'autofeaturizer': {'autofeaturizer': {'_logger': None,
-            'auto_featurizer': True,
-            'bandstruct_col': 'bandstructure',
-            'cache_src': '~/features.json',
-            'composition_col': 'composition',
-            'converted_input_df': None,
-            'do_precheck': True,
-            'dos_col': 'dos',
-            'drop_inputs': True
+    2019-10-11 16:05:41 INFO     Problem type is: regression
+    2019-10-11 16:05:41 INFO     Fitting MatPipe pipeline to data.
+    2019-10-11 16:05:41 INFO     AutoFeaturizer: Starting fitting.
+    2019-10-11 16:05:41 INFO     AutoFeaturizer: Adding compositions from structures.
     ...
+    2019-10-11 16:05:47 INFO     DataCleaner: Handling feature na by max na threshold of 0.01 with method 'drop'.
+    2019-10-11 16:05:47 INFO     DataCleaner: After handling na: 636 samples, 168 features
+    2019-10-11 16:05:47 INFO     DataCleaner: Finished fitting.
+    2019-10-11 16:05:47 INFO     FeatureReducer: Starting fitting.
+    2019-10-11 16:05:47 INFO     FeatureReducer: 57 features removed due to cross correlation more than 0.95
+    2019-10-11 16:05:49 INFO     TreeFeatureReducer: Finished tree-based feature reduction of 110 initial features to 13
+    2019-10-11 16:05:49 INFO     FeatureReducer: Finished fitting.
+    2019-10-11 16:05:49 INFO     FeatureReducer: Starting transforming.
+    2019-10-11 16:05:49 INFO     FeatureReducer: Finished transforming.
+    2019-10-11 16:05:49 INFO     TPOTAdaptor: Starting fitting.
+    2019-10-11 16:07:50 INFO     TPOTAdaptor: Finished fitting.
+    2019-10-11 16:07:50 INFO     MatPipe successfully fit.
 
+If you see :code:`WARNING` or :code:`ERROR`, you should inspect the pipeline
+to make sure everything is configured as intended. If you see a :code:`CRITICAL`,
+it is likely something is misconfigured within the pipeline and should be
+looked into in detail!
 
 
 Quick reminders

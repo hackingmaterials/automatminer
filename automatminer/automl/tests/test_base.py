@@ -28,12 +28,12 @@ class TestAdaptorGood(DFMLAdaptor):
     def __init__(self, config_attr):
         self.config_attr = config_attr
         self.target = None
-        self.is_fit = False
         self._ml_data = None
         self._best_pipeline = None
         self._backend = None
         self._features = None
         self._fitted_target = None
+        super(DFMLAdaptor, self).__init__()
 
     @set_fitted
     def fit(self, df, target):

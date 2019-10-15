@@ -8,9 +8,7 @@ Current adaptor classes are:
 """
 from collections import OrderedDict
 
-from sklearn.pipeline import Pipeline
 from tpot import TPOTClassifier, TPOTRegressor
-from tpot.base import TPOTBase
 
 from automatminer.automl.config.tpot_configs import TPOT_CLASSIFIER_CONFIG, \
     TPOT_REGRESSOR_CONFIG
@@ -26,6 +24,8 @@ __authors__ = ['Alex Dunn <ardunn@lbl.gov'
                'Alireza Faghaninia <alireza.faghaninia@gmail.com>',
                'Qi Wang <wqthu11@gmail.com>',
                'Daniel Dopp <dbdopp@lbl.gov>']
+
+_adaptor_tmp_backend = None
 
 
 class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
@@ -61,6 +61,10 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         best_models (OrderedDict): The best model names and their scores.
         backend (TPOTBase): The TPOT object interface used for ML training.
         models (OrderedDict): The raw sklearn-style models output by TPOT.
+
+        from_serialized (bool): Whether the backend is loaded from a serialized
+            instance. If True, the previous full TPOT data will not be available
+            due to pickling problems.
     """
 
     def __init__(self, logger=True, **tpot_kwargs):
@@ -79,6 +83,10 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self._backend = None
         self._features = None
         self.logger = logger
+
+        self.from_serialized = False
+        self._best_models = None
+        super(DFMLAdaptor, self).__init__()
 
     @log_progress(AMM_LOG_FIT_STR)
     @set_fitted
@@ -148,68 +156,109 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                 best hyperparameter combination found.
 
         """
-        self.greater_score_is_better = is_greater_better(
-            self.backend.scoring_function)
 
-        # Get list of evaluated model names, cast to set and back
-        # to get unique model names, instantiate ordered model dictionary
-        evaluated_models = []
-        for key in self.backend.evaluated_individuals_.keys():
-            evaluated_models.append(key.split('(')[0])
+        if self.from_serialized:
+            return self._best_models
+        else:
+            self.greater_score_is_better = is_greater_better(
+                self.backend.scoring_function)
 
-        model_names = list(set(evaluated_models))
-        models = OrderedDict({model: [] for model in model_names})
+            # Get list of evaluated model names, cast to set and back
+            # to get unique model names, instantiate ordered model dictionary
+            evaluated_models = []
+            for key in self.backend.evaluated_individuals_.keys():
+                evaluated_models.append(key.split('(')[0])
+                # evaluated_models.append(key)
 
-        # This makes a dict of model names mapped to all runs of that model
-        for key, val in self.backend.evaluated_individuals_.items():
-            models[key.split('(')[0]].append(val)
+            model_names = list(set(evaluated_models))
+            models = OrderedDict({model: [] for model in model_names})
 
-        # For each base model type sort the runs by best score
-        for model_name in model_names:
-            models[model_name].sort(
-                key=lambda x: x['internal_cv_score'],
-                reverse=self.greater_score_is_better
-            )
+            # This makes a dict of model names mapped to all runs of that model
+            for key, val in self.backend.evaluated_individuals_.items():
+                models[key.split('(')[0]].append(val)
 
-        # Gets a simplified dict of the model to only its best run
-        # Sort the best individual models by type to best models overall
-        best_models = OrderedDict(
-            sorted({model: models[model][0] for model in models}.items(),
-                   key=lambda x: x[1]['internal_cv_score'],
-                   reverse=self.greater_score_is_better))
+            # For each base model type sort the runs by best score
+            for model_name in model_names:
+                models[model_name].sort(
+                    key=lambda x: x['internal_cv_score'],
+                    reverse=self.greater_score_is_better
+                )
 
-        # Mapping of top models to just their score
-        scores = {model: best_models[model]['internal_cv_score']
-                  for model in best_models}
+            # Gets a simplified dict of the model to only its best run
+            # Sort the best individual models by type to best models overall
+            best_models = OrderedDict(
+                sorted({model: models[model][0] for model in models}.items(),
+                       key=lambda x: x[1]['internal_cv_score'],
+                       reverse=self.greater_score_is_better))
 
-        # Sorted dict of top models just mapped to their top scores
-        best_models_and_scores = OrderedDict(
-            sorted(scores.items(),
-                   key=lambda x: x[1],
-                   reverse=self.greater_score_is_better))
-        self.models = models
-        return best_models_and_scores
+            # Mapping of top models to just their score
+            scores = {model: best_models[model]['internal_cv_score']
+                      for model in best_models}
+
+            # Sorted dict of top models just mapped to their top scores
+            best_models_and_scores = OrderedDict(
+                sorted(scores.items(),
+                       key=lambda x: x[1],
+                       reverse=self.greater_score_is_better))
+            self.models = models
+            return best_models_and_scores
 
     @property
+    @check_fitted
     def backend(self):
         return self._backend
 
     @property
+    @check_fitted
     def best_pipeline(self):
-        if isinstance(self._backend, TPOTBase):
-            return self._backend.fitted_pipeline_
-        elif isinstance(self._backend, Pipeline):
+        if self.from_serialized:
+            # The TPOT backend is replaced by the best pipeline.
             return self._backend
         else:
-            raise TypeError("Backend type not recognized as TPOT or Pipeline")
+            return self._backend.fitted_pipeline_
 
     @property
+    @check_fitted
     def features(self):
         return self._features
 
     @property
+    @check_fitted
     def fitted_target(self):
         return self._fitted_target
+
+    @check_fitted
+    def serialize(self) -> None:
+        """
+        Avoid TPOT pickling issues. Used by MatPipe during save.
+
+        Returns:
+            (self): A deepcopy of this object, with some modifications to make
+                it serializable.
+
+        """
+        if not self.from_serialized:
+            global _adaptor_tmp_backend
+            _adaptor_tmp_backend = self._backend
+            # Necessary for getting best models post serialization
+            self._best_models = self.best_models
+            self._backend = self.best_pipeline
+            self.from_serialized = True
+
+    @check_fitted
+    def deserialize(self) -> None:
+        """
+        Get the original TPOTAdaptor image back after serializing, with
+        (relatively) contained scope.
+
+        Returns:
+            None
+        """
+        if not self.from_serialized:
+            global _adaptor_tmp_backend
+            self._backend = _adaptor_tmp_backend
+            _adaptor_tmp_backend = None
+            self.from_serialized = False
 
 
 class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
@@ -236,11 +285,6 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
 
         mode (str): Either AMM_REG_NAME (regression) or AMM_CLF_NAME
             (classification)
-        _regressor (BaseEstimator): The single pipeline to be used for
-            regression
-        _classifier (BaseEstimator)L The single pipeline to be used for
-            classification
-
     """
 
     def __init__(self, regressor, classifier, logger=True):
@@ -278,7 +322,7 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     @property
     @check_fitted
     def backend(self):
-        return None
+        return self.best_pipeline
 
     @property
     @check_fitted
@@ -294,4 +338,3 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
     @check_fitted
     def fitted_target(self):
         return self._fitted_target
-

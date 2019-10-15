@@ -42,6 +42,10 @@ class TestLogTools(unittest.TestCase):
         null_log_file = os.path.join(run_dir, logger_base_name + "_null.log")
         self.assertFalse(os.path.isfile(null_log_file))
 
+    def tearDown(self):
+        logfile = os.path.join(run_dir, "TESTING.log")
+        os.remove(logfile)
+
 
 if __name__ == "__main__":
     unittest.main()
