@@ -247,7 +247,7 @@ Using DFTransformers individually
 
 DFTransformers can also be used outside of a MatPipe, if you only need part of a
 pipeline. Each implements a 'fit'/'transform' syntax, where the input and
-output are dataframes.
+output are dataframes (the same as MatPipe).
 
 For example, if you are looking to generate features without any cleaning,
 feature reduction, or machine learning, do:

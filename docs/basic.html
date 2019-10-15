@@ -77,7 +77,8 @@
   <div class="section" id="basic-usage">
 <h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
 <p>Basic usage of Automatminer requires using only one class - <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code>.</p>
-<p><code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> works with dataframes as input and output. It is able to train
+<p><code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> works with <strong>pandas dataframes as input and output</strong>. It is
+able to train
 on training data using it’s <code class="code docutils literal notranslate"><span class="pre">fit</span></code> method, predict on new data using
 <code class="code docutils literal notranslate"><span class="pre">predict</span></code>, and run benchmarks using <code class="code docutils literal notranslate"><span class="pre">benchmark</span></code> - all in an
 automatic and end-to-end fashion.</p>
@@ -102,9 +103,9 @@ repository.</p>
 <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code>’s constituent classes are set up. Typically, the “express”
 preset will give you results with a moderate degree of accuracy and relatively
 quick training, so we’ll use that here.</p>
-<p><em>Note: The default :code:`MatPipe()` is equivalent to
-:code:`MatPipe.from_preset(“express”)`; other presets have different
-configuration options!</em></p>
+<p>Note: The default <code class="code docutils literal notranslate"><span class="pre">MatPipe()</span></code> is equivalent to
+<code class="code docutils literal notranslate"><span class="pre">MatPipe.from_preset(&quot;express&quot;)</span></code>; other presets have different
+configuration options!</p>
 </div>
 <div class="section" id="training-a-pipeline">
 <h2>Training a pipeline<a class="headerlink" href="#training-a-pipeline" title="Permalink to this headline">¶</a></h2>

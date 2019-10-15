@@ -4,7 +4,8 @@ Basic Usage
 Basic usage of Automatminer requires using only one class - :code:`MatPipe`.
 
 
-:code:`MatPipe` works with dataframes as input and output. It is able to train
+:code:`MatPipe` works with **pandas dataframes as input and output**. It is
+able to train
 on training data using it's :code:`fit` method, predict on new data using
 :code:`predict`, and run benchmarks using :code:`benchmark` - all in an
 automatic and end-to-end fashion.
@@ -38,9 +39,9 @@ This preset is a set of options specifying exactly how each of
 preset will give you results with a moderate degree of accuracy and relatively
 quick training, so we'll use that here.
 
-*Note: The default :code:`MatPipe()` is equivalent to
+Note: The default :code:`MatPipe()` is equivalent to
 :code:`MatPipe.from_preset("express")`; other presets have different
-configuration options!*
+configuration options!
 
 
 
