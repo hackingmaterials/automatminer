@@ -148,22 +148,10 @@ latex_documents = [
 
 html_theme = 'alabaster'
 
-html_theme_options = {
-    'logo': 'logo_lowres.png',
-    # 'github_repo': 'hackingmaterials/automatminer',
-    # 'github_button': 'true',
-    # 'link': '#0c7baa',
-    # 'show_powered_by': 'false',
-    # 'fixed_sidebar': 'true',
-    # 'font_family': 'Nunito',
-    # 'head_font_family': 'Nunito',
-    # 'caption_font_family': 'Nunito',
-    # 'description_font_style': 'Nunito',
-    # 'description': "An autoML tool for materials",
-    # 'font_size': 12,
-    # 'code_font_family': 'Ubuntu Mono',
-    # 'code_font_size': 16,
+# find options here https://alabaster.readthedocs.io/en/latest/customization.html
 
+html_theme_options = {
+    'logo': 'logo_header.png',
     'github_repo': 'hackingmaterials/automatminer',
     'github_button': 'true',
     'link': '#0c7baa',
@@ -174,13 +162,13 @@ html_theme_options = {
     'caption_font_family': 'Ubuntu',
     'description_font_style': 'Ubuntu',
     'description': "An autoML tool for materials",
-    'font_size': 11,
-    'code_font_family': 'Inconsolata',
-    'code_font_size': 12,
-    "sidebar_list": "#2b3340",
+    'font_size': "14px",
+    # 'code_font_family': 'Nanum Gothic Coding',
+    'code_font_size': "12px",
+    "sidebar_list": "#000",
 
     # 'page_width': 300,
-    'sidebar_width': "300px",
+    'sidebar_width': "250px",
     # "relbarbgcolor": "#333",
     # "sidebarlinkcolor": "#e15617",
     # "sidebarbgcolor": "#000",

@@ -4,7 +4,7 @@
 
 body {
     font-family: Ubuntu;
-    font-size: 11;
+    font-size: 14px;
     background-color: #fff;
     color: #000;
     margin: 0;
@@ -23,11 +23,11 @@ div.documentwrapper {
 }
 
 div.bodywrapper {
-    margin: 0 0 0 300px;
+    margin: 0 0 0 250px;
 }
 
 div.sphinxsidebar {
-    width: 300px;
+    width: 250px;
     font-size: 14px;
     line-height: 1.5;
 }
@@ -138,7 +138,7 @@ div.sphinxsidebar p {
 div.sphinxsidebar ul {
     margin: 10px 0;
     padding: 0;
-    color: #2b3340;
+    color: #000;
 }
 
 div.sphinxsidebar ul li.toctree-l1 > a {
@@ -327,8 +327,8 @@ p.admonition-title:after {
 }
 
 pre, tt, code {
-    font-family: Inconsolata;
-    font-size: 12;
+    font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+    font-size: 12px;
 }
 
 .hll {
