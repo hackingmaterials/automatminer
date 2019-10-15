@@ -5,7 +5,6 @@ Classes for automatic featurization and core featurizer functionality.
 import os
 import math
 
-import pandas as pd
 from pymatgen import Composition
 from matminer.featurizers.conversions import StrToComposition, DictToObject, \
     StructureToComposition, StructureToOxidStructure, \
