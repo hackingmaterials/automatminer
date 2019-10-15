@@ -426,7 +426,6 @@ class MatPipe(DFTransformer, LoggableMixin):
 
         # Reassign live memory objects for further use in this object
         self.learner.deserialize()
-        print(self.learner.best_pipeline)
         for loggable in loggables:
             loggable._logger = temp_logger
 
