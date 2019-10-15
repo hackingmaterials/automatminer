@@ -188,7 +188,7 @@ classes (called DFTransformers) doing all the real work:
 The interface to MatPipe is the same regardless of the DFTransformers they
 are made of.
 **Define custom pipelines by initializing these classes individually, then
-passing them into MatPipe's __init__**
+passing them into MatPipe's __init__**.
 
 **Modifying a preset pipeline**
 
@@ -222,7 +222,9 @@ Here we'll show how to make a fully custom pipeline.
     from automatminer import AutoFeaturizer, FeatureReducer, DataCleaner, \
         SinglePipelineAdaptor
 
-    autofeaturizer = AutoFeaturizer(from_preset="production", cache_src="./features.json", exclude=["EwaldEnergy"])
+    autofeaturizer = AutoFeaturizer(from_preset="production",
+                                    cache_src="./features.json",
+                                    exclude=["EwaldEnergy"])
     cleaner = DataCleaner(max_na_frac=0.05)
     reducer = FeatureReducer(reducers=("corr",))
     learner = SinglePipelineAdaptor(classifier=XGBClassifier(n_estimators=500),
