@@ -69,8 +69,8 @@ sample data.
     # Predict bandgap of some unknown materials
     predicted_df = pipe.predict(unknown_df)
 
-Scope
-------
+Overview
+--------
 
 **Automatminer can work with many kinds of data:**
 
@@ -91,6 +91,20 @@ Scope
 
 See `matminer's Table of Featurizers <https://hackingmaterials.github.io/matminer/featurizer_summary.html>`_
 for a full (and growing) list.
+
+
+**Automatminer is designed to be easy to use and reproducible**
+
+- Save pipelines which are portable across machines
+- Fit a complete pipeline with 1 line of code
+- Predict on new samples with 1 line of code
+- Presets for easy setup
+
+**Automatminer is automatic and accurate**
+
+- No hand tuning required
+- Comparable in accuracy to hand-tuned models in benchmark tests
+
 
 User manual
 --------------
