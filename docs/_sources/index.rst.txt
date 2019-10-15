@@ -124,13 +124,23 @@ Want to see something added or changed? Some ways to get involved are:
   the install process for everyone.
 - Let us know if you'd like to see certain features.
 - Point us to areas of the code that are difficult to understand or use.
-- Contribute code. You can do this by forking
+- Contribute code! You can do this by forking
   `Automatminer on Github <https://github.com/hackingmaterials/automatminer>`_
   and submitting a pull request.
+- Post to our `support forum <https://hackingmaterials.discourse.group/c/matminer>`_ -
+don't be shy, we look forward to feedback!
 
 See our `contribution guidelines
 <https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md>`_
-for more inspect.
+for more inspect. For a list of contributors, see our
+`GitHub page <https://github.com/hackingmaterials/automatminer/graphs/contributors>`_
+
+Citing Automatminer or MatBench
+--------------------------------
+If you find Automatminer or the MatBench benchmarks helpful in your research,
+please consider citing us. We have a publication under submission. For now,
+please cite our `Github repo <https://github.com/hackingmaterials/automatminer>`_!
+
 
 API documentation
 ------------------
