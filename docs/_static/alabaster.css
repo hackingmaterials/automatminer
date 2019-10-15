@@ -3,8 +3,8 @@
 /* -- page layout ----------------------------------------------------------- */
 
 body {
-    font-family: Nunito;
-    font-size: 12;
+    font-family: Ubuntu;
+    font-size: 11;
     background-color: #fff;
     color: #000;
     margin: 0;
@@ -59,7 +59,7 @@ div.footer a {
 }
 
 p.caption {
-    font-family: Nunito;
+    font-family: Ubuntu;
     font-size: inherit;
 }
 
@@ -102,12 +102,12 @@ div.sphinxsidebarwrapper h1.logo-name {
 
 div.sphinxsidebarwrapper p.blurb {
     margin-top: 0;
-    font-style: Nunito;
+    font-style: Ubuntu;
 }
 
 div.sphinxsidebar h3,
 div.sphinxsidebar h4 {
-    font-family: Nunito;
+    font-family: Ubuntu;
     color: #444;
     font-size: 24px;
     font-weight: normal;
@@ -151,7 +151,7 @@ div.sphinxsidebar ul li.toctree-l2 > a {
 
 div.sphinxsidebar input {
     border: 1px solid #CCC;
-    font-family: Nunito;
+    font-family: Ubuntu;
     font-size: 1em;
 }
 
@@ -197,7 +197,7 @@ div.body h3,
 div.body h4,
 div.body h5,
 div.body h6 {
-    font-family: Nunito;
+    font-family: Ubuntu;
     font-weight: normal;
     margin: 30px 0px 10px 0px;
     padding: 0;
@@ -238,7 +238,7 @@ div.admonition tt.xref, div.admonition code.xref, div.admonition a tt {
 }
 
 div.admonition p.admonition-title {
-    font-family: Nunito;
+    font-family: Ubuntu;
     font-weight: normal;
     font-size: 24px;
     margin: 0 0 10px 0;
@@ -327,8 +327,8 @@ p.admonition-title:after {
 }
 
 pre, tt, code {
-    font-family: Ubuntu Mono;
-    font-size: 16;
+    font-family: Inconsolata;
+    font-size: 12;
 }
 
 .hll {
