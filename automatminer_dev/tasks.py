@@ -6,7 +6,6 @@ import warnings
 from math import sqrt
 
 import numpy as np
-import pandas as pd
 from sklearn.model_selection import KFold, StratifiedKFold
 from fireworks import FireTaskBase, explicit_serialize
 from sklearn.metrics import f1_score, r2_score, mean_squared_error, \
@@ -91,7 +90,7 @@ class RunPipe(FireTaskBase):
             "cleaner": DataCleaner(**cleaner_kwargs),
             "autofeaturizer": AutoFeaturizer(**autofeaturizer_kwargs)}
 
-        logger = initialize_logger(AMM_LOGGER_BASENAME, filepath=save_dir)
+        logger = initialize_logger(AMM_LOGGER_BASENAME, log_dir=save_dir)
         pipe = MatPipe(**pipe_config, logger=logger)
 
         # Set up dataset
@@ -358,7 +357,7 @@ class RunSingleFit(FireTaskBase):
             "reducer": FeatureReducer(**reducer_kwargs),
             "cleaner": DataCleaner(**cleaner_kwargs),
             "autofeaturizer": AutoFeaturizer(**autofeaturizer_kwargs)}
-        logger = initialize_logger(AMM_LOGGER_BASENAME, filepath=base_save_dir)
+        logger = initialize_logger(AMM_LOGGER_BASENAME, log_dir=base_save_dir)
         pipe = MatPipe(**pipe_config, logger=logger)
 
         # Set up dataset
