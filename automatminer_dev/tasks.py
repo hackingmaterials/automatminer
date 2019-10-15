@@ -21,7 +21,7 @@ from automatminer.pipeline import MatPipe
 from automatminer.utils.ml import AMM_REG_NAME, AMM_CLF_NAME
 from automatminer.utils.log import initialize_logger, AMM_LOGGER_BASENAME
 
-from benchdev.config import LP
+from automatminer_dev.config import LP
 
 """
 Tasks for dev benchmarking.

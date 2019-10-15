@@ -10,10 +10,10 @@ import automatminer
 from fireworks import Firework, Workflow, ScriptTask, LaunchPad, FWorker
 from sklearn.model_selection import KFold
 
-from benchdev.tasks import \
+from automatminer_dev.tasks import \
     ConsolidatePipesToBenchmark, RunPipe, StorePipeResults, \
     ConsolidateBenchmarksToBuild, RunSingleFit
-from benchdev.config import LP, KFOLD_DEFAULT, \
+from automatminer_dev.config import LP, KFOLD_DEFAULT, \
     LOCAL_DEBUG_SET, RUN_TESTS_CMD, BENCHMARK_DEBUG_SET, BENCHMARK_FULL_SET
 
 """
@@ -289,7 +289,7 @@ if __name__ == "__main__":
         "debug"
     ]
 
-    from benchdev.config import MP_E_FORM, JDFT2D, GLASS
+    from automatminer_dev.config import MP_E_FORM, JDFT2D, GLASS
     # wf = wf_evaluate_build("lrc", "set generation size", BENCHMARK_FULL_SET, pipe_config,
     #                        include_tests=False, cache=True, tags=tags)
 

@@ -5,7 +5,7 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.model_selection import cross_val_score, KFold, StratifiedKFold
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
-from benchdev.config import BENCHMARK_FULL_SET
+from automatminer_dev.config import BENCHMARK_FULL_SET
 
 
 benchmark_dir = os.environ["AMM_DATASET_DIR"]

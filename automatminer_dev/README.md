@@ -1,6 +1,6 @@
 # Automatminer benchmarking dev
 
-`benchdev` is a collection of dev tools for executing hundred or thousands of machine
+`automatminer_dev` is a collection of dev tools for executing hundred or thousands of machine
 learning benchmarks on parallel computing resources with Fireworks. This is not
 part of the main automatminer code, and as such, is not
    1. maintained as closely as the main code
@@ -8,7 +8,7 @@ part of the main automatminer code, and as such, is not
    3. documented as completely as the main code
 
 In addition to installing matminer and automatminer, you will need to install
-the benchdev package:
+the automatminer_dev package:
 ```bash
 python setup_dev.py develop
 ```
@@ -21,7 +21,7 @@ The available workflows include:
 * multiple nested CV benchmarks (i.e., on many different data sets)
 * plain ol' fitting operations (i.e., fitting a model for production)
    
-Also, this `benchdev` folder is dependent upon specific environment variables, file
+Also, this `automatminer_dev` folder is dependent upon specific environment variables, file
 locations, and variables which are documented throughout the code. If you want
 to run your own version of these dev tools, you'll need to set your own versions
 of these variables specific to your computing platform, most of which you can
