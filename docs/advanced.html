@@ -163,48 +163,49 @@ specify the <code class="code docutils literal notranslate"><span class="pre">ig
 our predicted samples and we don’t want to use it as a learning feature. This
 is the intended use case for <code class="code docutils literal notranslate"><span class="pre">ignore</span></code>.</p>
 <p>Assuming you’ve already fit a <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code>, specify you’d like to ignore:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_folds</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_df</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;material-id&quot;</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_df</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_df</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;material-id&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Your output will look like this:</p>
-<blockquote>
-<div><ul class="simple">
-<li><ul>
-<li><p><code class="code docutils literal notranslate"><span class="pre">structure</span></code></p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">material-id</span></code></p></li>
-<li><p>…</p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">my_property</span> <span class="pre">predicted</span></code></p></li>
-</ul>
-</li>
-<li><ul>
-<li><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">m-12345</span></code></p></li>
-<li><p>…</p></li>
-<li><p>0.449</p></li>
-</ul>
-</li>
-<li><ul>
-<li><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">m-5983</span></code></p></li>
-<li><p>…</p></li>
-<li><p>-0.573</p></li>
-</ul>
-</li>
-<li><ul>
-<li><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">m-029393</span></code></p></li>
-<li><p>…</p></li>
-<li><p>-0.005</p></li>
-</ul>
-</li>
-<li><ul>
-<li><p>…</p></li>
-<li><p>…</p></li>
-<li><p>…</p></li>
-</ul>
-</li>
-</ul>
-</div></blockquote>
+<p><code class="code docutils literal notranslate"><span class="pre">predicted_df</span></code></p>
+<table class="docutils align-left">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="code docutils literal notranslate"><span class="pre">structure</span></code></p></th>
+<th class="head"><p><code class="code docutils literal notranslate"><span class="pre">material-id</span></code></p></th>
+<th class="head"><p>…</p></th>
+<th class="head"><p><code class="code docutils literal notranslate"><span class="pre">my_property</span> <span class="pre">predicted</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-12345</span></code></p></td>
+<td><p>…</p></td>
+<td><p>0.449</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-5983</span></code></p></td>
+<td><p>…</p></td>
+<td><p>-0.573</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">&lt;structure</span> <span class="pre">object&gt;</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">m-029393</span></code></p></td>
+<td><p>…</p></td>
+<td><p>-0.005</p></td>
+</tr>
+<tr class="row-odd"><td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+</tbody>
+</table>
+<p>The ignore argument also works when benchmarking with <code class="code docutils literal notranslate"><span class="pre">MatPipe.benchmark</span></code>.</p>
 <p><strong>Warning</strong></p>
 <p>Ignoring columns in MatPipe supercedes all inner operations. If inner operations
 require a feature ignored in the MatPipe predict, the pipeline will fail.</p>

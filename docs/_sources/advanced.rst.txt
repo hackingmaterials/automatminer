@@ -115,9 +115,15 @@ Assuming you've already fit a :code:`MatPipe`, specify you'd like to ignore:
 
 .. code-block:: python
 
-    predicted_folds = pipe.predict(test_df, ignore=["material-id"])
+    predicted_df = pipe.predict(test_df, ignore=["material-id"])
 
 Your output will look like this:
+
+:code:`predicted_df`
+
+.. list-table::
+   :align: left
+   :header-rows: 1
 
    * - :code:`structure`
      - :code:`material-id`
@@ -138,6 +144,9 @@ Your output will look like this:
    * - ...
      - ...
      - ...
+     - ...
+
+The ignore argument also works when benchmarking with :code:`MatPipe.benchmark`.
 
 **Warning**
 

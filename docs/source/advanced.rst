@@ -64,6 +64,7 @@ materials ML problems which work in Automatminer benchmarks. Learn more here:
 
 Time Savers and Practical Tools
 -------------------------------
+
 **Using user-defined features**
 
 Often, there will be important features associated with your data which
@@ -111,13 +112,20 @@ In this example, we want to keep the :code:`material-id` column for identifying
 our predicted samples and we don't want to use it as a learning feature. This
 is the intended use case for :code:`ignore`.
 
-Assuming you've already fit a :code:`MatPipe`, specify you'd like to ignore:
+Assuming you've already fit a :code:`MatPipe` on the target :code:`my_property`,
+specify you'd like to ignore the materials column:
 
 .. code-block:: python
 
-    predicted_folds = pipe.predict(test_df, ignore=["material-id"])
+    predicted_df = pipe.predict(test_df, ignore=["material-id"])
 
 Your output will look like this:
+
+:code:`predicted_df`
+
+.. list-table::
+   :align: left
+   :header-rows: 1
 
    * - :code:`structure`
      - :code:`material-id`
@@ -140,14 +148,49 @@ Your output will look like this:
      - ...
      - ...
 
+The ignore argument also works when benchmarking with :code:`MatPipe.benchmark`.
+
 **Warning**
 
 Ignoring columns in MatPipe supercedes all inner operations. If inner operations
 require a feature ignored in the MatPipe predict, the pipeline will fail.
 
+
 Customizing pipelines
 ---------------------
 
+**Overview**
+
+So far, we have only worked with the top level interface object, MatPipe,
+created through preset configurations. If you find the MatPipe presets are too
+restrictive, you can specify your own custom pipelines.
+
+Here is a (very incomplete) list of things you can do with custom pipelines:
+
+* choose your own matminer featurizer sets to use
+* customize AutoML parameters
+* add, remove, or modify feature reduction techniques
+* change the imputation behavior and NaN handling
+* change feature encoding
+* modify featurizer prechecking and other automatic matminer operations
+* cache features and save them for later
+* customize multiprocessing parallelization
+* and much more!
+
+MatPipe is a container object for four sklearn BaseEstimator-like
+classes doing all the real work:
+
+* :code:`AutoFeaturizer`: Creates and assigns features for each sample
+* :code:`DataCleaner`: Prepares samples for input to ML algorithms
+* :code:`FeatureReducer`: Reduce the number of features with statistical learning.
+* :code:`DFMLAdaptor`: A machine learning adaptor to make predictions using an ML backend (e.g., TPOT).
+
+
+The interface to MatPipe is the same regardless of the objects they are made of.
+**Define custom pipelines by initializing these classes individually, then
+passing them into MatPipe's :code:`__init__`**
+
+**Modifying a
 
 
 Using DFTransformers individually
