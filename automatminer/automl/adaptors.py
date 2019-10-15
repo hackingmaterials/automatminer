@@ -27,6 +27,7 @@ __authors__ = ['Alex Dunn <ardunn@lbl.gov'
 
 _adaptor_tmp_backend = None
 
+
 class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
     """
     A dataframe adaptor for the TPOT classifiers and regressors.

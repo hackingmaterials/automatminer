@@ -162,7 +162,8 @@ specify the <code class="code docutils literal notranslate"><span class="pre">ig
 <p>In this example, we want to keep the <code class="code docutils literal notranslate"><span class="pre">material-id</span></code> column for identifying
 our predicted samples and we don’t want to use it as a learning feature. This
 is the intended use case for <code class="code docutils literal notranslate"><span class="pre">ignore</span></code>.</p>
-<p>Assuming you’ve already fit a <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code>, specify you’d like to ignore:</p>
+<p>Assuming you’ve already fit a <code class="code docutils literal notranslate"><span class="pre">MatPipe</span></code> on the target <code class="code docutils literal notranslate"><span class="pre">my_property</span></code>,
+specify you’d like to ignore the materials column:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_df</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_df</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;material-id&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -212,9 +213,95 @@ require a feature ignored in the MatPipe predict, the pipeline will fail.</p>
 </div>
 <div class="section" id="customizing-pipelines">
 <h2>Customizing pipelines<a class="headerlink" href="#customizing-pipelines" title="Permalink to this headline">¶</a></h2>
+<p><strong>Overview</strong></p>
+<p>So far, we have only worked with the top level interface object, MatPipe,
+created through preset configurations. If you find the MatPipe presets are too
+restrictive, you can specify your own custom pipelines.</p>
+<p>Here is a (very incomplete) list of things you can do with custom pipelines:</p>
+<ul class="simple">
+<li><p>choose your own matminer featurizer sets to use</p></li>
+<li><p>customize AutoML parameters</p></li>
+<li><p>add, remove, or modify feature reduction techniques</p></li>
+<li><p>change the imputation behavior and NaN handling</p></li>
+<li><p>change feature encoding</p></li>
+<li><p>modify featurizer prechecking and other automatic matminer operations</p></li>
+<li><p>customize multiprocessing parallelization</p></li>
+<li><p>and much more!</p></li>
+</ul>
+<p>MatPipe is a container object for four sklearn BaseEstimator-like
+classes (called DFTransformers) doing all the real work:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">AutoFeaturizer</span></code>: (<code class="code docutils literal notranslate"><span class="pre">MatPipe.autofeaturizer</span></code>) Creates and assigns features for each sample</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">DataCleaner</span></code>: (<code class="code docutils literal notranslate"><span class="pre">MatPipe.cleaner</span></code>) Prepares samples for input to ML algorithms</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">FeatureReducer</span></code>: (<code class="code docutils literal notranslate"><span class="pre">MatPipe.reducer</span></code>) Reduce the number of features with statistical learning.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">DFMLAdaptor</span></code>: (<code class="code docutils literal notranslate"><span class="pre">MatPipe.learner</span></code>) A machine learning adaptor to make predictions using an ML backend (e.g., TPOT). As of this writing, there is <code class="code docutils literal notranslate"><span class="pre">TPOTAdaptor</span></code> and <code class="code docutils literal notranslate"><span class="pre">SinglePipelineAdaptor</span></code></p></li>
+</ul>
+<p>The interface to MatPipe is the same regardless of the DFTransformers they
+are made of.
+<strong>Define custom pipelines by initializing these classes individually, then
+passing them into MatPipe’s __init__</strong></p>
+<p><strong>Modifying a preset pipeline</strong></p>
+<p>The easiest way to start making custom pipelines is by modifying a preset
+config, then passing it into MatPipe. In this example, let’s set the TPOT
+learning time to 1 hour and set the number of multiprocessing jobs to 4.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">get_preset_config</span><span class="p">,</span> <span class="n">TPOTAdaptor</span><span class="p">,</span> <span class="n">MatPipe</span>
+
+<span class="c1"># Get the config</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">get_preset_config</span><span class="p">(</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
+
+<span class="c1"># Define a custom TPOTAdaptor to replace the express one</span>
+<span class="n">config</span><span class="p">[</span><span class="s2">&quot;learner&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TPOTAdaptor</span><span class="p">(</span><span class="n">max_time_mins</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Make a matpipe</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Your custom pipeline is now ready to fit, predict, and benchmark.</p>
+<p><strong>A fully custom pipeline</strong></p>
+<p>Here we’ll show how to make a fully custom pipeline.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBRegressor</span><span class="p">,</span> <span class="n">XGBClassifier</span>
+
+<span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">AutoFeaturizer</span><span class="p">,</span> <span class="n">FeatureReducer</span><span class="p">,</span> <span class="n">DataCleaner</span><span class="p">,</span> \
+    <span class="n">SinglePipelineAdaptor</span>
+
+<span class="n">autofeaturizer</span> <span class="o">=</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">from_preset</span><span class="o">=</span><span class="s2">&quot;production&quot;</span><span class="p">,</span> <span class="n">cache_src</span><span class="o">=</span><span class="s2">&quot;./features.json&quot;</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;EwaldEnergy&quot;</span><span class="p">])</span>
+<span class="n">cleaner</span> <span class="o">=</span> <span class="n">DataCleaner</span><span class="p">(</span><span class="n">max_na_frac</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">FeatureReducer</span><span class="p">(</span><span class="n">reducers</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;corr&quot;</span><span class="p">,))</span>
+<span class="n">learner</span> <span class="o">=</span> <span class="n">SinglePipelineAdaptor</span><span class="p">(</span><span class="n">classifier</span><span class="o">=</span><span class="n">XGBClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">500</span><span class="p">),</span>
+                                <span class="n">regressor</span><span class="o">=</span><span class="n">XGBRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">500</span><span class="p">))</span>
+
+<span class="c1"># Make a matpipe</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">MatPipe</span><span class="p">(</span>
+    <span class="n">autofeaturizer</span><span class="o">=</span><span class="n">autofeaturizer</span><span class="p">,</span>
+    <span class="n">cleaner</span><span class="o">=</span><span class="n">cleaner</span><span class="p">,</span>
+    <span class="n">reducer</span><span class="o">=</span><span class="n">reducer</span><span class="p">,</span>
+    <span class="n">learner</span><span class="o">=</span><span class="n">learner</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>We only specify a few options in this example, but each class is quite flexible.</p>
 </div>
 <div class="section" id="using-dftransformers-individually">
 <h2>Using DFTransformers individually<a class="headerlink" href="#using-dftransformers-individually" title="Permalink to this headline">¶</a></h2>
+<p>DFTransformers can also be used outside of a MatPipe, if you only need part of a
+pipeline. Each implements a ‘fit’/’transform’ syntax, where the input and
+output are dataframes.</p>
+<p>For example, if you are looking to generate features without any cleaning,
+feature reduction, or machine learning, do:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">automatminer</span> <span class="kn">import</span> <span class="n">AutoFeaturizer</span>
+
+<span class="n">autofeaturizer</span> <span class="o">=</span> <span class="n">AutoFeaturizer</span><span class="p">(</span><span class="n">from_preset</span><span class="o">=</span><span class="s2">&quot;express&quot;</span><span class="p">)</span>
+
+<span class="c1"># Fit the DFTransformer</span>
+<span class="n">autofeaturizer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">my_input_df</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;my_target_property&quot;</span><span class="p">)</span>
+
+<span class="c1"># Generate the features using the DFTransformer</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">autofeaturizer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">my_input_df</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;my_target_property&quot;</span><span class="p">)</span>
+
+<span class="c1"># Or equivalently,</span>
+<span class="c1"># df = autofeaturizer.fit_transform(my_input_df, target=&quot;my_target_property)</span>
+</pre></div>
+</div>
 </div>
 </div>
 
