@@ -149,7 +149,7 @@ latex_documents = [
 html_theme = 'alabaster'
 
 html_theme_options = {
-    # 'logo': 'logo_lowres.png',
+    'logo': 'logo_lowres.png',
     # 'github_repo': 'hackingmaterials/automatminer',
     # 'github_button': 'true',
     # 'link': '#0c7baa',
@@ -177,10 +177,10 @@ html_theme_options = {
     'font_size': 11,
     'code_font_family': 'Inconsolata',
     'code_font_size': 12,
-    "sidebar_list": "#2b3340"
+    "sidebar_list": "#2b3340",
 
     # 'page_width': 300,
-    # 'sidebar_width': 200,
+    'sidebar_width': "300px",
     # "relbarbgcolor": "#333",
     # "sidebarlinkcolor": "#e15617",
     # "sidebarbgcolor": "#000",

@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>automatminer.automl.config package &#8212; Automatminer 2019.10.11 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="automatminer.automl.tests package" href="automatminer.automl.tests.html" />
+    <link rel="prev" title="automatminer.automl package" href="automatminer.automl.html" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo_lowres.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">An autoML tool for materials</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="automatminer.html">automatminer package</a></li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="automatminer-automl-config-package">
+<h1>automatminer.automl.config package<a class="headerlink" href="#automatminer-automl-config-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-automatminer.automl.config.tpot_configs">
+<span id="automatminer-automl-config-tpot-configs-module"></span><h2>automatminer.automl.config.tpot_configs module<a class="headerlink" href="#module-automatminer.automl.config.tpot_configs" title="Permalink to this headline">¶</a></h2>
+<p>This file is modified from the default config files of the TPOT library.
+It contains a customed dict of operators that we want to optimize using
+genetic algorithm.</p>
+<p>We can add/remove Regressors/Preprocessors/Selectors-related operators
+to custom the operators to be optimized by tpot in the future. For instance,
+the Preprocessors/Selectors-related procedures are currently taken care of
+by the Preprocess class in automatminer, so we may consider to comment out the
+related operators in the config_dicts (or use tpot instead of Preprocess
+to optimize some procedures).</p>
+<p>Check the TPOT documentation for information on the structure of config_dicts</p>
+</div>
+<div class="section" id="module-automatminer.automl.config">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-automatminer.automl.config" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;HackingMaterials 2019.
+      
+      |
+      <a href="_sources/automatminer.automl.config.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

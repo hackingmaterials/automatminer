@@ -1,0 +1,685 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>automatminer.preprocessing package &#8212; Automatminer 2019.10.11 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="automatminer.preprocessing.tests package" href="automatminer.preprocessing.tests.html" />
+    <link rel="prev" title="automatminer.featurization.tests package" href="automatminer.featurization.tests.html" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo_lowres.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">An autoML tool for materials</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="automatminer.html">automatminer package</a></li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="automatminer-preprocessing-package">
+<h1>automatminer.preprocessing package<a class="headerlink" href="#automatminer-preprocessing-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.preprocessing.tests.html">automatminer.preprocessing.tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.tests.html#module-automatminer.preprocessing.tests.test_core">automatminer.preprocessing.tests.test_core module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.preprocessing.tests.html#module-automatminer.preprocessing.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-automatminer.preprocessing.core">
+<span id="automatminer-preprocessing-core-module"></span><h2>automatminer.preprocessing.core module<a class="headerlink" href="#module-automatminer.preprocessing.core" title="Permalink to this headline">¶</a></h2>
+<p>Top level preprocessing classes.</p>
+<dl class="class">
+<dt id="automatminer.preprocessing.core.DataCleaner">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.preprocessing.core.</code><code class="sig-name descname">DataCleaner</code><span class="sig-paren">(</span><em class="sig-param">max_na_frac=0.01</em>, <em class="sig-param">feature_na_method='drop'</em>, <em class="sig-param">encode_categories=True</em>, <em class="sig-param">encoder='one-hot'</em>, <em class="sig-param">drop_na_targets=True</em>, <em class="sig-param">na_method_fit='drop'</em>, <em class="sig-param">na_method_transform='fill'</em>, <em class="sig-param">logger=True</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="automatminer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<p>Transform a featurized dataframe into an ML-ready dataframe.</p>
+<p>Works by first removing samples not having a target value (if desired), then
+dropping features with high nan rates. Finally, removing or otherwise
+handling nans for individual samples (a relatively uncommon occurrence).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_na_frac</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The maximum fraction (0.0 - 1.0) of samples for a
+given feature allowed. Columns containing a higher nan fraction are
+handled according to feature_na_method.</p></li>
+<li><p><strong>feature_na_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Defines how to handle features (column) with
+higher na fraction than max_na_frac. “drop” for dropping these
+features. “fill” for filling these features with pandas bfill and
+ffill. “mean” to fill categorical variables and mean for numerical
+variables. Alternatively, specify a number to replace the nans,
+e.g. 0. If all samples are nan, feature will be dropped regardless.</p></li>
+<li><p><strong>encode_categories</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, retains features which are
+categorical (data type is string or object) and then
+one-hot encodes them. If False, drops them.</p></li>
+<li><p><strong>encoder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – choose a method for encoding the categorical
+variables. Current options: ‘one-hot’ and ‘label’.</p></li>
+<li><p><strong>drop_na_targets</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Drop samples containing target values which are
+na.</p></li>
+<li><p><strong>na_method_fit</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Set the na_method for samples in fit.
+Select one of the following methods: “fill” (use pandas fillna with
+ffill and bfill, sequentially), “ignore” (totally ignore nans in
+samples), “drop” (drop any remaining samples having a nan feature),
+“mean” (fills categorical variables, takes means of numerical).
+Alternatively, specify a number to replace the nans, e.g. 0.</p></li>
+<li><p><strong>na_method_transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The same as na_method_fit, but
+for transform.</p></li>
+<li><p><strong>logger</strong> (<em>Logger</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for logging.
+Alternatively, if set to True, the default automatminer logger will
+be used. If set to False, then no logging will occur.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.DataCleaner.max_problem_col_warning_threshold">
+<code class="sig-name descname">max_problem_col_warning_threshold</code><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.max_problem_col_warning_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>The max number of
+“problematic” columns (as a fraction of total columns) which are nan
+which are allowed before logging a warning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">The following attrs are set during fitting.</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.DataCleaner.object_cols">
+<code class="sig-name descname">object_cols</code><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.object_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>The features identified as objects/categories</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.DataCleaner.number_cols">
+<code class="sig-name descname">number_cols</code><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.number_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>The features identified as numerical</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.DataCleaner.fitted_df">
+<code class="sig-name descname">fitted_df</code><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.fitted_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>The fitted dataframe</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.DataCleaner.fitted_target">
+<code class="sig-name descname">fitted_target</code><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.fitted_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>The target variable in the dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.DataCleaner.dropped_features">
+<code class="sig-name descname">dropped_features</code><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.dropped_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>The features which were dropped.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.DataCleaner.dropped_samples">
+<code class="sig-name descname">dropped_samples</code><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.dropped_samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dataframe of samples to be dropped</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.DataCleaner.warnings">
+<code class="sig-name descname">warnings</code><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.warnings" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of warnings accumulated during fitting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.core.DataCleaner.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The operation to be logging.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The method result.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.core.DataCleaner.fit_transform">
+<code class="sig-name descname">fit_transform</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target</em>, <em class="sig-param">**fit_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.fit_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines the fitting and transformation of a dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The pandas dataframe to be fit.</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the target string specifying the ML target.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The transformed dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(pandas.DataFrame)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.core.DataCleaner.handle_na">
+<code class="sig-name descname">handle_na</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target</em>, <em class="sig-param">na_method</em>, <em class="sig-param">coerce_mismatch=True</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.handle_na" title="Permalink to this definition">¶</a></dt>
+<dd><p>First pass for handling cells without values (null or nan). Additional
+preprocessing may be necessary as one column may be filled with
+median while the other with mean or mode, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The dataframe containing features</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The key defining the ML target.</p></li>
+<li><p><strong>coerce_mismatch</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If there is a mismatch between the fitted
+dataframe columns and the argument dataframe columns, create
+and drop mismatch columns so the dataframes are matching. If
+False, raises an error. New columns are instantiated as all
+zeros, as most of the time this is a onehot encoding issue.</p></li>
+<li><p><strong>na_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – How to deal with samples still containing nans
+after troublesome columns are already dropped. Default is
+‘drop’. Other options are from pandas.DataFrame.fillna:
+{‘bfill’, ‘pad’, ‘ffill’}, or ‘ignore’ to ignore nans.
+Alternatively, specify a value to replace the nans, e.g. 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(pandas.DataFrame) The cleaned df</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.core.DataCleaner.retained_features">
+<em class="property">property </em><code class="sig-name descname">retained_features</code><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.retained_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>The features retained during fitting, which may be used to craft the
+dataframe during transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The list of features retained.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.core.DataCleaner.to_numerical">
+<code class="sig-name descname">to_numerical</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.to_numerical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms non-numerical columns to numerical columns which are
+machine learning-friendly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The dataframe containing features</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The key defining the ML target.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(pandas.DataFrame) The numerical df</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.core.DataCleaner.transform">
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The operation to be logging.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The method result.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="automatminer.preprocessing.core.FeatureReducer">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.preprocessing.core.</code><code class="sig-name descname">FeatureReducer</code><span class="sig-paren">(</span><em class="sig-param">reducers=('pca'</em>, <em class="sig-param">)</em>, <em class="sig-param">corr_threshold=0.95</em>, <em class="sig-param">tree_importance_percentile=0.9</em>, <em class="sig-param">n_pca_features='auto'</em>, <em class="sig-param">n_rebate_features=0.3</em>, <em class="sig-param">keep_features=None</em>, <em class="sig-param">remove_features=None</em>, <em class="sig-param">logger=True</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.FeatureReducer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="automatminer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<p>Perform feature reduction on a clean dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reducers</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>)</em>) – <p>The set of feature reduction operations to be
+performed on the data. The order of strings determines the order
+in which the reducers will be applied. Valid reducer strings are
+the following:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>’corr’: Removes any cross-correlated features having corr.</dt><dd><p>coefficients larger than a threshold value. Retains
+feature names.</p>
+</dd>
+<dt>’tree’: Perform iterative feature reduction via a tree-based</dt><dd><p>feature reduction, using ._feature_importances implemented
+in sklearn. Retains feature names.</p>
+</dd>
+<dt>’rebate’: Perform ReliefF feature reduction using the skrebate</dt><dd><p>package. Retains feature names.</p>
+</dd>
+<dt>’pca’: Perform Principal Component Analysis via</dt><dd><p>eigendecomposition. Note the feature labels will be renamed
+to “PCA Feature X” if pca is present anywhere in the feature
+reduction scheme!</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Example: Apply tree-based feature reduction, then pca:</dt><dd><p>reducers = (‘tree’, ‘pca’)</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>corr_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The correlation threshold between any two
+features needed for one to be removed (calculated with R).</p></li>
+<li><p><strong>tree_importance_percentile</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – the selected percentile (between 0.0
+and 1.0)of the features sorted (descending) based on their
+importance.</p></li>
+<li><p><strong>n_pca_features</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – If int, the number of features to be
+retained by PCA. If float, the fraction of features to be retained
+by PCA once the dataframe is passed to it (i.e., 0.5 means PCA
+retains half of the features it is passed). PCA must be present in
+the reducers. ‘auto’ automatically determines the number of features
+to retain.</p></li>
+<li><p><strong>n_rebate_features</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – If int, the number of ReBATE relief
+features to be retained. If float, the fraction of features to be
+retained by ReBATE once it is passed the dataframe (i.e., 0.5 means
+ReBATE retains half of the features it is passed). ReBATE must be
+present in the reducers.</p></li>
+<li><p><strong>keep_features</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – A list of features that will not be removed.
+This option does nothing if PCA feature removal is present.</p></li>
+<li><p><strong>remove_features</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – A list of features that will be removed.
+This option does nothing if PCA feature removal is present.</p></li>
+<li><p><strong>logger</strong> (<em>Logger</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for logging.
+Alternatively, if set to True, the default automatminer logger will
+be used. If set to False, then no logging will occur.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">The following attrs are set during fitting.</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.FeatureReducer.removed_features">
+<code class="sig-name descname">removed_features</code><a class="headerlink" href="#automatminer.preprocessing.core.FeatureReducer.removed_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>The keys are the feature reduction methods
+applied. The values are the feature labels removed by that feature
+reduction method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.FeatureReducer.retained_features">
+<code class="sig-name descname">retained_features</code><a class="headerlink" href="#automatminer.preprocessing.core.FeatureReducer.retained_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>The features retained.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.preprocessing.core.FeatureReducer.reducer_params">
+<code class="sig-name descname">reducer_params</code><a class="headerlink" href="#automatminer.preprocessing.core.FeatureReducer.reducer_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>The keys are the feature reduction methods
+applied. The values are the parameters used by each feature reducer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.core.FeatureReducer.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.FeatureReducer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The operation to be logging.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The method result.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.core.FeatureReducer.rm_correlated">
+<code class="sig-name descname">rm_correlated</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target</em>, <em class="sig-param">r_max=0.95</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.FeatureReducer.rm_correlated" title="Permalink to this definition">¶</a></dt>
+<dd><p>A feature selection method that remove those that are cross correlated
+by more than threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The dataframe containing features, target_key</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the name of the target column/feature</p></li>
+<li><p><strong>r_max</strong> (<em>0&lt;float&lt;=1</em>) – if R is greater than this value, the
+feature that has lower correlation with the target is removed.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns (pandas.DataFrame):</dt><dd><p>the dataframe with the highly cross-correlated features removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.core.FeatureReducer.transform">
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.FeatureReducer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The operation to be logging.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The method result.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.preprocessing.feature_selection">
+<span id="automatminer-preprocessing-feature-selection-module"></span><h2>automatminer.preprocessing.feature_selection module<a class="headerlink" href="#module-automatminer.preprocessing.feature_selection" title="Permalink to this headline">¶</a></h2>
+<p>Various in-house feature reduction techniques.</p>
+<dl class="class">
+<dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.preprocessing.feature_selection.</code><code class="sig-name descname">TreeFeatureReducer</code><span class="sig-paren">(</span><em class="sig-param">mode</em>, <em class="sig-param">importance_percentile=0.95</em>, <em class="sig-param">logger=True</em>, <em class="sig-param">random_state=0</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="automatminer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<dl class="simple">
+<dt>Tree-based feature reduction tools based on sklearn models that have</dt><dd><p>the .feature_importances_ attribute.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – “regression” or “classification”</p></li>
+<li><p><strong>importance_percentile</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – the selected percentile of the features
+sorted (descending) based on their importance.</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – relevant if non-deterministic algorithms such as
+random forest are used.</p></li>
+<li><p><strong>logger</strong> (<em>Logger</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for logging.
+Alternatively, if set to True, the default automatminer logger will be
+used. If set to False, then no logging will occur.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">tree='rf'</em>, <em class="sig-param">recursive=True</em>, <em class="sig-param">cv=5</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits to the data (X) and target (y) to determine the selected_features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pandas.DataFrame</em>) – input data, note that numpy matrix is NOT
+accepted since the X.columns is used for feature names</p></li>
+<li><p><strong>y</strong> (<em>pandas.Series</em><em> or </em><em>np.ndarray</em>) – list of outputs used for fitting
+the tree model</p></li>
+<li><p><strong>tree</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><em>instantiated sklearn tree-based model</em>) – if a model is
+directly fed, it must have the .feature_importances_ attribute</p></li>
+<li><p><strong>recursive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to recursively reduce the features (True)
+or just do it once (False)</p></li>
+<li><p><strong>cv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><em>CrossValidation</em>) – sklearn’s cross-validation with the
+same options (int or actual instantiated CrossValidation)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns (None):</dt><dd><p>sets the class attribute .selected_features</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_reduced_features">
+<code class="sig-name descname">get_reduced_features</code><span class="sig-paren">(</span><em class="sig-param">tree_model</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">recursive=True</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_reduced_features" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Gives a reduced list of feature names given a tree-based model that</dt><dd><p>has the .feature_importances_ attribute.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tree_model</strong> (<em>instantiated sklearn tree-based model</em>) – </p></li>
+<li><p><strong>X</strong> (<em>pandas.dataframe</em>) – </p></li>
+<li><p><strong>y</strong> (<em>pandas.Series</em><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – the target column</p></li>
+<li><p><strong>recursive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns ([str]): list of the top * percentile of features. * determined</dt><dd><p>by importance_percentile argument.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_top_features">
+<code class="sig-name descname">get_top_features</code><span class="sig-paren">(</span><em class="sig-param">feat_importance</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.get_top_features" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Simple function to through a sorted list of features and select top</dt><dd><p>percentiles.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>feat_importance</strong> (<em>[</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>)</em><em>]</em>) – a sorted list of
+(feature, importance) tuples</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns ([str]): list of the top * percentile of features. * determined</dt><dd><p>by importance_percentile argument.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer.transform">
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param">X</em>, <em class="sig-param">y=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Transforms the data with the subset of features determined after</dt><dd><p>calling the fit method on the data.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pandas.DataFrame</em>) – input data, note that numpy matrix is NOT
+accepted since the X.columns is used for feature names</p></li>
+<li><p><strong>y</strong> (<em>placeholder</em>) – ignored input (for consistency in notation)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns (pandas.DataFrame): the data with reduced number of features.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.preprocessing.feature_selection.lower_corr_clf">
+<code class="sig-prename descclassname">automatminer.preprocessing.feature_selection.</code><code class="sig-name descname">lower_corr_clf</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target</em>, <em class="sig-param">f1</em>, <em class="sig-param">f2</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.feature_selection.lower_corr_clf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train a simple linear model on the data to decide on the worse of two
+features. The feature which should be dropped is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – The dataframe containing the target values and
+features in question</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The key for the target column</p></li>
+<li><p><strong>f1</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The key for the first feature.</p></li>
+<li><p><strong>f2</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The key for the second feature.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The name of the feature to be dropped (worse score).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="automatminer.preprocessing.feature_selection.rebate">
+<code class="sig-prename descclassname">automatminer.preprocessing.feature_selection.</code><code class="sig-name descname">rebate</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target</em>, <em class="sig-param">n_features</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.feature_selection.rebate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the MultiSURF* algorithm on a dataframe, returning the reduced df.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – A dataframe</p></li>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The target key (must be present in df)</p></li>
+<li><p><strong>n_features</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of features desired to be returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>pd.DataFrame The dataframe with fewer features, and no target</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.preprocessing">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-automatminer.preprocessing" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;HackingMaterials 2019.
+      
+      |
+      <a href="_sources/automatminer.preprocessing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

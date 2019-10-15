@@ -1,0 +1,782 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>automatminer.featurization package &#8212; Automatminer 2019.10.11 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="automatminer.featurization.tests package" href="automatminer.featurization.tests.html" />
+    <link rel="prev" title="automatminer.automl.tests package" href="automatminer.automl.tests.html" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata&display=swap" rel="stylesheet">
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo_lowres.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">An autoML tool for materials</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">MatBench benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="automatminer.html">automatminer package</a></li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="automatminer-featurization-package">
+<h1>automatminer.featurization package<a class="headerlink" href="#automatminer-featurization-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="automatminer.featurization.tests.html">automatminer.featurization.tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.tests.html#module-automatminer.featurization.tests.test_base">automatminer.featurization.tests.test_base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.tests.html#module-automatminer.featurization.tests.test_core">automatminer.featurization.tests.test_core module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.tests.html#module-automatminer.featurization.tests.test_sets">automatminer.featurization.tests.test_sets module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automatminer.featurization.tests.html#module-automatminer.featurization.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-automatminer.featurization.base">
+<span id="automatminer-featurization-base-module"></span><h2>automatminer.featurization.base module<a class="headerlink" href="#module-automatminer.featurization.base" title="Permalink to this headline">¶</a></h2>
+<p>Base classes for sets of featurizers.</p>
+<dl class="class">
+<dt id="automatminer.featurization.base.FeaturizerSet">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.featurization.base.</code><code class="sig-name descname">FeaturizerSet</code><span class="sig-paren">(</span><em class="sig-param">exclude=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.base.FeaturizerSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<p>Abstract class for defining sets of featurizers.</p>
+<p>All FeaturizerSets should implement at least fours sets of featurizers:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>express - The “go-to” set of featurizers</p></li>
+<li><dl class="simple">
+<dt>heavy - A more expensive and complete (though not necessarily</dt><dd><p>better) version of express.</p>
+</dd>
+</dl>
+</li>
+<li><p>all - All featurizers available for the intended featurization type(s)</p></li>
+<li><p>debug - An ultra-minimal set of featurizers for debugging purposes.</p></li>
+</ul>
+</div></blockquote>
+<p>Each set returned is a list of matminer featurizer objects. The choice of
+featurizers for a given set is at the discrtetion of the implementor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>exclude</strong> (<em>list of str</em><em>, </em><em>optional</em>) – A list of featurizer class names that
+will be excluded from the set of featurizers returned.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="automatminer.featurization.base.FeaturizerSet.all">
+<em class="property">abstract property </em><code class="sig-name descname">all</code><a class="headerlink" href="#automatminer.featurization.base.FeaturizerSet.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>All featurizers available for this featurization type. These
+featurizers are allowed to:</p>
+<ul class="simple">
+<li><p>have multiple, highly similar versions of the same featurizer,</p></li>
+<li><dl class="simple">
+<dt>not work on standard versions of the input types (e.g., SiteDOS works</dt><dd><p>on the DOS for a single site, not structure</p>
+</dd>
+</dl>
+</li>
+<li><p>return non-vectorized outputs (e.g., matrices, other data types).</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[~T]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.base.FeaturizerSet.debug">
+<em class="property">abstract property </em><code class="sig-name descname">debug</code><a class="headerlink" href="#automatminer.featurization.base.FeaturizerSet.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>An ultra-minimal set of featurizers for debugging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[~T]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.base.FeaturizerSet.express">
+<em class="property">abstract property </em><code class="sig-name descname">express</code><a class="headerlink" href="#automatminer.featurization.base.FeaturizerSet.express" title="Permalink to this definition">¶</a></dt>
+<dd><p>A focused set of featurizers which should:</p>
+<ul class="simple">
+<li><p>be reasonably fast to featurize</p></li>
+<li><p>be not prone to errors/nans</p></li>
+<li><p>provide informative learning features</p></li>
+<li><p>do not include many irrelevant features making ML expensive</p></li>
+<li><p>have each featurizer return a vector</p></li>
+<li><p>allow the recognized type (structure, composition, etc.) as input.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[~T]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.base.FeaturizerSet.heavy">
+<em class="property">abstract property </em><code class="sig-name descname">heavy</code><a class="headerlink" href="#automatminer.featurization.base.FeaturizerSet.heavy" title="Permalink to this definition">¶</a></dt>
+<dd><p>A more expensive and complete (though not necessarily better)
+version of express.</p>
+<p>Similar to express, all featurizers selected should return useful
+learning features. However the selected featurizers may now:</p>
+<ul class="simple">
+<li><p>generate many (thousands+) features</p></li>
+<li><p>be expensive to featurize (1s+ per item)</p></li>
+<li><p>be prone to NaNs on certain datasets</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[~T]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.featurization.core">
+<span id="automatminer-featurization-core-module"></span><h2>automatminer.featurization.core module<a class="headerlink" href="#module-automatminer.featurization.core" title="Permalink to this headline">¶</a></h2>
+<p>Classes for automatic featurization and core featurizer functionality.</p>
+<dl class="class">
+<dt id="automatminer.featurization.core.AutoFeaturizer">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.featurization.core.</code><code class="sig-name descname">AutoFeaturizer</code><span class="sig-paren">(</span><em class="sig-param">cache_src=None</em>, <em class="sig-param">preset=None</em>, <em class="sig-param">featurizers=None</em>, <em class="sig-param">exclude=None</em>, <em class="sig-param">functionalize=False</em>, <em class="sig-param">ignore_cols=None</em>, <em class="sig-param">ignore_errors=True</em>, <em class="sig-param">drop_inputs=True</em>, <em class="sig-param">guess_oxistates=True</em>, <em class="sig-param">multiindex=False</em>, <em class="sig-param">do_precheck=True</em>, <em class="sig-param">n_jobs=None</em>, <em class="sig-param">logger=True</em>, <em class="sig-param">composition_col='composition'</em>, <em class="sig-param">structure_col='structure'</em>, <em class="sig-param">bandstructure_col='bandstructure'</em>, <em class="sig-param">dos_col='dos'</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="automatminer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<p>Automatically featurize a dataframe.</p>
+<p>Use this object first by calling fit, then by calling transform.</p>
+<dl>
+<dt>AutoFeaturizer requires you to specify the column names for each type of</dt><dd><p>featurization, or just use the defaults:</p>
+<p>“composition”: To use composition features
+“structure”: To use structure features
+“bandstructure”: To use bandstructure features
+“dos”: To use density of states features</p>
+</dd>
+</dl>
+<p>The featurizers corresponding to each featurizer type cannot be used if
+the correct column name is not present.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cache_src</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – An absolute path to a json file holding feature
+information. If file exists, will read features (loc indexwise)
+from this file instead of featurizing. If this file does not exist,
+AutoFeaturizer will featurize normally, then save the features to a
+new file. Only features (not featurizer input objects) will be saved</p></li>
+<li><p><strong>preset</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – “express” or “heavy” or “debug” or “all. Determines by
+preset the featurizers that should be applied. See the Featurizer
+sets for specifics of each. Default is “express”. Incompatible with
+the featurizers arg.</p></li>
+<li><p><strong>featurizers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – <p>Use this option if you want to manually specify
+the featurizers to use. Keys are the featurizer types you want
+applied (e.g., “structure”, “composition”). The corresponding values
+are lists of featurizer objects you want for each featurizer type.</p>
+<p class="rubric">Example</p>
+<dl>
+<dt>{“composition”: [ElementProperty.from_preset(“matminer”),</dt><dd><blockquote>
+<div><p>EwaldEnergy()]</p>
+</div></blockquote>
+<p>”structure”: [BagofBonds(), GlobalSymmetryFeatures()]}</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>exclude</strong> (<em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>]</em>) – Class names of featurizers to exclude. Only used if
+you use a preset.</p></li>
+<li><p><strong>ignore_cols</strong> (<em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>]</em>) – Column names to be ignored/removed from any
+dataframe undergoing fitting or transformation. If columns are
+not ignored, they may be used later on for learning.</p></li>
+<li><p><strong>ignore_errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, each featurizer will ignore all errors
+during featurization.</p></li>
+<li><p><strong>drop_inputs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Drop the columns containing input objects for
+featurization after they are featurized.</p></li>
+<li><p><strong>guess_oxistates</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, try to decorate sites with oxidation
+state.</p></li>
+<li><p><strong>multiiindex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, returns a multiindexed dataframe. Not
+recommended for use in MatPipe.</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of parallel jobs to use during featurization
+for each featurizer. Default is n_cores</p></li>
+<li><p><strong>logger</strong> (<em>Logger</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for logging.
+Alternatively, if set to True, the default automatminer logger will
+be used. If set to False, then no logging will occur.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">These attributes are set during fitting</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.core.AutoFeaturizer.featurizers">
+<code class="sig-name descname">featurizers</code><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.featurizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same format as input dictionary in Args. Values
+contain the actual objects being used for featurization. Featurizers
+can be removed if check_validity=True and the featurizer is not
+valid for more than self.min_precheck_frac fraction of the fitting
+dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.core.AutoFeaturizer.features">
+<code class="sig-name descname">features</code><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.features" title="Permalink to this definition">¶</a></dt>
+<dd><p>The features generated from the application of all
+featurizers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.core.AutoFeaturizer.auto_featurizer">
+<code class="sig-name descname">auto_featurizer</code><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.auto_featurizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>whether the featurizers are set automatically,
+or passed by the users.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.core.AutoFeaturizer.fitted_input_df">
+<code class="sig-name descname">fitted_input_df</code><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.fitted_input_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dataframe which was fitted on</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.core.AutoFeaturizer.converted_input_df">
+<code class="sig-name descname">converted_input_df</code><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.converted_input_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>The converted dataframe which
+was fitted on (i.e., strings converted to compositions).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.core.AutoFeaturizer.removed_featurizers">
+<code class="sig-name descname">removed_featurizers</code><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.removed_featurizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of featurizers removed
+by prechecking methods, if applicable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>[BaseFeaturizer]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">Attributes not set during fitting and not specified by arguments</code></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="automatminer.featurization.core.AutoFeaturizer.min_precheck_frac">
+<code class="sig-name descname">min_precheck_frac</code><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.min_precheck_frac" title="Permalink to this definition">¶</a></dt>
+<dd><p>The minimum fraction of a featuriser’s input
+that can be valid (via featurizer.precheck(data).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.core.AutoFeaturizer.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The operation to be logging.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The method result.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.core.AutoFeaturizer.transform">
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.core.AutoFeaturizer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for a method to log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The operation to be logging.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The method result.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.featurization.sets">
+<span id="automatminer-featurization-sets-module"></span><h2>automatminer.featurization.sets module<a class="headerlink" href="#module-automatminer.featurization.sets" title="Permalink to this headline">¶</a></h2>
+<p>Defines sets of featurizers to be used by automatminer during featurization.</p>
+<p>Featurizer sets are classes with attributes containing lists of featurizers.
+For example, the set of all express structure featurizers could be found with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">StructureFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">express</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="automatminer.featurization.sets.AllFeaturizers">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.featurization.sets.</code><code class="sig-name descname">AllFeaturizers</code><span class="sig-paren">(</span><em class="sig-param">exclude=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.sets.AllFeaturizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.featurization.base.FeaturizerSet" title="automatminer.featurization.base.FeaturizerSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.featurization.base.FeaturizerSet</span></code></a></p>
+<p>Featurizer set containing all available featurizers.</p>
+<p>This class provides subsets for composition, structure, density of states
+and band structure based featurizers. Additional sets containing all
+featurizers and the set of express/heavy/etc. featurizers are provided.</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">composition_featurizers</span> <span class="o">=</span> <span class="n">AllFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">composition</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>exclude</strong> (<em>list of str</em><em>, </em><em>optional</em>) – A list of featurizer class names that
+will be excluded from the set of featurizers returned.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="automatminer.featurization.sets.AllFeaturizers.all">
+<em class="property">property </em><code class="sig-name descname">all</code><a class="headerlink" href="#automatminer.featurization.sets.AllFeaturizers.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>All featurizers available for this featurization type. These
+featurizers are allowed to:</p>
+<ul class="simple">
+<li><p>have multiple, highly similar versions of the same featurizer,</p></li>
+<li><dl class="simple">
+<dt>not work on standard versions of the input types (e.g., SiteDOS works</dt><dd><p>on the DOS for a single site, not structure</p>
+</dd>
+</dl>
+</li>
+<li><p>return non-vectorized outputs (e.g., matrices, other data types).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.AllFeaturizers.bandstructure">
+<em class="property">property </em><code class="sig-name descname">bandstructure</code><a class="headerlink" href="#automatminer.featurization.sets.AllFeaturizers.bandstructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all band structure based featurizers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.AllFeaturizers.composition">
+<em class="property">property </em><code class="sig-name descname">composition</code><a class="headerlink" href="#automatminer.featurization.sets.AllFeaturizers.composition" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all composition based featurizers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.AllFeaturizers.debug">
+<em class="property">property </em><code class="sig-name descname">debug</code><a class="headerlink" href="#automatminer.featurization.sets.AllFeaturizers.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>An ultra-minimal set of featurizers for debugging.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.AllFeaturizers.dos">
+<em class="property">property </em><code class="sig-name descname">dos</code><a class="headerlink" href="#automatminer.featurization.sets.AllFeaturizers.dos" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all density of states based featurizers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.AllFeaturizers.express">
+<em class="property">property </em><code class="sig-name descname">express</code><a class="headerlink" href="#automatminer.featurization.sets.AllFeaturizers.express" title="Permalink to this definition">¶</a></dt>
+<dd><p>A focused set of featurizers which should:</p>
+<ul class="simple">
+<li><p>be reasonably fast to featurize</p></li>
+<li><p>be not prone to errors/nans</p></li>
+<li><p>provide informative learning features</p></li>
+<li><p>do not include many irrelevant features making ML expensive</p></li>
+<li><p>have each featurizer return a vector</p></li>
+<li><p>allow the recognized type (structure, composition, etc.) as input.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.AllFeaturizers.heavy">
+<em class="property">property </em><code class="sig-name descname">heavy</code><a class="headerlink" href="#automatminer.featurization.sets.AllFeaturizers.heavy" title="Permalink to this definition">¶</a></dt>
+<dd><p>A more expensive and complete (though not necessarily better)
+version of express.</p>
+<p>Similar to express, all featurizers selected should return useful
+learning features. However the selected featurizers may now:</p>
+<ul class="simple">
+<li><p>generate many (thousands+) features</p></li>
+<li><p>be expensive to featurize (1s+ per item)</p></li>
+<li><p>be prone to NaNs on certain datasets</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.AllFeaturizers.structure">
+<em class="property">property </em><code class="sig-name descname">structure</code><a class="headerlink" href="#automatminer.featurization.sets.AllFeaturizers.structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all structure based featurizers.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="automatminer.featurization.sets.BSFeaturizers">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.featurization.sets.</code><code class="sig-name descname">BSFeaturizers</code><span class="sig-paren">(</span><em class="sig-param">exclude=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.sets.BSFeaturizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.featurization.base.FeaturizerSet" title="automatminer.featurization.base.FeaturizerSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.featurization.base.FeaturizerSet</span></code></a></p>
+<p>Featurizer set containing band structure featurizers.</p>
+<p>See the FeaturizerSet documentation for inspect of each property (sublist
+of featurizers).</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bs_featurizers</span> <span class="o">=</span> <span class="n">BSFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">express</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>exclude</strong> (<em>list of str</em><em>, </em><em>optional</em>) – A list of featurizer class names that
+will be excluded from the set of featurizers returned.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="automatminer.featurization.sets.BSFeaturizers.all">
+<em class="property">property </em><code class="sig-name descname">all</code><a class="headerlink" href="#automatminer.featurization.sets.BSFeaturizers.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all band structure based featurizers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.BSFeaturizers.debug">
+<em class="property">property </em><code class="sig-name descname">debug</code><a class="headerlink" href="#automatminer.featurization.sets.BSFeaturizers.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>An ultra-minimal set of featurizers for debugging.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.BSFeaturizers.express">
+<em class="property">property </em><code class="sig-name descname">express</code><a class="headerlink" href="#automatminer.featurization.sets.BSFeaturizers.express" title="Permalink to this definition">¶</a></dt>
+<dd><p>A focused set of featurizers which should:</p>
+<ul class="simple">
+<li><p>be reasonably fast to featurize</p></li>
+<li><p>be not prone to errors/nans</p></li>
+<li><p>provide informative learning features</p></li>
+<li><p>do not include many irrelevant features making ML expensive</p></li>
+<li><p>have each featurizer return a vector</p></li>
+<li><p>allow the recognized type (structure, composition, etc.) as input.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.BSFeaturizers.heavy">
+<em class="property">property </em><code class="sig-name descname">heavy</code><a class="headerlink" href="#automatminer.featurization.sets.BSFeaturizers.heavy" title="Permalink to this definition">¶</a></dt>
+<dd><p>A more expensive and complete (though not necessarily better)
+version of express.</p>
+<p>Similar to express, all featurizers selected should return useful
+learning features. However the selected featurizers may now:</p>
+<ul class="simple">
+<li><p>generate many (thousands+) features</p></li>
+<li><p>be expensive to featurize (1s+ per item)</p></li>
+<li><p>be prone to NaNs on certain datasets</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="automatminer.featurization.sets.CompositionFeaturizers">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.featurization.sets.</code><code class="sig-name descname">CompositionFeaturizers</code><span class="sig-paren">(</span><em class="sig-param">exclude=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.sets.CompositionFeaturizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.featurization.base.FeaturizerSet" title="automatminer.featurization.base.FeaturizerSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.featurization.base.FeaturizerSet</span></code></a></p>
+<p>Featurizer set containing composition featurizers.</p>
+<p>See the FeaturizerSet documentation for inspect of each property (sublist
+of featurizers).</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">best_featurizers</span> <span class="o">=</span> <span class="n">CompositionFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">express</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>exclude</strong> (<em>list of str</em><em>, </em><em>optional</em>) – A list of featurizer class names that
+will be excluded from the set of featurizers returned.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="automatminer.featurization.sets.CompositionFeaturizers.all">
+<em class="property">property </em><code class="sig-name descname">all</code><a class="headerlink" href="#automatminer.featurization.sets.CompositionFeaturizers.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>All featurizers available for this featurization type. These
+featurizers are allowed to:</p>
+<ul class="simple">
+<li><p>have multiple, highly similar versions of the same featurizer,</p></li>
+<li><dl class="simple">
+<dt>not work on standard versions of the input types (e.g., SiteDOS works</dt><dd><p>on the DOS for a single site, not structure</p>
+</dd>
+</dl>
+</li>
+<li><p>return non-vectorized outputs (e.g., matrices, other data types).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.CompositionFeaturizers.debug">
+<em class="property">property </em><code class="sig-name descname">debug</code><a class="headerlink" href="#automatminer.featurization.sets.CompositionFeaturizers.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>An ultra-minimal set of featurizers for debugging.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.CompositionFeaturizers.express">
+<em class="property">property </em><code class="sig-name descname">express</code><a class="headerlink" href="#automatminer.featurization.sets.CompositionFeaturizers.express" title="Permalink to this definition">¶</a></dt>
+<dd><p>A focused set of featurizers which should:</p>
+<ul class="simple">
+<li><p>be reasonably fast to featurize</p></li>
+<li><p>be not prone to errors/nans</p></li>
+<li><p>provide informative learning features</p></li>
+<li><p>do not include many irrelevant features making ML expensive</p></li>
+<li><p>have each featurizer return a vector</p></li>
+<li><p>allow the recognized type (structure, composition, etc.) as input.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.CompositionFeaturizers.heavy">
+<em class="property">property </em><code class="sig-name descname">heavy</code><a class="headerlink" href="#automatminer.featurization.sets.CompositionFeaturizers.heavy" title="Permalink to this definition">¶</a></dt>
+<dd><p>A more expensive and complete (though not necessarily better)
+version of express.</p>
+<p>Similar to express, all featurizers selected should return useful
+learning features. However the selected featurizers may now:</p>
+<ul class="simple">
+<li><p>generate many (thousands+) features</p></li>
+<li><p>be expensive to featurize (1s+ per item)</p></li>
+<li><p>be prone to NaNs on certain datasets</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="automatminer.featurization.sets.DOSFeaturizers">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.featurization.sets.</code><code class="sig-name descname">DOSFeaturizers</code><span class="sig-paren">(</span><em class="sig-param">exclude=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.sets.DOSFeaturizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.featurization.base.FeaturizerSet" title="automatminer.featurization.base.FeaturizerSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.featurization.base.FeaturizerSet</span></code></a></p>
+<p>Featurizer set containing density of states featurizers.</p>
+<p>See the FeaturizerSet documentation for inspect of each property (sublist
+of featurizers).</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dos_featurizers</span> <span class="o">=</span> <span class="n">DOSFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">express</span>
+</pre></div>
+</div>
+<p>Density of states featurizers should work on the entire density of states
+if they are in express or heavy. If they are in “all” they may work on
+sites or return matrices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>exclude</strong> (<em>list of str</em><em>, </em><em>optional</em>) – A list of featurizer class names that
+will be excluded from the set of featurizers returned.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="automatminer.featurization.sets.DOSFeaturizers.all">
+<em class="property">property </em><code class="sig-name descname">all</code><a class="headerlink" href="#automatminer.featurization.sets.DOSFeaturizers.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all density of states based featurizers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.DOSFeaturizers.debug">
+<em class="property">property </em><code class="sig-name descname">debug</code><a class="headerlink" href="#automatminer.featurization.sets.DOSFeaturizers.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>An ultra-minimal set of featurizers for debugging.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.DOSFeaturizers.express">
+<em class="property">property </em><code class="sig-name descname">express</code><a class="headerlink" href="#automatminer.featurization.sets.DOSFeaturizers.express" title="Permalink to this definition">¶</a></dt>
+<dd><p>A focused set of featurizers which should:</p>
+<ul class="simple">
+<li><p>be reasonably fast to featurize</p></li>
+<li><p>be not prone to errors/nans</p></li>
+<li><p>provide informative learning features</p></li>
+<li><p>do not include many irrelevant features making ML expensive</p></li>
+<li><p>have each featurizer return a vector</p></li>
+<li><p>allow the recognized type (structure, composition, etc.) as input.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.DOSFeaturizers.heavy">
+<em class="property">property </em><code class="sig-name descname">heavy</code><a class="headerlink" href="#automatminer.featurization.sets.DOSFeaturizers.heavy" title="Permalink to this definition">¶</a></dt>
+<dd><p>A more expensive and complete (though not necessarily better)
+version of express.</p>
+<p>Similar to express, all featurizers selected should return useful
+learning features. However the selected featurizers may now:</p>
+<ul class="simple">
+<li><p>generate many (thousands+) features</p></li>
+<li><p>be expensive to featurize (1s+ per item)</p></li>
+<li><p>be prone to NaNs on certain datasets</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="automatminer.featurization.sets.StructureFeaturizers">
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.featurization.sets.</code><code class="sig-name descname">StructureFeaturizers</code><span class="sig-paren">(</span><em class="sig-param">exclude=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.featurization.base.FeaturizerSet" title="automatminer.featurization.base.FeaturizerSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.featurization.base.FeaturizerSet</span></code></a></p>
+<p>Featurizer set containing structure featurizers.</p>
+<p>See the FeaturizerSet documentation for inspect of each property (sublist
+of featurizers).</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">best_featurizers</span> <span class="o">=</span> <span class="n">StructureFeaturizers</span><span class="p">()</span><span class="o">.</span><span class="n">express</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>exclude</strong> (<em>list of str</em><em>, </em><em>optional</em>) – A list of featurizer class names that
+will be excluded from the set of featurizers returned.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.all">
+<em class="property">property </em><code class="sig-name descname">all</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>All featurizers available for this featurization type. These
+featurizers are allowed to:</p>
+<ul class="simple">
+<li><p>have multiple, highly similar versions of the same featurizer,</p></li>
+<li><dl class="simple">
+<dt>not work on standard versions of the input types (e.g., SiteDOS works</dt><dd><p>on the DOS for a single site, not structure</p>
+</dd>
+</dl>
+</li>
+<li><p>return non-vectorized outputs (e.g., matrices, other data types).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.debug">
+<em class="property">property </em><code class="sig-name descname">debug</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>An ultra-minimal set of featurizers for debugging.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.express">
+<em class="property">property </em><code class="sig-name descname">express</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.express" title="Permalink to this definition">¶</a></dt>
+<dd><p>A focused set of featurizers which should:</p>
+<ul class="simple">
+<li><p>be reasonably fast to featurize</p></li>
+<li><p>be not prone to errors/nans</p></li>
+<li><p>provide informative learning features</p></li>
+<li><p>do not include many irrelevant features making ML expensive</p></li>
+<li><p>have each featurizer return a vector</p></li>
+<li><p>allow the recognized type (structure, composition, etc.) as input.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.heavy">
+<em class="property">property </em><code class="sig-name descname">heavy</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.heavy" title="Permalink to this definition">¶</a></dt>
+<dd><p>A more expensive and complete (though not necessarily better)
+version of express.</p>
+<p>Similar to express, all featurizers selected should return useful
+learning features. However the selected featurizers may now:</p>
+<ul class="simple">
+<li><p>generate many (thousands+) features</p></li>
+<li><p>be expensive to featurize (1s+ per item)</p></li>
+<li><p>be prone to NaNs on certain datasets</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automatminer.featurization.sets.StructureFeaturizers.need_fit">
+<em class="property">property </em><code class="sig-name descname">need_fit</code><a class="headerlink" href="#automatminer.featurization.sets.StructureFeaturizers.need_fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-automatminer.featurization">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-automatminer.featurization" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;HackingMaterials 2019.
+      
+      |
+      <a href="_sources/automatminer.featurization.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
