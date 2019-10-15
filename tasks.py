@@ -66,7 +66,7 @@ def update_changelog(ctx):
 
 @task
 def full_tests_circleci(ctx):
-    ctx.run("./run_intensive.sh")
+    ctx.run("./dev_scripts/run_intensive.sh")
 
 
 @task
