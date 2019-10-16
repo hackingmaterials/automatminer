@@ -135,7 +135,7 @@ class RunPipe(FireTaskBase):
 
         # Save everything
         pipe.save(os.path.join(save_dir, "pipe.p"))
-        pipe.digest(os.path.join(save_dir, "digest.txt"))
+        pipe.inspect(filename=os.path.join(save_dir, "digest.txt"))
         result_df.to_csv(os.path.join(save_dir, "test_df.csv"))
         pipe.post_fit_df.to_csv(os.path.join(save_dir, "fitted_df.csv"))
 
