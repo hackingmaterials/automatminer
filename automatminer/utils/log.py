@@ -2,10 +2,10 @@
 Utils for logging.
 """
 
+import datetime
+import logging
 import os
 import sys
-import logging
-import datetime
 
 AMM_LOGGER_BASENAME = "automatminer"
 AMM_LOG_FIT_STR = "fitting"
@@ -15,7 +15,7 @@ AMM_LOG_PREDICT_STR = "predicting"
 AMM_DEFAULT_LOGGER = True
 
 
-def initialize_logger(logger_name, log_dir='.', level=None) -> logging.Logger:
+def initialize_logger(logger_name, log_dir=".", level=None) -> logging.Logger:
     """Initialize the default logger with stdout and file handlers.
 
     Args:
@@ -28,15 +28,16 @@ def initialize_logger(logger_name, log_dir='.', level=None) -> logging.Logger:
     level = level or logging.INFO
 
     logger = logging.getLogger(logger_name)
-    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
-                                  datefmt='%Y-%m-%d %H:%M:%S')
+    formatter = logging.Formatter(
+        fmt="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+    )
 
     logpath = os.path.join(log_dir, logger_name)
     if os.path.exists(logpath + ".log"):
-        logpath += "_" + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        logpath += "_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     logpath += ".log"
 
-    handler = logging.FileHandler(logpath, mode='w')
+    handler = logging.FileHandler(logpath, mode="w")
     handler.setFormatter(formatter)
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
@@ -87,12 +88,14 @@ def log_progress(operation):
             Return:
                 result: The method result.
             """
-            self = args[0]
-            self.logger.info("{}Starting {}.".format(self._log_prefix,
-                                                     operation))
+            instance = args[0]
+            instance.logger.info(
+                "{}Starting {}.".format(instance._log_prefix, operation)
+            )
             result = meth(*args, **kwargs)
-            self.logger.info("{}Finished {}.".format(self._log_prefix,
-                                                     operation))
+            instance.logger.info(
+                "{}Finished {}.".format(instance._log_prefix, operation)
+            )
             return result
 
         return wrapper

@@ -5,12 +5,17 @@ import os
 import unittest
 
 import pandas as pd
-from sklearn.exceptions import NotFittedError
-
 from automatminer import __version__
-from automatminer.utils.pkg import compare_columns, check_fitted, \
-    set_fitted, get_version, save_dict_to_file, AMM_SUPPORTED_EXTS
 from automatminer.base import DFTransformer
+from automatminer.utils.pkg import (
+    AMM_SUPPORTED_EXTS,
+    check_fitted,
+    compare_columns,
+    get_version,
+    save_dict_to_file,
+    set_fitted,
+)
+from sklearn.exceptions import NotFittedError
 
 
 class MyTransformer(DFTransformer):
@@ -27,7 +32,6 @@ class MyTransformer(DFTransformer):
 
 
 class TestPackageTools(unittest.TestCase):
-
     def setUp(self) -> None:
         self.remant_base_path = os.path.dirname(__file__)
         self.remant_file_prefix = "saved"

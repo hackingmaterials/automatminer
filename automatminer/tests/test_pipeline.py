@@ -2,18 +2,17 @@
 Tests for the top level interface.
 """
 
-import unittest
 import os.path
+import unittest
 
 import pandas as pd
-from matminer.datasets.dataset_retrieval import load_dataset
-from sklearn.metrics import r2_score
-from sklearn.exceptions import NotFittedError
-from sklearn.model_selection import KFold
-
 from automatminer.pipeline import MatPipe
-from automatminer.presets import get_preset_config, get_available_presets
-from automatminer.utils.pkg import AutomatminerError, AMM_SUPPORTED_EXTS
+from automatminer.presets import get_available_presets, get_preset_config
+from automatminer.utils.pkg import AMM_SUPPORTED_EXTS, AutomatminerError
+from matminer.datasets.dataset_retrieval import load_dataset
+from sklearn.exceptions import NotFittedError
+from sklearn.metrics import r2_score
+from sklearn.model_selection import KFold
 
 test_dir = os.path.dirname(__file__)
 CACHE_SRC = os.path.join(test_dir, "cache.json")
@@ -24,11 +23,11 @@ DIGEST_PATH = os.path.join(test_dir, "matdigest")
 
 class TestMatPipeSetup(unittest.TestCase):
     def setUp(self):
-        self.config = get_preset_config('debug')
+        self.config = get_preset_config("debug")
 
     def test_instantiation(self):
-        learner = self.config['learner']
-        autofeaturizer = self.config['autofeaturizer']
+        learner = self.config["learner"]
+        autofeaturizer = self.config["autofeaturizer"]
         with self.assertRaises(AutomatminerError):
             MatPipe(learner=learner)
         with self.assertRaises(AutomatminerError):
@@ -74,22 +73,20 @@ def make_matpipe_test(config_preset, skip=None):
         skip = []
     for s in skip:
         if s not in skippables:
-            raise ValueError(
-                f"{s} is not a skippable test. Choose from {skippables}"
-            )
+            raise ValueError(f"{s} is not a skippable test. Choose from {skippables}")
     reason = "Skip was requested."
 
     class TestMatPipe(unittest.TestCase):
         def setUp(self):
             df = load_dataset("elastic_tensor_2015").rename(
-                columns={"formula": "composition"})
+                columns={"formula": "composition"}
+            )
             self.df = df[["composition", "K_VRH"]]
             self.df_struc = df[["composition", "structure", "K_VRH"]]
             self.extra_features = df["G_VRH"]
             self.target = "K_VRH"
             self.config = get_preset_config(config_preset)
-            self.config_cached = get_preset_config(config_preset,
-                                                   cache_src=CACHE_SRC)
+            self.config_cached = get_preset_config(config_preset, cache_src=CACHE_SRC)
             self.pipe = MatPipe(**self.config)
             self.pipe_cached = MatPipe(**self.config_cached)
 
@@ -132,7 +129,6 @@ def make_matpipe_test(config_preset, skip=None):
             test = df_test[self.target + " predicted"]
             self.assertTrue(r2_score(true, test) > 0.75)
 
-
         @unittest.skipIf("ignore" in skip, reason)
         def test_ignore(self):
             df = self.df
@@ -163,7 +159,6 @@ def make_matpipe_test(config_preset, skip=None):
             predicted_some = self.pipe.predict(df_test, ignore=some)
             self.assertFalse(ef in predicted_some.columns)
             self.assertTrue("composition" in predicted_some.columns)
-
 
         @unittest.skipIf("benchmarking" in skip, reason)
         def test_benchmarking_no_cache(self):
@@ -231,8 +226,9 @@ def make_matpipe_test(config_preset, skip=None):
 
             # Test static subset of kfold
             df2 = self.df.iloc[500:550]
-            df_tests2 = pipe.benchmark(df2, self.target, kfold,
-                                       fold_subset=[0, 3], cache=cache)
+            df_tests2 = pipe.benchmark(
+                df2, self.target, kfold, fold_subset=[0, 3], cache=cache
+            )
             self.assertEqual(len(df_tests2), 2)
 
         def tearDown(self) -> None:
@@ -244,8 +240,10 @@ def make_matpipe_test(config_preset, skip=None):
     return TestMatPipe
 
 
-@unittest.skipIf(int(os.environ.get("SKIP_INTENSIVE", 0)),
-                     "Test too intensive for CircleCI commit builds.")
+@unittest.skipIf(
+    int(os.environ.get("SKIP_INTENSIVE", 0)),
+    "Test too intensive for CircleCI commit builds.",
+)
 class MatPipeDebugTest(make_matpipe_test("debug")):
     pass
 
