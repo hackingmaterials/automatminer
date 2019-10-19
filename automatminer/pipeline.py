@@ -108,7 +108,7 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.cleaner = cleaner
         self.reducer = reducer
         self.learner = learner
-        self.logger = logger
+        logger = logger
         self.pre_fit_df = None
         self.post_fit_df = None
         self.ml_type = None
@@ -167,15 +167,15 @@ class MatPipe(DFTransformer, LoggableMixin):
         """
         self.pre_fit_df = df
         self.ml_type = regression_or_classification(df[target])
-        self.logger.info("Problem type is: {}".format(self.ml_type))
+        logger.info("Problem type is: {}".format(self.ml_type))
 
         # Fit transformers on training data
-        self.logger.info("Fitting MatPipe pipeline to data.")
+        logger.info("Fitting MatPipe pipeline to data.")
         df = self.autofeaturizer.fit_transform(df, target)
         df = self.cleaner.fit_transform(df, target)
         df = self.reducer.fit_transform(df, target)
         self.learner.fit(df, target)
-        self.logger.info("MatPipe successfully fit.")
+        logger.info("MatPipe successfully fit.")
         self.post_fit_df = df
         self.target = target
         return self
@@ -219,7 +219,7 @@ class MatPipe(DFTransformer, LoggableMixin):
             (pandas.DataFrame): The dataframe with target property predictions.
         """
         if ignore:
-            self.logger.warning(
+            logger.warning(
                 f"MatPipe will ignore and append (after prediction) the "
                 f"following columns: \n{ignore}"
             )
@@ -228,12 +228,12 @@ class MatPipe(DFTransformer, LoggableMixin):
         else:
             ignore_df = pd.DataFrame()
 
-        self.logger.info("Beginning MatPipe prediction using fitted pipeline.")
+        logger.info("Beginning MatPipe prediction using fitted pipeline.")
         df = self.autofeaturizer.transform(df, self.target)
         df = self.cleaner.transform(df, self.target)
         df = self.reducer.transform(df, self.target)
         predictions = self.learner.predict(df, self.target)
-        self.logger.info("MatPipe prediction completed.")
+        logger.info("MatPipe prediction completed.")
         merged_df = predictions.join(ignore_df, how="left")
         return merged_df
 
@@ -290,10 +290,10 @@ class MatPipe(DFTransformer, LoggableMixin):
         cache_src = self.autofeaturizer.cache_src
         if cache_src and cache:
             if os.path.exists(cache_src):
-                self.logger.warning(
+                logger.warning(
                     "Cache src {} already found! Ensure this featurized data "
                     "matches the df being benchmarked.".format(cache_src))
-            self.logger.warning("Running pre-featurization for caching.")
+            logger.warning("Running pre-featurization for caching.")
             self.autofeaturizer.fit_transform(df, target)
         elif cache_src and not cache:
             raise AutomatminerError(
@@ -306,23 +306,23 @@ class MatPipe(DFTransformer, LoggableMixin):
                 "autofeaturizer. Pass the cache_src argument to AutoFeaturizer "
                 "or use the cache_src get_preset_config powerup.")
         else:
-            self.logger.debug("No caching being used in AutoFeaturizer or "
+            logger.debug("No caching being used in AutoFeaturizer or "
                               "benchmark.")
 
         if not fold_subset:
             fold_subset = list(range(kfold.n_splits))
 
-        self.logger.warning("Beginning benchmark.")
+        logger.warning("Beginning benchmark.")
         results = []
         fold = 0
         for _, test_ix in kfold.split(X=df, y=df[target]):
             if fold in fold_subset:
-                self.logger.info("Training on fold index {}".format(fold))
+                logger.info("Training on fold index {}".format(fold))
                 # Split, identify, and randomize test set
                 test = df.iloc[test_ix].sample(frac=1)
                 train = df[~df.index.isin(test.index)].sample(frac=1)
                 self.fit(train, target)
-                self.logger.info("Predicting fold index {}".format(fold))
+                logger.info("Predicting fold index {}".format(fold))
                 test = self.predict(test, ignore=ignore)
                 results.append(test)
             fold += 1

@@ -149,7 +149,7 @@ class DFMLAdaptor(DFTransformer):
 
             log_msg = "Prediction finished successfully."
             try:
-                self.logger.info(self._log_prefix + log_msg)
+                logger.info(self._log_prefix + log_msg)
             except AttributeError:
                 pass
             return df

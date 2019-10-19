@@ -82,7 +82,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self._fitted_target = None
         self._backend = None
         self._features = None
-        self.logger = logger
+        logger = logger
 
         self.from_serialized = False
         self._best_models = None
@@ -289,7 +289,7 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
 
     def __init__(self, regressor, classifier, logger=True):
         self.mode = None
-        self.logger = logger
+        logger = logger
         self._regressor = regressor
         self._classifier = classifier
         self._features = None

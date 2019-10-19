@@ -128,7 +128,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
 
         self.cache_src = cache_src
         self.preset = "express" if preset is None else preset
-        self.logger = logger
+        logger = logger
         self.featurizers = featurizers
         self.exclude = exclude if exclude else []
         self.functionalize = functionalize
@@ -201,7 +201,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.needs_fit = needs_fit
 
         if self.needs_fit and self.cache_src:
-            self.logger.critical(self._log_prefix +
+            logger.critical(self._log_prefix +
                              "Using cached features on fittable featurizers! "
                              "Please make sure you are not benchmarking with "
                              "these options enabled; it is likely you will be"
@@ -243,7 +243,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             (AutoFeaturizer): self
         """
         if self.cache_src and os.path.exists(self.cache_src):
-            self.logger.info(self._log_prefix +
+            logger.info(self._log_prefix +
                              "Cache {} found. Fit aborted."
                              "".format(self.cache_src))
             return self
@@ -254,7 +254,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
 
         for featurizer_type, featurizers in self.featurizers.items():
             if not featurizers:
-                self.logger.info(
+                logger.info(
                     self._log_prefix +
                     "No {} featurizers being used.".format(featurizer_type))
                 continue
@@ -264,7 +264,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
 
                 # Remove invalid featurizers by looking at valid_fraction
                 if self.do_precheck:
-                    self.logger.debug(self._log_prefix +
+                    logger.debug(self._log_prefix +
                                       "Prechecking featurizers.")
                     invalid_featurizers = []
                     for f in featurizers:
@@ -279,9 +279,9 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                       " ({})" \
                                       "".format(f.__class__.__name__, frac,
                                                 self.min_precheck_frac)
-                                self.logger.info(self._log_prefix + msg)
+                                logger.info(self._log_prefix + msg)
                         except (AttributeError, ValueError, KeyError) as E:
-                            self.logger.warning(
+                            logger.warning(
                                 self._log_prefix +
                                 "{} precheck failed with {}. Ignoring...."
                                 "".format(f, E))
@@ -298,7 +298,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                         if f.__class__.__name__ in self.fittable_fcls:
                             log_fit = True
                     if log_fit:
-                        self.logger.info(
+                        logger.info(
                             self._log_prefix +
                             "Fitting {}.".format(f.__class__.__name__))
 
@@ -307,12 +307,12 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                     self.features += f.feature_labels()
 
                     if log_fit:
-                        self.logger.info(
+                        logger.info(
                             self._log_prefix +
                             "Fit {} to {} samples in dataframe."
                             "".format(f.__class__.__name__, df.shape[0]))
             else:
-                self.logger.info(self._log_prefix +
+                logger.info(self._log_prefix +
                                  "Featurizer type {} not in the dataframe to be"
                                  " fitted. Skipping...".format(featurizer_type))
         self.converted_input_df = df
@@ -333,7 +333,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             df (pandas.DataFrame): Transformed dataframe containing features.
         """
         if self.cache_src and os.path.exists(self.cache_src):
-            self.logger.debug(self._log_prefix +
+            logger.debug(self._log_prefix +
                               "Reading cache_src {}".format(self.cache_src))
             cached_df = load_dataframe_from_json(self.cache_src)
             if not all([loc in cached_df.index for loc in df.index]):
@@ -344,7 +344,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 cached_subdf = cached_df.loc[df.index]
                 if target in cached_subdf.columns:
                     if target not in df.columns:
-                        self.logger.warn(
+                        logger.warn(
                             self._log_prefix +
                             "Target not present in both cached df and input df."
                             " Cannot perform comparison to ensure index match.")
@@ -371,12 +371,12 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                 except TypeError:
                                     pass
                         if problems:
-                            self.logger.warning(
+                            logger.warning(
                                 self._log_prefix +
                                 "Mismatch between cached targets and input "
                                 "targets: \n{}".format(problems))
 
-                self.logger.info(self._log_prefix +
+                logger.info(self._log_prefix +
                                  "Restored {} features on {} samples from "
                                  "cache {}".format(len(cached_subdf.columns),
                                                    len(df.index),
@@ -397,7 +397,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                         df = self._tidy_column(df, featurizer_type)
 
                     for f in featurizers:
-                        self.logger.info(self._log_prefix +
+                        logger.info(self._log_prefix +
                                          "Featurizing with {}."
                                          "".format(f.__class__.__name__))
                         df = f.featurize_dataframe(
@@ -409,7 +409,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                     if self.drop_inputs:
                         df = df.drop(columns=[featurizer_type])
                 else:
-                    self.logger.info(self._log_prefix +
+                    logger.info(self._log_prefix +
                                      "Featurizer type {} not in the dataframe. "
                                      "Skipping...".format(featurizer_type))
             if self.functionalize:
@@ -468,7 +468,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         if featurizer_type == self.composition_col:
             # Convert formulas to composition objects
             if isinstance(type_tester, str):
-                self.logger.info(self._log_prefix +
+                logger.info(self._log_prefix +
                                  "Compositions detected as strings. Attempting "
                                  "conversion to Composition objects...")
                 stc = StrToComposition(overwrite_data=True,
@@ -479,7 +479,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                              inplace=False)
 
             elif isinstance(type_tester, dict):
-                self.logger.info(self._log_prefix +
+                logger.info(self._log_prefix +
                                  "Compositions detected as dicts. Attempting "
                                  "conversion to Composition objects...")
                 df[featurizer_type] = [Composition.from_dict(d) for d in
@@ -487,7 +487,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
 
             # Convert non-oxidstate containing comps to oxidstate comps
             if self.guess_oxistates:
-                self.logger.info(self._log_prefix +
+                logger.info(self._log_prefix +
                                  "Guessing oxidation states of compositions, as"
                                  " they were not present in input.")
                 cto = CompositionToOxidComposition(
@@ -498,7 +498,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                                  multiindex=self.multiindex,
                                                  inplace=False)
                 except Exception as e:
-                    self.logger.warning(self._log_prefix +
+                    logger.warning(self._log_prefix +
                                      "Could not decorate oxidation states due "
                                      "to {}. Excluding featurizers based on "
                                      "composition oxistates".format(e))
@@ -509,7 +509,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         else:
             # Convert structure/bs/dos dicts to objects (robust already)
             if isinstance(type_tester, (dict, str)):
-                self.logger.info(self._log_prefix.capitalize() +
+                logger.info(self._log_prefix.capitalize() +
                                  "{} detected as string or dict. Attempting "
                                  "conversion to {} objects..."
                                  "".format(featurizer_type, featurizer_type))
@@ -524,7 +524,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             # Decorate with oxidstates
             if featurizer_type == self.structure_col and \
                     self.guess_oxistates:
-                self.logger.info(
+                logger.info(
                     self._log_prefix +
                     "Guessing oxidation states of structures if they were "
                     "not present in input.")
@@ -536,7 +536,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                                                  multiindex=self.multiindex,
                                                  inplace=False)
                 except Exception as e:
-                    self.logger.info(
+                    logger.info(
                         self._log_prefix +
                         "Could not decorate oxidation states on structures "
                         "due to {}.".format(e))
@@ -564,11 +564,11 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                 and self.composition_col in self.featurizers:
 
             if self.composition_col in df.columns:
-                self.logger.info(self._log_prefix +
+                logger.info(self._log_prefix +
                                  "composition column already exists, "
                                  "overwriting with composition from structure.")
             else:
-                self.logger.info(self._log_prefix +
+                logger.info(self._log_prefix +
                                  "Adding compositions from structures.")
 
             df = self._tidy_column(df, self.structure_col)
