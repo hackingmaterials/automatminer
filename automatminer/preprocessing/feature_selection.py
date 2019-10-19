@@ -1,6 +1,8 @@
 """
 Various in-house feature reduction techniques.
 """
+import logging
+
 import numpy as np
 from sklearn.base import is_classifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
@@ -17,8 +19,11 @@ from automatminer.base import LoggableMixin, DFTransformer
 __authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
                "Alex Dunn <ardunn@lbl.gov>"]
 
+
+logger = logging.getLogger(__name__)
+
 # Used in compare_coff_clf, declared here to prevent repeated obj creation
-COMMON_CLF = SGDClassifier()
+common_clf = SGDClassifier()
 
 
 class TreeFeatureReducer(DFTransformer, LoggableMixin):
@@ -32,14 +37,9 @@ class TreeFeatureReducer(DFTransformer, LoggableMixin):
             sorted (descending) based on their importance.
         random_state (int): relevant if non-deterministic algorithms such as
             random forest are used.
-        logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will be
-            used. If set to False, then no logging will occur.
     """
 
-    def __init__(self, mode, importance_percentile=0.95,
-                 logger=True, random_state=0):
-        self.logger = logger
+    def __init__(self, mode, importance_percentile=0.95, random_state=0):
         self.mode = mode
         self.importance_percentile = importance_percentile
         self.selected_features = None
@@ -91,7 +91,7 @@ class TreeFeatureReducer(DFTransformer, LoggableMixin):
             tfeats = self.get_top_features(fimportance)
             m_curr = len(tfeats)
             m_prev = len(X.columns)
-            self.logger.debug('nfeatures: {}->{}'.format(
+            logger.debug('nfeatures: {}->{}'.format(
                 len(X.columns), m_curr))
             X = X[tfeats]
             if not recursive:
@@ -141,7 +141,7 @@ class TreeFeatureReducer(DFTransformer, LoggableMixin):
             all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
         # take the union of selected features of each fold
         self.selected_features = list(set(all_feats))
-        self.logger.info(
+        logger.info(
             self._log_prefix +
             'Finished tree-based feature reduction of {} initial features to '
             '{}'.format(m0, len(self.selected_features)))
@@ -214,8 +214,8 @@ def lower_corr_clf(df, target, f1, f2):
     for i, x in enumerate([x1, x2]):
         x_tr, x_te, y_tr, y_te = train_test_split(x, y, test_size=0.3,
                                                   random_state=0)
-        COMMON_CLF.fit(x_tr, y_tr)
-        y_pred = COMMON_CLF.predict(x_te)
+        common_clf.fit(x_tr, y_tr)
+        y_pred = common_clf.predict(x_te)
         if len(unique_names) <= 2:
             score = roc_auc_score(y_te, y_pred)
         else:
