@@ -58,7 +58,7 @@ def initialize_null_logger(name) -> logging.Logger:
     return logger
 
 
-def log_progress(operation):
+def log_progress(logger, operation):
     """
     Decorator to auto-log progress before and after executing a method, such
     as fit and transform. Should only be applied to DataFrameTransformers.
@@ -70,6 +70,7 @@ def log_progress(operation):
     INFO: Finished AutoFeaturizer fitting.
 
     Args:
+        logger (logging.Logger): A logger object to help log progress.
         operation (str): Some info about the operation you want to log.
 
     Returns:
@@ -88,10 +89,10 @@ def log_progress(operation):
                 result: The method result.
             """
             self = args[0]
-            self.logger.info("{}Starting {}.".format(self._log_prefix,
+            logger.info("{}Starting {}.".format(self._log_prefix,
                                                      operation))
             result = meth(*args, **kwargs)
-            self.logger.info("{}Finished {}.".format(self._log_prefix,
+            logger.info("{}Finished {}.".format(self._log_prefix,
                                                      operation))
             return result
 
