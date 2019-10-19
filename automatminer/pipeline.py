@@ -414,7 +414,8 @@ class MatPipe(DFTransformer, LoggableMixin):
         """
         self.learner.serialize()
 
-        temp_logger = copy.deepcopy(self._logger)
+        # temp_logger = copy.deepcopy(self._logger)
+        temp_logger = None
         loggables = [
             self, self.learner, self.reducer, self.cleaner, self.autofeaturizer
         ]
