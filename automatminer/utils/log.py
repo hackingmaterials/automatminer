@@ -28,6 +28,8 @@ def initialize_logger(logger_name, log_dir='.', level=None) -> logging.Logger:
     level = level or logging.INFO
 
     logger = logging.getLogger(logger_name)
+    logger.handlers = []  # reset logging handlers if they already exist
+
     formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
                                   datefmt='%Y-%m-%d %H:%M:%S')
 

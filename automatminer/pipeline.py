@@ -7,7 +7,7 @@ from typing import Dict
 
 import pandas as pd
 
-import automatminer.__name__ as amm_name
+from automatminer import __name__ as amm_name
 from automatminer.base import DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
