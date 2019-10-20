@@ -15,10 +15,7 @@ from matminer.featurizers.conversions import (
     CompositionToOxidComposition,
 )
 from matminer.featurizers.function import FunctionFeaturizer
-from matminer.utils.io import (
-    store_dataframe_as_json,
-    load_dataframe_from_json,
-)
+from matminer.utils.io import store_dataframe_as_json, load_dataframe_from_json
 
 from automatminer.utils.log import (
     log_progress,
@@ -42,9 +39,7 @@ __author__ = [
     "Qi Wang <wqthu11@gmail.com>",
 ]
 
-_COMMON_COL_ERR_STR = (
-    "composition_col/structure_col/bandstructure_col/dos_col"
-)
+_COMMON_COL_ERR_STR = "composition_col/structure_col/bandstructure_col/dos_col"
 
 logger = logging.getLogger(__name__)
 
@@ -316,9 +311,7 @@ class AutoFeaturizer(DFTransformer):
 
                 # Remove invalid featurizers by looking at valid_fraction
                 if self.do_precheck:
-                    logger.debug(
-                        self._log_prefix + "Prechecking featurizers."
-                    )
+                    logger.debug(self._log_prefix + "Prechecking featurizers.")
                     invalid_featurizers = []
                     for f in featurizers:
                         try:

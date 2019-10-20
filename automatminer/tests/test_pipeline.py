@@ -237,12 +237,7 @@ def make_matpipe_test(config_preset, skip=None):
 
         def tearDown(self) -> None:
             digests = [DIGEST_PATH + ext for ext in AMM_SUPPORTED_EXTS]
-            for remnant in [
-                CACHE_SRC,
-                PIPE_PATH,
-                VERSION_PIPE_PATH,
-                *digests,
-            ]:
+            for remnant in [CACHE_SRC, PIPE_PATH, VERSION_PIPE_PATH, *digests]:
                 if os.path.exists(remnant):
                     os.remove(remnant)
 

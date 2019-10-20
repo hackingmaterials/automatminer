@@ -1,1 +1,1 @@
-from .core import AutoFeaturizer
+from .core import AutoFeaturizer  # noqa

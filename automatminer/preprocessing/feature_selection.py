@@ -146,9 +146,7 @@ class TreeFeatureReducer(DFTransformer):
         for train, _ in cv.split(X, y, groups=None):
             Xtrn = X.iloc[train]
             ytrn = y.iloc[train]
-            all_feats += self.get_reduced_features(
-                tree, Xtrn, ytrn, recursive
-            )
+            all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
         # take the union of selected features of each fold
         self.selected_features = list(set(all_feats))
         logger.info(

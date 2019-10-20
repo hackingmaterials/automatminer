@@ -317,8 +317,7 @@ class DataCleaner(DFTransformer):
             mismatch = compare_columns(self.fitted_df, df, ignore=target)
             if mismatch["mismatch"]:
                 logger.warning(
-                    self._log_prefix
-                    + "Mismatched columns found in dataframe "
+                    self._log_prefix + "Mismatched columns found in dataframe "
                     "used for fitting and argument dataframe."
                 )
                 if coerce_mismatch:
@@ -390,9 +389,7 @@ class DataCleaner(DFTransformer):
             df = df.fillna(method="bfill")
         elif na_method == "mean":
             # Samples belonging in number columns are averaged to replace na
-            dfn = df[
-                [ncol for ncol in df.columns if ncol in self.number_cols]
-            ]
+            dfn = df[[ncol for ncol in df.columns if ncol in self.number_cols]]
             dfn = dfn.fillna(value=dfn.mean())
             df[dfn.columns] = dfn
 
@@ -420,8 +417,7 @@ class DataCleaner(DFTransformer):
             (pandas.DataFrame) The numerical df
         """
         logger.info(
-            self._log_prefix
-            + "Replacing infinite values with nan for easier "
+            self._log_prefix + "Replacing infinite values with nan for easier "
             "screening."
         )
         df = df.replace([np.inf, -np.inf], np.nan)
@@ -732,9 +728,7 @@ class FeatureReducer(DFTransformer):
         save_from_removal = [
             c for c in self._keep_features if c in all_removed
         ]
-        for_force_removal = [
-            c for c in self._remove_features if c in all_kept
-        ]
+        for_force_removal = [c for c in self._remove_features if c in all_kept]
 
         if save_from_removal:
             logger.info(

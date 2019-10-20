@@ -10,10 +10,7 @@ from matminer.featurizers.structure import (
     GlobalSymmetryFeatures,
     DensityFeatures,
 )
-from matminer.utils.io import (
-    load_dataframe_from_json,
-    store_dataframe_as_json,
-)
+from matminer.utils.io import load_dataframe_from_json, store_dataframe_as_json
 
 from automatminer.featurization.core import AutoFeaturizer
 from automatminer.featurization.sets import (
@@ -235,7 +232,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         target = "K_VRH"
         cols = ["composition", target]
         df1 = self.test_df[cols].iloc[: self.limit]
-        df2 = self.test_df[cols].iloc[-1 * self.limit :]
+        df2 = self.test_df[cols].iloc[-1 * self.limit:]
 
         af = AutoFeaturizer(preset="express")
         af.fit(df1, target)
@@ -350,9 +347,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         af.min_precheck_frac = 0.99
 
         af.fit(df, target)
-        classes = [
-            f.__class__.__name__ for f in af.featurizers["composition"]
-        ]
+        classes = [f.__class__.__name__ for f in af.featurizers["composition"]]
 
         # both of these should be around 0.922 precheck fraction, so they fail
         # the precheck test.

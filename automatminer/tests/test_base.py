@@ -2,7 +2,6 @@
 Tests for the base classes.
 """
 import unittest
-import logging
 
 import pandas as pd
 from sklearn.exceptions import NotFittedError

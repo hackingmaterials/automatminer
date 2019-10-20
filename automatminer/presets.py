@@ -7,7 +7,6 @@ __author__ = ["Alex Dunn <ardunn@lbl.gov>"]
 from automatminer.automl import SinglePipelineAdaptor, TPOTAdaptor
 from automatminer.featurization import AutoFeaturizer
 from automatminer.preprocessing import DataCleaner, FeatureReducer
-from automatminer.utils.log import AMM_DEFAULT_LOGGER
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from xgboost import XGBClassifier, XGBRegressor
 
@@ -60,9 +59,7 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
         config = {
             "learner": TPOTAdaptor(max_time_mins=2880),
             "reducer": FeatureReducer(reducers=("corr", "rebate")),
-            "autofeaturizer": AutoFeaturizer(
-                preset="heavy", **caching_kwargs
-            ),
+            "autofeaturizer": AutoFeaturizer(preset="heavy", **caching_kwargs),
             "cleaner": DataCleaner(),
         }
     elif preset == "express":
@@ -95,9 +92,7 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
                 max_time_mins=1, max_eval_time_mins=1, population_size=10
             ),
             "reducer": FeatureReducer(reducers=("corr", "tree")),
-            "autofeaturizer": AutoFeaturizer(
-                preset="debug", **caching_kwargs
-            ),
+            "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
             "cleaner": DataCleaner(),
         }
     elif preset == "debug_single":
@@ -108,9 +103,7 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
                 regressor=RandomForestRegressor(**rf_kwargs),
             ),
             "reducer": FeatureReducer(reducers=("corr",)),
-            "autofeaturizer": AutoFeaturizer(
-                preset="debug", **caching_kwargs
-            ),
+            "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
             "cleaner": DataCleaner(),
         }
     return config
