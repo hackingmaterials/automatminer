@@ -33,11 +33,6 @@ def get_last_commit():
 def get_time_str():
     return datetime.datetime.now().strftime("%Y.%m.%d_%H:%M:%S")
 
-def check_pipe_config(pipe_config):
-    if "logger" in pipe_config:
-        raise ValueError("Logger is set internally by tasks.")
-
-
 def wf_single_fit(fworker, fit_name, pipe_config, name, data_file, target, *args,
                   tags=None, **kwargs):
     """

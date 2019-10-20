@@ -18,7 +18,6 @@ from automatminer.preprocessing import DataCleaner, FeatureReducer
 from automatminer.automl.adaptors import TPOTAdaptor, SinglePipelineAdaptor
 from automatminer.pipeline import MatPipe
 from automatminer.utils.ml import AMM_REG_NAME, AMM_CLF_NAME
-from automatminer.utils.log import initialize_logger, AMM_LOGGER_BASENAME
 
 from automatminer_dev.config import LP
 
@@ -90,8 +89,7 @@ class RunPipe(FireTaskBase):
             "cleaner": DataCleaner(**cleaner_kwargs),
             "autofeaturizer": AutoFeaturizer(**autofeaturizer_kwargs)}
 
-        logger = initialize_logger(AMM_LOGGER_BASENAME, log_dir=save_dir)
-        pipe = MatPipe(**pipe_config, logger=logger)
+        pipe = MatPipe(**pipe_config)
 
         # Set up dataset
         # Dataset should already be set up correctly as json beforehand.
@@ -357,8 +355,7 @@ class RunSingleFit(FireTaskBase):
             "reducer": FeatureReducer(**reducer_kwargs),
             "cleaner": DataCleaner(**cleaner_kwargs),
             "autofeaturizer": AutoFeaturizer(**autofeaturizer_kwargs)}
-        logger = initialize_logger(AMM_LOGGER_BASENAME, log_dir=base_save_dir)
-        pipe = MatPipe(**pipe_config, logger=logger)
+        pipe = MatPipe(**pipe_config)
 
         # Set up dataset
         # Dataset should already be set up correctly as json beforehand.
