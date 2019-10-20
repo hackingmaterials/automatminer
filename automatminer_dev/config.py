@@ -6,7 +6,6 @@ The environment variables you need for this all to work are:
 - AMM_DATASET_DIR: where to store datasets
 - AMM_CODE_DIR: where to run tests
 """
-from fireworks import LaunchPad
 from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
 
 from hmte.db import get_connection
@@ -28,7 +27,7 @@ LOCAL_DEBUG_REG = {
     "data_file": "debug_jdft2d.json.gz",
     "target": "exfoliation_en",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 LOCAL_DEBUG_CLF = {
@@ -36,7 +35,7 @@ LOCAL_DEBUG_CLF = {
     "data_file": "debug_expt_is_metal.json.gz",
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
-    "clf_pos_label": True
+    "clf_pos_label": True,
 }
 
 LOCAL_DEBUG_SET = [LOCAL_DEBUG_CLF, LOCAL_DEBUG_REG]
@@ -48,7 +47,7 @@ LOG_KVRH = {
     "data_file": "matbench_log_kvrh.json.gz",
     "target": "log10(K_VRH)",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 LOG_GVRH = {
@@ -56,7 +55,7 @@ LOG_GVRH = {
     "data_file": "matbench_log_gvrh.json.gz",
     "target": "log10(G_VRH)",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 DIELECTRIC = {
@@ -64,7 +63,7 @@ DIELECTRIC = {
     "data_file": "matbench_dielectric.json.gz",
     "target": "n",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 JDFT2D = {
@@ -72,7 +71,7 @@ JDFT2D = {
     "data_file": "matbench_jdft2d.json.gz",
     "target": "exfoliation_en",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 MP_GAP = {
@@ -80,7 +79,7 @@ MP_GAP = {
     "data_file": "matbench_mp_gap.json.gz",
     "target": "gap pbe",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 MP_IS_METAL = {
@@ -88,7 +87,7 @@ MP_IS_METAL = {
     "data_file": "matbench_mp_is_metal.json.gz",
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
-    "clf_pos_label": True
+    "clf_pos_label": True,
 }
 
 MP_E_FORM = {
@@ -96,7 +95,7 @@ MP_E_FORM = {
     "data_file": "matbench_mp_e_form.json.gz",
     "target": "e_form",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 PEROVSKITES = {
@@ -104,7 +103,7 @@ PEROVSKITES = {
     "data_file": "matbench_perovskites.json.gz",
     "target": "e_form",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 GLASS = {
@@ -112,7 +111,7 @@ GLASS = {
     "data_file": "matbench_glass.json.gz",
     "target": "gfa",
     "problem_type": AMM_CLF_NAME,
-    "clf_pos_label": True
+    "clf_pos_label": True,
 }
 
 EXPT_IS_METAL = {
@@ -120,7 +119,7 @@ EXPT_IS_METAL = {
     "data_file": "matbench_expt_is_metal.json.gz",
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
-    "clf_pos_label": True
+    "clf_pos_label": True,
 }
 
 EXPT_GAP = {
@@ -128,7 +127,7 @@ EXPT_GAP = {
     "data_file": "matbench_expt_gap.json.gz",
     "target": "gap expt",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 PHONONS = {
@@ -136,7 +135,7 @@ PHONONS = {
     "data_file": "matbench_phonons.json.gz",
     "target": "last phdos peak",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 STEELS = {
@@ -144,13 +143,25 @@ STEELS = {
     "data_file": "matbench_steels.json.gz",
     "target": "yield strength",
     "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None
+    "clf_pos_label": None,
 }
 
 BENCHMARK_DEBUG_SET = [JDFT2D, PHONONS, EXPT_IS_METAL, STEELS]
-BENCHMARK_FULL_SET = [LOG_KVRH, LOG_GVRH, DIELECTRIC, JDFT2D,
-                      MP_GAP, MP_IS_METAL, MP_E_FORM, PEROVSKITES, GLASS,
-                      EXPT_IS_METAL, EXPT_GAP, STEELS, PHONONS]
+BENCHMARK_FULL_SET = [
+    LOG_KVRH,
+    LOG_GVRH,
+    DIELECTRIC,
+    JDFT2D,
+    MP_GAP,
+    MP_IS_METAL,
+    MP_E_FORM,
+    PEROVSKITES,
+    GLASS,
+    EXPT_IS_METAL,
+    EXPT_GAP,
+    STEELS,
+    PHONONS,
+]
 
 # Extra datasets, probably not present
 # BULK = {
