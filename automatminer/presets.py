@@ -49,7 +49,9 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
 
     elif preset == "production":
         config = {
-            "learner": TPOTAdaptor(max_time_mins=1440, max_eval_time_mins=20, **n_jobs_kwargs),
+            "learner": TPOTAdaptor(
+                max_time_mins=1440, max_eval_time_mins=20, **n_jobs_kwargs
+            ),
             "reducer": FeatureReducer(
                 reducers=("corr", "tree"), tree_importance_percentile=0.99
             ),
@@ -62,12 +64,16 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
         config = {
             "learner": TPOTAdaptor(max_time_mins=2880, **n_jobs_kwargs),
             "reducer": FeatureReducer(reducers=("corr", "rebate")),
-            "autofeaturizer": AutoFeaturizer(preset="heavy", **caching_kwargs, **n_jobs_kwargs),
+            "autofeaturizer": AutoFeaturizer(
+                preset="heavy", **caching_kwargs, **n_jobs_kwargs
+            ),
             "cleaner": DataCleaner(),
         }
     elif preset == "express":
         config = {
-            "learner": TPOTAdaptor(max_time_mins=60, population_size=20, **n_jobs_kwargs),
+            "learner": TPOTAdaptor(
+                max_time_mins=60, population_size=20, **n_jobs_kwargs
+            ),
             "reducer": FeatureReducer(
                 reducers=("corr", "tree"), tree_importance_percentile=0.99
             ),
@@ -77,7 +83,11 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             "cleaner": DataCleaner(),
         }
     elif preset == "express_single":
-        xgb_kwargs = {"n_estimators": 300, "max_depth": 3, "n_jobs": n_jobs_kwargs["n_jobs"]}
+        xgb_kwargs = {
+            "n_estimators": 300,
+            "max_depth": 3,
+            "n_jobs": n_jobs_kwargs["n_jobs"],
+        }
         config = {
             "learner": SinglePipelineAdaptor(
                 regressor=XGBRegressor(**xgb_kwargs),
@@ -92,11 +102,15 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
     elif preset == "debug":
         config = {
             "learner": TPOTAdaptor(
-                max_time_mins=1, max_eval_time_mins=1, population_size=10,
+                max_time_mins=1,
+                max_eval_time_mins=1,
+                population_size=10,
                 **n_jobs_kwargs
             ),
             "reducer": FeatureReducer(reducers=("corr", "tree")),
-            "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs, **n_jobs_kwargs),
+            "autofeaturizer": AutoFeaturizer(
+                preset="debug", **caching_kwargs, **n_jobs_kwargs
+            ),
             "cleaner": DataCleaner(),
         }
     elif preset == "debug_single":
@@ -107,7 +121,9 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
                 regressor=RandomForestRegressor(**rf_kwargs),
             ),
             "reducer": FeatureReducer(reducers=("corr",)),
-            "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs, **n_jobs_kwargs),
+            "autofeaturizer": AutoFeaturizer(
+                preset="debug", **caching_kwargs, **n_jobs_kwargs
+            ),
             "cleaner": DataCleaner(),
         }
     return config
