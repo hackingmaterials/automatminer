@@ -66,7 +66,9 @@ class TestPreprocess(unittest.TestCase):
         df2 = self.test_df
         df2 = df2.drop(columns=[self.target])
         df2 = dc.transform(df2, self.target)
-        self.assertFalse(compare_columns(df, df2, ignore=self.target)["mismatch"])
+        self.assertFalse(
+            compare_columns(df, df2, ignore=self.target)["mismatch"]
+        )
         self.assertTrue(self.target not in df2.columns)
 
     def test_DataCleaner_sample_na_method(self):
@@ -135,7 +137,9 @@ class TestPreprocess(unittest.TestCase):
         minimum_x = dffit["minimum X"]
         mean_min_x = minimum_x[~minimum_x.isnull()].mean()
         fitted = dcmean.fit_transform(dffit, target=self.target)
-        self.assertAlmostEqual(fitted["minimum X"].iloc[99], mean_min_x, places=10)
+        self.assertAlmostEqual(
+            fitted["minimum X"].iloc[99], mean_min_x, places=10
+        )
 
     def test_DataCleaner_na_method_feature_sample_interaction(self):
         dc = DataCleaner(
@@ -179,7 +183,9 @@ class TestPreprocess(unittest.TestCase):
         dc.fit(fit_df, self.target)
 
         trs_df2 = dc.transform(trs_df, self.target)
-        self.assertAlmostEqual(trs_df2["range X"].mean(), fit_df["range X"].mean())
+        self.assertAlmostEqual(
+            trs_df2["range X"].mean(), fit_df["range X"].mean()
+        )
         self.assertAlmostEqual(trs_df2["range X"].std(), 0.0)
 
     def test_DataCleaner_big_nan_handler_warning(self):
@@ -315,7 +321,9 @@ class TestFeatureReduction(unittest.TestCase):
     def test_TreeBasedFeatureReduction(self):
         X = self.test_df.drop("gap expt", axis=1)
         y = self.test_df["gap expt"]
-        tbfr = TreeFeatureReducer(mode="regression", random_state=self.random_state)
+        tbfr = TreeFeatureReducer(
+            mode="regression", random_state=self.random_state
+        )
         tbfr.fit(X, y, cv=3)
         self.assertEqual(len(tbfr.selected_features), 19)
         X_reduced = tbfr.transform(X)

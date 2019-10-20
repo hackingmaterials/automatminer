@@ -7,26 +7,44 @@ import math
 import logging
 
 from pymatgen import Composition
-from matminer.featurizers.conversions import StrToComposition, DictToObject, \
-    StructureToComposition, StructureToOxidStructure, \
-    CompositionToOxidComposition
+from matminer.featurizers.conversions import (
+    StrToComposition,
+    DictToObject,
+    StructureToComposition,
+    StructureToOxidStructure,
+    CompositionToOxidComposition,
+)
 from matminer.featurizers.function import FunctionFeaturizer
-from matminer.utils.io import store_dataframe_as_json, load_dataframe_from_json
+from matminer.utils.io import (
+    store_dataframe_as_json,
+    load_dataframe_from_json,
+)
 
-from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR, \
-    AMM_LOG_TRANSFORM_STR
+from automatminer.utils.log import (
+    log_progress,
+    AMM_LOG_FIT_STR,
+    AMM_LOG_TRANSFORM_STR,
+)
 from automatminer.utils.pkg import check_fitted, set_fitted
 from automatminer.base import DFTransformer
-from automatminer.featurization.sets import CompositionFeaturizers, \
-    StructureFeaturizers, BSFeaturizers, DOSFeaturizers
+from automatminer.featurization.sets import (
+    CompositionFeaturizers,
+    StructureFeaturizers,
+    BSFeaturizers,
+    DOSFeaturizers,
+)
 from automatminer.utils.pkg import AutomatminerError
 from automatminer.utils.ml import regression_or_classification
 
-__author__ = ["Alex Dunn <ardunn@lbl.gov>",
-              "Alireza Faghaninia <alireza@lbl.gov>",
-              "Qi Wang <wqthu11@gmail.com>"]
+__author__ = [
+    "Alex Dunn <ardunn@lbl.gov>",
+    "Alireza Faghaninia <alireza@lbl.gov>",
+    "Qi Wang <wqthu11@gmail.com>",
+]
 
-_COMMON_COL_ERR_STR = "composition_col/structure_col/bandstructure_col/dos_col"
+_COMMON_COL_ERR_STR = (
+    "composition_col/structure_col/bandstructure_col/dos_col"
+)
 
 logger = logging.getLogger(__name__)
 
@@ -108,22 +126,39 @@ class AutoFeaturizer(DFTransformer):
             that can be valid (via featurizer.precheck(data).
     """
 
-    def __init__(self, cache_src=None, preset=None, featurizers=None,
-                 exclude=None, functionalize=False, ignore_cols=None,
-                 ignore_errors=True, drop_inputs=True, guess_oxistates=True,
-                 multiindex=False, do_precheck=True, n_jobs=None,
-                 composition_col="composition", structure_col="structure",
-                 bandstructure_col="bandstructure", dos_col="dos"):
+    def __init__(
+        self,
+        cache_src=None,
+        preset=None,
+        featurizers=None,
+        exclude=None,
+        functionalize=False,
+        ignore_cols=None,
+        ignore_errors=True,
+        drop_inputs=True,
+        guess_oxistates=True,
+        multiindex=False,
+        do_precheck=True,
+        n_jobs=None,
+        composition_col="composition",
+        structure_col="structure",
+        bandstructure_col="bandstructure",
+        dos_col="dos",
+    ):
 
         if featurizers and preset:
-            raise AutomatminerError("Featurizers and preset were both set. "
-                                    "Please either use a preset ('express', "
-                                    "'all', 'debug', 'heavy') or set "
-                                    "featurizers manually.")
+            raise AutomatminerError(
+                "Featurizers and preset were both set. "
+                "Please either use a preset ('express', "
+                "'all', 'debug', 'heavy') or set "
+                "featurizers manually."
+            )
         if not featurizers and not preset:
-            raise AutomatminerError("Please specify set(s) of featurizers to "
-                                    "use either through the featurizers"
-                                    "argument or through the preset argument.")
+            raise AutomatminerError(
+                "Please specify set(s) of featurizers to "
+                "use either through the featurizers"
+                "argument or through the preset argument."
+            )
 
         self.cache_src = cache_src
         self.preset = "express" if preset is None else preset
@@ -148,33 +183,45 @@ class AutoFeaturizer(DFTransformer):
         self.dos_col = dos_col
         super(AutoFeaturizer, self).__init__()
 
-        _supported_featurizers = {composition_col: CompositionFeaturizers,
-                                  structure_col: StructureFeaturizers,
-                                  bandstructure_col: BSFeaturizers,
-                                  dos_col: DOSFeaturizers}
+        _supported_featurizers = {
+            composition_col: CompositionFeaturizers,
+            structure_col: StructureFeaturizers,
+            bandstructure_col: BSFeaturizers,
+            dos_col: DOSFeaturizers,
+        }
 
         # user-set featurizers
         if self.featurizers:
             if not isinstance(self.featurizers, dict):
-                raise TypeError("Featurizers must be a dictionary with keys"
-                                "matching your {}".format(_COMMON_COL_ERR_STR))
+                raise TypeError(
+                    "Featurizers must be a dictionary with keys"
+                    "matching your {}".format(_COMMON_COL_ERR_STR)
+                )
 
-            invalid_ftypes = [f for f in self.featurizers.keys() if
-                              f not in _supported_featurizers.keys()]
+            invalid_ftypes = [
+                f
+                for f in self.featurizers.keys()
+                if f not in _supported_featurizers.keys()
+            ]
             if invalid_ftypes:
-                raise KeyError("The following keys were specified as featurizer"
-                               " types but were not set in {}"
-                               "".format(_COMMON_COL_ERR_STR))
+                raise KeyError(
+                    "The following keys were specified as featurizer"
+                    " types but were not set in {}"
+                    "".format(_COMMON_COL_ERR_STR)
+                )
 
             for ftype, fset in self.featurizers.items():
-                _allowed = [f.__class__.__name__ for f in
-                            _supported_featurizers[ftype]().all]
+                _allowed = [
+                    f.__class__.__name__
+                    for f in _supported_featurizers[ftype]().all
+                ]
                 for f in fset:
                     if f.__class__.__name__ not in _allowed:
                         raise ValueError(
                             "The {} featurizer {} is not supported by "
                             "AutoFeaturizer. Try updating your version of "
-                            "automatminer and matminer.".format(ftype, f))
+                            "automatminer and matminer.".format(ftype, f)
+                        )
 
         # auto-set featurizers
         else:
@@ -182,7 +229,8 @@ class AutoFeaturizer(DFTransformer):
             for featurizer_type in _supported_featurizers.keys():
                 featurizer_set = _supported_featurizers[featurizer_type]
                 featurizers[featurizer_type] = getattr(
-                    featurizer_set(exclude=self.exclude), self.preset)
+                    featurizer_set(exclude=self.exclude), self.preset
+                )
             self.featurizers = featurizers
 
         # Check if any featurizers need fitting (useful for MatPipe)
@@ -199,17 +247,21 @@ class AutoFeaturizer(DFTransformer):
         self.needs_fit = needs_fit
 
         if self.needs_fit and self.cache_src:
-            logger.critical(self._log_prefix +
-                             "Using cached features on fittable featurizers! "
-                             "Please make sure you are not benchmarking with "
-                             "these options enabled; it is likely you will be"
-                             "leaking data (i.e., features) from the testing"
-                             "sets into the training.")
+            logger.critical(
+                self._log_prefix
+                + "Using cached features on fittable featurizers! "
+                "Please make sure you are not benchmarking with "
+                "these options enabled; it is likely you will be"
+                "leaking data (i.e., features) from the testing"
+                "sets into the training."
+            )
 
         if self.cache_src and "json" not in self.cache_src.lower():
-            raise ValueError("The cache_src filename does not contain json."
-                             "JSON is the required file type for featurizer"
-                             "caching.")
+            raise ValueError(
+                "The cache_src filename does not contain json."
+                "JSON is the required file type for featurizer"
+                "caching."
+            )
 
         self.min_precheck_frac = 0.9
 
@@ -241,9 +293,10 @@ class AutoFeaturizer(DFTransformer):
             (AutoFeaturizer): self
         """
         if self.cache_src and os.path.exists(self.cache_src):
-            logger.info(self._log_prefix +
-                             "Cache {} found. Fit aborted."
-                             "".format(self.cache_src))
+            logger.info(
+                self._log_prefix + "Cache {} found. Fit aborted."
+                "".format(self.cache_src)
+            )
             return self
 
         self.fitted_input_df = df
@@ -253,8 +306,9 @@ class AutoFeaturizer(DFTransformer):
         for featurizer_type, featurizers in self.featurizers.items():
             if not featurizers:
                 logger.info(
-                    self._log_prefix +
-                    "No {} featurizers being used.".format(featurizer_type))
+                    self._log_prefix
+                    + "No {} featurizers being used.".format(featurizer_type)
+                )
                 continue
 
             if featurizer_type in df.columns:
@@ -262,30 +316,38 @@ class AutoFeaturizer(DFTransformer):
 
                 # Remove invalid featurizers by looking at valid_fraction
                 if self.do_precheck:
-                    logger.debug(self._log_prefix +
-                                      "Prechecking featurizers.")
+                    logger.debug(
+                        self._log_prefix + "Prechecking featurizers."
+                    )
                     invalid_featurizers = []
                     for f in featurizers:
                         try:
-                            frac = f.precheck_dataframe(df, featurizer_type,
-                                                        return_frac=True)
+                            frac = f.precheck_dataframe(
+                                df, featurizer_type, return_frac=True
+                            )
                             if frac < self.min_precheck_frac:
                                 invalid_featurizers.append(f)
-                                msg = "Will remove {} because it's fraction " \
-                                      "passing the precheck for this " \
-                                      "dataset ({}) was less than the minimum" \
-                                      " ({})" \
-                                      "".format(f.__class__.__name__, frac,
-                                                self.min_precheck_frac)
+                                msg = (
+                                    "Will remove {} because it's fraction "
+                                    "passing the precheck for this "
+                                    "dataset ({}) was less than the minimum"
+                                    " ({})"
+                                    "".format(
+                                        f.__class__.__name__,
+                                        frac,
+                                        self.min_precheck_frac,
+                                    )
+                                )
                                 logger.info(self._log_prefix + msg)
                         except (AttributeError, ValueError, KeyError) as E:
                             logger.warning(
-                                self._log_prefix +
-                                "{} precheck failed with {}. Ignoring...."
-                                "".format(f, E))
-                    self.featurizers[featurizer_type] = [f for f in featurizers
-                                                         if f not in
-                                                         invalid_featurizers]
+                                self._log_prefix
+                                + "{} precheck failed with {}. Ignoring...."
+                                "".format(f, E)
+                            )
+                    self.featurizers[featurizer_type] = [
+                        f for f in featurizers if f not in invalid_featurizers
+                    ]
                     self.removed_featurizers = invalid_featurizers
                     featurizers = self.featurizers[featurizer_type]
 
@@ -297,8 +359,9 @@ class AutoFeaturizer(DFTransformer):
                             log_fit = True
                     if log_fit:
                         logger.info(
-                            self._log_prefix +
-                            "Fitting {}.".format(f.__class__.__name__))
+                            self._log_prefix
+                            + "Fitting {}.".format(f.__class__.__name__)
+                        )
 
                     f.fit(df[featurizer_type].tolist())
                     f.set_n_jobs(self.n_jobs)
@@ -306,13 +369,16 @@ class AutoFeaturizer(DFTransformer):
 
                     if log_fit:
                         logger.info(
-                            self._log_prefix +
-                            "Fit {} to {} samples in dataframe."
-                            "".format(f.__class__.__name__, df.shape[0]))
+                            self._log_prefix
+                            + "Fit {} to {} samples in dataframe."
+                            "".format(f.__class__.__name__, df.shape[0])
+                        )
             else:
-                logger.info(self._log_prefix +
-                                 "Featurizer type {} not in the dataframe to be"
-                                 " fitted. Skipping...".format(featurizer_type))
+                logger.info(
+                    self._log_prefix
+                    + "Featurizer type {} not in the dataframe to be"
+                    " fitted. Skipping...".format(featurizer_type)
+                )
         self.converted_input_df = df
         return self
 
@@ -331,32 +397,41 @@ class AutoFeaturizer(DFTransformer):
             df (pandas.DataFrame): Transformed dataframe containing features.
         """
         if self.cache_src and os.path.exists(self.cache_src):
-            logger.debug(self._log_prefix +
-                              "Reading cache_src {}".format(self.cache_src))
+            logger.debug(
+                self._log_prefix
+                + "Reading cache_src {}".format(self.cache_src)
+            )
             cached_df = load_dataframe_from_json(self.cache_src)
             if not all([loc in cached_df.index for loc in df.index]):
-                raise AutomatminerError("Feature cache does not contain all "
-                                        "entries (by DataFrame index) needed "
-                                        "to transform the input df.")
+                raise AutomatminerError(
+                    "Feature cache does not contain all "
+                    "entries (by DataFrame index) needed "
+                    "to transform the input df."
+                )
             else:
                 cached_subdf = cached_df.loc[df.index]
                 if target in cached_subdf.columns:
                     if target not in df.columns:
                         logger.warn(
-                            self._log_prefix +
-                            "Target not present in both cached df and input df."
-                            " Cannot perform comparison to ensure index match.")
+                            self._log_prefix
+                            + "Target not present in both cached df and input df."
+                            " Cannot perform comparison to ensure index match."
+                        )
                     else:
                         cached_targets = cached_subdf[target]
                         input_targets = df[target]
                         cached_type = regression_or_classification(
-                            cached_targets)
-                        input_type = regression_or_classification(input_targets)
+                            cached_targets
+                        )
+                        input_type = regression_or_classification(
+                            input_targets
+                        )
                         if cached_type != input_type:
                             raise AutomatminerError(
                                 "Cached targets appear to be '{}' type, while "
                                 "input targets appear to be '{}'."
-                                "".format(cached_type, input_type))
+                                "".format(cached_type, input_type)
+                            )
 
                         problems = {}
                         for ix in input_targets.index:
@@ -370,15 +445,20 @@ class AutoFeaturizer(DFTransformer):
                                     pass
                         if problems:
                             logger.warning(
-                                self._log_prefix +
-                                "Mismatch between cached targets and input "
-                                "targets: \n{}".format(problems))
+                                self._log_prefix
+                                + "Mismatch between cached targets and input "
+                                "targets: \n{}".format(problems)
+                            )
 
-                logger.info(self._log_prefix +
-                                 "Restored {} features on {} samples from "
-                                 "cache {}".format(len(cached_subdf.columns),
-                                                   len(df.index),
-                                                   self.cache_src))
+                logger.info(
+                    self._log_prefix
+                    + "Restored {} features on {} samples from "
+                    "cache {}".format(
+                        len(cached_subdf.columns),
+                        len(df.index),
+                        self.cache_src,
+                    )
+                )
                 return cached_subdf
         else:
             transforming_on_fitted = df is self.fitted_input_df
@@ -395,31 +475,38 @@ class AutoFeaturizer(DFTransformer):
                         df = self._tidy_column(df, featurizer_type)
 
                     for f in featurizers:
-                        logger.info(self._log_prefix +
-                                         "Featurizing with {}."
-                                         "".format(f.__class__.__name__))
+                        logger.info(
+                            self._log_prefix + "Featurizing with {}."
+                            "".format(f.__class__.__name__)
+                        )
                         df = f.featurize_dataframe(
                             df,
                             featurizer_type,
                             ignore_errors=self.ignore_errors,
                             multiindex=self.multiindex,
-                            inplace=False)
+                            inplace=False,
+                        )
                     if self.drop_inputs:
                         df = df.drop(columns=[featurizer_type])
                 else:
-                    logger.info(self._log_prefix +
-                                     "Featurizer type {} not in the dataframe. "
-                                     "Skipping...".format(featurizer_type))
+                    logger.info(
+                        self._log_prefix
+                        + "Featurizer type {} not in the dataframe. "
+                        "Skipping...".format(featurizer_type)
+                    )
             if self.functionalize:
                 ff = FunctionFeaturizer()
                 cols = df.columns.tolist()
                 for ft in self.featurizers.keys():
                     if ft in cols:
                         cols.pop(ft)
-                df = ff.fit_featurize_dataframe(df, cols,
-                                                ignore_errors=self.ignore_errors,
-                                                multiindex=self.multiindex,
-                                                inplace=False)
+                df = ff.fit_featurize_dataframe(
+                    df,
+                    cols,
+                    ignore_errors=self.ignore_errors,
+                    multiindex=self.multiindex,
+                    inplace=False,
+                )
             if self.cache_src and not os.path.exists(self.cache_src):
                 store_dataframe_as_json(df, self.cache_src)
             return df
@@ -466,78 +553,112 @@ class AutoFeaturizer(DFTransformer):
         if featurizer_type == self.composition_col:
             # Convert formulas to composition objects
             if isinstance(type_tester, str):
-                logger.info(self._log_prefix +
-                                 "Compositions detected as strings. Attempting "
-                                 "conversion to Composition objects...")
-                stc = StrToComposition(overwrite_data=True,
-                                       target_col_id=featurizer_type)
-                df = stc.featurize_dataframe(df, featurizer_type,
-                                             multiindex=self.multiindex,
-                                             ignore_errors=True,
-                                             inplace=False)
+                logger.info(
+                    self._log_prefix
+                    + "Compositions detected as strings. Attempting "
+                    "conversion to Composition objects..."
+                )
+                stc = StrToComposition(
+                    overwrite_data=True, target_col_id=featurizer_type
+                )
+                df = stc.featurize_dataframe(
+                    df,
+                    featurizer_type,
+                    multiindex=self.multiindex,
+                    ignore_errors=True,
+                    inplace=False,
+                )
 
             elif isinstance(type_tester, dict):
-                logger.info(self._log_prefix +
-                                 "Compositions detected as dicts. Attempting "
-                                 "conversion to Composition objects...")
-                df[featurizer_type] = [Composition.from_dict(d) for d in
-                                       df[featurizer_type]]
+                logger.info(
+                    self._log_prefix
+                    + "Compositions detected as dicts. Attempting "
+                    "conversion to Composition objects..."
+                )
+                df[featurizer_type] = [
+                    Composition.from_dict(d) for d in df[featurizer_type]
+                ]
 
             # Convert non-oxidstate containing comps to oxidstate comps
             if self.guess_oxistates:
-                logger.info(self._log_prefix +
-                                 "Guessing oxidation states of compositions, as"
-                                 " they were not present in input.")
+                logger.info(
+                    self._log_prefix
+                    + "Guessing oxidation states of compositions, as"
+                    " they were not present in input."
+                )
                 cto = CompositionToOxidComposition(
-                    target_col_id=featurizer_type, overwrite_data=True,
-                    return_original_on_error=True, max_sites=-50)
+                    target_col_id=featurizer_type,
+                    overwrite_data=True,
+                    return_original_on_error=True,
+                    max_sites=-50,
+                )
                 try:
-                    df = cto.featurize_dataframe(df, featurizer_type,
-                                                 multiindex=self.multiindex,
-                                                 inplace=False)
+                    df = cto.featurize_dataframe(
+                        df,
+                        featurizer_type,
+                        multiindex=self.multiindex,
+                        inplace=False,
+                    )
                 except Exception as e:
-                    logger.warning(self._log_prefix +
-                                     "Could not decorate oxidation states due "
-                                     "to {}. Excluding featurizers based on "
-                                     "composition oxistates".format(e))
-                    classes_require_oxi = [c.__class__.__name__ for c in
-                                           CompositionFeaturizers().need_oxi]
+                    logger.warning(
+                        self._log_prefix
+                        + "Could not decorate oxidation states due "
+                        "to {}. Excluding featurizers based on "
+                        "composition oxistates".format(e)
+                    )
+                    classes_require_oxi = [
+                        c.__class__.__name__
+                        for c in CompositionFeaturizers().need_oxi
+                    ]
                     self.exclude.extend(classes_require_oxi)
 
         else:
             # Convert structure/bs/dos dicts to objects (robust already)
             if isinstance(type_tester, (dict, str)):
-                logger.info(self._log_prefix.capitalize() +
-                                 "{} detected as string or dict. Attempting "
-                                 "conversion to {} objects..."
-                                 "".format(featurizer_type, featurizer_type))
+                logger.info(
+                    self._log_prefix.capitalize()
+                    + "{} detected as string or dict. Attempting "
+                    "conversion to {} objects..."
+                    "".format(featurizer_type, featurizer_type)
+                )
                 if isinstance(type_tester, str):
                     raise ValueError(
                         "{} column is type {}. Cannot convert."
-                        "".format(featurizer_type, type(type_tester)))
-                dto = DictToObject(overwrite_data=True,
-                                   target_col_id=featurizer_type)
-                df = dto.featurize_dataframe(df, featurizer_type, inplace=False)
+                        "".format(featurizer_type, type(type_tester))
+                    )
+                dto = DictToObject(
+                    overwrite_data=True, target_col_id=featurizer_type
+                )
+                df = dto.featurize_dataframe(
+                    df, featurizer_type, inplace=False
+                )
 
             # Decorate with oxidstates
-            if featurizer_type == self.structure_col and \
-                    self.guess_oxistates:
+            if featurizer_type == self.structure_col and self.guess_oxistates:
                 logger.info(
-                    self._log_prefix +
-                    "Guessing oxidation states of structures if they were "
-                    "not present in input.")
+                    self._log_prefix
+                    + "Guessing oxidation states of structures if they were "
+                    "not present in input."
+                )
                 sto = StructureToOxidStructure(
-                    target_col_id=featurizer_type, overwrite_data=True,
-                    return_original_on_error=True, max_sites=30)
+                    target_col_id=featurizer_type,
+                    overwrite_data=True,
+                    return_original_on_error=True,
+                    max_sites=30,
+                )
                 try:
-                    df = sto.featurize_dataframe(df, featurizer_type,
-                                                 multiindex=self.multiindex,
-                                                 inplace=False)
+                    df = sto.featurize_dataframe(
+                        df,
+                        featurizer_type,
+                        multiindex=self.multiindex,
+                        inplace=False,
+                    )
                 except Exception as e:
                     logger.info(
-                        self._log_prefix +
-                        "Could not decorate oxidation states on structures "
-                        "due to {}.".format(e))
+                        self._log_prefix
+                        + "Could not decorate oxidation states on structures "
+                        "due to {}.".format(e)
+                    )
         return df
 
     def _add_composition_from_structure(self, df, overwrite=True):
@@ -557,17 +678,21 @@ class AutoFeaturizer(DFTransformer):
         Returns:
             df (pandas.DataFrame): Contains composition column if desired
         """
-        if self.structure_col in df.columns \
-                and (self.composition_col not in df.columns or overwrite) \
-                and self.composition_col in self.featurizers:
+        if (
+            self.structure_col in df.columns
+            and (self.composition_col not in df.columns or overwrite)
+            and self.composition_col in self.featurizers
+        ):
 
             if self.composition_col in df.columns:
-                logger.info(self._log_prefix +
-                                 "composition column already exists, "
-                                 "overwriting with composition from structure.")
+                logger.info(
+                    self._log_prefix + "composition column already exists, "
+                    "overwriting with composition from structure."
+                )
             else:
-                logger.info(self._log_prefix +
-                                 "Adding compositions from structures.")
+                logger.info(
+                    self._log_prefix + "Adding compositions from structures."
+                )
 
             df = self._tidy_column(df, self.structure_col)
 
@@ -576,6 +701,7 @@ class AutoFeaturizer(DFTransformer):
             struct2comp = StructureToComposition(
                 reduce=True,
                 target_col_id=self.composition_col,
-                overwrite_data=overwrite)
+                overwrite_data=overwrite,
+            )
             df = struct2comp.featurize_dataframe(df, self.structure_col)
         return df

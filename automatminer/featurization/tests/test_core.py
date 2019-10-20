@@ -2,38 +2,47 @@ import os
 import copy
 import unittest
 
-import pandas as pd
 from pymatgen import Composition
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.datasets.dataset_retrieval import load_dataset
 from matminer.featurizers.composition import ElementProperty
-from matminer.featurizers.structure import GlobalSymmetryFeatures, \
-    DensityFeatures
-from matminer.utils.io import load_dataframe_from_json, store_dataframe_as_json
+from matminer.featurizers.structure import (
+    GlobalSymmetryFeatures,
+    DensityFeatures,
+)
+from matminer.utils.io import (
+    load_dataframe_from_json,
+    store_dataframe_as_json,
+)
 
 from automatminer.featurization.core import AutoFeaturizer
-from automatminer.featurization.sets import StructureFeaturizers, \
-    CompositionFeaturizers
+from automatminer.featurization.sets import (
+    StructureFeaturizers,
+    CompositionFeaturizers,
+)
 
 TEST_DIR = os.path.dirname(__file__)
 CACHE_FILE = "cache_test.json"
 CACHE_PATH = os.path.join(TEST_DIR, CACHE_FILE)
 
-__author__ = ["Alex Dunn <ardunn@lbl.gov>",
-              "Alireza Faghaninia <alireza@lbl.gov>",
-              "Qi Wang <wqthu11@gmail.com>"]
+__author__ = [
+    "Alex Dunn <ardunn@lbl.gov>",
+    "Alireza Faghaninia <alireza@lbl.gov>",
+    "Qi Wang <wqthu11@gmail.com>",
+]
 
 
 class TestAutoFeaturizer(unittest.TestCase):
     def setUp(self):
-        self.test_df = load_dataset('elastic_tensor_2015').rename(
-            columns={"formula": "composition"})
+        self.test_df = load_dataset("elastic_tensor_2015").rename(
+            columns={"formula": "composition"}
+        )
         self.limit = 5
 
     def test_sanity(self):
         df = copy.copy(self.test_df)
         # sanity checks
-        self.assertTrue(df['composition'].iloc[0], "Nb4CoSi")
+        self.assertTrue(df["composition"].iloc[0], "Nb4CoSi")
         self.assertTrue(df["composition"].iloc[1179], "Al2Cu")
         self.assertEqual(df.shape[0], 1181)
 
@@ -44,14 +53,16 @@ class TestAutoFeaturizer(unittest.TestCase):
         target = "K_VRH"
 
         # When compositions are strings
-        df = copy.copy(self.test_df[['composition', target]].iloc[:self.limit])
+        df = copy.copy(
+            self.test_df[["composition", target]].iloc[: self.limit]
+        )
         af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
         self.assertAlmostEqual(df["MagpieData minimum Number"].iloc[2], 14.0)
         self.assertTrue("composition" not in df.columns)
 
         # When compositions are Composition objects
-        df = self.test_df[["composition", target]].iloc[:self.limit]
+        df = self.test_df[["composition", target]].iloc[: self.limit]
         df["composition"] = [Composition(s) for s in df["composition"]]
         af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
@@ -66,7 +77,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         target = "K_VRH"
 
         # When structures are Structure objects
-        df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
+        df = copy.copy(self.test_df[["structure", target]].iloc[: self.limit])
         af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
         # Ensure there are some structure features created
@@ -78,7 +89,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("structure" not in df.columns)
 
         # When structures are dictionaries
-        df = copy.copy(self.test_df[['structure', target]].iloc[:self.limit])
+        df = copy.copy(self.test_df[["structure", target]].iloc[: self.limit])
         df["structure"] = [s.as_dict() for s in df["structure"]]
         af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
@@ -91,7 +102,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue("structure" not in df.columns)
 
     def test_featurizers_by_users(self):
-        df = copy.copy(self.test_df.iloc[:self.limit])
+        df = copy.copy(self.test_df.iloc[: self.limit])
         target = "K_VRH"
 
         dn = DensityFeatures()
@@ -116,7 +127,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         """
         Test custom args for featurizers to use.
         """
-        df = copy.copy(self.test_df.iloc[:self.limit])
+        df = copy.copy(self.test_df.iloc[: self.limit])
         target = "K_VRH"
         exclude = ["ElementProperty"]
 
@@ -149,24 +160,31 @@ class TestAutoFeaturizer(unittest.TestCase):
         save_path = os.path.join(TEST_DIR, df_bsdos_pickled)
         if refresh_df_init:
             mpdr = MPDataRetrieval()
-            df = mpdr.get_dataframe(criteria={"material_id": "mp-149"},
-                                    properties=["pretty_formula",
-                                                "dos",
-                                                "bandstructure",
-                                                "bandstructure_uniform"]
-                                    )
+            df = mpdr.get_dataframe(
+                criteria={"material_id": "mp-149"},
+                properties=[
+                    "pretty_formula",
+                    "dos",
+                    "bandstructure",
+                    "bandstructure_uniform",
+                ],
+            )
             store_dataframe_as_json(df, save_path)
         else:
             df = load_dataframe_from_json(save_path)
         df = df.dropna(axis=0)
-        df = df.rename(columns={"bandstructure_uniform": "bandstructure",
-                                "bandstructure": "line bandstructure"})
+        df = df.rename(
+            columns={
+                "bandstructure_uniform": "bandstructure",
+                "bandstructure": "line bandstructure",
+            }
+        )
         df[target] = [["red"]]
         n_cols_init = df.shape[1]
 
-        featurizer = AutoFeaturizer(preset="express",
-                                    ignore_errors=False,
-                                    multiindex=False)
+        featurizer = AutoFeaturizer(
+            preset="express", ignore_errors=False, multiindex=False
+        )
         df = featurizer.fit_transform(df, target)
 
         # sanity checks
@@ -193,17 +211,20 @@ class TestAutoFeaturizer(unittest.TestCase):
 
     def test_presets(self):
         target = "K_VRH"
-        df = copy.copy(self.test_df.iloc[:self.limit])
+        df = copy.copy(self.test_df.iloc[: self.limit])
         af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
-        known_feats = CompositionFeaturizers().express + \
-                      StructureFeaturizers().express
+        known_feats = (
+            CompositionFeaturizers().express + StructureFeaturizers().express
+        )
         n_structure_featurizers = len(af.featurizers["structure"])
         n_composition_featurizers = len(af.featurizers["composition"])
         n_removed_featurizers = len(af.removed_featurizers)
-        n_featurizers = n_structure_featurizers + \
-                        n_composition_featurizers + \
-                        n_removed_featurizers
+        n_featurizers = (
+            n_structure_featurizers
+            + n_composition_featurizers
+            + n_removed_featurizers
+        )
         self.assertEqual(n_featurizers, len(known_feats))
 
     def test_transferability(self):
@@ -213,16 +234,17 @@ class TestAutoFeaturizer(unittest.TestCase):
         """
         target = "K_VRH"
         cols = ["composition", target]
-        df1 = self.test_df[cols].iloc[:self.limit]
-        df2 = self.test_df[cols].iloc[-1 * self.limit:]
+        df1 = self.test_df[cols].iloc[: self.limit]
+        df2 = self.test_df[cols].iloc[-1 * self.limit :]
 
         af = AutoFeaturizer(preset="express")
         af.fit(df1, target)
 
         df2 = af.transform(df2, target)
         self.assertAlmostEqual(df2[target].iloc[0], 111.788114, places=5)
-        self.assertAlmostEqual(df2["MagpieData mean Number"].iloc[1], 17.5,
-                               places=2)
+        self.assertAlmostEqual(
+            df2["MagpieData mean Number"].iloc[1], 17.5, places=2
+        )
 
     def test_column_attr(self):
         """
@@ -234,14 +256,18 @@ class TestAutoFeaturizer(unittest.TestCase):
         # Modification of test_featurize_composition with AutoFeaturizer parameter
         target = "K_VRH"
         custom_comp_key = "comp"
-        cols = ['composition', target]
-        mod_comp_df = self.test_df[cols].iloc[:self.limit]
-        mod_comp_df = mod_comp_df.rename(columns=
-                                         {"composition": custom_comp_key})
+        cols = ["composition", target]
+        mod_comp_df = self.test_df[cols].iloc[: self.limit]
+        mod_comp_df = mod_comp_df.rename(
+            columns={"composition": custom_comp_key}
+        )
 
         df = copy.copy(mod_comp_df)
-        af = AutoFeaturizer(composition_col=custom_comp_key, preset="express",
-                            ignore_errors=True)
+        af = AutoFeaturizer(
+            composition_col=custom_comp_key,
+            preset="express",
+            ignore_errors=True,
+        )
         df = af.fit_transform(df, target)
         self.assertEqual(df["MagpieData minimum Number"].iloc[2], 14.0)
         self.assertTrue("composition" not in df.columns)
@@ -256,11 +282,12 @@ class TestAutoFeaturizer(unittest.TestCase):
         self.assertTrue(custom_comp_key not in df.columns)
 
         # Modification of test_featurize_structure with AutoFeaturizer parameter
-        cols = ['structure', target]
-        mod_struc_df = self.test_df[cols].iloc[:self.limit]
+        cols = ["structure", target]
+        mod_struc_df = self.test_df[cols].iloc[: self.limit]
         custom_struc_key = "struc"
         mod_struc_df = mod_struc_df.rename(
-            columns={"structure": custom_struc_key})
+            columns={"structure": custom_struc_key}
+        )
 
         df = copy.copy(mod_struc_df)
         af = AutoFeaturizer(structure_col=custom_struc_key, preset="express")
@@ -286,7 +313,7 @@ class TestAutoFeaturizer(unittest.TestCase):
     def test_functionalization(self):
         target = "K_VRH"
         flimit = 2
-        df = self.test_df[['composition', target]].iloc[:flimit]
+        df = self.test_df[["composition", target]].iloc[:flimit]
         af = AutoFeaturizer(functionalize=True, preset="express")
         df = af.fit_transform(df, target)
         self.assertTupleEqual(df.shape, (flimit, 1752))
@@ -304,25 +331,28 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         self.assertFalse(os.path.exists(CACHE_PATH))
         af = AutoFeaturizer(cache_src=CACHE_PATH, preset="express")
-        df = self.test_df[['composition', target]].iloc[:10]
+        df = self.test_df[["composition", target]].iloc[:10]
         df_feats = af.fit_transform(df, target)
         self.assertTrue(os.path.exists(CACHE_PATH))
 
-        df_cache = self.test_df[['composition', target]].iloc[:10]
+        df_cache = self.test_df[["composition", target]].iloc[:10]
         df_cache_feats = af.fit_transform(df_cache, target)
-        self.assertAlmostEqual(df_feats.iloc[3, 0].tolist(),
-                               df_cache_feats.iloc[3, 0].tolist())
+        self.assertAlmostEqual(
+            df_feats.iloc[3, 0].tolist(), df_cache_feats.iloc[3, 0].tolist()
+        )
 
     def test_prechecking(self):
         target = "K_VRH"
         af = AutoFeaturizer(preset="express")
-        df = self.test_df[['composition', target]]
+        df = self.test_df[["composition", target]]
 
         # Increase the minimum precheck fraction for purposes of this test
         af.min_precheck_frac = 0.99
 
         af.fit(df, target)
-        classes = [f.__class__.__name__ for f in af.featurizers["composition"]]
+        classes = [
+            f.__class__.__name__ for f in af.featurizers["composition"]
+        ]
 
         # both of these should be around 0.922 precheck fraction, so they fail
         # the precheck test.
@@ -337,5 +367,5 @@ class TestAutoFeaturizer(unittest.TestCase):
             os.remove(CACHE_PATH)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

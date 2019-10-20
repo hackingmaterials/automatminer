@@ -69,26 +69,27 @@ class TestTransformerBad(DFTransformer):
 
 
 class TestBaseTransformers(unittest.TestCase):
-
     def setUp(self):
-        self.df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [7, 8, 9]})
+        self.df = pd.DataFrame(
+            {"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]}
+        )
 
     def test_DFTransformer(self):
         ttg = TestTransformerGood(5)
         self.assertTrue(hasattr(ttg, "config_attr"))
         self.assertTrue(ttg.config_attr, 5)
         with self.assertRaises(NotFittedError):
-            ttg.transform(self.df, 'b')
+            ttg.transform(self.df, "b")
 
-        ttg.fit(self.df, 'a')
+        ttg.fit(self.df, "a")
         self.assertTrue(ttg.config_attr, 5)
 
-        test = ttg.transform(self.df, 'b')
+        test = ttg.transform(self.df, "b")
         self.assertTrue("b" in test.columns)
         self.assertTrue("c" in test.columns)
         self.assertTrue("a" not in test.columns)
 
-        test = ttg.fit_transform(self.df, 'c')
+        test = ttg.fit_transform(self.df, "c")
         self.assertTrue("c" not in test.columns)
         self.assertTrue("a" in test.columns)
         self.assertTrue("b" in test.columns)
@@ -101,15 +102,21 @@ class TestBaseTransformers(unittest.TestCase):
         ttg_nested = TestTransformerGood(ttg)
 
         self.assertEqual(ttg.get_params()["config_attr"], 5)
-        self.assertEqual(ttg_nested.get_params()["config_attr__config_attr"], 5)
+        self.assertEqual(
+            ttg_nested.get_params()["config_attr__config_attr"], 5
+        )
 
         ttg.set_params(config_attr=6)
         self.assertEqual(ttg.get_params()["config_attr"], 6)
-        self.assertEqual(ttg_nested.get_params()["config_attr__config_attr"], 6)
+        self.assertEqual(
+            ttg_nested.get_params()["config_attr__config_attr"], 6
+        )
 
         ttg_nested.set_params(config_attr__config_attr=7)
         self.assertEqual(ttg.get_params()["config_attr"], 7)
-        self.assertEqual(ttg_nested.get_params()["config_attr__config_attr"], 7)
+        self.assertEqual(
+            ttg_nested.get_params()["config_attr__config_attr"], 7
+        )
 
 
 if __name__ == "__main__":

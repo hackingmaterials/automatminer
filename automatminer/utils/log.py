@@ -15,7 +15,7 @@ AMM_LOG_PREDICT_STR = "predicting"
 AMM_DEFAULT_LOGGER = True
 
 
-def initialize_logger(logger_name, log_dir='.', level=None) -> logging.Logger:
+def initialize_logger(logger_name, log_dir=".", level=None) -> logging.Logger:
     """Initialize the default logger with stdout and file handlers.
 
     Args:
@@ -30,15 +30,17 @@ def initialize_logger(logger_name, log_dir='.', level=None) -> logging.Logger:
     logger = logging.getLogger(logger_name)
     logger.handlers = []  # reset logging handlers if they already exist
 
-    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
-                                  datefmt='%Y-%m-%d %H:%M:%S')
+    formatter = logging.Formatter(
+        fmt="%(asctime)s %(levelname)-8s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
     logpath = os.path.join(log_dir, logger_name)
     if os.path.exists(logpath + ".log"):
-        logpath += "_" + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        logpath += "_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     logpath += ".log"
 
-    handler = logging.FileHandler(logpath, mode='w')
+    handler = logging.FileHandler(logpath, mode="w")
     handler.setFormatter(formatter)
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
@@ -91,11 +93,9 @@ def log_progress(logger, operation):
                 result: The method result.
             """
             self = args[0]
-            logger.info("{}Starting {}.".format(self._log_prefix,
-                                                operation))
+            logger.info("{}Starting {}.".format(self._log_prefix, operation))
             result = meth(*args, **kwargs)
-            logger.info("{}Finished {}.".format(self._log_prefix,
-                                                operation))
+            logger.info("{}Finished {}.".format(self._log_prefix, operation))
             return result
 
         return wrapper

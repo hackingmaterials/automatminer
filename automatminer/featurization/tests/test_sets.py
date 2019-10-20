@@ -7,8 +7,13 @@ import matminer.featurizers.structure as sf
 import matminer.featurizers.dos as dosf
 import matminer.featurizers.bandstructure as bf
 
-from automatminer.featurization.sets import AllFeaturizers, \
-    StructureFeaturizers, CompositionFeaturizers, BSFeaturizers, DOSFeaturizers
+from automatminer.featurization.sets import (
+    AllFeaturizers,
+    StructureFeaturizers,
+    CompositionFeaturizers,
+    BSFeaturizers,
+    DOSFeaturizers,
+)
 
 try:
     import dscribe
@@ -41,12 +46,17 @@ class TestAllFeaturizers(unittest.TestCase):
         ignore = ignore if ignore else []
 
         def is_featurizer(class_object):
-            return (issubclass(class_object, BaseFeaturizer)
-                    and not class_object == BaseFeaturizer)
+            return (
+                issubclass(class_object, BaseFeaturizer)
+                and not class_object == BaseFeaturizer
+            )
 
         # getmembers returns list of (class_name, class_object)
-        classes = [n for n, c in inspect.getmembers(module, inspect.isclass)
-                   if is_featurizer(c) and c.__module__ == module.__name__]
+        classes = [
+            n
+            for n, c in inspect.getmembers(module, inspect.isclass)
+            if is_featurizer(c) and c.__module__ == module.__name__
+        ]
         featurizers = [c for c in classes if c not in ignore]
         return featurizers
 
@@ -59,9 +69,13 @@ class TestAllFeaturizers(unittest.TestCase):
         test_feats = [c.__class__.__name__ for c in test_feats]
 
         for featurizer_name in true_feats:
-            self.assertTrue(featurizer_name in test_feats,
-                            ("{} matminer featurizer not in implemented in "
-                             "automatminer").format(featurizer_name))
+            self.assertTrue(
+                featurizer_name in test_feats,
+                (
+                    "{} matminer featurizer not in implemented in "
+                    "automatminer"
+                ).format(featurizer_name),
+            )
 
     def test_composition_featurizers(self):
         true_feats = TestAllFeaturizers.get_featurizers(cf)
@@ -69,7 +83,7 @@ class TestAllFeaturizers(unittest.TestCase):
         self._test_features_implemented(test_feats, true_feats)
 
     def test_structure_featurizers(self):
-        ignore = ['StructureComposition', 'CGCNNFeaturizer']
+        ignore = ["StructureComposition", "CGCNNFeaturizer"]
         if not dscribe:
             ignore += ["SOAP"]
         true_feats = self.get_featurizers(sf, ignore)
@@ -102,5 +116,5 @@ class TestFeaturizerSets(unittest.TestCase):
                 self.assertNotEqual(getattr(ftype, attr), [])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

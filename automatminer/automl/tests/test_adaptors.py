@@ -11,11 +11,13 @@ from automatminer.presets import get_preset_config
 from automatminer.automl.adaptors import SinglePipelineAdaptor
 from automatminer.utils.pkg import AutomatminerError
 
-__author__ = ['Qi Wang <qwang3@lbl.gov>', 'Alex Dunn <ardunn@lbl.gov>']
+__author__ = ["Qi Wang <qwang3@lbl.gov>", "Alex Dunn <ardunn@lbl.gov>"]
 
 
-@unittest.skipIf(int(os.environ.get("SKIP_INTENSIVE", 0)),
-                 "Test too intensive for CircleCI commit builds.")
+@unittest.skipIf(
+    int(os.environ.get("SKIP_INTENSIVE", 0)),
+    "Test too intensive for CircleCI commit builds.",
+)
 class TestTPOTAdaptor(unittest.TestCase):
     def setUp(self):
         basedir = os.path.dirname(os.path.realpath(__file__))
@@ -47,7 +49,9 @@ class TestTPOTAdaptor(unittest.TestCase):
 
     def test_training_only(self):
         target_key = "K_VRH"
-        train_w_predictions = self.tpot.fit_transform(self.train_df, target_key)
+        train_w_predictions = self.tpot.fit_transform(
+            self.train_df, target_key
+        )
         y_true = train_w_predictions[target_key]
         y_test = train_w_predictions[target_key + " predicted"]
         self.assertTrue(r2_score(y_true, y_test) > 0.85)
@@ -55,7 +59,7 @@ class TestTPOTAdaptor(unittest.TestCase):
     def test_feature_mismatching(self):
         target_key = "K_VRH"
         df1 = self.train_df
-        df2 = self.test_df.rename(columns={'mean X': "some other feature"})
+        df2 = self.test_df.rename(columns={"mean X": "some other feature"})
         self.tpot.fit(df1, target_key)
         with self.assertRaises(AutomatminerError):
             self.tpot.predict(df2, target_key)
@@ -69,10 +73,12 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
         self.test_df = df.copy(deep=True).iloc[451:]
 
     def test_Pipeline(self):
-        modelr = Pipeline([('scaler', StandardScaler()),
-                           ('rfr', RandomForestRegressor())])
-        modelc = Pipeline([('scaler', StandardScaler()),
-                           ('rfr', RandomForestClassifier())])
+        modelr = Pipeline(
+            [("scaler", StandardScaler()), ("rfr", RandomForestRegressor())]
+        )
+        modelc = Pipeline(
+            [("scaler", StandardScaler()), ("rfr", RandomForestClassifier())]
+        )
         learner = SinglePipelineAdaptor(regressor=modelr, classifier=modelc)
         target_key = "K_VRH"
         learner.fit(self.train_df, target_key)
@@ -83,8 +89,10 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
         self.assertTrue(r2_score(y_true, y_test) > 0.75)
 
     def test_BaseEstimator(self):
-        learner = SinglePipelineAdaptor(regressor=RandomForestRegressor(),
-                                        classifier=RandomForestClassifier())
+        learner = SinglePipelineAdaptor(
+            regressor=RandomForestRegressor(),
+            classifier=RandomForestClassifier(),
+        )
         target_key = "K_VRH"
         learner.fit(self.train_df, target_key)
         test_w_predictions = learner.predict(self.test_df, target_key)
@@ -93,18 +101,22 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
         self.assertGreater(r2_score(y_true, y_test), 0.75)
 
     def test_feature_mismatching(self):
-        learner = SinglePipelineAdaptor(regressor=RandomForestRegressor(),
-                                        classifier=RandomForestClassifier())
+        learner = SinglePipelineAdaptor(
+            regressor=RandomForestRegressor(),
+            classifier=RandomForestClassifier(),
+        )
         target_key = "K_VRH"
         df1 = self.train_df
-        df2 = self.test_df.rename(columns={'mean X': "some other feature"})
+        df2 = self.test_df.rename(columns={"mean X": "some other feature"})
         learner.fit(df1, target_key)
         with self.assertRaises(AutomatminerError):
             learner.predict(df2, target_key)
 
     def test_BaseEstimator_classification(self):
-        learner = SinglePipelineAdaptor(regressor=RandomForestRegressor(),
-                                        classifier=RandomForestClassifier())
+        learner = SinglePipelineAdaptor(
+            regressor=RandomForestRegressor(),
+            classifier=RandomForestClassifier(),
+        )
         # Prepare dataset for classification
         train_df = self.train_df
         test_df = self.test_df
@@ -124,5 +136,5 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
         self.assertGreater(f1_score(y_true, y_test), 0.65)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

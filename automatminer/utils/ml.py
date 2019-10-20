@@ -57,7 +57,8 @@ def is_greater_better(scoring_function) -> bool:
     # Check to ensure no metrics are accidentally placed in both sets
     if desired_high_metrics.intersection(desired_low_metrics):
         raise AutomatminerError(
-            "Error, there is a metric in both desired" " high and desired low metrics"
+            "Error, there is a metric in both desired"
+            " high and desired low metrics"
         )
 
     if (

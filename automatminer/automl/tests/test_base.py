@@ -94,18 +94,20 @@ class TestAdaptorGood(DFMLAdaptor):
 
 class TestBaseAutoMLTransformers(unittest.TestCase):
     def setUp(self):
-        self.df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [7, 8, 9]})
+        self.df = pd.DataFrame(
+            {"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]}
+        )
 
     def test_DFMLAdaptor(self):
         tag = TestAdaptorGood(config_attr=5)
 
         with self.assertRaises(NotFittedError):
-            tag.transform(self.df, 'a')
+            tag.transform(self.df, "a")
 
         with self.assertRaises(NotFittedError):
-            tag.predict(self.df, 'a')
+            tag.predict(self.df, "a")
 
-        tag.fit(self.df, 'a')
+        tag.fit(self.df, "a")
         self.assertTrue(hasattr(tag, "features"))
         self.assertTrue(hasattr(tag, "best_pipeline"))
         self.assertTrue(hasattr(tag, "backend"))
@@ -115,12 +117,12 @@ class TestBaseAutoMLTransformers(unittest.TestCase):
         self.assertTrue(tag.backend == "mybackend")
         self.assertTrue(tag.features[0] == "b")
 
-        predicted = tag.predict(self.df, 'b')
+        predicted = tag.predict(self.df, "b")
         self.assertTrue("b" in predicted)
         self.assertTrue("c" in predicted)
         self.assertTrue("a" not in predicted)
 
-        predicted2 = tag.fit_transform(self.df, 'c')
+        predicted2 = tag.fit_transform(self.df, "c")
         self.assertTrue("b" in predicted2)
         self.assertTrue("a" in predicted2)
         self.assertTrue("c" not in predicted2)

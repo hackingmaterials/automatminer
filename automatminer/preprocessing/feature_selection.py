@@ -5,8 +5,12 @@ import logging
 
 import numpy as np
 from sklearn.base import is_classifier
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, \
-    GradientBoostingClassifier, GradientBoostingRegressor
+from sklearn.ensemble import (
+    RandomForestRegressor,
+    RandomForestClassifier,
+    GradientBoostingClassifier,
+    GradientBoostingRegressor,
+)
 from sklearn.model_selection import check_cv, train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.linear_model import SGDClassifier
@@ -16,8 +20,10 @@ from skrebate import MultiSURFstar
 from automatminer.utils.pkg import AutomatminerError
 from automatminer.base import DFTransformer
 
-__authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
-               "Alex Dunn <ardunn@lbl.gov>"]
+__authors__ = [
+    "Alireza Faghaninia <alireza@lbl.gov>",
+    "Alex Dunn <ardunn@lbl.gov>",
+]
 
 
 logger = logging.getLogger(__name__)
@@ -87,18 +93,19 @@ class TreeFeatureReducer(DFTransformer):
             tree_model.fit(X, y)
             fimportance = sorted(
                 zip(X.columns, tree_model.feature_importances_),
-                key=lambda x: x[1], reverse=True)
+                key=lambda x: x[1],
+                reverse=True,
+            )
             tfeats = self.get_top_features(fimportance)
             m_curr = len(tfeats)
             m_prev = len(X.columns)
-            logger.debug('nfeatures: {}->{}'.format(
-                len(X.columns), m_curr))
+            logger.debug("nfeatures: {}->{}".format(len(X.columns), m_curr))
             X = X[tfeats]
             if not recursive:
                 break
         return tfeats
 
-    def fit(self, X, y, tree='rf', recursive=True, cv=5):
+    def fit(self, X, y, tree="rf", recursive=True, cv=5):
         """
         Fits to the data (X) and target (y) to determine the selected_features.
 
@@ -119,32 +126,36 @@ class TreeFeatureReducer(DFTransformer):
         """
         m0 = len(X.columns)
         if isinstance(tree, str):
-            if tree.lower() in ['rf', 'random forest', 'randomforest']:
-                if self.mode.lower() in ['classification', 'classifier']:
+            if tree.lower() in ["rf", "random forest", "randomforest"]:
+                if self.mode.lower() in ["classification", "classifier"]:
                     tree = RandomForestClassifier(random_state=self.rs)
                 else:
                     tree = RandomForestRegressor(random_state=self.rs)
-            elif tree.lower() in ['gb', 'gbt', 'gradiet boosting']:
-                if self.mode.lower() in ['classification', 'classifier']:
+            elif tree.lower() in ["gb", "gbt", "gradiet boosting"]:
+                if self.mode.lower() in ["classification", "classifier"]:
                     tree = GradientBoostingClassifier(random_state=self.rs)
                 else:
                     tree = GradientBoostingRegressor(random_state=self.rs)
             else:
                 raise AutomatminerError(
-                    'Unsupported tree_type {}!'.format(tree))
+                    "Unsupported tree_type {}!".format(tree)
+                )
 
         cv = check_cv(cv=cv, y=y, classifier=is_classifier(tree))
         all_feats = []
         for train, _ in cv.split(X, y, groups=None):
             Xtrn = X.iloc[train]
             ytrn = y.iloc[train]
-            all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
+            all_feats += self.get_reduced_features(
+                tree, Xtrn, ytrn, recursive
+            )
         # take the union of selected features of each fold
         self.selected_features = list(set(all_feats))
         logger.info(
-            self._log_prefix +
-            'Finished tree-based feature reduction of {} initial features to '
-            '{}'.format(m0, len(self.selected_features)))
+            self._log_prefix
+            + "Finished tree-based feature reduction of {} initial features to "
+            "{}".format(m0, len(self.selected_features))
+        )
         return self
 
     def transform(self, X, y=None):
@@ -160,7 +171,7 @@ class TreeFeatureReducer(DFTransformer):
         Returns (pandas.DataFrame): the data with reduced number of features.
         """
         if self.selected_features is None:
-            raise AutomatminerError('The fit method should be called first!')
+            raise AutomatminerError("The fit method should be called first!")
         return X[self.selected_features]
 
 
@@ -212,8 +223,9 @@ def lower_corr_clf(df, target, f1, f2):
     features = [f1, f2]
     comparison_res = {}
     for i, x in enumerate([x1, x2]):
-        x_tr, x_te, y_tr, y_te = train_test_split(x, y, test_size=0.3,
-                                                  random_state=0)
+        x_tr, x_te, y_tr, y_te = train_test_split(
+            x, y, test_size=0.3, random_state=0
+        )
         common_clf.fit(x_tr, y_tr)
         y_pred = common_clf.predict(x_te)
         if len(unique_names) <= 2:

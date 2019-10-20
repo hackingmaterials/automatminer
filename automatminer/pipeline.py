@@ -11,9 +11,15 @@ from automatminer import __name__ as amm_name
 from automatminer.base import DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
-from automatminer.utils.pkg import check_fitted, set_fitted, \
-    return_attrs_recursively, AutomatminerError, VersionError, get_version, \
-    save_dict_to_file
+from automatminer.utils.pkg import (
+    check_fitted,
+    set_fitted,
+    return_attrs_recursively,
+    AutomatminerError,
+    VersionError,
+    get_version,
+    save_dict_to_file,
+)
 from automatminer.utils.log import initialize_logger
 
 logger = initialize_logger(logger_name=amm_name)
@@ -87,15 +93,18 @@ class MatPipe(DFTransformer):
         target (str): The name of the column where target values are held.
     """
 
-    def __init__(self, autofeaturizer=None, cleaner=None, reducer=None,
-                 learner=None):
+    def __init__(
+        self, autofeaturizer=None, cleaner=None, reducer=None, learner=None
+    ):
         transformers = [autofeaturizer, cleaner, reducer, learner]
         if not all(transformers):
             if any(transformers):
-                raise AutomatminerError("Please specify all dataframe"
-                                        "transformers (autofeaturizer, learner,"
-                                        "reducer, and cleaner), or none (to use"
-                                        "default).")
+                raise AutomatminerError(
+                    "Please specify all dataframe"
+                    "transformers (autofeaturizer, learner,"
+                    "reducer, and cleaner), or none (to use"
+                    "default)."
+                )
             else:
                 config = get_preset_config("express")
                 autofeaturizer = config["autofeaturizer"]
@@ -115,7 +124,7 @@ class MatPipe(DFTransformer):
         super(MatPipe, self).__init__()
 
     @staticmethod
-    def from_preset(preset: str = 'express', **powerups):
+    def from_preset(preset: str = "express", **powerups):
         """
         Get a preset MatPipe from a string using
         automatminer.presets.get_preset_config
@@ -235,8 +244,9 @@ class MatPipe(DFTransformer):
         return merged_df
 
     @set_fitted
-    def benchmark(self, df, target, kfold, fold_subset=None, cache=False,
-                  ignore=None):
+    def benchmark(
+        self, df, target, kfold, fold_subset=None, cache=False, ignore=None
+    ):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
@@ -289,22 +299,26 @@ class MatPipe(DFTransformer):
             if os.path.exists(cache_src):
                 logger.warning(
                     "Cache src {} already found! Ensure this featurized data "
-                    "matches the df being benchmarked.".format(cache_src))
+                    "matches the df being benchmarked.".format(cache_src)
+                )
             logger.warning("Running pre-featurization for caching.")
             self.autofeaturizer.fit_transform(df, target)
         elif cache_src and not cache:
             raise AutomatminerError(
                 "Caching was enabled in AutoFeaturizer but not in benchmark. "
                 "Either disable caching in AutoFeaturizer or enable it by "
-                "passing cache=True to benchmark.")
+                "passing cache=True to benchmark."
+            )
         elif cache and not cache_src:
             raise AutomatminerError(
                 "MatPipe cache is enabled, but no cache_src was defined in "
                 "autofeaturizer. Pass the cache_src argument to AutoFeaturizer "
-                "or use the cache_src get_preset_config powerup.")
+                "or use the cache_src get_preset_config powerup."
+            )
         else:
-            logger.debug("No caching being used in AutoFeaturizer or "
-                              "benchmark.")
+            logger.debug(
+                "No caching being used in AutoFeaturizer or " "benchmark."
+            )
 
         if not fold_subset:
             fold_subset = list(range(kfold.n_splits))
@@ -369,17 +383,12 @@ class MatPipe(DFTransformer):
             "drop_na_targets",
         ]
         cleaner_data = {
-            attr: str(getattr(self.cleaner, attr))
-            for attr in cleaner_attrs
+            attr: str(getattr(self.cleaner, attr)) for attr in cleaner_attrs
         }
 
-        reducer_attrs = [
-            "reducers",
-            "reducer_params",
-        ]
+        reducer_attrs = ["reducers", "reducer_params"]
         reducer_data = {
-            attr: str(getattr(self.reducer, attr))
-            for attr in reducer_attrs
+            attr: str(getattr(self.reducer, attr)) for attr in reducer_attrs
         }
 
         attrs = {
@@ -387,7 +396,7 @@ class MatPipe(DFTransformer):
             "ml_model": str(self.learner.best_pipeline),
             "feature_reduction": reducer_data,
             "data_cleaning": cleaner_data,
-            "features": self.learner.features
+            "features": self.learner.features,
         }
         if filename:
             save_dict_to_file(attrs, filename)
@@ -410,7 +419,7 @@ class MatPipe(DFTransformer):
             None
         """
         self.learner.serialize()
-        with open(filename, 'wb') as f:
+        with open(filename, "wb") as f:
             pickle.dump(self, f)
         # Reassign live memory objects for further use in this object
         self.learner.deserialize()
@@ -430,7 +439,7 @@ class MatPipe(DFTransformer):
         Returns:
             pipe (MatPipe): A MatPipe object.
         """
-        with open(filename, 'rb') as f:
+        with open(filename, "rb") as f:
             pipe = pickle.load(f)
 
         if pipe.version != get_version() and not supress_version_mismatch:

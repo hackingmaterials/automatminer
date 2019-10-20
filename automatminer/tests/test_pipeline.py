@@ -73,7 +73,9 @@ def make_matpipe_test(config_preset, skip=None):
         skip = []
     for s in skip:
         if s not in skippables:
-            raise ValueError(f"{s} is not a skippable test. Choose from {skippables}")
+            raise ValueError(
+                f"{s} is not a skippable test. Choose from {skippables}"
+            )
     reason = "Skip was requested."
 
     class TestMatPipe(unittest.TestCase):
@@ -86,7 +88,9 @@ def make_matpipe_test(config_preset, skip=None):
             self.extra_features = df["G_VRH"]
             self.target = "K_VRH"
             self.config = get_preset_config(config_preset)
-            self.config_cached = get_preset_config(config_preset, cache_src=CACHE_SRC)
+            self.config_cached = get_preset_config(
+                config_preset, cache_src=CACHE_SRC
+            )
             self.pipe = MatPipe(**self.config)
             self.pipe_cached = MatPipe(**self.config_cached)
 
@@ -233,7 +237,12 @@ def make_matpipe_test(config_preset, skip=None):
 
         def tearDown(self) -> None:
             digests = [DIGEST_PATH + ext for ext in AMM_SUPPORTED_EXTS]
-            for remnant in [CACHE_SRC, PIPE_PATH, VERSION_PIPE_PATH, *digests]:
+            for remnant in [
+                CACHE_SRC,
+                PIPE_PATH,
+                VERSION_PIPE_PATH,
+                *digests,
+            ]:
                 if os.path.exists(remnant):
                     os.remove(remnant)
 

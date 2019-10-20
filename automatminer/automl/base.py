@@ -137,14 +137,14 @@ class DFMLAdaptor(DFTransformer):
                 "dataframe target! ({})".format(target, self.fitted_target)
             )
         elif not all([f in df.columns for f in self.features]):
-            not_in_model = [f for f in self.features if
-                            f not in df.columns]
+            not_in_model = [f for f in self.features if f not in df.columns]
             not_in_df = [f for f in df.columns if f not in self.features]
             raise AutomatminerError(
                 "Features used to build model are different from df columns! "
                 "Features located in model not located in df: \n{} \n "
                 "Features located in df not in model: \n{}"
-                "".format(not_in_df, not_in_model))
+                "".format(not_in_df, not_in_model)
+            )
         else:
             X = df[self.features].values  # rectify feature order
             y_pred = self.best_pipeline.predict(X)
