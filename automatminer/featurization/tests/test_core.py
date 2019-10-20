@@ -9,6 +9,7 @@ from matminer.datasets.dataset_retrieval import load_dataset
 from matminer.featurizers.composition import ElementProperty
 from matminer.featurizers.structure import GlobalSymmetryFeatures, \
     DensityFeatures
+from matminer.utils.io import load_dataframe_from_json, store_dataframe_as_json
 
 from automatminer.featurization.core import AutoFeaturizer
 from automatminer.featurization.sets import StructureFeaturizers, \
@@ -145,6 +146,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         """
         target = "color"
         df_bsdos_pickled = "mp_data_with_dos_bandstructure.pickle"
+        save_path = os.path.join(TEST_DIR, df_bsdos_pickled)
         if refresh_df_init:
             mpdr = MPDataRetrieval()
             df = mpdr.get_dataframe(criteria={"material_id": "mp-149"},
@@ -153,9 +155,9 @@ class TestAutoFeaturizer(unittest.TestCase):
                                                 "bandstructure",
                                                 "bandstructure_uniform"]
                                     )
-            df.to_pickle(os.path.join(TEST_DIR, df_bsdos_pickled))
+            store_dataframe_as_json(df, save_path)
         else:
-            df = pd.read_pickle(os.path.join(TEST_DIR, df_bsdos_pickled))
+            df = load_dataframe_from_json(save_path)
         df = df.dropna(axis=0)
         df = df.rename(columns={"bandstructure_uniform": "bandstructure",
                                 "bandstructure": "line bandstructure"})
