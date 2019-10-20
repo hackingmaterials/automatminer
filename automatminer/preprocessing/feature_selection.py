@@ -17,12 +17,12 @@ from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.linear_model import SGDClassifier
 from sklearn.preprocessing import LabelEncoder
 
+from automatminer.utils.pkg import AutomatminerError
+from automatminer.base import DFTransformer
+
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", category=DeprecationWarning)
     from skrebate import MultiSURFstar
-
-from automatminer.utils.pkg import AutomatminerError
-from automatminer.base import DFTransformer
 
 __authors__ = [
     "Alireza Faghaninia <alireza@lbl.gov>",
