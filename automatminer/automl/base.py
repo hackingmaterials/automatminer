@@ -4,6 +4,7 @@ Base classes for automl.
 
 import abc
 from typing import List
+import logging
 
 import numpy as np
 import pandas as pd
@@ -11,6 +12,8 @@ import pandas as pd
 from automatminer.base import DFTransformer
 from automatminer.utils.log import AMM_LOG_PREDICT_STR, log_progress
 from automatminer.utils.pkg import AutomatminerError, check_fitted
+
+logger = logging.getLogger(__name__)
 
 
 class DFMLAdaptor(DFTransformer):
@@ -107,7 +110,7 @@ class DFMLAdaptor(DFTransformer):
         return None
 
     @check_fitted
-    @log_progress(AMM_LOG_PREDICT_STR)
+    @log_progress(logger, AMM_LOG_PREDICT_STR)
     def predict(self, df: pd.DataFrame, target: str) -> pd.DataFrame:
         """
         Predict the target property of materials given a df of features. This

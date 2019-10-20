@@ -4,6 +4,7 @@ Classes for automatic featurization and core featurizer functionality.
 
 import os
 import math
+import logging
 
 from pymatgen import Composition
 from matminer.featurizers.conversions import StrToComposition, DictToObject, \
@@ -26,6 +27,8 @@ __author__ = ["Alex Dunn <ardunn@lbl.gov>",
               "Qi Wang <wqthu11@gmail.com>"]
 
 _COMMON_COL_ERR_STR = "composition_col/structure_col/bandstructure_col/dos_col"
+
+logger = logging.getLogger(__name__)
 
 
 class AutoFeaturizer(DFTransformer, LoggableMixin):
@@ -80,9 +83,6 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
             recommended for use in MatPipe.
         n_jobs (int): The number of parallel jobs to use during featurization
             for each featurizer. Default is n_cores
-        logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will
-            be used. If set to False, then no logging will occur.
 
     Attributes:
         These attributes are set during fitting
@@ -112,9 +112,8 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
                  exclude=None, functionalize=False, ignore_cols=None,
                  ignore_errors=True, drop_inputs=True, guess_oxistates=True,
                  multiindex=False, do_precheck=True, n_jobs=None,
-                 logger=True, composition_col="composition",
-                 structure_col="structure", bandstructure_col="bandstructure",
-                 dos_col="dos"):
+                 composition_col="composition", structure_col="structure",
+                 bandstructure_col="bandstructure", dos_col="dos"):
 
         if featurizers and preset:
             raise AutomatminerError("Featurizers and preset were both set. "
@@ -128,7 +127,6 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
 
         self.cache_src = cache_src
         self.preset = "express" if preset is None else preset
-        logger = logger
         self.featurizers = featurizers
         self.exclude = exclude if exclude else []
         self.functionalize = functionalize
@@ -215,7 +213,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
 
         self.min_precheck_frac = 0.9
 
-    @log_progress(AMM_LOG_FIT_STR)
+    @log_progress(logger, AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
         """
@@ -318,7 +316,7 @@ class AutoFeaturizer(DFTransformer, LoggableMixin):
         self.converted_input_df = df
         return self
 
-    @log_progress(AMM_LOG_TRANSFORM_STR)
+    @log_progress(logger, AMM_LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target):
         """

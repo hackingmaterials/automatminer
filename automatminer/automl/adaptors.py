@@ -6,6 +6,7 @@ Current adaptor classes are:
     TPOTAdaptor: Uses the backend from the automl project TPOT, which can be
         found at https://github.com/EpistasisLab/tpot
 """
+import logging
 from collections import OrderedDict
 
 from tpot import TPOTClassifier, TPOTRegressor
@@ -26,6 +27,7 @@ __authors__ = ['Alex Dunn <ardunn@lbl.gov'
                'Daniel Dopp <dbdopp@lbl.gov>']
 
 _adaptor_tmp_backend = None
+logger = logging.getLogger(__name__)
 
 
 class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
@@ -67,7 +69,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             due to pickling problems.
     """
 
-    def __init__(self, logger=True, **tpot_kwargs):
+    def __init__(self, *tpot_kwargs):
         tpot_kwargs['cv'] = tpot_kwargs.get('cv', 5)
         tpot_kwargs['n_jobs'] = tpot_kwargs.get('n_jobs', -1)
         tpot_kwargs['verbosity'] = tpot_kwargs.get('verbosity', 3)
@@ -82,13 +84,12 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self._fitted_target = None
         self._backend = None
         self._features = None
-        logger = logger
 
         self.from_serialized = False
         self._best_models = None
         super(DFMLAdaptor, self).__init__()
 
-    @log_progress(AMM_LOG_FIT_STR)
+    @log_progress(logger, AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
         """
@@ -276,9 +277,6 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
             not need to be a BaseEstimator or Pipeline.
         classifier (sklearn Pipeline or BaseEstimator-like): The object you want
             to use for machine learning classification.
-        logger (logging.Logger, bool):  A custom logger object to use for
-            logging. Alternatively, if set to True, the default automatminer
-            logger will be used. If set to False, then no logging will occur.
 
     Attributes:
         The following unique attributes are set during fitting.
@@ -289,14 +287,13 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
 
     def __init__(self, regressor, classifier, logger=True):
         self.mode = None
-        logger = logger
         self._regressor = regressor
         self._classifier = classifier
         self._features = None
         self._fitted_target = None
         self._best_pipeline = None
 
-    @log_progress(AMM_LOG_FIT_STR)
+    @log_progress(logger, AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
 

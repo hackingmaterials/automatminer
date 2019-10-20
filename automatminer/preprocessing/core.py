@@ -110,7 +110,7 @@ class DataCleaner(DFTransformer, LoggableMixin):
         """
         return self.fitted_df.columns.tolist()
 
-    @log_progress(AMM_LOG_FIT_STR)
+    @log_progress(logger, AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
         """
@@ -137,7 +137,7 @@ class DataCleaner(DFTransformer, LoggableMixin):
         self.fitted_target = target
         return self
 
-    @log_progress(AMM_LOG_TRANSFORM_STR)
+    @log_progress(logger, AMM_LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target):
         """
@@ -511,7 +511,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
         self._pca_feats = None
         super(FeatureReducer, self).__init__()
 
-    @log_progress(AMM_LOG_FIT_STR)
+    @log_progress(logger, AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target):
         missing_remove_features = [c for c in self._remove_features
@@ -537,8 +537,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
             if r == "tree":
                 tbfr = TreeFeatureReducer(
                     importance_percentile=self.tree_importance_percentile,
-                    mode=regression_or_classification(y),
-                    logger=logger)
+                    mode=regression_or_classification(y))
                 reduced_df = tbfr.fit_transform(X, y).copy(deep=True)
                 self.reducer_params[r] = {
                     "importance_percentile": tbfr.importance_percentile,
@@ -648,7 +647,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
                                   self._remove_features or c != target]
         return self
 
-    @log_progress(AMM_LOG_TRANSFORM_STR)
+    @log_progress(logger, AMM_LOG_TRANSFORM_STR)
     @check_fitted
     def transform(self, df, target):
         if target not in df.columns:

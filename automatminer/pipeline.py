@@ -2,8 +2,8 @@
 The highest level classes for pipelines.
 """
 import os
-import copy
 import pickle
+import logging
 from typing import Dict
 
 import pandas as pd
@@ -14,7 +14,9 @@ from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.pkg import check_fitted, set_fitted, \
     return_attrs_recursively, AutomatminerError, VersionError, get_version, \
     save_dict_to_file
-from automatminer.utils.log import AMM_DEFAULT_LOGGER
+from automatminer.utils.log import initialize_logger
+
+logger = initialize_logger(logger_name=__name__)
 
 
 class MatPipe(DFTransformer, LoggableMixin):
@@ -70,9 +72,6 @@ class MatPipe(DFTransformer, LoggableMixin):
         learner (DFMLAdaptor): The auto ml adaptor object used to
             actually run a auto-ml pipeline on the clean, reduced, featurized
             dataframe.
-        logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will
-            be used. If set to False, then no logging will occur.
 
     Attributes:
         version (str): The automatminer version used for serialization and
@@ -89,7 +88,7 @@ class MatPipe(DFTransformer, LoggableMixin):
     """
 
     def __init__(self, autofeaturizer=None, cleaner=None, reducer=None,
-                 learner=None, logger=AMM_DEFAULT_LOGGER):
+                 learner=None):
         transformers = [autofeaturizer, cleaner, reducer, learner]
         if not all(transformers):
             if any(transformers):
@@ -108,7 +107,6 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.cleaner = cleaner
         self.reducer = reducer
         self.learner = learner
-        logger = logger
         self.pre_fit_df = None
         self.post_fit_df = None
         self.ml_type = None
@@ -413,22 +411,10 @@ class MatPipe(DFTransformer, LoggableMixin):
             None
         """
         self.learner.serialize()
-
-        # temp_logger = copy.deepcopy(self._logger)
-        temp_logger = None
-        loggables = [
-            self, self.learner, self.reducer, self.cleaner, self.autofeaturizer
-        ]
-        for loggable in loggables:
-            loggable._logger = AMM_DEFAULT_LOGGER
-
         with open(filename, 'wb') as f:
             pickle.dump(self, f)
-
         # Reassign live memory objects for further use in this object
         self.learner.deserialize()
-        for loggable in loggables:
-            loggable._logger = temp_logger
 
     @staticmethod
     def load(filename, logger=True, supress_version_mismatch=False):
