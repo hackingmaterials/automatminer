@@ -58,6 +58,13 @@ class TestMatPipePresets(unittest.TestCase):
         self.assertEqual(prod[AF_KEY].cache_src, cache_src)
         MatPipe(**prod)
 
+    def test_n_jobs_powerup(self):
+        n_jobs = 1
+        prod = get_preset_config("production", n_jobs=n_jobs)
+        self.assertEqual(prod[AF_KEY].n_jobs, n_jobs)
+        self.assertEqual(prod[ML_KEY].tpot_kwargs["n_jobs"], n_jobs)
+        MatPipe(**prod)
+
     def test_missing(self):
         with self.assertRaises(ValueError):
             _ = get_preset_config("QWERTYUIOP1234567890")
