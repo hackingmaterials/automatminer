@@ -92,10 +92,10 @@ def log_progress(logger, operation):
             """
             self = args[0]
             logger.info("{}Starting {}.".format(self._log_prefix,
-                                                     operation))
+                                                operation))
             result = meth(*args, **kwargs)
             logger.info("{}Finished {}.".format(self._log_prefix,
-                                                     operation))
+                                                operation))
             return result
 
         return wrapper
