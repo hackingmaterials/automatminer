@@ -3,7 +3,7 @@ import hashlib
 import copy
 import random
 
-from fireworks import Firework, Workflow, ScriptTask
+from fireworks import Firework, Workflow
 from sklearn.model_selection import KFold
 
 from automatminer_dev.tasks.bench import (
@@ -18,7 +18,8 @@ from automatminer_dev.workflows.util import (
     VALID_FWORKERS,
 )
 
-from automatminer_dev.config import LP, KFOLD_DEFAULT, RUN_TESTS_CMD
+from automatminer_dev.config import LP, KFOLD_DEFAULT
+from automatminer_dev.workflows.util import get_test_fw
 
 """
 Functions for creating benchmarking workflows.
@@ -110,9 +111,7 @@ def wf_evaluate_build(
         all_links[fw] = [fw_build_merge]
 
     if include_tests:
-        fw_test = Firework(
-            ScriptTask(script=RUN_TESTS_CMD), name="run tests ({})".format(build_id)
-        )
+        fw_test = get_test_fw(build_id)
         all_links[fw_test] = fws_fold0
     all_links[fw_build_merge] = []
 

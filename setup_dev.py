@@ -20,7 +20,7 @@ if __name__ == "__main__":
         author=['Alex Dunn'],
         author_email='ardunn@lbl.gov',
         license='modified BSD',
-        packages=find_packages(include="./dev"),
+        packages=find_packages(include="./automatminer_dev"),
         package_data={},
         zip_safe=False,
         install_requires=reqs_list,

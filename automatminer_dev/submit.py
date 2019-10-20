@@ -1,7 +1,6 @@
 from automatminer_dev.config import (
     LP,
     KFOLD_DEFAULT,
-    LOCAL_DEBUG_SET,
     RUN_TESTS_CMD,
     BENCHMARK_DEBUG_SET,
     BENCHMARK_FULL_SET,
@@ -16,8 +15,6 @@ Running benchmarks
 
 if __name__ == "__main__":
 
-    # from tpot.base import TPOTBase
-    # TPOTBase(generations=, population_size=)
     pipe_config = {
         "learner_name": "TPOTAdaptor",
         # "learner_kwargs": {"generations": 100, "population_size": 100, "memory": "auto", "n_jobs": 10, "max_eval_time_mins": 5},
@@ -49,9 +46,6 @@ if __name__ == "__main__":
         },
     }
 
-    # todo: change the feature_na_method!
-    # todo: change the tpot template!!!
-
     pipe_config_debug = {
         "autofeaturizer_kwargs": {"preset": "debug", "n_jobs": 10},
         "reducer_kwargs": {"reducers": ()},
@@ -65,9 +59,6 @@ if __name__ == "__main__":
         },
     }
 
-    # from sklearn.ensemble import RandomForestClassifier
-    #
-    # rf = RandomForestClassifier()
     tags = [
         # "data_full",
         # "drop_mean",
@@ -87,23 +78,20 @@ if __name__ == "__main__":
     # from automatminer_dev.config import MP_E_FORM, JDFT2D, GLASS
     # wf = wf_benchmark("lrc", pipe_config, **GFA, cache=True, tags=tags)
 
-    # wf = wf_evaluate_build(
-    #     "lrc",
-    #     "24 hr tpot production 99% reducing with mean drop cleaning samples",
-    #     BENCHMARK_FULL_SET,
-    #     pipe_config,
-    #     include_tests=False,
-    #     cache=True,
-    #     tags=tags,
-    # )
+    wf = wf_evaluate_build(
+        "lrc",
+        "24 hr tpot production 99% reducing with mean drop cleaning samples",
+        BENCHMARK_FULL_SET,
+        pipe_config,
+        include_tests=False,
+        cache=True,
+        tags=tags,
+    )
 
-    wf = wf_evaluate_build("local", "test_local", BENCHMARK_DEBUG_SET, pipe_config_debug)
+    # wf = wf_evaluate_build("local", "test_local", BENCHMARK_DEBUG_SET, pipe_config_debug)
 
     # wf = wf_evaluate_build("cori", "rf run for comparison to the paper", BENCHMARK_FULL_SET,
     #                        pipe_config_debug, include_tests=False, cache=True, tags=tags)
-
-    # ds = LOCAL_DEBUG_SET[0]
-    # wf = wf_single_fit("local", "test fit", pipe_config, **ds, tags=["debug"])
 
     # LP.reset(password=None, require_password=False)
     LP.add_wf(wf)

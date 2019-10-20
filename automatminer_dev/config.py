@@ -21,25 +21,6 @@ KFOLD_DEFAULT = {"shuffle": True, "random_state": 18012019, "n_splits": 5}
 RUN_TESTS_CMD = "cd $AMM_CODE_DIR && coverage run setup.py test"
 EXPORT_COV_CMD = "coverage xml && python-codacy-coverage -r coverage.xml"
 
-# Local testing configuration...
-LOCAL_DEBUG_REG = {
-    "name": "debug_local_reg",
-    "data_file": "debug_jdft2d.json.gz",
-    "target": "exfoliation_en",
-    "problem_type": AMM_REG_NAME,
-    "clf_pos_label": None,
-}
-
-LOCAL_DEBUG_CLF = {
-    "name": "debug_local_clf",
-    "data_file": "debug_expt_is_metal.json.gz",
-    "target": "is_metal",
-    "problem_type": AMM_CLF_NAME,
-    "clf_pos_label": True,
-}
-
-LOCAL_DEBUG_SET = [LOCAL_DEBUG_CLF, LOCAL_DEBUG_REG]
-
 # Real benchmark sets
 
 LOG_KVRH = {
@@ -162,21 +143,3 @@ BENCHMARK_FULL_SET = [
     STEELS,
     PHONONS,
 ]
-
-# Extra datasets, probably not present
-# BULK = {
-#     "name": "mp_bulk",
-#     "data_file": "elasticity_K_VRH.json.gz",
-#     "target": "K_VRH",
-#     "problem_type": AMM_REG_NAME,
-#     "clf_pos_label": None
-# }
-#
-# SHEAR = {
-#     "name": "mp_shear",
-#     "data_file": "elasticity_G_VRH.json.gz",
-#     "target": "G_VRH",
-#     "problem_type": AMM_REG_NAME,
-#     "clf_pos_label": None
-# }
-# EXTRAS = [SHEAR, BULK]
