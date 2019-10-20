@@ -128,7 +128,7 @@
 
 <dl class="function">
 <dt id="automatminer.utils.log.log_progress">
-<code class="sig-prename descclassname">automatminer.utils.log.</code><code class="sig-name descname">log_progress</code><span class="sig-paren">(</span><em class="sig-param">operation</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.log.log_progress" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">automatminer.utils.log.</code><code class="sig-name descname">log_progress</code><span class="sig-paren">(</span><em class="sig-param">logger</em>, <em class="sig-param">operation</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.utils.log.log_progress" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decorator to auto-log progress before and after executing a method, such
 as fit and transform. Should only be applied to DataFrameTransformers.</p>
 <p>For example,</p>
@@ -137,7 +137,10 @@ as fit and transform. Should only be applied to DataFrameTransformers.</p>
 INFO: Finished AutoFeaturizer fitting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Some info about the operation you want to log.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.8)"><em>logging.Logger</em></a>) – A logger object to help log progress.</p></li>
+<li><p><strong>operation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Some info about the operation you want to log.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A wrapper for the input method.</p>
