@@ -15,10 +15,11 @@ from matminer.featurizers.conversions import StrToComposition
 from tqdm import tqdm
 
 import pandas as pd
+
 # pd.set_option('display.height', 1000)
-pd.set_option('display.max_rows', 500)
-pd.set_option('display.max_columns', 500)
-pd.set_option('display.width', 1000)
+pd.set_option("display.max_rows", 500)
+pd.set_option("display.max_columns", 500)
+pd.set_option("display.width", 1000)
 
 
 df = load_dataset("glass_ternary_landolt")
@@ -26,7 +27,9 @@ df = load_dataset("glass_ternary_landolt")
 df = df.rename(columns={"formula": "composition"})
 df = df[["composition", "gfa"]]
 
-df = StrToComposition(target_col_id="composition_obj").featurize_dataframe(df, "composition")
+df = StrToComposition(target_col_id="composition_obj").featurize_dataframe(
+    df, "composition"
+)
 df["composition"] = [c.reduced_formula for c in df["composition_obj"]]
 df = df.drop(columns=["composition_obj"])
 

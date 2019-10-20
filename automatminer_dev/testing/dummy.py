@@ -29,11 +29,9 @@ for p in BENCHMARK_FULL_SET:
     else:
         raise ValueError("problem type {} is not known.".format(ltype))
 
-    cvs = cross_val_score(estimator,
-                          df.drop(columns=[target]),
-                          y=df[target],
-                          scoring=scoring,
-                          cv=kf)
+    cvs = cross_val_score(
+        estimator, df.drop(columns=[target]), y=df[target], scoring=scoring, cv=kf
+    )
 
     cvs = multiplier * cvs
     mean_cvs = np.mean(cvs)

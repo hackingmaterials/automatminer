@@ -3,20 +3,25 @@ import warnings
 from fireworks import Firework, Workflow
 
 from automatminer_dev.tasks.single import RunSingleFit
-from automatminer_dev.workflows.util import get_last_commit, get_time_str, \
-    VALID_FWORKERS
+from automatminer_dev.workflows.util import (
+    get_last_commit,
+    get_time_str,
+    VALID_FWORKERS,
+)
 
 
-def wf_single_fit(fworker, fit_name, pipe_config, name, data_file, target,
-                  *args,
-                  tags=None, **kwargs):
+def wf_single_fit(
+    fworker, fit_name, pipe_config, name, data_file, target, *args, tags=None, **kwargs
+):
     """
     Submit a dataset to be fit for a single pipeline (i.e., to train on a
     dataset for real predictions).
     """
-    warnings.warn("Single fitted MatPipe not being stored in automatminer db "
-                  "collections. Please consult fw_spec to find the benchmark "
-                  "on {}".format(fworker))
+    warnings.warn(
+        "Single fitted MatPipe not being stored in automatminer db "
+        "collections. Please consult fw_spec to find the benchmark "
+        "on {}".format(fworker)
+    )
     if fworker not in VALID_FWORKERS:
         raise ValueError("fworker must be in {}".format(VALID_FWORKERS))
 
@@ -29,7 +34,7 @@ def wf_single_fit(fworker, fit_name, pipe_config, name, data_file, target,
         "target": target,
         "automatminer_commit": get_last_commit(),
         "tags": tags if tags else [],
-        "_fworker": fworker
+        "_fworker": fworker,
     }
 
     fw_name = "{} single fit".format(name)

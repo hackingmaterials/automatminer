@@ -6,23 +6,48 @@ import random
 from fireworks import Firework, Workflow, ScriptTask
 from sklearn.model_selection import KFold
 
-from automatminer_dev.tasks.bench import \
-    ConsolidatePipesToBenchmark, RunPipe, StorePipeResults, \
-    ConsolidateBenchmarksToBuild
-from automatminer_dev.workflows.util import get_last_commit, get_time_str, \
-    VALID_FWORKERS
+from automatminer_dev.tasks.bench import (
+    ConsolidatePipesToBenchmark,
+    RunPipe,
+    StorePipeResults,
+    ConsolidateBenchmarksToBuild,
+)
+from automatminer_dev.workflows.util import (
+    get_last_commit,
+    get_time_str,
+    VALID_FWORKERS,
+)
 
 from automatminer_dev.config import LP, KFOLD_DEFAULT, RUN_TESTS_CMD
 
 """
-Functions for creating benchmarks.
+Functions for creating benchmarking workflows.
 
+A pipe is one config being run on one fold of one problem.
+
+A benchmark is one config being run on all nested CV folds of one problem.
+
+A build is getting the results of one config on all problems.
+
+
+Build
+|
+N Benchmark(s)
+|
+M * N Pipe(s)
 """
 
 
-def wf_evaluate_build(fworker, build_name, dataset_set, pipe_config,
-                      include_tests=False, cache=True,
-                      kfold_config=KFOLD_DEFAULT, tags=None):
+def wf_evaluate_build(
+    fworker,
+    build_name,
+    dataset_set,
+    pipe_config,
+    include_tests=False,
+    cache=True,
+    kfold_config=KFOLD_DEFAULT,
+    tags=None,
+):
     """
     Current fworkers:
     - "local": Alex's local computer
@@ -38,8 +63,10 @@ def wf_evaluate_build(fworker, build_name, dataset_set, pipe_config,
     words_short = [w for w in words if 4 <= len(w) <= 6]
 
     build_id = None
-    while LP.db.automatminer_builds.find(
-            {"build_id": build_id}).count() != 0 or not build_id:
+    while (
+        LP.db.automatminer_builds.find({"build_id": build_id}).count() != 0
+        or not build_id
+    ):
         build_id = " ".join([w.lower() for w in random.sample(words_short, 2)])
     print("build id: {}".format(build_id))
 
@@ -48,51 +75,76 @@ def wf_evaluate_build(fworker, build_name, dataset_set, pipe_config,
     fws_consolidate = []
     benchmark_hashes = []
     for benchmark in dataset_set:
-        links, fw_fold0, fw_consolidate = wf_benchmark(fworker, pipe_config,
-                                                       **benchmark,
-                                                       tags=tags,
-                                                       kfold_config=kfold_config,
-                                                       cache=cache,
-                                                       return_fireworks=True,
-                                                       build_id=build_id,
-                                                       add_dataset_to_names=True)
+        links, fw_fold0, fw_consolidate = wf_benchmark(
+            fworker,
+            pipe_config,
+            **benchmark,
+            tags=tags,
+            kfold_config=kfold_config,
+            cache=cache,
+            return_fireworks=True,
+            build_id=build_id,
+            add_dataset_to_names=True
+        )
         all_links.update(links)
         fws_fold0.extend(fw_fold0)
         fws_consolidate.append(fw_consolidate)
         # benchmark has is the same between all fws in one benchmark
         benchmark_hashes.append(fw_fold0[0].to_dict()["spec"]["benchmark_hash"])
 
-    fw_build_merge = Firework(ConsolidateBenchmarksToBuild(),
-                              spec={"benchmark_hashes": benchmark_hashes,
-                                    "build_id": build_id,
-                                    "pipe_config": pipe_config,
-                                    "build_name": build_name,
-                                    "commit": get_last_commit(),
-                                    "_fworker": fworker,
-                                    "tags": tags},
-                              name="build merge ({})".format(build_id))
+    fw_build_merge = Firework(
+        ConsolidateBenchmarksToBuild(),
+        spec={
+            "benchmark_hashes": benchmark_hashes,
+            "build_id": build_id,
+            "pipe_config": pipe_config,
+            "build_name": build_name,
+            "commit": get_last_commit(),
+            "_fworker": fworker,
+            "tags": tags,
+        },
+        name="build merge ({})".format(build_id),
+    )
 
     for fw in fws_consolidate:
         all_links[fw] = [fw_build_merge]
 
     if include_tests:
-        fw_test = Firework(ScriptTask(script=RUN_TESTS_CMD),
-                           name="run tests ({})".format(build_id))
+        fw_test = Firework(
+            ScriptTask(script=RUN_TESTS_CMD), name="run tests ({})".format(build_id)
+        )
         all_links[fw_test] = fws_fold0
     all_links[fw_build_merge] = []
 
     wf_name = "build: {} ({}) [{}]".format(build_id, build_name, fworker)
-    wf = Workflow(list(all_links.keys()), all_links, name=wf_name,
-                  metadata={"build_id": build_id, "tags": tags,
-                            "benchmark_hashes": benchmark_hashes})
+    wf = Workflow(
+        list(all_links.keys()),
+        all_links,
+        name=wf_name,
+        metadata={
+            "build_id": build_id,
+            "tags": tags,
+            "benchmark_hashes": benchmark_hashes,
+        },
+    )
     return wf
 
 
-def wf_benchmark(fworker, pipe_config, name, data_file, target, problem_type,
-                 clf_pos_label,
-                 cache=True, kfold_config=KFOLD_DEFAULT, tags=None,
-                 return_fireworks=False, add_dataset_to_names=True,
-                 build_id=None):
+def wf_benchmark(
+    fworker,
+    pipe_config,
+    name,
+    data_file,
+    target,
+    problem_type,
+    clf_pos_label,
+    cache=True,
+    kfold_config=KFOLD_DEFAULT,
+    tags=None,
+    return_fireworks=False,
+    add_dataset_to_names=True,
+    build_id=None,
+):
     if fworker not in VALID_FWORKERS:
         raise ValueError("fworker must be in {}".format(VALID_FWORKERS))
 
@@ -128,7 +180,7 @@ def wf_benchmark(fworker, pipe_config, name, data_file, target, problem_type,
         "tags": tags if tags else [],
         "cache": cache,
         "build_id": build_id,
-        "_fworker": fworker
+        "_fworker": fworker,
     }
 
     dataset_name = "" if not add_dataset_to_names else name + " "
@@ -142,20 +194,21 @@ def wf_benchmark(fworker, pipe_config, name, data_file, target, problem_type,
         foldspec["save_dir"] = save_dir
 
         if fold == 0 and cache:
-            pipename = "{}fold {} + featurization ({})".format(dataset_name,
-                                                               fold,
-                                                               benchmark_hash)
+            pipename = "{}fold {} + featurization ({})".format(
+                dataset_name, fold, benchmark_hash
+            )
         else:
-            pipename = "{}fold {} ({})".format(dataset_name, fold,
-                                               benchmark_hash)
+            pipename = "{}fold {} ({})".format(dataset_name, fold, benchmark_hash)
 
-        fws_all_folds.append(Firework([RunPipe(), StorePipeResults()],
-                                      spec=foldspec,
-                                      name=pipename))
+        fws_all_folds.append(
+            Firework([RunPipe(), StorePipeResults()], spec=foldspec, name=pipename)
+        )
 
-    fw_consolidate = Firework(ConsolidatePipesToBenchmark(),
-                              spec=common_spec,
-                              name="bench merge ({})".format(benchmark_hash))
+    fw_consolidate = Firework(
+        ConsolidatePipesToBenchmark(),
+        spec=common_spec,
+        name="bench merge ({})".format(benchmark_hash),
+    )
 
     if cache:
         fw_fold0 = fws_all_folds[0]
@@ -172,9 +225,11 @@ def wf_benchmark(fworker, pipe_config, name, data_file, target, problem_type,
         connected_to_top_wf = [fw_fold0] if cache else fw_fold0
         return links, connected_to_top_wf, fw_consolidate
     else:
-        wf_name = "benchmark {}: ({}) [{}]".format(benchmark_hash, name,
-                                                   fworker)
-        wf = Workflow(list(links.keys()), links_dict=links,
-                      name=wf_name, metadata={"benchmark_hash": benchmark_hash,
-                                              "tags": tags}, )
+        wf_name = "benchmark {}: ({}) [{}]".format(benchmark_hash, name, fworker)
+        wf = Workflow(
+            list(links.keys()),
+            links_dict=links,
+            name=wf_name,
+            metadata={"benchmark_hash": benchmark_hash, "tags": tags},
+        )
         return wf

@@ -17,14 +17,14 @@ import numpy as np
 
 
 import pandas as pd
-pd.set_option('display.max_rows', 500)
-pd.set_option('display.max_columns', 500)
-pd.set_option('display.width', 1000)
-pd.set_option('precision', 8)
+
+pd.set_option("display.max_rows", 500)
+pd.set_option("display.max_columns", 500)
+pd.set_option("display.width", 1000)
+pd.set_option("precision", 8)
 
 df = load_dataset("expt_gap")
 df = df.rename(columns={"formula": "composition"})
-
 
 
 # print("Ground Truth")
@@ -37,7 +37,9 @@ excluded_compositions = []
 
 
 # Prevent differences in order of formula symbols from corrupting the actual number of unique compositions
-df = StrToComposition(target_col_id="composition_obj").featurize_dataframe(df, "composition")
+df = StrToComposition(target_col_id="composition_obj").featurize_dataframe(
+    df, "composition"
+)
 df["composition"] = [c.reduced_formula for c in df["composition_obj"]]
 df = df.drop(columns=["composition_obj"])
 
@@ -47,7 +49,7 @@ print("Number of unique compositions:", len(unique))
 
 new_df_dict = {"composition": [], "gap expt": []}
 for c in tqdm(unique):
-    df_per_comp_gaps = df[df["composition"]==c]
+    df_per_comp_gaps = df[df["composition"] == c]
     per_comp_gaps = df_per_comp_gaps["gap expt"]
     measurement_range = max(per_comp_gaps) - min(per_comp_gaps)
     if measurement_range > 0.1:

@@ -27,11 +27,11 @@ class RunSingleFit(FireTaskBase):
         autofeaturizer_kwargs = pipe_config_dict["autofeaturizer_kwargs"]
 
         # Modify data_file based on computing resource
-        data_dir = os.environ['AMM_DATASET_DIR']
+        data_dir = os.environ["AMM_DATASET_DIR"]
         data_file = os.path.join(data_dir, data_file)
 
         # Modify save_dir based on computing resource
-        bench_dir = os.environ['AMM_MODEL_DIR']
+        bench_dir = os.environ["AMM_MODEL_DIR"]
         base_save_dir = fw_spec["base_save_dir"]
         base_save_dir = os.path.join(bench_dir, base_save_dir)
 
@@ -42,17 +42,20 @@ class RunSingleFit(FireTaskBase):
         if learner_name == "TPOTAdaptor":
             learner = TPOTAdaptor(**learner_kwargs)
         elif learner_name == "rf":
-            warnings.warn("Learner kwargs passed into RF regressor/classifiers bc. rf being used.")
-            learner = SinglePipelineAdaptor(regressor=RandomForestRegressor(**learner_kwargs),
-                                            classifier=RandomForestClassifier(**learner_kwargs))
+            warnings.warn(
+                "Learner kwargs passed into RF regressor/classifiers bc. rf being used."
+            )
+            learner = SinglePipelineAdaptor(
+                regressor=RandomForestRegressor(**learner_kwargs),
+                classifier=RandomForestClassifier(**learner_kwargs),
+            )
         else:
-            raise ValueError("{} not supported yet!"
-                             "".format(learner_name))
+            raise ValueError("{} not supported yet!" "".format(learner_name))
         pipe_config = {
             "learner": learner,
             "reducer": FeatureReducer(**reducer_kwargs),
             "cleaner": DataCleaner(**cleaner_kwargs),
-            "autofeaturizer": AutoFeaturizer(**autofeaturizer_kwargs)
+            "autofeaturizer": AutoFeaturizer(**autofeaturizer_kwargs),
         }
         pipe = MatPipe(**pipe_config)
 
