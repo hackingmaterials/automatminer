@@ -2,6 +2,7 @@
 Various in-house feature reduction techniques.
 """
 import logging
+import warnings
 
 import numpy as np
 from sklearn.base import is_classifier
@@ -15,7 +16,10 @@ from sklearn.model_selection import check_cv, train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.linear_model import SGDClassifier
 from sklearn.preprocessing import LabelEncoder
-from skrebate import MultiSURFstar
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=DeprecationWarning)
+    from skrebate import MultiSURFstar
 
 from automatminer.utils.pkg import AutomatminerError
 from automatminer.base import DFTransformer
