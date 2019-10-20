@@ -6,7 +6,6 @@ The environment variables you need for this all to work are:
 - AMM_DATASET_DIR: where to store datasets
 - AMM_CODE_DIR: where to run tests
 """
-from fireworks import LaunchPad
 from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
 
 from hmte.db import get_connection
