@@ -83,5 +83,6 @@ class FeaturizerSet(abc.ABC):
 
     def _get_featurizers(self, featurizers: List) -> List:
         """Utility function for getting featurizers not in the ignore list."""
-        return [f for f in featurizers
-                if f.__class__.__name__ not in self.exclude]
+        return [
+            f for f in featurizers if f.__class__.__name__ not in self.exclude
+        ]

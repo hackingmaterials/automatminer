@@ -2,10 +2,10 @@
 Utils for logging.
 """
 
-import datetime
-import logging
 import os
 import sys
+import logging
+import datetime
 
 AMM_LOGGER_BASENAME = "automatminer"
 AMM_LOG_FIT_STR = "fitting"
@@ -28,8 +28,11 @@ def initialize_logger(logger_name, log_dir=".", level=None) -> logging.Logger:
     level = level or logging.INFO
 
     logger = logging.getLogger(logger_name)
+    logger.handlers = []  # reset logging handlers if they already exist
+
     formatter = logging.Formatter(
-        fmt="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+        fmt="%(asctime)s %(levelname)-8s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
     logpath = os.path.join(log_dir, logger_name)
@@ -59,7 +62,7 @@ def initialize_null_logger(name) -> logging.Logger:
     return logger
 
 
-def log_progress(operation):
+def log_progress(logger, operation):
     """
     Decorator to auto-log progress before and after executing a method, such
     as fit and transform. Should only be applied to DataFrameTransformers.
@@ -71,6 +74,7 @@ def log_progress(operation):
     INFO: Finished AutoFeaturizer fitting.
 
     Args:
+        logger (logging.Logger): A logger object to help log progress.
         operation (str): Some info about the operation you want to log.
 
     Returns:
@@ -88,14 +92,10 @@ def log_progress(operation):
             Return:
                 result: The method result.
             """
-            instance = args[0]
-            instance.logger.info(
-                "{}Starting {}.".format(instance._log_prefix, operation)
-            )
+            self = args[0]
+            logger.info("{}Starting {}.".format(self._log_prefix, operation))
             result = meth(*args, **kwargs)
-            instance.logger.info(
-                "{}Finished {}.".format(instance._log_prefix, operation)
-            )
+            logger.info("{}Finished {}.".format(self._log_prefix, operation))
             return result
 
         return wrapper

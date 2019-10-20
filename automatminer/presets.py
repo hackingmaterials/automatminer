@@ -7,7 +7,6 @@ __author__ = ["Alex Dunn <ardunn@lbl.gov>"]
 from automatminer.automl import SinglePipelineAdaptor, TPOTAdaptor
 from automatminer.featurization import AutoFeaturizer
 from automatminer.preprocessing import DataCleaner, FeatureReducer
-from automatminer.utils.log import AMM_DEFAULT_LOGGER
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from xgboost import XGBClassifier, XGBRegressor
 
@@ -36,7 +35,6 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             cache_src (str): A file path. If specified, Autofeaturizer will use
                 feature caching with a file stored at this location. See
                 Autofeaturizer's cache_src argument for more information.
-            logger (logging.Logger): The logging object to use.
 
     Returns:
         (dict) The desired preset config.
@@ -52,7 +50,9 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             "reducer": FeatureReducer(
                 reducers=("corr", "tree"), tree_importance_percentile=0.99
             ),
-            "autofeaturizer": AutoFeaturizer(preset="express", **caching_kwargs),
+            "autofeaturizer": AutoFeaturizer(
+                preset="express", **caching_kwargs
+            ),
             "cleaner": DataCleaner(),
         }
     elif preset == "heavy":
@@ -68,7 +68,9 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             "reducer": FeatureReducer(
                 reducers=("corr", "tree"), tree_importance_percentile=0.99
             ),
-            "autofeaturizer": AutoFeaturizer(preset="express", **caching_kwargs),
+            "autofeaturizer": AutoFeaturizer(
+                preset="express", **caching_kwargs
+            ),
             "cleaner": DataCleaner(),
         }
     elif preset == "express_single":
@@ -79,7 +81,9 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
                 classifier=XGBClassifier(**xgb_kwargs),
             ),
             "reducer": FeatureReducer(reducers=("corr",)),
-            "autofeaturizer": AutoFeaturizer(preset="express", **caching_kwargs),
+            "autofeaturizer": AutoFeaturizer(
+                preset="express", **caching_kwargs
+            ),
             "cleaner": DataCleaner(),
         }
     elif preset == "debug":
@@ -102,9 +106,6 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
             "cleaner": DataCleaner(),
         }
-
-    logger = powerups.get("logger", AMM_DEFAULT_LOGGER)
-    config["logger"] = logger
     return config
 
 
@@ -115,4 +116,11 @@ def get_available_presets():
     Returns:
         ([str]): A list of preset names.
     """
-    return ["production", "heavy", "express", "express_single", "debug", "debug_single"]
+    return [
+        "production",
+        "heavy",
+        "express",
+        "express_single",
+        "debug",
+        "debug_single",
+    ]

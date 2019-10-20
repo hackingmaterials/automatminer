@@ -1,28 +1,31 @@
 """
 The highest level classes for pipelines.
 """
-import copy
 import os
 import pickle
 from typing import Dict
 
 import pandas as pd
-from automatminer.base import DFTransformer, LoggableMixin
+
+from automatminer import __name__ as amm_name
+from automatminer.base import DFTransformer
 from automatminer.presets import get_preset_config
-from automatminer.utils.log import AMM_DEFAULT_LOGGER
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.pkg import (
+    check_fitted,
+    set_fitted,
+    return_attrs_recursively,
     AutomatminerError,
     VersionError,
-    check_fitted,
     get_version,
-    return_attrs_recursively,
     save_dict_to_file,
-    set_fitted,
 )
+from automatminer.utils.log import initialize_logger
+
+logger = initialize_logger(logger_name=amm_name)
 
 
-class MatPipe(DFTransformer, LoggableMixin):
+class MatPipe(DFTransformer):
     """
     Establish an ML pipeline for transforming compositions, structures,
     bandstructures, and DOS objects into machine-learned properties.
@@ -75,9 +78,6 @@ class MatPipe(DFTransformer, LoggableMixin):
         learner (DFMLAdaptor): The auto ml adaptor object used to
             actually run a auto-ml pipeline on the clean, reduced, featurized
             dataframe.
-        logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will
-            be used. If set to False, then no logging will occur.
 
     Attributes:
         version (str): The automatminer version used for serialization and
@@ -94,12 +94,7 @@ class MatPipe(DFTransformer, LoggableMixin):
     """
 
     def __init__(
-        self,
-        autofeaturizer=None,
-        cleaner=None,
-        reducer=None,
-        learner=None,
-        logger=AMM_DEFAULT_LOGGER,
+        self, autofeaturizer=None, cleaner=None, reducer=None, learner=None
     ):
         transformers = [autofeaturizer, cleaner, reducer, learner]
         if not all(transformers):
@@ -121,7 +116,6 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.cleaner = cleaner
         self.reducer = reducer
         self.learner = learner
-        self.logger = logger
         self.pre_fit_df = None
         self.post_fit_df = None
         self.ml_type = None
@@ -150,7 +144,6 @@ class MatPipe(DFTransformer, LoggableMixin):
                 Current powerups are:
                  - cache_src (str): The cache source if you want to save
                     features.
-                 - logger (logging.Logger): The logger to use.
         """
         config = get_preset_config(preset, **powerups)
         return MatPipe(**config)
@@ -180,15 +173,15 @@ class MatPipe(DFTransformer, LoggableMixin):
         """
         self.pre_fit_df = df
         self.ml_type = regression_or_classification(df[target])
-        self.logger.info("Problem type is: {}".format(self.ml_type))
+        logger.info("Problem type is: {}".format(self.ml_type))
 
         # Fit transformers on training data
-        self.logger.info("Fitting MatPipe pipeline to data.")
+        logger.info("Fitting MatPipe pipeline to data.")
         df = self.autofeaturizer.fit_transform(df, target)
         df = self.cleaner.fit_transform(df, target)
         df = self.reducer.fit_transform(df, target)
         self.learner.fit(df, target)
-        self.logger.info("MatPipe successfully fit.")
+        logger.info("MatPipe successfully fit.")
         self.post_fit_df = df
         self.target = target
         return self
@@ -232,7 +225,7 @@ class MatPipe(DFTransformer, LoggableMixin):
             (pandas.DataFrame): The dataframe with target property predictions.
         """
         if ignore:
-            self.logger.warning(
+            logger.warning(
                 f"MatPipe will ignore and append (after prediction) the "
                 f"following columns: \n{ignore}"
             )
@@ -241,17 +234,19 @@ class MatPipe(DFTransformer, LoggableMixin):
         else:
             ignore_df = pd.DataFrame()
 
-        self.logger.info("Beginning MatPipe prediction using fitted pipeline.")
+        logger.info("Beginning MatPipe prediction using fitted pipeline.")
         df = self.autofeaturizer.transform(df, self.target)
         df = self.cleaner.transform(df, self.target)
         df = self.reducer.transform(df, self.target)
         predictions = self.learner.predict(df, self.target)
-        self.logger.info("MatPipe prediction completed.")
+        logger.info("MatPipe prediction completed.")
         merged_df = predictions.join(ignore_df, how="left")
         return merged_df
 
     @set_fitted
-    def benchmark(self, df, target, kfold, fold_subset=None, cache=False, ignore=None):
+    def benchmark(
+        self, df, target, kfold, fold_subset=None, cache=False, ignore=None
+    ):
         """
         If the target property is known for all data, perform an ML benchmark
         using MatPipe. Used for getting an idea of how well AutoML can predict
@@ -302,11 +297,11 @@ class MatPipe(DFTransformer, LoggableMixin):
         cache_src = self.autofeaturizer.cache_src
         if cache_src and cache:
             if os.path.exists(cache_src):
-                self.logger.warning(
+                logger.warning(
                     "Cache src {} already found! Ensure this featurized data "
                     "matches the df being benchmarked.".format(cache_src)
                 )
-            self.logger.warning("Running pre-featurization for caching.")
+            logger.warning("Running pre-featurization for caching.")
             self.autofeaturizer.fit_transform(df, target)
         elif cache_src and not cache:
             raise AutomatminerError(
@@ -321,24 +316,24 @@ class MatPipe(DFTransformer, LoggableMixin):
                 "or use the cache_src get_preset_config powerup."
             )
         else:
-            self.logger.debug(
+            logger.debug(
                 "No caching being used in AutoFeaturizer or " "benchmark."
             )
 
         if not fold_subset:
             fold_subset = list(range(kfold.n_splits))
 
-        self.logger.warning("Beginning benchmark.")
+        logger.warning("Beginning benchmark.")
         results = []
         fold = 0
         for _, test_ix in kfold.split(X=df, y=df[target]):
             if fold in fold_subset:
-                self.logger.info("Training on fold index {}".format(fold))
+                logger.info("Training on fold index {}".format(fold))
                 # Split, identify, and randomize test set
                 test = df.iloc[test_ix].sample(frac=1)
                 train = df[~df.index.isin(test.index)].sample(frac=1)
                 self.fit(train, target)
-                self.logger.info("Predicting fold index {}".format(fold))
+                logger.info("Predicting fold index {}".format(fold))
                 test = self.predict(test, ignore=ignore)
                 results.append(test)
             fold += 1
@@ -424,37 +419,19 @@ class MatPipe(DFTransformer, LoggableMixin):
             None
         """
         self.learner.serialize()
-
-        # temp_logger = copy.deepcopy(self._logger)
-        temp_logger = None
-        loggables = [
-            self,
-            self.learner,
-            self.reducer,
-            self.cleaner,
-            self.autofeaturizer,
-        ]
-        for loggable in loggables:
-            loggable._logger = AMM_DEFAULT_LOGGER
-
         with open(filename, "wb") as f:
             pickle.dump(self, f)
-
         # Reassign live memory objects for further use in this object
         self.learner.deserialize()
-        for loggable in loggables:
-            loggable._logger = temp_logger
 
     @staticmethod
-    def load(filename, logger=True, supress_version_mismatch=False):
+    def load(filename, supress_version_mismatch=False):
         """
         Loads a MatPipe that was saved.
 
         Args:
             filename (str): The pickled MatPipe object (should have been saved
                 using save).
-            logger (bool or logging.Logger): The logger to use for the loaded
-                MatPipe.
             supress_version_mismatch (bool): If False, throws an error when
                 there is a version mismatch between a serialized MatPipe and the
                 current Automatminer version. If True, suppresses this error.
@@ -468,11 +445,10 @@ class MatPipe(DFTransformer, LoggableMixin):
         if pipe.version != get_version() and not supress_version_mismatch:
             raise VersionError("Version mismatch")
 
-        pipe.logger = logger
-        pipe.logger.info("Loaded MatPipe from file {}.".format(filename))
+        logger.info("Loaded MatPipe from file {}.".format(filename))
         if hasattr(pipe.learner, "from_serialized"):
             if pipe.learner.from_serialized:
-                pipe.logger.warning(
+                logger.warning(
                     "Only use this model to make predictions (do not "
                     "retrain!). Backend was serialzed as only the top model, "
                     "not the full automl backend. "

@@ -4,6 +4,7 @@ Base classes for automl.
 
 import abc
 from typing import List
+import logging
 
 import numpy as np
 import pandas as pd
@@ -11,6 +12,8 @@ import pandas as pd
 from automatminer.base import DFTransformer
 from automatminer.utils.log import AMM_LOG_PREDICT_STR, log_progress
 from automatminer.utils.pkg import AutomatminerError, check_fitted
+
+logger = logging.getLogger(__name__)
 
 
 class DFMLAdaptor(DFTransformer):
@@ -107,7 +110,7 @@ class DFMLAdaptor(DFTransformer):
         return None
 
     @check_fitted
-    @log_progress(AMM_LOG_PREDICT_STR)
+    @log_progress(logger, AMM_LOG_PREDICT_STR)
     def predict(self, df: pd.DataFrame, target: str) -> pd.DataFrame:
         """
         Predict the target property of materials given a df of features. This
@@ -134,14 +137,14 @@ class DFMLAdaptor(DFTransformer):
                 "dataframe target! ({})".format(target, self.fitted_target)
             )
         elif not all([f in df.columns for f in self.features]):
-            not_in_model = [f for f in self.features if
-                            f not in df.columns]
+            not_in_model = [f for f in self.features if f not in df.columns]
             not_in_df = [f for f in df.columns if f not in self.features]
             raise AutomatminerError(
                 "Features used to build model are different from df columns! "
                 "Features located in model not located in df: \n{} \n "
                 "Features located in df not in model: \n{}"
-                "".format(not_in_df, not_in_model))
+                "".format(not_in_df, not_in_model)
+            )
         else:
             X = df[self.features].values  # rectify feature order
             y_pred = self.best_pipeline.predict(X)
@@ -149,7 +152,7 @@ class DFMLAdaptor(DFTransformer):
 
             log_msg = "Prediction finished successfully."
             try:
-                self.logger.info(self._log_prefix + log_msg)
+                logger.info(self._log_prefix + log_msg)
             except AttributeError:
                 pass
             return df

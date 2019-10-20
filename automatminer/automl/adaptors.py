@@ -6,29 +6,36 @@ Current adaptor classes are:
     TPOTAdaptor: Uses the backend from the automl project TPOT, which can be
         found at https://github.com/EpistasisLab/tpot
 """
+import logging
 from collections import OrderedDict
 
 from tpot import TPOTClassifier, TPOTRegressor
 
-from automatminer.automl.config.tpot_configs import TPOT_CLASSIFIER_CONFIG, \
-    TPOT_REGRESSOR_CONFIG
+from automatminer.automl.config.tpot_configs import (
+    TPOT_CLASSIFIER_CONFIG,
+    TPOT_REGRESSOR_CONFIG,
+)
 from automatminer.utils.pkg import set_fitted, check_fitted
-from automatminer.utils.ml import is_greater_better, \
-    regression_or_classification
+from automatminer.utils.ml import (
+    is_greater_better,
+    regression_or_classification,
+)
 from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR
 from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
-from automatminer.base import LoggableMixin
 from automatminer.automl.base import DFMLAdaptor
 
-__authors__ = ['Alex Dunn <ardunn@lbl.gov'
-               'Alireza Faghaninia <alireza.faghaninia@gmail.com>',
-               'Qi Wang <wqthu11@gmail.com>',
-               'Daniel Dopp <dbdopp@lbl.gov>']
+__authors__ = [
+    "Alex Dunn <ardunn@lbl.gov"
+    "Alireza Faghaninia <alireza.faghaninia@gmail.com>",
+    "Qi Wang <wqthu11@gmail.com>",
+    "Daniel Dopp <dbdopp@lbl.gov>",
+]
 
 _adaptor_tmp_backend = None
+logger = logging.getLogger(__name__)
 
 
-class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
+class TPOTAdaptor(DFMLAdaptor):
     """
     A dataframe adaptor for the TPOT classifiers and regressors.
 
@@ -48,11 +55,6 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                 'bootstrap': [True, False]
                 },
             }
-
-        logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will
-            be used. If set to False, then no logging will occur.
-
     Attributes:
         The following unique attributes are set during fitting.
 
@@ -67,28 +69,27 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             due to pickling problems.
     """
 
-    def __init__(self, logger=True, **tpot_kwargs):
-        tpot_kwargs['cv'] = tpot_kwargs.get('cv', 5)
-        tpot_kwargs['n_jobs'] = tpot_kwargs.get('n_jobs', -1)
-        tpot_kwargs['verbosity'] = tpot_kwargs.get('verbosity', 3)
-        tpot_kwargs['memory'] = tpot_kwargs.get('memory', 'auto')
+    def __init__(self, **tpot_kwargs):
+        tpot_kwargs["cv"] = tpot_kwargs.get("cv", 5)
+        tpot_kwargs["n_jobs"] = tpot_kwargs.get("n_jobs", -1)
+        tpot_kwargs["verbosity"] = tpot_kwargs.get("verbosity", 3)
+        tpot_kwargs["memory"] = tpot_kwargs.get("memory", "auto")
 
         self.mode = None
         self.tpot_kwargs = tpot_kwargs
         self.models = None
-        self.random_state = tpot_kwargs.get('random_state', None)
+        self.random_state = tpot_kwargs.get("random_state", None)
         self.greater_score_is_better = None
 
         self._fitted_target = None
         self._backend = None
         self._features = None
-        self.logger = logger
 
         self.from_serialized = False
         self._best_models = None
         super(DFMLAdaptor, self).__init__()
 
-    @log_progress(AMM_LOG_FIT_STR)
+    @log_progress(logger, AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
         """
@@ -112,27 +113,29 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
         self.mode = regression_or_classification(df[target])
 
         mltype_str = "Classifier" if self.mode == AMM_CLF_NAME else "Regressor"
-        self.tpot_kwargs['template'] = self.tpot_kwargs.get(
-            'template',
-            'Selector-Transformer-{}'.format(mltype_str)
+        self.tpot_kwargs["template"] = self.tpot_kwargs.get(
+            "template", "Selector-Transformer-{}".format(mltype_str)
         )
 
         if self.mode == AMM_CLF_NAME:
-            self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
-                'config_dict', TPOT_CLASSIFIER_CONFIG)
+            self.tpot_kwargs["config_dict"] = self.tpot_kwargs.get(
+                "config_dict", TPOT_CLASSIFIER_CONFIG
+            )
             if "scoring" not in self.tpot_kwargs:
                 self.tpot_kwargs["scoring"] = "balanced_accuracy"
             self._backend = TPOTClassifier(**self.tpot_kwargs)
         elif self.mode == AMM_REG_NAME:
-            self.tpot_kwargs['config_dict'] = self.tpot_kwargs.get(
-                'config_dict', TPOT_REGRESSOR_CONFIG)
+            self.tpot_kwargs["config_dict"] = self.tpot_kwargs.get(
+                "config_dict", TPOT_REGRESSOR_CONFIG
+            )
             if "scoring" not in self.tpot_kwargs:
                 self.tpot_kwargs["scoring"] = "neg_mean_absolute_error"
             self._backend = TPOTRegressor(**self.tpot_kwargs)
         else:
-            raise ValueError("Learning type {} not recognized as a valid mode "
-                             "for {}".format(self.mode,
-                                             self.__class__.__name__))
+            raise ValueError(
+                "Learning type {} not recognized as a valid mode "
+                "for {}".format(self.mode, self.__class__.__name__)
+            )
         self._features = df.drop(columns=target).columns.tolist()
         self._fitted_target = target
         self._backend = self._backend.fit(X, y, **fit_kwargs)
@@ -161,13 +164,14 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             return self._best_models
         else:
             self.greater_score_is_better = is_greater_better(
-                self.backend.scoring_function)
+                self.backend.scoring_function
+            )
 
             # Get list of evaluated model names, cast to set and back
             # to get unique model names, instantiate ordered model dictionary
             evaluated_models = []
             for key in self.backend.evaluated_individuals_.keys():
-                evaluated_models.append(key.split('(')[0])
+                evaluated_models.append(key.split("(")[0])
                 # evaluated_models.append(key)
 
             model_names = list(set(evaluated_models))
@@ -175,31 +179,39 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
 
             # This makes a dict of model names mapped to all runs of that model
             for key, val in self.backend.evaluated_individuals_.items():
-                models[key.split('(')[0]].append(val)
+                models[key.split("(")[0]].append(val)
 
             # For each base model type sort the runs by best score
             for model_name in model_names:
                 models[model_name].sort(
-                    key=lambda x: x['internal_cv_score'],
-                    reverse=self.greater_score_is_better
+                    key=lambda x: x["internal_cv_score"],
+                    reverse=self.greater_score_is_better,
                 )
 
             # Gets a simplified dict of the model to only its best run
             # Sort the best individual models by type to best models overall
             best_models = OrderedDict(
-                sorted({model: models[model][0] for model in models}.items(),
-                       key=lambda x: x[1]['internal_cv_score'],
-                       reverse=self.greater_score_is_better))
+                sorted(
+                    {model: models[model][0] for model in models}.items(),
+                    key=lambda x: x[1]["internal_cv_score"],
+                    reverse=self.greater_score_is_better,
+                )
+            )
 
             # Mapping of top models to just their score
-            scores = {model: best_models[model]['internal_cv_score']
-                      for model in best_models}
+            scores = {
+                model: best_models[model]["internal_cv_score"]
+                for model in best_models
+            }
 
             # Sorted dict of top models just mapped to their top scores
             best_models_and_scores = OrderedDict(
-                sorted(scores.items(),
-                       key=lambda x: x[1],
-                       reverse=self.greater_score_is_better))
+                sorted(
+                    scores.items(),
+                    key=lambda x: x[1],
+                    reverse=self.greater_score_is_better,
+                )
+            )
             self.models = models
             return best_models_and_scores
 
@@ -261,7 +273,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             self.from_serialized = False
 
 
-class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
+class SinglePipelineAdaptor(DFMLAdaptor):
     """
     For running single models or pipelines in a MatPipe pipeline using the same
     syntax as the AutoML adaptors.
@@ -276,9 +288,6 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
             not need to be a BaseEstimator or Pipeline.
         classifier (sklearn Pipeline or BaseEstimator-like): The object you want
             to use for machine learning classification.
-        logger (logging.Logger, bool):  A custom logger object to use for
-            logging. Alternatively, if set to True, the default automatminer
-            logger will be used. If set to False, then no logging will occur.
 
     Attributes:
         The following unique attributes are set during fitting.
@@ -287,16 +296,15 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
             (classification)
     """
 
-    def __init__(self, regressor, classifier, logger=True):
+    def __init__(self, regressor, classifier):
         self.mode = None
-        self.logger = logger
         self._regressor = regressor
         self._classifier = classifier
         self._features = None
         self._fitted_target = None
         self._best_pipeline = None
 
-    @log_progress(AMM_LOG_FIT_STR)
+    @log_progress(logger, AMM_LOG_FIT_STR)
     @set_fitted
     def fit(self, df, target, **fit_kwargs):
 
@@ -308,9 +316,10 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
         elif self.mode == AMM_REG_NAME:
             self._best_pipeline = self._regressor
         else:
-            raise ValueError("Learning type {} not recognized as a valid mode "
-                             "for {}".format(self.mode,
-                                             self.__class__.__name__))
+            raise ValueError(
+                "Learning type {} not recognized as a valid mode "
+                "for {}".format(self.mode, self.__class__.__name__)
+            )
 
         # Prevent goofy pandas casting by casting to native
         y = df[target].values.tolist()

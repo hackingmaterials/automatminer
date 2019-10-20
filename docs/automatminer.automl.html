@@ -119,9 +119,6 @@ fit/predict/transform methods analagously to BaseEstimator, but does
 not need to be a BaseEstimator or Pipeline.</p></li>
 <li><p><strong>classifier</strong> (<em>sklearn Pipeline</em><em> or </em><em>BaseEstimator-like</em>) – The object you want
 to use for machine learning classification.</p></li>
-<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.8)"><em>logging.Logger</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for
-logging. Alternatively, if set to True, the default automatminer
-logger will be used. If set to False, then no logging will occur.</p></li>
 </ul>
 </dd>
 </dl>
@@ -183,7 +180,7 @@ logger will be used. If set to False, then no logging will occur.</p></li>
 
 <dl class="class">
 <dt id="automatminer.automl.adaptors.TPOTAdaptor">
-<em class="property">class </em><code class="sig-prename descclassname">automatminer.automl.adaptors.</code><code class="sig-name descname">TPOTAdaptor</code><span class="sig-paren">(</span><em class="sig-param">logger=True</em>, <em class="sig-param">**tpot_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.automl.adaptors.</code><code class="sig-name descname">TPOTAdaptor</code><span class="sig-paren">(</span><em class="sig-param">*tpot_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#automatminer.automl.base.DFMLAdaptor" title="automatminer.automl.base.DFMLAdaptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.automl.base.DFMLAdaptor</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
 <p>A dataframe adaptor for the TPOT classifiers and regressors.</p>
 <dl class="field-list simple">

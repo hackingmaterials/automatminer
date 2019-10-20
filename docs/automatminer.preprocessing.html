@@ -90,7 +90,7 @@
 <p>Top level preprocessing classes.</p>
 <dl class="class">
 <dt id="automatminer.preprocessing.core.DataCleaner">
-<em class="property">class </em><code class="sig-prename descclassname">automatminer.preprocessing.core.</code><code class="sig-name descname">DataCleaner</code><span class="sig-paren">(</span><em class="sig-param">max_na_frac=0.01</em>, <em class="sig-param">feature_na_method='drop'</em>, <em class="sig-param">encode_categories=True</em>, <em class="sig-param">encoder='one-hot'</em>, <em class="sig-param">drop_na_targets=True</em>, <em class="sig-param">na_method_fit='drop'</em>, <em class="sig-param">na_method_transform='fill'</em>, <em class="sig-param">logger=True</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.preprocessing.core.</code><code class="sig-name descname">DataCleaner</code><span class="sig-paren">(</span><em class="sig-param">max_na_frac=0.01</em>, <em class="sig-param">feature_na_method='drop'</em>, <em class="sig-param">encode_categories=True</em>, <em class="sig-param">encoder='one-hot'</em>, <em class="sig-param">drop_na_targets=True</em>, <em class="sig-param">na_method_fit='drop'</em>, <em class="sig-param">na_method_transform='fill'</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.core.DataCleaner" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="automatminer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
 <p>Transform a featurized dataframe into an ML-ready dataframe.</p>
 <p>Works by first removing samples not having a target value (if desired), then
@@ -123,9 +123,6 @@ samples), “drop” (drop any remaining samples having a nan feature),
 Alternatively, specify a number to replace the nans, e.g. 0.</p></li>
 <li><p><strong>na_method_transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The same as na_method_fit, but
 for transform.</p></li>
-<li><p><strong>logger</strong> (<em>Logger</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for logging.
-Alternatively, if set to True, the default automatminer logger will
-be used. If set to False, then no logging will occur.</p></li>
 </ul>
 </dd>
 </dl>
@@ -505,7 +502,7 @@ feature that has lower correlation with the target is removed.</p></li>
 <p>Various in-house feature reduction techniques.</p>
 <dl class="class">
 <dt id="automatminer.preprocessing.feature_selection.TreeFeatureReducer">
-<em class="property">class </em><code class="sig-prename descclassname">automatminer.preprocessing.feature_selection.</code><code class="sig-name descname">TreeFeatureReducer</code><span class="sig-paren">(</span><em class="sig-param">mode</em>, <em class="sig-param">importance_percentile=0.95</em>, <em class="sig-param">logger=True</em>, <em class="sig-param">random_state=0</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.preprocessing.feature_selection.</code><code class="sig-name descname">TreeFeatureReducer</code><span class="sig-paren">(</span><em class="sig-param">mode</em>, <em class="sig-param">importance_percentile=0.95</em>, <em class="sig-param">random_state=0</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.preprocessing.feature_selection.TreeFeatureReducer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="automatminer.html#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
 <dl class="simple">
 <dt>Tree-based feature reduction tools based on sklearn models that have</dt><dd><p>the .feature_importances_ attribute.</p>
@@ -519,9 +516,6 @@ feature that has lower correlation with the target is removed.</p></li>
 sorted (descending) based on their importance.</p></li>
 <li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – relevant if non-deterministic algorithms such as
 random forest are used.</p></li>
-<li><p><strong>logger</strong> (<em>Logger</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for logging.
-Alternatively, if set to True, the default automatminer logger will be
-used. If set to False, then no logging will occur.</p></li>
 </ul>
 </dd>
 </dl>

@@ -47,13 +47,15 @@ class CompositionFeaturizers(FeaturizerSet):
 
     @property
     def debug(self):
-        return self._get_featurizers([cf.ElementProperty.from_preset("magpie")])
+        return self._get_featurizers(
+            [cf.ElementProperty.from_preset("magpie")]
+        )
 
     @property
     def express(self):
         fs = [
             cf.ElementProperty.from_preset("magpie"),
-            cf.OxidationStates.from_preset(preset_name='deml'),
+            cf.OxidationStates.from_preset(preset_name="deml"),
             cf.ElectronAffinity(),
             cf.IonProperty(),
             cf.YangSolidSolution(),
@@ -81,15 +83,14 @@ class CompositionFeaturizers(FeaturizerSet):
             cf.BandCenter(),
             cf.ValenceOrbital(),
             cf.YangSolidSolution(),
-            cf.CationProperty.from_preset(preset_name='deml'),
-            cf.OxidationStates.from_preset(preset_name='deml'),
+            cf.CationProperty.from_preset(preset_name="deml"),
+            cf.OxidationStates.from_preset(preset_name="deml"),
             cf.ElectronAffinity(),
             cf.ElectronegativityDiff(),
             cf.IonProperty(fast=True),
             cf.Miedema(),
             cf.AtomicPackingEfficiency(),  # slower than the rest
-            cf.CohesiveEnergy()  # requires mpid present
-
+            cf.CohesiveEnergy(),  # requires mpid present
         ]
         return self._get_featurizers(fs)
 
@@ -130,14 +131,14 @@ class StructureFeaturizers(FeaturizerSet):
             sf.EwaldEnergy(),
             sf.SineCoulombMatrix(flatten=True),
             sf.GlobalInstabilityIndex(),
-            sf.StructuralComplexity()
+            sf.StructuralComplexity(),
         ]
         return self._get_featurizers(fs)
 
     @property
     def heavy(self):
         fs = [
-            self.ssf.from_preset('CrystalNNFingerprint_ops'),
+            self.ssf.from_preset("CrystalNNFingerprint_ops"),
             sf.ChemicalOrdering(),
             sf.StructuralHeterogeneity(),
             sf.MaximumPackingEfficiency(),
@@ -154,7 +155,7 @@ class StructureFeaturizers(FeaturizerSet):
     def all(self):
         fs = [
             # Vector
-            self.ssf.from_preset('CrystalNNFingerprint_ops'),
+            self.ssf.from_preset("CrystalNNFingerprint_ops"),
             self.ssf.from_preset("BondLength-dejong2016"),
             self.ssf.from_preset("BondAngle-dejong2016"),
             self.ssf.from_preset("Composition-dejong2016_SD"),
@@ -166,7 +167,6 @@ class StructureFeaturizers(FeaturizerSet):
             sf.BagofBonds(coulomb_matrix=sf.SineCoulombMatrix()),
             sf.CoulombMatrix(flatten=True),
             sf.BondFractions(),
-
             # Non vector
             sf.CoulombMatrix(flatten=False),  # returns matrix
             sf.SineCoulombMatrix(flatten=False),  # returns matrix
@@ -226,7 +226,7 @@ class DOSFeaturizers(FeaturizerSet):
             dosf.DOSFeaturizer(),
             dosf.DopingFermi(),
             dosf.Hybridization(),
-            dosf.DosAsymmetry()
+            dosf.DosAsymmetry(),
         ]
         return self._get_featurizers(fs)
 
@@ -296,31 +296,31 @@ class AllFeaturizers(FeaturizerSet):
         super(AllFeaturizers, self).__init__(exclude=exclude)
 
         self._featurizer_sets = {
-            'comp': CompositionFeaturizers(),
-            'struct': StructureFeaturizers(),
-            'bs': BSFeaturizers(),
-            'dos': DOSFeaturizers()
+            "comp": CompositionFeaturizers(),
+            "struct": StructureFeaturizers(),
+            "bs": BSFeaturizers(),
+            "dos": DOSFeaturizers(),
         }
 
     @property
     def composition(self):
         """List of all composition based featurizers."""
-        return self._get_featurizers(self._featurizer_sets['comp'].all)
+        return self._get_featurizers(self._featurizer_sets["comp"].all)
 
     @property
     def structure(self):
         """List of all structure based featurizers."""
-        return self._get_featurizers(self._featurizer_sets['struct'].all)
+        return self._get_featurizers(self._featurizer_sets["struct"].all)
 
     @property
     def bandstructure(self):
         """List of all band structure based featurizers."""
-        return self._get_featurizers(self._featurizer_sets['bs'].all)
+        return self._get_featurizers(self._featurizer_sets["bs"].all)
 
     @property
     def dos(self):
         """List of all density of states based featurizers."""
-        return self._get_featurizers(self._featurizer_sets['dos'].all)
+        return self._get_featurizers(self._featurizer_sets["dos"].all)
 
     @property
     def express(self):

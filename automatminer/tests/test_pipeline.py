@@ -42,7 +42,7 @@ class TestMatPipeSetup(unittest.TestCase):
             MatPipe.from_preset(preset)
 
         MatPipe.from_preset("debug", cache_src="some_file.json")
-        MatPipe.from_preset("debug", logger=False)
+        MatPipe.from_preset("debug")
         MatPipe.from_preset("debug", log_level=1)
 
 
@@ -73,7 +73,9 @@ def make_matpipe_test(config_preset, skip=None):
         skip = []
     for s in skip:
         if s not in skippables:
-            raise ValueError(f"{s} is not a skippable test. Choose from {skippables}")
+            raise ValueError(
+                f"{s} is not a skippable test. Choose from {skippables}"
+            )
     reason = "Skip was requested."
 
     class TestMatPipe(unittest.TestCase):
@@ -86,7 +88,9 @@ def make_matpipe_test(config_preset, skip=None):
             self.extra_features = df["G_VRH"]
             self.target = "K_VRH"
             self.config = get_preset_config(config_preset)
-            self.config_cached = get_preset_config(config_preset, cache_src=CACHE_SRC)
+            self.config_cached = get_preset_config(
+                config_preset, cache_src=CACHE_SRC
+            )
             self.pipe = MatPipe(**self.config)
             self.pipe_cached = MatPipe(**self.config_cached)
 
@@ -187,7 +191,7 @@ def make_matpipe_test(config_preset, skip=None):
 
             # Load test
             self.pipe.save(filename=PIPE_PATH)
-            self.pipe = MatPipe.load(PIPE_PATH, logger=False)
+            self.pipe = MatPipe.load(PIPE_PATH)
             df_test = self.pipe.predict(self.df[-220:-201])
             self.assertTrue(self.target in df_test.columns)
             self.assertTrue(self.target + " predicted" in df_test.columns)

@@ -270,7 +270,7 @@ logger that has no output.</p>
 <p>The highest level classes for pipelines.</p>
 <dl class="class">
 <dt id="automatminer.pipeline.MatPipe">
-<em class="property">class </em><code class="sig-prename descclassname">automatminer.pipeline.</code><code class="sig-name descname">MatPipe</code><span class="sig-paren">(</span><em class="sig-param">autofeaturizer=None</em>, <em class="sig-param">cleaner=None</em>, <em class="sig-param">reducer=None</em>, <em class="sig-param">learner=None</em>, <em class="sig-param">logger=True</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.pipeline.</code><code class="sig-name descname">MatPipe</code><span class="sig-paren">(</span><em class="sig-param">autofeaturizer=None</em>, <em class="sig-param">cleaner=None</em>, <em class="sig-param">reducer=None</em>, <em class="sig-param">learner=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
 <p>Establish an ML pipeline for transforming compositions, structures,
 bandstructures, and DOS objects into machine-learned properties.</p>
@@ -319,9 +319,6 @@ select the best features from a “clean” dataframe.</p></li>
 <li><p><strong>learner</strong> (<a class="reference internal" href="automatminer.automl.html#automatminer.automl.base.DFMLAdaptor" title="automatminer.automl.base.DFMLAdaptor"><em>DFMLAdaptor</em></a>) – The auto ml adaptor object used to
 actually run a auto-ml pipeline on the clean, reduced, featurized
 dataframe.</p></li>
-<li><p><strong>logger</strong> (<em>Logger</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for logging.
-Alternatively, if set to True, the default automatminer logger will
-be used. If set to False, then no logging will occur.</p></li>
 </ul>
 </dd>
 </dl>

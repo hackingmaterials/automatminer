@@ -55,6 +55,12 @@ Automatminer uses `pandas <https://pandas.pydata.org>`_ dataframes for all of
 its working objects. Put dataframes in, get dataframes out.
 
 
+.. image:: _static/dataframe_pipe.png
+   :alt: server
+   :align: center
+   :width: 800px
+
+
 Here's an example of training on known data, and extending the model to out of
 sample data.
 

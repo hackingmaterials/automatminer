@@ -12,6 +12,7 @@ from automatminer.featurization.base import FeaturizerSet
 class TestAutoFeaturizer(unittest.TestCase):
     def test_fsets(self):
         """Test the base behavior of ABC FeaturizerSet."""
+
         class BadFeaturizerSet(FeaturizerSet):
             def __init__(self, exclude=None):
                 super(BadFeaturizerSet, self).__init__(exclude=exclude)

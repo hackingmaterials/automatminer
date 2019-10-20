@@ -1,29 +1,42 @@
 """
 Various in-house feature reduction techniques.
 """
+import logging
+import warnings
+
 import numpy as np
-from automatminer.base import DFTransformer, LoggableMixin
-from automatminer.utils.pkg import AutomatminerError
 from sklearn.base import is_classifier
 from sklearn.ensemble import (
+    RandomForestRegressor,
+    RandomForestClassifier,
     GradientBoostingClassifier,
     GradientBoostingRegressor,
-    RandomForestClassifier,
-    RandomForestRegressor,
 )
-from sklearn.linear_model import SGDClassifier
-from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import check_cv, train_test_split
+from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.linear_model import SGDClassifier
 from sklearn.preprocessing import LabelEncoder
-from skrebate import MultiSURFstar
 
-__authors__ = ["Alireza Faghaninia <alireza@lbl.gov>", "Alex Dunn <ardunn@lbl.gov>"]
+from automatminer.utils.pkg import AutomatminerError
+from automatminer.base import DFTransformer
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=DeprecationWarning)
+    from skrebate import MultiSURFstar
+
+__authors__ = [
+    "Alireza Faghaninia <alireza@lbl.gov>",
+    "Alex Dunn <ardunn@lbl.gov>",
+]
+
+
+logger = logging.getLogger(__name__)
 
 # Used in compare_coff_clf, declared here to prevent repeated obj creation
-COMMON_CLF = SGDClassifier()
+common_clf = SGDClassifier()
 
 
-class TreeFeatureReducer(DFTransformer, LoggableMixin):
+class TreeFeatureReducer(DFTransformer):
     """
     Tree-based feature reduction tools based on sklearn models that have
         the .feature_importances_ attribute.
@@ -34,13 +47,9 @@ class TreeFeatureReducer(DFTransformer, LoggableMixin):
             sorted (descending) based on their importance.
         random_state (int): relevant if non-deterministic algorithms such as
             random forest are used.
-        logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will be
-            used. If set to False, then no logging will occur.
     """
 
-    def __init__(self, mode, importance_percentile=0.95, logger=True, random_state=0):
-        self.logger = logger
+    def __init__(self, mode, importance_percentile=0.95, random_state=0):
         self.mode = mode
         self.importance_percentile = importance_percentile
         self.selected_features = None
@@ -94,7 +103,7 @@ class TreeFeatureReducer(DFTransformer, LoggableMixin):
             tfeats = self.get_top_features(fimportance)
             m_curr = len(tfeats)
             m_prev = len(X.columns)
-            self.logger.debug("nfeatures: {}->{}".format(len(X.columns), m_curr))
+            logger.debug("nfeatures: {}->{}".format(len(X.columns), m_curr))
             X = X[tfeats]
             if not recursive:
                 break
@@ -132,7 +141,9 @@ class TreeFeatureReducer(DFTransformer, LoggableMixin):
                 else:
                     tree = GradientBoostingRegressor(random_state=self.rs)
             else:
-                raise AutomatminerError("Unsupported tree_type {}!".format(tree))
+                raise AutomatminerError(
+                    "Unsupported tree_type {}!".format(tree)
+                )
 
         cv = check_cv(cv=cv, y=y, classifier=is_classifier(tree))
         all_feats = []
@@ -142,7 +153,7 @@ class TreeFeatureReducer(DFTransformer, LoggableMixin):
             all_feats += self.get_reduced_features(tree, Xtrn, ytrn, recursive)
         # take the union of selected features of each fold
         self.selected_features = list(set(all_feats))
-        self.logger.info(
+        logger.info(
             self._log_prefix
             + "Finished tree-based feature reduction of {} initial features to "
             "{}".format(m0, len(self.selected_features))
@@ -214,9 +225,11 @@ def lower_corr_clf(df, target, f1, f2):
     features = [f1, f2]
     comparison_res = {}
     for i, x in enumerate([x1, x2]):
-        x_tr, x_te, y_tr, y_te = train_test_split(x, y, test_size=0.3, random_state=0)
-        COMMON_CLF.fit(x_tr, y_tr)
-        y_pred = COMMON_CLF.predict(x_te)
+        x_tr, x_te, y_tr, y_te = train_test_split(
+            x, y, test_size=0.3, random_state=0
+        )
+        common_clf.fit(x_tr, y_tr)
+        y_pred = common_clf.predict(x_te)
         if len(unique_names) <= 2:
             score = roc_auc_score(y_te, y_pred)
         else:
