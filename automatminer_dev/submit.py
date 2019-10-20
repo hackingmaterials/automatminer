@@ -87,15 +87,17 @@ if __name__ == "__main__":
     # from automatminer_dev.config import MP_E_FORM, JDFT2D, GLASS
     # wf = wf_benchmark("lrc", pipe_config, **GFA, cache=True, tags=tags)
 
-    wf = wf_evaluate_build(
-        "lrc",
-        "24 hr tpot production 99% reducing with mean drop cleaning samples",
-        BENCHMARK_FULL_SET,
-        pipe_config,
-        include_tests=False,
-        cache=True,
-        tags=tags,
-    )
+    # wf = wf_evaluate_build(
+    #     "lrc",
+    #     "24 hr tpot production 99% reducing with mean drop cleaning samples",
+    #     BENCHMARK_FULL_SET,
+    #     pipe_config,
+    #     include_tests=False,
+    #     cache=True,
+    #     tags=tags,
+    # )
+
+    wf = wf_evaluate_build("local", "test_local", BENCHMARK_DEBUG_SET, pipe_config_debug)
 
     # wf = wf_evaluate_build("cori", "rf run for comparison to the paper", BENCHMARK_FULL_SET,
     #                        pipe_config_debug, include_tests=False, cache=True, tags=tags)

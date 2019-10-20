@@ -1,18 +1,19 @@
 # Automatminer benchmarking dev
 
-`automatminer_dev` is a collection of dev tools for executing hundred or thousands of machine
-learning benchmarks on parallel computing resources with Fireworks. This is not
-part of the main automatminer code, and as such, is not
+`automatminer_dev` is a collection of dev tools for executing hundreds 
+or thousands of machine learning benchmarks on parallel computing 
+resources with Fireworks. This is not part of the main automatminer 
+code, and as such, is not
    1. maintained as closely as the main code
    2. tested as rigorously as the main code
    3. documented as completely as the main code
 
-In addition to installing matminer and automatminer, you will need to install
-the automatminer_dev package:
+In addition to installing matminer and automatminer, you will need to 
+install the automatminer_dev package:
 ```bash
 python setup_dev.py develop
 ```
-You will also need to install the requirements in requirements-dev.txt
+You will also need to install the requirements in `requirements_dev.txt`
 
 ##### So don't expect a response or much help on the forum regarding dev (for now, at least.)
    
@@ -21,17 +22,18 @@ The available workflows include:
 * multiple nested CV benchmarks (i.e., on many different data sets)
 * plain ol' fitting operations (i.e., fitting a model for production)
    
-Also, this `automatminer_dev` folder is dependent upon specific environment variables, file
-locations, and variables which are documented throughout the code. If you want
-to run your own version of these dev tools, you'll need to set your own versions
-of these variables specific to your computing platform, most of which you can
-do through `config.py`.  
+Also, this `automatminer_dev` folder is dependent upon specific 
+environment variables, file locations, and variables which are 
+documented throughout the code. If you want to run your own version of 
+these dev tools, you'll need to set your own versions of these variables
+specific to your computing platform, most of which you can do through 
+`config.py`.  
 
-Finally, the results of these workflows are saved to a private database. If you
-want to use your own databse, you'll need to substitute the code from the 
-private database with your own (should only be a couple of lines from
-`config.py` if you're familiar with pymongo and MongoDB). The general setup
-of this database is as follows (by collection):
+Finally, the results of these workflows are saved to a private database.
+If you want to use your own databse, you'll need to substitute the code
+from the private database with your own (should only be a couple of 
+lines from `config.py` if you're familiar with pymongo and MongoDB). 
+The general setup of this database is as follows (by collection):
 
 #### Automatminer results collections
 - `automatminer_pipes`: individual MatPipes; most typically, folds
