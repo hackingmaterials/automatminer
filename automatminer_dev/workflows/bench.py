@@ -111,7 +111,7 @@ def wf_evaluate_build(
         all_links[fw] = [fw_build_merge]
 
     if include_tests:
-        fw_test = get_test_fw(build_id)
+        fw_test = get_test_fw(fworker, build_id)
         all_links[fw_test] = fws_fold0
     all_links[fw_build_merge] = []
 
