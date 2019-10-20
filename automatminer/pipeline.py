@@ -3,11 +3,11 @@ The highest level classes for pipelines.
 """
 import os
 import pickle
-import logging
 from typing import Dict
 
 import pandas as pd
 
+import automatminer.__name__ as amm_name
 from automatminer.base import DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
@@ -16,7 +16,7 @@ from automatminer.utils.pkg import check_fitted, set_fitted, \
     save_dict_to_file
 from automatminer.utils.log import initialize_logger
 
-logger = initialize_logger(logger_name=__name__)
+logger = initialize_logger(logger_name=amm_name)
 
 
 class MatPipe(DFTransformer):
