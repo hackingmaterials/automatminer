@@ -43,7 +43,7 @@ class TestMatPipeSetup(unittest.TestCase):
             MatPipe.from_preset(preset)
 
         MatPipe.from_preset("debug", cache_src="some_file.json")
-        MatPipe.from_preset("debug", logger=False)
+        MatPipe.from_preset("debug")
         MatPipe.from_preset("debug", log_level=1)
 
 
@@ -192,7 +192,7 @@ def make_matpipe_test(config_preset, skip=None):
 
             # Load test
             self.pipe.save(filename=PIPE_PATH)
-            self.pipe = MatPipe.load(PIPE_PATH, logger=False)
+            self.pipe = MatPipe.load(PIPE_PATH)
             df_test = self.pipe.predict(self.df[-220:-201])
             self.assertTrue(self.target in df_test.columns)
             self.assertTrue(self.target + " predicted" in df_test.columns)

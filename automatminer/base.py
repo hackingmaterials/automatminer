@@ -63,3 +63,20 @@ class DFTransformer(abc.ABC, BaseEstimator):
 
         """
         return self.fit(df, target).transform(df, target)
+
+    @property
+    def _log_prefix(self):
+        """
+        The class's log prefix.
+
+        Without log_prefix:
+        2019.10.15 WARNING Some log message.
+
+        with log prefix:
+        2019.10.15 WARNING DataCleaner: Some log message.
+
+        Returns:
+            (str): The log prefix.
+
+        """
+        return self.__class__.__name__ + ": "

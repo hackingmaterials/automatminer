@@ -16,7 +16,7 @@ from matminer.utils.io import store_dataframe_as_json, load_dataframe_from_json
 from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR, \
     AMM_LOG_TRANSFORM_STR
 from automatminer.utils.pkg import check_fitted, set_fitted
-from automatminer.base import DFTransformer, LoggableMixin
+from automatminer.base import DFTransformer
 from automatminer.featurization.sets import CompositionFeaturizers, \
     StructureFeaturizers, BSFeaturizers, DOSFeaturizers
 from automatminer.utils.pkg import AutomatminerError
@@ -31,7 +31,7 @@ _COMMON_COL_ERR_STR = "composition_col/structure_col/bandstructure_col/dos_col"
 logger = logging.getLogger(__name__)
 
 
-class AutoFeaturizer(DFTransformer, LoggableMixin):
+class AutoFeaturizer(DFTransformer):
     """
     Automatically featurize a dataframe.
 
