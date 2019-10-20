@@ -14,7 +14,7 @@ from sklearn.preprocessing import LabelEncoder
 from skrebate import MultiSURFstar
 
 from automatminer.utils.pkg import AutomatminerError
-from automatminer.base import LoggableMixin, DFTransformer
+from automatminer.base import DFTransformer
 
 __authors__ = ["Alireza Faghaninia <alireza@lbl.gov>",
                "Alex Dunn <ardunn@lbl.gov>"]
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 common_clf = SGDClassifier()
 
 
-class TreeFeatureReducer(DFTransformer, LoggableMixin):
+class TreeFeatureReducer(DFTransformer):
     """
     Tree-based feature reduction tools based on sklearn models that have
         the .feature_importances_ attribute.

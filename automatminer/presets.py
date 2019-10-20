@@ -37,7 +37,6 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
             cache_src (str): A file path. If specified, Autofeaturizer will use
                 feature caching with a file stored at this location. See
                 Autofeaturizer's cache_src argument for more information.
-            logger (logging.Logger): The logging object to use.
 
     Returns:
         (dict) The desired preset config.
@@ -103,9 +102,6 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
             "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
             "cleaner": DataCleaner()
         }
-
-    logger = powerups.get("logger", AMM_DEFAULT_LOGGER)
-    config["logger"] = logger
     return config
 
 

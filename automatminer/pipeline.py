@@ -8,7 +8,7 @@ from typing import Dict
 
 import pandas as pd
 
-from automatminer.base import LoggableMixin, DFTransformer
+from automatminer.base import DFTransformer
 from automatminer.presets import get_preset_config
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.pkg import check_fitted, set_fitted, \
@@ -19,7 +19,7 @@ from automatminer.utils.log import initialize_logger
 logger = initialize_logger(logger_name=__name__)
 
 
-class MatPipe(DFTransformer, LoggableMixin):
+class MatPipe(DFTransformer):
     """
     Establish an ML pipeline for transforming compositions, structures,
     bandstructures, and DOS objects into machine-learned properties.
@@ -135,7 +135,6 @@ class MatPipe(DFTransformer, LoggableMixin):
                 Current powerups are:
                  - cache_src (str): The cache source if you want to save
                     features.
-                 - logger (logging.Logger): The logger to use.
         """
         config = get_preset_config(preset, **powerups)
         return MatPipe(**config)
@@ -417,15 +416,13 @@ class MatPipe(DFTransformer, LoggableMixin):
         self.learner.deserialize()
 
     @staticmethod
-    def load(filename, logger=True, supress_version_mismatch=False):
+    def load(filename, supress_version_mismatch=False):
         """
         Loads a MatPipe that was saved.
 
         Args:
             filename (str): The pickled MatPipe object (should have been saved
                 using save).
-            logger (bool or logging.Logger): The logger to use for the loaded
-                MatPipe.
             supress_version_mismatch (bool): If False, throws an error when
                 there is a version mismatch between a serialized MatPipe and the
                 current Automatminer version. If True, suppresses this error.
@@ -439,11 +436,10 @@ class MatPipe(DFTransformer, LoggableMixin):
         if pipe.version != get_version() and not supress_version_mismatch:
             raise VersionError("Version mismatch")
 
-        pipe.logger = logger
-        pipe.logger.info("Loaded MatPipe from file {}.".format(filename))
+        logger.info("Loaded MatPipe from file {}.".format(filename))
         if hasattr(pipe.learner, "from_serialized"):
             if pipe.learner.from_serialized:
-                pipe.logger.warning(
+                logger.warning(
                     "Only use this model to make predictions (do not "
                     "retrain!). Backend was serialzed as only the top model, "
                     "not the full automl backend. "

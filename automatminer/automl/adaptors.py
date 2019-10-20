@@ -18,7 +18,6 @@ from automatminer.utils.ml import is_greater_better, \
     regression_or_classification
 from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR
 from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
-from automatminer.base import LoggableMixin
 from automatminer.automl.base import DFMLAdaptor
 
 __authors__ = ['Alex Dunn <ardunn@lbl.gov'
@@ -30,7 +29,7 @@ _adaptor_tmp_backend = None
 logger = logging.getLogger(__name__)
 
 
-class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
+class TPOTAdaptor(DFMLAdaptor):
     """
     A dataframe adaptor for the TPOT classifiers and regressors.
 
@@ -50,11 +49,6 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
                 'bootstrap': [True, False]
                 },
             }
-
-        logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will
-            be used. If set to False, then no logging will occur.
-
     Attributes:
         The following unique attributes are set during fitting.
 
@@ -262,7 +256,7 @@ class TPOTAdaptor(DFMLAdaptor, LoggableMixin):
             self.from_serialized = False
 
 
-class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
+class SinglePipelineAdaptor(DFMLAdaptor):
     """
     For running single models or pipelines in a MatPipe pipeline using the same
     syntax as the AutoML adaptors.
@@ -285,7 +279,7 @@ class SinglePipelineAdaptor(DFMLAdaptor, LoggableMixin):
             (classification)
     """
 
-    def __init__(self, regressor, classifier, logger=True):
+    def __init__(self, regressor, classifier):
         self.mode = None
         self._regressor = regressor
         self._classifier = classifier

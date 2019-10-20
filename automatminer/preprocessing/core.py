@@ -15,7 +15,7 @@ from automatminer.utils.log import log_progress, AMM_LOG_TRANSFORM_STR, \
     AMM_LOG_FIT_STR
 from automatminer.utils.ml import regression_or_classification, \
     AMM_REG_NAME
-from automatminer.base import LoggableMixin, DFTransformer
+from automatminer.base import DFTransformer
 from automatminer.preprocessing.feature_selection import TreeFeatureReducer, \
     rebate, lower_corr_clf
 
@@ -27,7 +27,7 @@ __authors__ = ["Alex Dunn <ardunn@lbl.gov>",
 logger = logging.getLogger(__name__)
 
 
-class DataCleaner(DFTransformer, LoggableMixin):
+class DataCleaner(DFTransformer):
     """
     Transform a featurized dataframe into an ML-ready dataframe.
 
@@ -424,7 +424,7 @@ class DataCleaner(DFTransformer, LoggableMixin):
         self.dropped_samples = None
 
 
-class FeatureReducer(DFTransformer, LoggableMixin):
+class FeatureReducer(DFTransformer):
     """
     Perform feature reduction on a clean dataframe.
 
@@ -471,9 +471,6 @@ class FeatureReducer(DFTransformer, LoggableMixin):
             This option does nothing if PCA feature removal is present.
         remove_features (list, None): A list of features that will be removed.
             This option does nothing if PCA feature removal is present.
-        logger (Logger, bool): A custom logger object to use for logging.
-            Alternatively, if set to True, the default automatminer logger will
-            be used. If set to False, then no logging will occur.
 
     Attributes:
         The following attrs are set during fitting.
@@ -489,7 +486,7 @@ class FeatureReducer(DFTransformer, LoggableMixin):
     def __init__(self, reducers=('pca',), corr_threshold=0.95,
                  tree_importance_percentile=0.90, n_pca_features='auto',
                  n_rebate_features=0.3, keep_features=None,
-                 remove_features=None, logger=True):
+                 remove_features=None):
 
         for reducer in reducers:
             if reducer not in ["corr", "tree", "rebate", "pca"]:
@@ -501,7 +498,6 @@ class FeatureReducer(DFTransformer, LoggableMixin):
         self.n_pca_features = n_pca_features
         self.tree_importance_percentile = tree_importance_percentile
         self.n_rebate_features = n_rebate_features
-        logger = logger
         self._keep_features = keep_features or []
         self._remove_features = remove_features or []
         self.removed_features = {}

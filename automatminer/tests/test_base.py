@@ -7,7 +7,7 @@ import logging
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 
-from automatminer.base import DFTransformer, LoggableMixin
+from automatminer.base import DFTransformer
 from automatminer.utils.pkg import check_fitted, set_fitted
 
 
@@ -68,18 +68,6 @@ class TestTransformerBad(DFTransformer):
         pass
 
 
-class TestLoggableMixin(LoggableMixin):
-    """
-    A class for testing logging mixin classes.
-
-    Args:
-        logger (bool or logging.Logger): The logging object.
-    """
-
-    def __init__(self, logger=True):
-        logger = logger
-
-
 class TestBaseTransformers(unittest.TestCase):
 
     def setUp(self):
@@ -122,11 +110,6 @@ class TestBaseTransformers(unittest.TestCase):
         ttg_nested.set_params(config_attr__config_attr=7)
         self.assertEqual(ttg.get_params()["config_attr"], 7)
         self.assertEqual(ttg_nested.get_params()["config_attr__config_attr"], 7)
-
-    def test_LoggableMixin(self):
-        tlm = TestLoggableMixin(logger=True)
-        self.assertTrue(hasattr(tlm, "logger"))
-        self.assertTrue(isinstance(tlm.logger, logging.Logger))
 
 
 if __name__ == "__main__":
