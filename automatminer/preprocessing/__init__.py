@@ -1,1 +1,1 @@
-from .core import DataCleaner, FeatureReducer
+from .core import DataCleaner, FeatureReducer  # noqa

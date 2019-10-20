@@ -1,15 +1,14 @@
 """
 Utils specific to this package.
 """
-import os
 import json
+import os
 from pprint import pformat
 
-import yaml
 import pandas as pd
+import yaml
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
-
 
 AMM_SUPPORTED_EXTS = [".txt", ".json", ".yaml", ".yml", ""]
 
@@ -51,14 +50,18 @@ def compare_columns(df1, df2, ignore=None) -> dict:
                  "mismatch": (bool)}
     """
     ignore = () if ignore is None else ignore
-    df2_not_in_df1 = [f for f in df2.columns if
-                      f not in df1.columns and f not in ignore]
-    df1_not_in_df2 = [f for f in df1.columns if
-                      f not in df2.columns and f not in ignore]
+    df2_not_in_df1 = [
+        f for f in df2.columns if f not in df1.columns and f not in ignore
+    ]
+    df1_not_in_df2 = [
+        f for f in df1.columns if f not in df2.columns and f not in ignore
+    ]
     matched = not (df2_not_in_df1 + df1_not_in_df2)
-    return {"df2_not_in_df1": df2_not_in_df1,
-            "df1_not_in_df2": df1_not_in_df2,
-            "mismatch": not matched}
+    return {
+        "df2_not_in_df1": df2_not_in_df1,
+        "df1_not_in_df2": df1_not_in_df2,
+        "mismatch": not matched,
+    }
 
 
 def check_fitted(func):
@@ -73,11 +76,13 @@ def check_fitted(func):
 
     def wrapper(*args, **kwargs):
         if not hasattr(args[0], "is_fit"):
-            raise AttributeError("Method using check_fitted has no is_fit attr"
-                                 " to check if fitted!")
+            raise AttributeError(
+                "Method using check_fitted has no is_fit attr" " to check if fitted!"
+            )
         if not args[0].is_fit:
-            raise NotFittedError("{} has not been fit!"
-                                 "".format(args[0].__class__.__name__))
+            raise NotFittedError(
+                "{} has not been fit!" "".format(args[0].__class__.__name__)
+            )
         else:
             return func(*args, **kwargs)
 
@@ -121,9 +126,11 @@ def return_attrs_recursively(obj) -> dict:
             if "automatminer" in value.__module__:
                 attrdict[attr] = {attr: return_attrs_recursively(value)}
             elif isinstance(value, pd.DataFrame):
-                attrdict[attr] = {"obj": value.__class__,
-                                  "columns": value.shape[1],
-                                  "samples": value.shape[0]}
+                attrdict[attr] = {
+                    "obj": value.__class__,
+                    "columns": value.shape[1],
+                    "samples": value.shape[0],
+                }
             elif isinstance(value, Pipeline):
                 attrdict[attr] = [str(s) for s in value.steps]
             else:
@@ -183,5 +190,5 @@ def get_version():
     with open(version_reference, "r") as f:
         init_file = f.readlines()
         v = [v for v in init_file if "__version__" in v][0]
-    v = v.replace("__version__", "").replace("\"", "").replace("=", "").strip()
+    v = v.replace("__version__", "").replace('"', "").replace("=", "").strip()
     return v

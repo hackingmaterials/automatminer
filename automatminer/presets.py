@@ -4,16 +4,15 @@ Configurations for MatPipe.
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>"]
 
-from xgboost import XGBRegressor, XGBClassifier
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-
+from automatminer.automl import SinglePipelineAdaptor, TPOTAdaptor
 from automatminer.featurization import AutoFeaturizer
-from automatminer.preprocessing import FeatureReducer, DataCleaner
-from automatminer.automl import TPOTAdaptor, SinglePipelineAdaptor
+from automatminer.preprocessing import DataCleaner, FeatureReducer
 from automatminer.utils.log import AMM_DEFAULT_LOGGER
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from xgboost import XGBClassifier, XGBRegressor
 
 
-def get_preset_config(preset: str = 'express', **powerups) -> dict:
+def get_preset_config(preset: str = "express", **powerups) -> dict:
     """
     Preset configs for MatPipe.
 
@@ -48,59 +47,59 @@ def get_preset_config(preset: str = 'express', **powerups) -> dict:
 
     elif preset == "production":
         config = {
-            "learner": TPOTAdaptor(max_time_mins=1440,
-                                   max_eval_time_mins=20),
-            "reducer": FeatureReducer(reducers=('corr', 'tree'),
-                                      tree_importance_percentile=0.99),
-            "autofeaturizer": AutoFeaturizer(preset="express",
-                                             **caching_kwargs),
-            "cleaner": DataCleaner()
+            "learner": TPOTAdaptor(max_time_mins=1440, max_eval_time_mins=20),
+            "reducer": FeatureReducer(
+                reducers=("corr", "tree"), tree_importance_percentile=0.99
+            ),
+            "autofeaturizer": AutoFeaturizer(preset="express", **caching_kwargs),
+            "cleaner": DataCleaner(),
         }
     elif preset == "heavy":
         config = {
             "learner": TPOTAdaptor(max_time_mins=2880),
             "reducer": FeatureReducer(reducers=("corr", "rebate")),
             "autofeaturizer": AutoFeaturizer(preset="heavy", **caching_kwargs),
-            "cleaner": DataCleaner()
+            "cleaner": DataCleaner(),
         }
     elif preset == "express":
         config = {
             "learner": TPOTAdaptor(max_time_mins=60, population_size=20),
-            "reducer": FeatureReducer(reducers=('corr', 'tree'),
-                                      tree_importance_percentile=0.99),
-            "autofeaturizer": AutoFeaturizer(preset="express",
-                                             **caching_kwargs),
-            "cleaner": DataCleaner()
+            "reducer": FeatureReducer(
+                reducers=("corr", "tree"), tree_importance_percentile=0.99
+            ),
+            "autofeaturizer": AutoFeaturizer(preset="express", **caching_kwargs),
+            "cleaner": DataCleaner(),
         }
     elif preset == "express_single":
         xgb_kwargs = {"n_estimators": 300, "max_depth": 3, "n_jobs": -1}
         config = {
             "learner": SinglePipelineAdaptor(
                 regressor=XGBRegressor(**xgb_kwargs),
-                classifier=XGBClassifier(**xgb_kwargs)),
-            "reducer": FeatureReducer(reducers=('corr',)),
-            "autofeaturizer": AutoFeaturizer(preset="express",
-                                             **caching_kwargs),
-            "cleaner": DataCleaner()
+                classifier=XGBClassifier(**xgb_kwargs),
+            ),
+            "reducer": FeatureReducer(reducers=("corr",)),
+            "autofeaturizer": AutoFeaturizer(preset="express", **caching_kwargs),
+            "cleaner": DataCleaner(),
         }
     elif preset == "debug":
         config = {
-            "learner": TPOTAdaptor(max_time_mins=1,
-                                   max_eval_time_mins=1,
-                                   population_size=10),
-            "reducer": FeatureReducer(reducers=('corr', 'tree')),
+            "learner": TPOTAdaptor(
+                max_time_mins=1, max_eval_time_mins=1, population_size=10
+            ),
+            "reducer": FeatureReducer(reducers=("corr", "tree")),
             "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
-            "cleaner": DataCleaner()
+            "cleaner": DataCleaner(),
         }
     elif preset == "debug_single":
         rf_kwargs = {"n_estimators": 10, "n_jobs": -1}
         config = {
             "learner": SinglePipelineAdaptor(
                 classifier=RandomForestClassifier(**rf_kwargs),
-                regressor=RandomForestRegressor(**rf_kwargs)),
-            "reducer": FeatureReducer(reducers=('corr',)),
+                regressor=RandomForestRegressor(**rf_kwargs),
+            ),
+            "reducer": FeatureReducer(reducers=("corr",)),
             "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
-            "cleaner": DataCleaner()
+            "cleaner": DataCleaner(),
         }
     return config
 
@@ -112,11 +111,4 @@ def get_available_presets():
     Returns:
         ([str]): A list of preset names.
     """
-    return [
-        "production",
-        "heavy",
-        "express",
-        "express_single",
-        "debug",
-        "debug_single"
-    ]
+    return ["production", "heavy", "express", "express_single", "debug", "debug_single"]
