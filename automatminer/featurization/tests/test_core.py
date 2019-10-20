@@ -232,7 +232,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         target = "K_VRH"
         cols = ["composition", target]
         df1 = self.test_df[cols].iloc[: self.limit]
-        df2 = self.test_df[cols].iloc[-1 * self.limit:]
+        df2 = self.test_df[cols].iloc[-1 * self.limit :]  # noqa
 
         af = AutoFeaturizer(preset="express")
         af.fit(df1, target)
