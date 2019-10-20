@@ -69,7 +69,7 @@ class TPOTAdaptor(DFMLAdaptor):
             due to pickling problems.
     """
 
-    def __init__(self, *tpot_kwargs):
+    def __init__(self, **tpot_kwargs):
         tpot_kwargs["cv"] = tpot_kwargs.get("cv", 5)
         tpot_kwargs["n_jobs"] = tpot_kwargs.get("n_jobs", -1)
         tpot_kwargs["verbosity"] = tpot_kwargs.get("verbosity", 3)
