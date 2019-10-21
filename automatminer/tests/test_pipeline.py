@@ -235,7 +235,7 @@ def make_matpipe_test(config_preset, skip=None):
             df_tests2 = pipe.benchmark(
                 df2, self.target, kfold, fold_subset=[0], cache=cache
             )
-            self.assertEqual(len(df_tests2), 2)
+            self.assertEqual(len(df_tests2), 1)
 
         def tearDown(self) -> None:
             digests = [DIGEST_PATH + ext for ext in AMM_SUPPORTED_EXTS]

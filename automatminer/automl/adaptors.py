@@ -74,6 +74,7 @@ class TPOTAdaptor(DFMLAdaptor):
         tpot_kwargs["n_jobs"] = tpot_kwargs.get("n_jobs", -1)
         tpot_kwargs["verbosity"] = tpot_kwargs.get("verbosity", 3)
         tpot_kwargs["memory"] = tpot_kwargs.get("memory", "auto")
+        tpot_kwargs["use_dask"] = True
 
         self.mode = None
         self.tpot_kwargs = tpot_kwargs
