@@ -1,3 +1,4 @@
+#!/bin/bash
 # Check PEP8 compliance with Flake8
 
 formatting_errors=$(flake8 automatminer)

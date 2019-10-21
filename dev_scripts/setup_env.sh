@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "SKIPPING INTENSIVE TESTS? $SKIP_INTENSIVE"
 python3 -m venv test_env
 . test_env/bin/activate
