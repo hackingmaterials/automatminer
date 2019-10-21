@@ -100,6 +100,9 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             "cleaner": DataCleaner(),
         }
     elif preset == "debug":
+        if "n_jobs" not in powerups:
+            n_jobs_kwargs["n_jobs"] = 2
+
         config = {
             "learner": TPOTAdaptor(
                 max_time_mins=1,
