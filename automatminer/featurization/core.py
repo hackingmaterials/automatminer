@@ -489,6 +489,7 @@ class AutoFeaturizer(DFTransformer):
                     )
             if self.functionalize:
                 ff = FunctionFeaturizer()
+                ff.set_n_jobs(self.n_jobs)
                 cols = df.columns.tolist()
                 for ft in self.featurizers.keys():
                     if ft in cols:
@@ -554,6 +555,7 @@ class AutoFeaturizer(DFTransformer):
                 stc = StrToComposition(
                     overwrite_data=True, target_col_id=featurizer_type
                 )
+                stc.set_n_jobs(self.n_jobs)
                 df = stc.featurize_dataframe(
                     df,
                     featurizer_type,
@@ -585,6 +587,7 @@ class AutoFeaturizer(DFTransformer):
                     return_original_on_error=True,
                     max_sites=-50,
                 )
+                cto.set_n_jobs(self.n_jobs)
                 try:
                     df = cto.featurize_dataframe(
                         df,
@@ -622,6 +625,7 @@ class AutoFeaturizer(DFTransformer):
                 dto = DictToObject(
                     overwrite_data=True, target_col_id=featurizer_type
                 )
+                dto.set_n_jobs(self.n_jobs)
                 df = dto.featurize_dataframe(
                     df, featurizer_type, inplace=False
                 )
@@ -639,6 +643,7 @@ class AutoFeaturizer(DFTransformer):
                     return_original_on_error=True,
                     max_sites=30,
                 )
+                sto.set_n_jobs(self.n_jobs)
                 try:
                     df = sto.featurize_dataframe(
                         df,
@@ -696,5 +701,6 @@ class AutoFeaturizer(DFTransformer):
                 target_col_id=self.composition_col,
                 overwrite_data=overwrite,
             )
+            struct2comp.set_n_jobs(self.n_jobs)
             df = struct2comp.featurize_dataframe(df, self.structure_col)
         return df
