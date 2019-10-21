@@ -1,0 +1,2 @@
+dash==1.4.1
+pandas

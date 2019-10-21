@@ -61,6 +61,8 @@ def make_matpipe_test(config_preset, skip=None):
             implemented by a preset.
 
     """
+
+    n_jobs = 2
     skippables = [
         "transferability",
         "user_features",
@@ -87,9 +89,9 @@ def make_matpipe_test(config_preset, skip=None):
             self.df_struc = df[["composition", "structure", "K_VRH"]]
             self.extra_features = df["G_VRH"]
             self.target = "K_VRH"
-            self.config = get_preset_config(config_preset)
+            self.config = get_preset_config(config_preset, n_jobs=n_jobs)
             self.config_cached = get_preset_config(
-                config_preset, cache_src=CACHE_SRC
+                config_preset, cache_src=CACHE_SRC, n_jobs=n_jobs
             )
             self.pipe = MatPipe(**self.config)
             self.pipe_cached = MatPipe(**self.config_cached)

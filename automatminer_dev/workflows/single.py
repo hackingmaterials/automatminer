@@ -3,6 +3,7 @@ import warnings
 from fireworks import Firework, Workflow
 
 from automatminer_dev.tasks.single import RunSingleFit
+from automatminer_dev.workflows.util import get_test_fw, get_last_commit
 from automatminer_dev.workflows.util import (
     get_last_commit,
     get_time_str,
@@ -42,4 +43,17 @@ def wf_single_fit(
 
     fw = Firework(RunSingleFit(), spec=spec, name=fw_name)
     wf = Workflow([fw], metadata={"tags": tags}, name=wf_name)
+    return wf
+
+
+def wf_run_test(fworker, test_name):
+    commit = get_last_commit()
+    wf_name = "run tests: {} [{}]".format(test_name, commit)
+
+    add_to_spec = {
+        "commit": commit,
+    }
+
+    test_fw = get_test_fw(fworker, add_to_spec=add_to_spec)
+    wf = Workflow([test_fw], metadata={"tags": "test"}, name=wf_name)
     return wf

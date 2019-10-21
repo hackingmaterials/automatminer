@@ -7,7 +7,6 @@ jobs:
     docker:
       - image: circleci/python:3.7.2
         environment:
-          CODACY_PROJECT_TOKEN: "0cdf090f6d5f4f8783fcf3ce04c6a1d6"
           SKIP_INTENSIVE: 1
     steps:
       - checkout

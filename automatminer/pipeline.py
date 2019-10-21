@@ -144,6 +144,8 @@ class MatPipe(DFTransformer):
                 Current powerups are:
                  - cache_src (str): The cache source if you want to save
                     features.
+                 - n_jobs (int): The number of parallel process to use when
+                    running.
         """
         config = get_preset_config(preset, **powerups)
         return MatPipe(**config)

@@ -35,46 +35,59 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             cache_src (str): A file path. If specified, Autofeaturizer will use
                 feature caching with a file stored at this location. See
                 Autofeaturizer's cache_src argument for more information.
+            n_jobs (int): The number of parallel process to use when running.
+                Particularly important for AutoFeaturixer and TPOTAdaptor.
 
     Returns:
         (dict) The desired preset config.
     """
     caching_kwargs = {"cache_src": powerups.get("cache_src", None)}
+    n_jobs_kwargs = {"n_jobs": powerups.get("n_jobs", -1)}
 
     if preset not in get_available_presets():
         raise ValueError("{} unknown preset.".format(preset))
 
     elif preset == "production":
         config = {
-            "learner": TPOTAdaptor(max_time_mins=1440, max_eval_time_mins=20),
+            "learner": TPOTAdaptor(
+                max_time_mins=1440, max_eval_time_mins=20, **n_jobs_kwargs
+            ),
             "reducer": FeatureReducer(
                 reducers=("corr", "tree"), tree_importance_percentile=0.99
             ),
             "autofeaturizer": AutoFeaturizer(
-                preset="express", **caching_kwargs
+                preset="express", **caching_kwargs, **n_jobs_kwargs
             ),
             "cleaner": DataCleaner(),
         }
     elif preset == "heavy":
         config = {
-            "learner": TPOTAdaptor(max_time_mins=2880),
+            "learner": TPOTAdaptor(max_time_mins=2880, **n_jobs_kwargs),
             "reducer": FeatureReducer(reducers=("corr", "rebate")),
-            "autofeaturizer": AutoFeaturizer(preset="heavy", **caching_kwargs),
+            "autofeaturizer": AutoFeaturizer(
+                preset="heavy", **caching_kwargs, **n_jobs_kwargs
+            ),
             "cleaner": DataCleaner(),
         }
     elif preset == "express":
         config = {
-            "learner": TPOTAdaptor(max_time_mins=60, population_size=20),
+            "learner": TPOTAdaptor(
+                max_time_mins=60, population_size=20, **n_jobs_kwargs
+            ),
             "reducer": FeatureReducer(
                 reducers=("corr", "tree"), tree_importance_percentile=0.99
             ),
             "autofeaturizer": AutoFeaturizer(
-                preset="express", **caching_kwargs
+                preset="express", **caching_kwargs, **n_jobs_kwargs
             ),
             "cleaner": DataCleaner(),
         }
     elif preset == "express_single":
-        xgb_kwargs = {"n_estimators": 300, "max_depth": 3, "n_jobs": -1}
+        xgb_kwargs = {
+            "n_estimators": 300,
+            "max_depth": 3,
+            "n_jobs": n_jobs_kwargs["n_jobs"],
+        }
         config = {
             "learner": SinglePipelineAdaptor(
                 regressor=XGBRegressor(**xgb_kwargs),
@@ -82,28 +95,35 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             ),
             "reducer": FeatureReducer(reducers=("corr",)),
             "autofeaturizer": AutoFeaturizer(
-                preset="express", **caching_kwargs
+                preset="express", **caching_kwargs, **n_jobs_kwargs
             ),
             "cleaner": DataCleaner(),
         }
     elif preset == "debug":
         config = {
             "learner": TPOTAdaptor(
-                max_time_mins=1, max_eval_time_mins=1, population_size=10
+                max_time_mins=1,
+                max_eval_time_mins=1,
+                population_size=10,
+                **n_jobs_kwargs
             ),
             "reducer": FeatureReducer(reducers=("corr", "tree")),
-            "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
+            "autofeaturizer": AutoFeaturizer(
+                preset="debug", **caching_kwargs, **n_jobs_kwargs
+            ),
             "cleaner": DataCleaner(),
         }
     elif preset == "debug_single":
-        rf_kwargs = {"n_estimators": 10, "n_jobs": -1}
+        rf_kwargs = {"n_estimators": 10, "n_jobs": n_jobs_kwargs["n_jobs"]}
         config = {
             "learner": SinglePipelineAdaptor(
                 classifier=RandomForestClassifier(**rf_kwargs),
                 regressor=RandomForestRegressor(**rf_kwargs),
             ),
             "reducer": FeatureReducer(reducers=("corr",)),
-            "autofeaturizer": AutoFeaturizer(preset="debug", **caching_kwargs),
+            "autofeaturizer": AutoFeaturizer(
+                preset="debug", **caching_kwargs, **n_jobs_kwargs
+            ),
             "cleaner": DataCleaner(),
         }
     return config
