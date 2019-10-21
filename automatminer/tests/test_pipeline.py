@@ -222,7 +222,7 @@ def make_matpipe_test(config_preset, skip=None):
         def _run_benchmark(self, cache, pipe):
             # Test static, regular benchmark (no fittable featurizers)
             df = self.df.iloc[500:600]
-            kfold = KFold(n_splits=5)
+            kfold = KFold(n_splits=2)
             df_tests = pipe.benchmark(df, self.target, kfold, cache=cache)
             self.assertEqual(len(df_tests), kfold.n_splits)
 
@@ -233,7 +233,7 @@ def make_matpipe_test(config_preset, skip=None):
             # Test static subset of kfold
             df2 = self.df.iloc[500:550]
             df_tests2 = pipe.benchmark(
-                df2, self.target, kfold, fold_subset=[0, 3], cache=cache
+                df2, self.target, kfold, fold_subset=[0], cache=cache
             )
             self.assertEqual(len(df_tests2), 2)
 

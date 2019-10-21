@@ -15,6 +15,8 @@ Running benchmarks
 
 if __name__ == "__main__":
 
+    N_JOBS = 10
+
     pipe_config = {
         "learner_name": "TPOTAdaptor",
         # "learner_kwargs": {"generations": 100, "population_size": 100, "memory": "auto", "n_jobs": 10, "max_eval_time_mins": 5},
@@ -24,7 +26,7 @@ if __name__ == "__main__":
             "max_eval_time_mins": 20,
             "population_size": 200,
             "memory": "auto",
-            "n_jobs": 20,
+            "n_jobs": N_JOBS,
         },
         # "reducer_kwargs": {"reducers": ("corr",)},
         "reducer_kwargs": {
@@ -35,7 +37,7 @@ if __name__ == "__main__":
         # "reducer_kwargs": {"reducers": ("pca",), "n_pca_features": 0.3},
         # "reducer_kwargs": {"reducers": ("rebate",), "n_rebate_features": 0.3},
         # "reducer_kwargs": {"reducers": ()},
-        "autofeaturizer_kwargs": {"preset": "express", "n_jobs": 20},
+        "autofeaturizer_kwargs": {"preset": "express", "n_jobs": N_JOBS},
         # "autofeaturizer_kwargs": {"preset": "heavy", "n_jobs": 20},
         # "cleaner_kwargs": {"max_na_frac": 0.01, "feature_na_method": "mean", "na_method_fit": "drop", "na_method_transform": "mean"},
         "cleaner_kwargs": {
@@ -54,7 +56,7 @@ if __name__ == "__main__":
         "cleaner_kwargs": {
             "max_na_frac": 0.01,
             "feature_na_method": "mean",
-            "na_method_fit": "drop",
+            "na_method_fit": "mean",
             "na_method_transform": "mean",
         },
     }
@@ -79,8 +81,8 @@ if __name__ == "__main__":
     # wf = wf_benchmark("lrc", pipe_config, **GFA, cache=True, tags=tags)
 
     wf = wf_evaluate_build(
-        "lrc",
-        "24 hr tpot production 99% reducing with mean drop cleaning samples",
+        "cori",
+        "24 hr tpot express 99% reducing with all mean cleaning samples",
         BENCHMARK_FULL_SET,
         pipe_config,
         include_tests=False,
@@ -88,7 +90,7 @@ if __name__ == "__main__":
         tags=tags,
     )
 
-    # wf = wf_run_test("lrc", )
+    # wf = wf_run_test("local", "initial_test")
 
     # wf = wf_evaluate_build("local", "test_local", BENCHMARK_DEBUG_SET, pipe_config_debug)
 
