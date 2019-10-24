@@ -3,6 +3,10 @@
 automatminer is an automatic prediction engine for materials properties.
 
 
+## The code on this repo is bleeding edge and is very unstable. Please use the code from the most recent release!
+## All versions at present require Python 3.7+. 
+
+
 | Tests  |   Code Coverage   |  Codacy | Release |
 |:----------:|:-------------:|:------:|:------:|
 | [![CircleCI](https://img.shields.io/circleci/project/github/hackingmaterials/automatminer/master.svg)](https://circleci.com/gh/hackingmaterials/automatminer) | [![Codacy Badge](https://img.shields.io/codacy/coverage/aa63dd7aa85e480bbe0e924a02ad1540.svg?colorB=brightgreen)](https://www.codacy.com/app/ardunn/automatminer) | [![Codacy Badge](https://img.shields.io/codacy/grade/aa63dd7aa85e480bbe0e924a02ad1540.svg)](https://www.codacy.com/app/ardunn/automatminer) | [![PyPI version](https://img.shields.io/pypi/v/automatminer.svg?colorB=blue)](https://pypi.org/project/automatminer/) |
