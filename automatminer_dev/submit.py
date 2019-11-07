@@ -56,7 +56,7 @@ if __name__ == "__main__":
         "cleaner_kwargs": {
             "max_na_frac": 0.01,
             "feature_na_method": "mean",
-            "na_method_fit": "mean",
+            "na_method_fit": "drop",
             "na_method_transform": "mean",
         },
     }

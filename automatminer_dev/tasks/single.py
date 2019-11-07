@@ -31,7 +31,7 @@ class RunSingleFit(FireTaskBase):
         data_file = os.path.join(data_dir, data_file)
 
         # Modify save_dir based on computing resource
-        bench_dir = os.environ["AMM_MODEL_DIR"]
+        bench_dir = os.environ["AMM_SINGLE_FIT_DIR"]
         base_save_dir = fw_spec["base_save_dir"]
         base_save_dir = os.path.join(bench_dir, base_save_dir)
 

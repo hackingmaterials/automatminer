@@ -2,9 +2,9 @@
 The environment variables you need for this all to work are:
 
 - AMM_BENCH_DIR: where to store benchmarks
-- AMM_MODEL_DIR: where to store models (from production fits on full datasets)
 - AMM_DATASET_DIR: where to store datasets
 - AMM_CODE_DIR: where to run tests
+- AMM_SINGLE_FIT_DIR: where to store models (single fits on datasets)
 """
 from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
 
