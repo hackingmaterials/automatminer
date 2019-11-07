@@ -69,9 +69,7 @@ class TestTransformerBad(DFTransformer):
 
 class TestBaseTransformers(unittest.TestCase):
     def setUp(self):
-        self.df = pd.DataFrame(
-            {"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]}
-        )
+        self.df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]})
 
     def test_DFTransformer(self):
         ttg = TestTransformerGood(5)
@@ -101,21 +99,15 @@ class TestBaseTransformers(unittest.TestCase):
         ttg_nested = TestTransformerGood(ttg)
 
         self.assertEqual(ttg.get_params()["config_attr"], 5)
-        self.assertEqual(
-            ttg_nested.get_params()["config_attr__config_attr"], 5
-        )
+        self.assertEqual(ttg_nested.get_params()["config_attr__config_attr"], 5)
 
         ttg.set_params(config_attr=6)
         self.assertEqual(ttg.get_params()["config_attr"], 6)
-        self.assertEqual(
-            ttg_nested.get_params()["config_attr__config_attr"], 6
-        )
+        self.assertEqual(ttg_nested.get_params()["config_attr__config_attr"], 6)
 
         ttg_nested.set_params(config_attr__config_attr=7)
         self.assertEqual(ttg.get_params()["config_attr"], 7)
-        self.assertEqual(
-            ttg_nested.get_params()["config_attr__config_attr"], 7
-        )
+        self.assertEqual(ttg_nested.get_params()["config_attr__config_attr"], 7)
 
 
 if __name__ == "__main__":

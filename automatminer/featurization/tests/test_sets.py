@@ -72,8 +72,7 @@ class TestAllFeaturizers(unittest.TestCase):
             self.assertTrue(
                 featurizer_name in test_feats,
                 (
-                    "{} matminer featurizer not in implemented in "
-                    "automatminer"
+                    "{} matminer featurizer not in implemented in " "automatminer"
                 ).format(featurizer_name),
             )
 

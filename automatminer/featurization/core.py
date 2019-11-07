@@ -207,8 +207,7 @@ class AutoFeaturizer(DFTransformer):
 
             for ftype, fset in self.featurizers.items():
                 _allowed = [
-                    f.__class__.__name__
-                    for f in _supported_featurizers[ftype]().all
+                    f.__class__.__name__ for f in _supported_featurizers[ftype]().all
                 ]
                 for f in fset:
                     if f.__class__.__name__ not in _allowed:
@@ -243,8 +242,7 @@ class AutoFeaturizer(DFTransformer):
 
         if self.needs_fit and self.cache_src:
             logger.critical(
-                self._log_prefix
-                + "Using cached features on fittable featurizers! "
+                self._log_prefix + "Using cached features on fittable featurizers! "
                 "Please make sure you are not benchmarking with "
                 "these options enabled; it is likely you will be"
                 "leaking data (i.e., features) from the testing"
@@ -362,8 +360,7 @@ class AutoFeaturizer(DFTransformer):
 
                     if log_fit:
                         logger.info(
-                            self._log_prefix
-                            + "Fit {} to {} samples in dataframe."
+                            self._log_prefix + "Fit {} to {} samples in dataframe."
                             "".format(f.__class__.__name__, df.shape[0])
                         )
             else:
@@ -391,8 +388,7 @@ class AutoFeaturizer(DFTransformer):
         """
         if self.cache_src and os.path.exists(self.cache_src):
             logger.debug(
-                self._log_prefix
-                + "Reading cache_src {}".format(self.cache_src)
+                self._log_prefix + "Reading cache_src {}".format(self.cache_src)
             )
             cached_df = load_dataframe_from_json(self.cache_src)
             if not all([loc in cached_df.index for loc in df.index]):
@@ -413,12 +409,8 @@ class AutoFeaturizer(DFTransformer):
                     else:
                         cached_targets = cached_subdf[target]
                         input_targets = df[target]
-                        cached_type = regression_or_classification(
-                            cached_targets
-                        )
-                        input_type = regression_or_classification(
-                            input_targets
-                        )
+                        cached_type = regression_or_classification(cached_targets)
+                        input_type = regression_or_classification(input_targets)
                         if cached_type != input_type:
                             raise AutomatminerError(
                                 "Cached targets appear to be '{}' type, while "
@@ -444,12 +436,9 @@ class AutoFeaturizer(DFTransformer):
                             )
 
                 logger.info(
-                    self._log_prefix
-                    + "Restored {} features on {} samples from "
+                    self._log_prefix + "Restored {} features on {} samples from "
                     "cache {}".format(
-                        len(cached_subdf.columns),
-                        len(df.index),
-                        self.cache_src,
+                        len(cached_subdf.columns), len(df.index), self.cache_src
                     )
                 )
                 return cached_subdf
@@ -566,8 +555,7 @@ class AutoFeaturizer(DFTransformer):
 
             elif isinstance(type_tester, dict):
                 logger.info(
-                    self._log_prefix
-                    + "Compositions detected as dicts. Attempting "
+                    self._log_prefix + "Compositions detected as dicts. Attempting "
                     "conversion to Composition objects..."
                 )
                 df[featurizer_type] = [
@@ -597,8 +585,7 @@ class AutoFeaturizer(DFTransformer):
                     )
                 except Exception as e:
                     logger.warning(
-                        self._log_prefix
-                        + "Could not decorate oxidation states due "
+                        self._log_prefix + "Could not decorate oxidation states due "
                         "to {}. Excluding featurizers based on "
                         "composition oxistates".format(e)
                     )
@@ -626,9 +613,7 @@ class AutoFeaturizer(DFTransformer):
                     overwrite_data=True, target_col_id=featurizer_type
                 )
                 dto.set_n_jobs(self.n_jobs)
-                df = dto.featurize_dataframe(
-                    df, featurizer_type, inplace=False
-                )
+                df = dto.featurize_dataframe(df, featurizer_type, inplace=False)
 
             # Decorate with oxidstates
             if featurizer_type == self.structure_col and self.guess_oxistates:

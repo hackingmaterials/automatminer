@@ -94,9 +94,7 @@ class TestAdaptorGood(DFMLAdaptor):
 
 class TestBaseAutoMLTransformers(unittest.TestCase):
     def setUp(self):
-        self.df = pd.DataFrame(
-            {"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]}
-        )
+        self.df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]})
 
     def test_DFMLAdaptor(self):
         tag = TestAdaptorGood(config_attr=5)

@@ -89,9 +89,7 @@ TPOT_REGRESSOR_CONFIG = {
         "nthread": [1],
     },
     # Preprocesssors
-    "sklearn.preprocessing.Binarizer": {
-        "threshold": np.arange(0.0, 1.01, 0.05)
-    },
+    "sklearn.preprocessing.Binarizer": {"threshold": np.arange(0.0, 1.01, 0.05)},
     "sklearn.decomposition.FastICA": {"tol": np.arange(0.0, 1.01, 0.05)},
     "sklearn.cluster.FeatureAgglomeration": {
         "linkage": ["ward", "complete", "average"],
@@ -124,9 +122,7 @@ TPOT_REGRESSOR_CONFIG = {
         "include_bias": [False],
         "interaction_only": [False],
     },
-    "sklearn.kernel_approximation.RBFSampler": {
-        "gamma": np.arange(0.0, 1.01, 0.05)
-    },
+    "sklearn.kernel_approximation.RBFSampler": {"gamma": np.arange(0.0, 1.01, 0.05)},
     "sklearn.preprocessing.RobustScaler": {},
     "sklearn.preprocessing.StandardScaler": {},
     "tpot.builtins.ZeroCount": {},
@@ -227,9 +223,7 @@ TPOT_CLASSIFIER_CONFIG = {
         "nthread": [1],
     },
     # Preprocesssors
-    "sklearn.preprocessing.Binarizer": {
-        "threshold": np.arange(0.0, 1.01, 0.05)
-    },
+    "sklearn.preprocessing.Binarizer": {"threshold": np.arange(0.0, 1.01, 0.05)},
     "sklearn.decomposition.FastICA": {"tol": np.arange(0.0, 1.01, 0.05)},
     "sklearn.cluster.FeatureAgglomeration": {
         "linkage": ["ward", "complete", "average"],
@@ -262,9 +256,7 @@ TPOT_CLASSIFIER_CONFIG = {
         "include_bias": [False],
         "interaction_only": [False],
     },
-    "sklearn.kernel_approximation.RBFSampler": {
-        "gamma": np.arange(0.0, 1.01, 0.05)
-    },
+    "sklearn.kernel_approximation.RBFSampler": {"gamma": np.arange(0.0, 1.01, 0.05)},
     "sklearn.preprocessing.RobustScaler": {},
     "sklearn.preprocessing.StandardScaler": {},
     "tpot.builtins.ZeroCount": {},

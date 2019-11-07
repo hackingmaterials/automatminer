@@ -318,9 +318,7 @@ class MatPipe(DFTransformer):
                 "or use the cache_src get_preset_config powerup."
             )
         else:
-            logger.debug(
-                "No caching being used in AutoFeaturizer or " "benchmark."
-            )
+            logger.debug("No caching being used in AutoFeaturizer or " "benchmark.")
 
         if not fold_subset:
             fold_subset = list(range(kfold.n_splits))

@@ -47,9 +47,7 @@ class CompositionFeaturizers(FeaturizerSet):
 
     @property
     def debug(self):
-        return self._get_featurizers(
-            [cf.ElementProperty.from_preset("magpie")]
-        )
+        return self._get_featurizers([cf.ElementProperty.from_preset("magpie")])
 
     @property
     def express(self):

@@ -6,10 +6,7 @@ from pymatgen import Composition
 from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 from matminer.datasets.dataset_retrieval import load_dataset
 from matminer.featurizers.composition import ElementProperty
-from matminer.featurizers.structure import (
-    GlobalSymmetryFeatures,
-    DensityFeatures,
-)
+from matminer.featurizers.structure import GlobalSymmetryFeatures, DensityFeatures
 from matminer.utils.io import load_dataframe_from_json, store_dataframe_as_json
 
 from automatminer.featurization.core import AutoFeaturizer
@@ -50,9 +47,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         target = "K_VRH"
 
         # When compositions are strings
-        df = copy.copy(
-            self.test_df[["composition", target]].iloc[: self.limit]
-        )
+        df = copy.copy(self.test_df[["composition", target]].iloc[: self.limit])
         af = AutoFeaturizer(preset="express")
         df = af.fit_transform(df, target)
         self.assertAlmostEqual(df["MagpieData minimum Number"].iloc[2], 14.0)
@@ -239,9 +234,7 @@ class TestAutoFeaturizer(unittest.TestCase):
 
         df2 = af.transform(df2, target)
         self.assertAlmostEqual(df2[target].iloc[0], 111.788114, places=5)
-        self.assertAlmostEqual(
-            df2["MagpieData mean Number"].iloc[1], 17.5, places=2
-        )
+        self.assertAlmostEqual(df2["MagpieData mean Number"].iloc[1], 17.5, places=2)
 
     def test_column_attr(self):
         """
@@ -255,15 +248,11 @@ class TestAutoFeaturizer(unittest.TestCase):
         custom_comp_key = "comp"
         cols = ["composition", target]
         mod_comp_df = self.test_df[cols].iloc[: self.limit]
-        mod_comp_df = mod_comp_df.rename(
-            columns={"composition": custom_comp_key}
-        )
+        mod_comp_df = mod_comp_df.rename(columns={"composition": custom_comp_key})
 
         df = copy.copy(mod_comp_df)
         af = AutoFeaturizer(
-            composition_col=custom_comp_key,
-            preset="express",
-            ignore_errors=True,
+            composition_col=custom_comp_key, preset="express", ignore_errors=True
         )
         df = af.fit_transform(df, target)
         self.assertEqual(df["MagpieData minimum Number"].iloc[2], 14.0)
@@ -282,9 +271,7 @@ class TestAutoFeaturizer(unittest.TestCase):
         cols = ["structure", target]
         mod_struc_df = self.test_df[cols].iloc[: self.limit]
         custom_struc_key = "struc"
-        mod_struc_df = mod_struc_df.rename(
-            columns={"structure": custom_struc_key}
-        )
+        mod_struc_df = mod_struc_df.rename(columns={"structure": custom_struc_key})
 
         df = copy.copy(mod_struc_df)
         af = AutoFeaturizer(structure_col=custom_struc_key, preset="express")

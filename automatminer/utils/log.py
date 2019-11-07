@@ -31,8 +31,7 @@ def initialize_logger(logger_name, log_dir=".", level=None) -> logging.Logger:
     logger.handlers = []  # reset logging handlers if they already exist
 
     formatter = logging.Formatter(
-        fmt="%(asctime)s %(levelname)-8s %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
+        fmt="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
 
     logpath = os.path.join(log_dir, logger_name)

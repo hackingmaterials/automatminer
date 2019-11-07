@@ -77,8 +77,7 @@ def check_fitted(func):
     def wrapper(*args, **kwargs):
         if not hasattr(args[0], "is_fit"):
             raise AttributeError(
-                "Method using check_fitted has no is_fit attr"
-                " to check if fitted!"
+                "Method using check_fitted has no is_fit attr" " to check if fitted!"
             )
         if not args[0].is_fit:
             raise NotFittedError(

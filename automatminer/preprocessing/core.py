@@ -192,8 +192,7 @@ class DataCleaner(DFTransformer):
             df = df[self.fitted_df.columns]
         else:
             logger.info(
-                self._log_prefix
-                + "Target not found in df columns. Ignoring..."
+                self._log_prefix + "Target not found in df columns. Ignoring..."
             )
             reordered_cols = self.fitted_df.drop(columns=[target]).columns
             df = df[reordered_cols]
@@ -246,16 +245,11 @@ class DataCleaner(DFTransformer):
         feats0 = set(df.columns)
         if not self.is_fit:
             logger.info(
-                self._log_prefix
-                + "Handling feature na by max na threshold of {} "
-                "with method '{}'.".format(
-                    self.max_na_frac, self.feature_na_method
-                )
+                self._log_prefix + "Handling feature na by max na threshold of {} "
+                "with method '{}'.".format(self.max_na_frac, self.feature_na_method)
             )
             threshold = int((1 - self.max_na_frac) * len(df))
-            all_problem_cols = df.columns[
-                df.isnull().mean() > self.max_na_frac
-            ]
+            all_problem_cols = df.columns[df.isnull().mean() > self.max_na_frac]
             n_problem_cols = all_problem_cols.shape[0]
             n_total_cols = df.shape[1]
             problem_col_frac = n_problem_cols / n_total_cols
@@ -275,9 +269,7 @@ class DataCleaner(DFTransformer):
                 df = df.dropna(axis=1, thresh=threshold)
             else:
                 df = df.dropna(axis=1, thresh=1)
-                problem_cols = df.columns[
-                    df.isnull().mean() > self.max_na_frac
-                ]
+                problem_cols = df.columns[df.isnull().mean() > self.max_na_frac]
                 dfp = df[problem_cols]
                 if self.feature_na_method == "fill":
                     dfp = dfp.fillna(method="ffill")
@@ -285,11 +277,7 @@ class DataCleaner(DFTransformer):
                 elif self.feature_na_method == "mean":
                     # Take the mean of all numeric columns
                     dfpn = dfp[
-                        [
-                            ncol
-                            for ncol in dfp.columns
-                            if ncol in self.number_cols
-                        ]
+                        [ncol for ncol in dfp.columns if ncol in self.number_cols]
                     ]
                     dfpn = dfpn.fillna(value=dfpn.mean())
                     dfp[dfpn.columns] = dfpn
@@ -369,9 +357,7 @@ class DataCleaner(DFTransformer):
                     mean_val = self.fitted_df[col].mean()
                     df[col] = [mean_val] * df.shape[0]
 
-        self.dropped_features = [
-            c for c in feats0 if c not in df.columns.values
-        ]
+        self.dropped_features = [c for c in feats0 if c not in df.columns.values]
 
         # Handle all rows that still contain any nans
         if na_method == "drop":
@@ -603,9 +589,7 @@ class FeatureReducer(DFTransformer):
             X = df.drop(columns=[target])
             y = df[target]
             if r == "corr":
-                reduced_df = self.rm_correlated(
-                    df, target, self.corr_threshold
-                )
+                reduced_df = self.rm_correlated(df, target, self.corr_threshold)
                 reduced_df = reduced_df.drop(columns=[target])
             if r == "tree":
                 tbfr = TreeFeatureReducer(
@@ -634,9 +618,7 @@ class FeatureReducer(DFTransformer):
                     + "ReBATE MultiSURF* running: retaining {} numerical "
                     "features.".format(self.n_rebate_features)
                 )
-                reduced_df = rebate(
-                    df, target, n_features=self.n_rebate_features
-                )
+                reduced_df = rebate(df, target, n_features=self.n_rebate_features)
                 reduced_df = reduced_df.copy(deep=True)
                 logger.info(
                     self._log_prefix
@@ -658,9 +640,7 @@ class FeatureReducer(DFTransformer):
                             "features ({}). Setting n_pca_features equal to "
                             "n_samples.".format(n_samples, n_features)
                         )
-                        self._pca = PCA(
-                            n_components=n_samples, svd_solver="full"
-                        )
+                        self._pca = PCA(n_components=n_samples, svd_solver="full")
                     else:
                         logger.info(
                             self._log_prefix
@@ -675,9 +655,7 @@ class FeatureReducer(DFTransformer):
                             + "Retaining fraction {} of current {} features."
                             "".format(self.n_pca_features, df.shape[1])
                         )
-                        self.n_pca_features = int(
-                            df.shape[1] * self.n_pca_features
-                        )
+                        self.n_pca_features = int(df.shape[1] * self.n_pca_features)
                     if self.n_pca_features > n_samples:
                         logger.warning(
                             self._log_prefix
@@ -697,9 +675,7 @@ class FeatureReducer(DFTransformer):
                     )
                 self._pca.fit(X.values, y.values)
                 matrix = self._pca.transform(X.values)
-                pca_feats = [
-                    "PCA {}".format(i) for i in range(matrix.shape[1])
-                ]
+                pca_feats = ["PCA {}".format(i) for i in range(matrix.shape[1])]
                 self._pca_feats = pca_feats
                 reduced_df = pd.DataFrame(
                     columns=pca_feats, data=matrix, index=X.index
@@ -711,9 +687,7 @@ class FeatureReducer(DFTransformer):
 
             retained = reduced_df.columns.values.tolist()
             removed = [
-                c
-                for c in df.columns.values
-                if c not in retained and c != target
+                c for c in df.columns.values if c not in retained and c != target
             ]
 
             self.removed_features[r] = removed
@@ -721,13 +695,9 @@ class FeatureReducer(DFTransformer):
                 reduced_df.loc[:, target] = y.tolist()
             df = reduced_df
 
-        all_removed = [
-            c for r, rf in self.removed_features.items() for c in rf
-        ]
+        all_removed = [c for r, rf in self.removed_features.items() for c in rf]
         all_kept = [c for c in df.columns.tolist() if c != target]
-        save_from_removal = [
-            c for c in self._keep_features if c in all_removed
-        ]
+        save_from_removal = [c for c in self._keep_features if c in all_removed]
         for_force_removal = [c for c in self._remove_features if c in all_kept]
 
         if save_from_removal:
@@ -744,9 +714,7 @@ class FeatureReducer(DFTransformer):
             self.removed_features["manual"] = for_force_removal
 
         self.retained_features = [
-            c
-            for c in all_kept
-            if c not in self._remove_features or c != target
+            c for c in all_kept if c not in self._remove_features or c != target
         ]
         return self
 
@@ -763,13 +731,9 @@ class FeatureReducer(DFTransformer):
         for r, f in self.removed_features.items():
             if r == "pca":
                 matrix = self._pca.transform(X)
-                X = pd.DataFrame(
-                    columns=self._pca_feats, data=matrix, index=X.index
-                )
+                X = pd.DataFrame(columns=self._pca_feats, data=matrix, index=X.index)
             else:
-                X = X.drop(
-                    columns=[c for c in f if c not in self._keep_features]
-                )
+                X = X.drop(columns=[c for c in f if c not in self._keep_features])
         if target in df:
             X.loc[:, target] = df[target].values
         return X
@@ -809,14 +773,11 @@ class FeatureReducer(DFTransformer):
                             else:
                                 removed_feat = idx
                         else:  # mode is classification
-                            removed_feat = lower_corr_clf(
-                                df, target, feat, idx
-                            )
+                            removed_feat = lower_corr_clf(df, target, feat, idx)
                         if removed_feat not in rm_feats:
                             rm_feats.append(removed_feat)
                             logger.debug(
-                                self._log_prefix
-                                + '"{}" correlates strongly with '
+                                self._log_prefix + '"{}" correlates strongly with '
                                 '"{}"'.format(feat, idx)
                             )
                             logger.debug(
@@ -833,8 +794,7 @@ class FeatureReducer(DFTransformer):
                 "".format(len(rm_feats), r_max)
             )
             logger.debug(
-                self._log_prefix
-                + "Features removed by cross-correlation were: {}"
+                self._log_prefix + "Features removed by cross-correlation were: {}"
                 "".format(rm_feats)
             )
         return df

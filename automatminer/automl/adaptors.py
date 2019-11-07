@@ -16,17 +16,13 @@ from automatminer.automl.config.tpot_configs import (
     TPOT_REGRESSOR_CONFIG,
 )
 from automatminer.utils.pkg import set_fitted, check_fitted
-from automatminer.utils.ml import (
-    is_greater_better,
-    regression_or_classification,
-)
+from automatminer.utils.ml import is_greater_better, regression_or_classification
 from automatminer.utils.log import log_progress, AMM_LOG_FIT_STR
 from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
 from automatminer.automl.base import DFMLAdaptor
 
 __authors__ = [
-    "Alex Dunn <ardunn@lbl.gov"
-    "Alireza Faghaninia <alireza.faghaninia@gmail.com>",
+    "Alex Dunn <ardunn@lbl.gov" "Alireza Faghaninia <alireza.faghaninia@gmail.com>",
     "Qi Wang <wqthu11@gmail.com>",
     "Daniel Dopp <dbdopp@lbl.gov>",
 ]

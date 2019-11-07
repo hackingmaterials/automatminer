@@ -49,9 +49,7 @@ class TestTPOTAdaptor(unittest.TestCase):
 
     def test_training_only(self):
         target_key = "K_VRH"
-        train_w_predictions = self.tpot.fit_transform(
-            self.train_df, target_key
-        )
+        train_w_predictions = self.tpot.fit_transform(self.train_df, target_key)
         y_true = train_w_predictions[target_key]
         y_test = train_w_predictions[target_key + " predicted"]
         self.assertTrue(r2_score(y_true, y_test) > 0.85)
@@ -90,8 +88,7 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
 
     def test_BaseEstimator(self):
         learner = SinglePipelineAdaptor(
-            regressor=RandomForestRegressor(),
-            classifier=RandomForestClassifier(),
+            regressor=RandomForestRegressor(), classifier=RandomForestClassifier()
         )
         target_key = "K_VRH"
         learner.fit(self.train_df, target_key)
@@ -102,8 +99,7 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
 
     def test_feature_mismatching(self):
         learner = SinglePipelineAdaptor(
-            regressor=RandomForestRegressor(),
-            classifier=RandomForestClassifier(),
+            regressor=RandomForestRegressor(), classifier=RandomForestClassifier()
         )
         target_key = "K_VRH"
         df1 = self.train_df
@@ -114,8 +110,7 @@ class TestSinglePipelineAdaptor(unittest.TestCase):
 
     def test_BaseEstimator_classification(self):
         learner = SinglePipelineAdaptor(
-            regressor=RandomForestRegressor(),
-            classifier=RandomForestClassifier(),
+            regressor=RandomForestRegressor(), classifier=RandomForestClassifier()
         )
         # Prepare dataset for classification
         train_df = self.train_df

@@ -24,10 +24,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore", category=DeprecationWarning)
     from skrebate import MultiSURFstar
 
-__authors__ = [
-    "Alireza Faghaninia <alireza@lbl.gov>",
-    "Alex Dunn <ardunn@lbl.gov>",
-]
+__authors__ = ["Alireza Faghaninia <alireza@lbl.gov>", "Alex Dunn <ardunn@lbl.gov>"]
 
 
 logger = logging.getLogger(__name__)
@@ -141,9 +138,7 @@ class TreeFeatureReducer(DFTransformer):
                 else:
                     tree = GradientBoostingRegressor(random_state=self.rs)
             else:
-                raise AutomatminerError(
-                    "Unsupported tree_type {}!".format(tree)
-                )
+                raise AutomatminerError("Unsupported tree_type {}!".format(tree))
 
         cv = check_cv(cv=cv, y=y, classifier=is_classifier(tree))
         all_feats = []
