@@ -15,7 +15,7 @@ Running benchmarks
 
 if __name__ == "__main__":
 
-    N_JOBS = 10
+    N_JOBS = 2
 
     pipe_config = {
         "learner_name": "TPOTAdaptor",
@@ -25,7 +25,8 @@ if __name__ == "__main__":
             "max_time_mins": 1440,
             "max_eval_time_mins": 20,
             "population_size": 200,
-            "memory": "auto",
+            #todo: change this back
+            # "memory": "auto",
             "n_jobs": N_JOBS,
         },
         # "reducer_kwargs": {"reducers": ("corr",)},
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     }
 
     pipe_config_debug = {
-        "autofeaturizer_kwargs": {"preset": "debug", "n_jobs": 10},
+        "autofeaturizer_kwargs": {"preset": "debug", "n_jobs": N_JOBS},
         "reducer_kwargs": {"reducers": ()},
         "learner_name": "rf",
         "learner_kwargs": {"n_estimators": 500},
@@ -77,18 +78,22 @@ if __name__ == "__main__":
         "debug"
     ]
 
-    # from automatminer_dev.config import MP_E_FORM, JDFT2D, GLASS
-    # wf = wf_benchmark("lrc", pipe_config, **GFA, cache=True, tags=tags)
+    from automatminer_dev.config import EXPT_IS_METAL, EXPT_GAP
+    worker = "lrc"
+    # wf = wf_benchmark(worker, pipe_config, **EXPT_IS_METAL, cache=True, tags=tags)
+    # wf = wf_benchmark(worker, pipe_config, **EXPT_GAP, cache=True, tags=tags)
+    # wf = wf_benchmark(worker, pipe_config_debug, **EXPT_IS_METAL, cache=True, tags=tags)
+    wf = wf_benchmark(worker, pipe_config_debug, **EXPT_GAP, cache=True, tags=tags)
 
-    wf = wf_evaluate_build(
-        "cori",
-        "24 hr tpot express 99% reducing with all mean cleaning samples",
-        BENCHMARK_FULL_SET,
-        pipe_config,
-        include_tests=False,
-        cache=True,
-        tags=tags,
-    )
+    # wf = wf_evaluate_build(
+    #     "cori",
+    #     "24 hr tpot express 99% reducing with all mean cleaning samples",
+    #     BENCHMARK_FULL_SET,
+    #     pipe_config,
+    #     include_tests=False,
+    #     cache=True,
+    #     tags=tags,
+    # )
 
     # wf = wf_run_test("local", "initial_test")
 
