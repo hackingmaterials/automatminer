@@ -109,7 +109,7 @@ class TPOTAdaptor(DFMLAdaptor):
         # Determine learning type based on whether classification or regression
         self.mode = regression_or_classification(df[target])
 
-        mltype_str = "Classifier" if self.mode == AMM_CLF_NAME else "Regressor"
+        # mltype_str = "Classifier" if self.mode == AMM_CLF_NAME else "Regressor"
         # self.tpot_kwargs["template"] = self.tpot_kwargs.get(
         #     "template", "Selector-Transformer-{}".format(mltype_str)
         # )
