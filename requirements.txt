@@ -1,14 +1,9 @@
 # Direct requirements of this project alone
 matminer==0.6.2
 xgboost==0.80
-tpot==0.9
+tpot==0.11.0
 skrebate==0.6
 pyyaml==5.1.2
-
-# Direct non-default dependencies of TPOT
-dask==2.6.0
-dask-ml==1.0.0
-fsspec>=0.3.3
 
 # Also requirements of matminer
 numpy

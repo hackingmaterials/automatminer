@@ -69,8 +69,7 @@ class TPOTAdaptor(DFMLAdaptor):
         tpot_kwargs["cv"] = tpot_kwargs.get("cv", 5)
         tpot_kwargs["n_jobs"] = tpot_kwargs.get("n_jobs", -1)
         tpot_kwargs["verbosity"] = tpot_kwargs.get("verbosity", 3)
-        # tpot_kwargs["memory"] = tpot_kwargs.get("memory", "auto")
-        # tpot_kwargs["use_dask"] = True
+        tpot_kwargs["memory"] = tpot_kwargs.get("memory", "auto")
 
         self.mode = None
         self.tpot_kwargs = tpot_kwargs
@@ -109,10 +108,10 @@ class TPOTAdaptor(DFMLAdaptor):
         # Determine learning type based on whether classification or regression
         self.mode = regression_or_classification(df[target])
 
-        # mltype_str = "Classifier" if self.mode == AMM_CLF_NAME else "Regressor"
-        # self.tpot_kwargs["template"] = self.tpot_kwargs.get(
-        #     "template", "Selector-Transformer-{}".format(mltype_str)
-        # )
+        mltype_str = "Classifier" if self.mode == AMM_CLF_NAME else "Regressor"
+        self.tpot_kwargs["template"] = self.tpot_kwargs.get(
+            "template", "Selector-Transformer-{}".format(mltype_str)
+        )
 
         if self.mode == AMM_CLF_NAME:
             self.tpot_kwargs["config_dict"] = self.tpot_kwargs.get(
