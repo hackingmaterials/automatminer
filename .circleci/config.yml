@@ -13,11 +13,11 @@ jobs:
 
     # Download and cache dependencies
     # Try commenting this out if there are ContextualVersionConflict errors
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "requirements.txt" }}
+#      - restore_cache:
+#          keys:
+#          - v1-dependencies-{{ checksum "requirements.txt" }}
 #           fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+#          - v1-dependencies-
 
       - run:
           name: setup env and run tests
