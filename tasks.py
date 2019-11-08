@@ -44,12 +44,12 @@ def version_check(ctx):
 
     if __version__ == setup_version:
         print("Setup and init versions match eachother.")
-        today = datetime.date.today().strftime("%Y.%-m.%-d")
-        if today != __version__:
+        today = datetime.date.today().strftime("%Y%m%d")
+        if today not in __version__:
             raise ValueError(f"The version {__version__} does not match "
-                             f"the date!")
+                             f"the date format {today}!")
         else:
-            print("Version matches the date.")
+            print("Date is contained within the version.")
     else:
         raise ValueError(f"There is a mismatch in the date between the "
                          f"rocketsled __init__ and the setup. Please "

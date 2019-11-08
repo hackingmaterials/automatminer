@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>automatminer package &#8212; Automatminer 2019.10.14 documentation</title>
+    <title>automatminer package &#8212; Automatminer 1.0.0.20191108 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -236,34 +236,6 @@ and &#64;set_fitted if necessary!</p>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="automatminer.base.LoggableMixin">
-<em class="property">class </em><code class="sig-prename descclassname">automatminer.base.</code><code class="sig-name descname">LoggableMixin</code><a class="headerlink" href="#automatminer.base.LoggableMixin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>A mixin class for easy logging (or absence of it).</p>
-<dl class="method">
-<dt id="automatminer.base.LoggableMixin.get_logger">
-<em class="property">static </em><code class="sig-name descname">get_logger</code><span class="sig-paren">(</span><em class="sig-param">logger</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.base.LoggableMixin.get_logger" title="Permalink to this definition">¶</a></dt>
-<dd><p>Handle boolean logger.
-:param logger: A custom logger object to use for logging.</p>
-<blockquote>
-<div><p>Alternatively, if set to True, the default automatminer logger
-will be used. If set to False, then no logging will occur.</p>
-</div></blockquote>
-<dl class="field-list simple">
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="automatminer.base.LoggableMixin.logger">
-<em class="property">property </em><code class="sig-name descname">logger</code><a class="headerlink" href="#automatminer.base.LoggableMixin.logger" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the class logger.
-If the logger is None, the logging calls will be redirected to a dummy
-logger that has no output.</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="module-automatminer.pipeline">
 <span id="automatminer-pipeline-module"></span><h2>automatminer.pipeline module<a class="headerlink" href="#module-automatminer.pipeline" title="Permalink to this headline">¶</a></h2>
@@ -271,7 +243,7 @@ logger that has no output.</p>
 <dl class="class">
 <dt id="automatminer.pipeline.MatPipe">
 <em class="property">class </em><code class="sig-prename descclassname">automatminer.pipeline.</code><code class="sig-name descname">MatPipe</code><span class="sig-paren">(</span><em class="sig-param">autofeaturizer=None</em>, <em class="sig-param">cleaner=None</em>, <em class="sig-param">reducer=None</em>, <em class="sig-param">learner=None</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a>, <a class="reference internal" href="#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.base.DFTransformer" title="automatminer.base.DFTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.DFTransformer</span></code></a></p>
 <p>Establish an ML pipeline for transforming compositions, structures,
 bandstructures, and DOS objects into machine-learned properties.</p>
 <dl class="simple">
@@ -430,7 +402,11 @@ Current powerups are:</p>
 </dd>
 </dl>
 </li>
-<li><p>logger (logging.Logger): The logger to use.</p></li>
+<li><dl class="simple">
+<dt>n_jobs (int): The number of parallel process to use when</dt><dd><p>running.</p>
+</dd>
+</dl>
+</li>
 </ul>
 </div></blockquote>
 </p></li>
@@ -446,15 +422,13 @@ Current powerups are:</p>
 
 <dl class="method">
 <dt id="automatminer.pipeline.MatPipe.load">
-<em class="property">static </em><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">logger=True</em>, <em class="sig-param">supress_version_mismatch=False</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.load" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">supress_version_mismatch=False</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.pipeline.MatPipe.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads a MatPipe that was saved.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The pickled MatPipe object (should have been saved
 using save).</p></li>
-<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.8)"><em>logging.Logger</em></a>) – The logger to use for the loaded
-MatPipe.</p></li>
 <li><p><strong>supress_version_mismatch</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If False, throws an error when
 there is a version mismatch between a serialized MatPipe and the
 current Automatminer version. If True, suppresses this error.</p></li>
@@ -555,7 +529,10 @@ cache_src (str): A file path. If specified, Autofeaturizer will use</p>
 <div><p>feature caching with a file stored at this location. See
 Autofeaturizer’s cache_src argument for more information.</p>
 </div></blockquote>
-<p>logger (logging.Logger): The logging object to use.</p>
+<dl class="simple">
+<dt>n_jobs (int): The number of parallel process to use when running.</dt><dd><p>Particularly important for AutoFeaturixer and TPOTAdaptor.</p>
+</dd>
+</dl>
 </p></li>
 </ul>
 </dd>

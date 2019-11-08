@@ -5,7 +5,9 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 reqs_raw = open(os.path.join(module_dir, "requirements.txt")).read()
 # reqs_list = [r.replace("==", ">=") for r in reqs_raw.split("\n")]
 reqs_list = [r for r in reqs_raw.split("\n")]
-version = "2019.10.14"
+
+# Version is MAJOR.MINOR.PATCH.YYYYMMDD
+version = "1.0.0.20191108"
 
 if __name__ == "__main__":
     setup(

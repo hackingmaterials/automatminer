@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>automatminer.automl package &#8212; Automatminer 2019.10.14 documentation</title>
+    <title>automatminer.automl package &#8212; Automatminer 1.0.0.20191108 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -104,8 +104,8 @@
 </div></blockquote>
 <dl class="class">
 <dt id="automatminer.automl.adaptors.SinglePipelineAdaptor">
-<em class="property">class </em><code class="sig-prename descclassname">automatminer.automl.adaptors.</code><code class="sig-name descname">SinglePipelineAdaptor</code><span class="sig-paren">(</span><em class="sig-param">regressor</em>, <em class="sig-param">classifier</em>, <em class="sig-param">logger=True</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.SinglePipelineAdaptor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#automatminer.automl.base.DFMLAdaptor" title="automatminer.automl.base.DFMLAdaptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.automl.base.DFMLAdaptor</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.automl.adaptors.</code><code class="sig-name descname">SinglePipelineAdaptor</code><span class="sig-paren">(</span><em class="sig-param">regressor</em>, <em class="sig-param">classifier</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.SinglePipelineAdaptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.automl.base.DFMLAdaptor" title="automatminer.automl.base.DFMLAdaptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.automl.base.DFMLAdaptor</span></code></a></p>
 <p>For running single models or pipelines in a MatPipe pipeline using the same
 syntax as the AutoML adaptors.</p>
 <p>This adaptor should be able to fit into a MatPipe in similar fashion to
@@ -180,8 +180,8 @@ to use for machine learning classification.</p></li>
 
 <dl class="class">
 <dt id="automatminer.automl.adaptors.TPOTAdaptor">
-<em class="property">class </em><code class="sig-prename descclassname">automatminer.automl.adaptors.</code><code class="sig-name descname">TPOTAdaptor</code><span class="sig-paren">(</span><em class="sig-param">*tpot_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#automatminer.automl.base.DFMLAdaptor" title="automatminer.automl.base.DFMLAdaptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.automl.base.DFMLAdaptor</span></code></a>, <a class="reference internal" href="automatminer.html#automatminer.base.LoggableMixin" title="automatminer.base.LoggableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.base.LoggableMixin</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">automatminer.automl.adaptors.</code><code class="sig-name descname">TPOTAdaptor</code><span class="sig-paren">(</span><em class="sig-param">**tpot_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#automatminer.automl.adaptors.TPOTAdaptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#automatminer.automl.base.DFMLAdaptor" title="automatminer.automl.base.DFMLAdaptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">automatminer.automl.base.DFMLAdaptor</span></code></a></p>
 <p>A dataframe adaptor for the TPOT classifiers and regressors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -203,9 +203,6 @@ use random forest:</p>
 </dl>
 <p>}</p>
 </p></li>
-<li><p><strong>logger</strong> (<em>Logger</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A custom logger object to use for logging.
-Alternatively, if set to True, the default automatminer logger will
-be used. If set to False, then no logging will occur.</p></li>
 </ul>
 </dd>
 </dl>
