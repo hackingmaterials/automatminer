@@ -1,5 +1,33 @@
 # Change Log
 
+## [Unreleased](https://github.com/hackingmaterials/automatminer/tree/HEAD)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.10.14...HEAD)
+
+**Implemented enhancements:**
+
+- Enforce a code style [\#208](https://github.com/hackingmaterials/automatminer/issues/208)
+
+**Fixed bugs:**
+
+- Add CI for python 3.6 [\#259](https://github.com/hackingmaterials/automatminer/issues/259)
+
+**Closed issues:**
+
+- Fix common segfaults [\#260](https://github.com/hackingmaterials/automatminer/issues/260)
+- TPOT segmentation fault [\#257](https://github.com/hackingmaterials/automatminer/issues/257)
+- TypeError: can't pickle \_thread.RLock objects when saving a pipe [\#253](https://github.com/hackingmaterials/automatminer/issues/253)
+
+**Merged pull requests:**
+
+- add CI for 3.6 [\#263](https://github.com/hackingmaterials/automatminer/pull/263) ([ardunn](https://github.com/ardunn))
+- Tpot downgrade [\#261](https://github.com/hackingmaterials/automatminer/pull/261) ([ardunn](https://github.com/ardunn))
+- Add pyproject.toml to config black line length [\#258](https://github.com/hackingmaterials/automatminer/pull/258) ([janosh](https://github.com/janosh))
+- Dev improvements [\#256](https://github.com/hackingmaterials/automatminer/pull/256) ([ardunn](https://github.com/ardunn))
+- Logging redux [\#255](https://github.com/hackingmaterials/automatminer/pull/255) ([ardunn](https://github.com/ardunn))
+- temporary workaround to avoid crashes on saving, until logging is redone [\#254](https://github.com/hackingmaterials/automatminer/pull/254) ([ardunn](https://github.com/ardunn))
+- Code style enforcement [\#245](https://github.com/hackingmaterials/automatminer/pull/245) ([janosh](https://github.com/janosh))
+
 ## [v2019.10.14](https://github.com/hackingmaterials/automatminer/tree/v2019.10.14) (2019-10-15)
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.11...v2019.10.14)
 
@@ -27,7 +55,6 @@
 **Closed issues:**
 
 - Reassign pipe logger [\#242](https://github.com/hackingmaterials/automatminer/issues/242)
-- fix joblib warning from importlib [\#240](https://github.com/hackingmaterials/automatminer/issues/240)
 - MatPipe save/load does not work on TPOTAdaptor pipelines [\#235](https://github.com/hackingmaterials/automatminer/issues/235)
 - Add ability to MatPipe to suppress internal warnings [\#233](https://github.com/hackingmaterials/automatminer/issues/233)
 - Make it easier to ignore entire columns but keep them in returned df [\#228](https://github.com/hackingmaterials/automatminer/issues/228)
