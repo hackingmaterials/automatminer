@@ -9,4 +9,4 @@ __author_email__ = "ardunn@lbl.gov"
 __license__ = "Modified BSD"
 
 # Version is MAJOR.MINOR.PATCH.YYYYMMDD
-__version__ = "1.0.0.20191108"
+__version__ = "1.0.0.20191110"
