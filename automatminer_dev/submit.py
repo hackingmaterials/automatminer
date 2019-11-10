@@ -15,7 +15,7 @@ Running benchmarks
 
 if __name__ == "__main__":
 
-    N_JOBS = 50
+    N_JOBS = 10
 
     pipe_config = {
         "learner_name": "TPOTAdaptor",
@@ -79,10 +79,12 @@ if __name__ == "__main__":
     ]
 
     from automatminer_dev.config import EXPT_IS_METAL, EXPT_GAP, MP_E_FORM
-    worker = "cori"
-    wf = wf_benchmark(worker, pipe_config, **MP_E_FORM, cache=True, tags=tags, prepend_name="DEBUG_+NPROC")
+    worker = "lrc"
+    # wf = wf_benchmark(worker, pipe_config, **EXPT_IS_METAL, cache=True, tags=tags, prepend_name="live run")
+    wf = wf_benchmark(worker, pipe_config, **EXPT_GAP, cache=True, tags=tags, prepend_name="live run")
+
     # wf = wf_benchmark(worker, pipe_config, **EXPT_GAP, cache=True, tags=tags)
-    # wf = wf_benchmark(worker, pipe_config_debug, **EXPT_IS_METAL, cache=True, tags=tags)
+    # wf = wf_benchmark(worker, pipe_config, **EXPT_IS_METAL, cache=True, tags=tags)
     # wf = wf_benchmark(worker, pipe_config_debug, **EXPT_GAP, cache=True, tags=tags)
 
 
