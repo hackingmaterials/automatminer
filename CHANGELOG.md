@@ -1,8 +1,7 @@
 # Change Log
 
-## [Unreleased](https://github.com/hackingmaterials/automatminer/tree/HEAD)
-
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.10.14...HEAD)
+## [v1.0.0.20191110](https://github.com/hackingmaterials/automatminer/tree/v1.0.0.20191110) (2019-11-10)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.10.14...v1.0.0.20191110)
 
 **Implemented enhancements:**
 
