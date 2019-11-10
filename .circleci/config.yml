@@ -34,6 +34,38 @@ jobs:
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
 
+  py367:
+    working_directory: ~/py367_automatminer
+    docker:
+      - image: circleci/python:3.6.7
+        environment:
+          SKIP_INTENSIVE: 1
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      # Try commenting this out if there are ContextualVersionConflict errors
+      #      - restore_cache:
+      #          keys:
+      #          - v1-dependencies-{{ checksum "requirements.txt" }}
+      #           fallback to using the latest cache if no exact match is found
+      #          - v1-dependencies-
+
+      - run:
+          name: setup env and run tests
+          command: |
+
+            source dev_scripts/setup_env.sh
+            source dev_scripts/run_tests.sh
+
+          no_output_timeout: 10m
+
+      - save_cache:
+          paths:
+            - ./test_env
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+
   code_style:
     working_directory: ~/py372_automatminer
     docker:
@@ -62,10 +94,10 @@ jobs:
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
 
-
 workflows:
   version: 2
   run_tests_on_commit:
     jobs:
       - py372
+      - py367
       - code_style

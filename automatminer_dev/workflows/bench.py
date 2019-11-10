@@ -143,6 +143,7 @@ def wf_benchmark(
     return_fireworks=False,
     add_dataset_to_names=True,
     build_id=None,
+    prepend_name="",
 ):
     if fworker not in VALID_FWORKERS:
         raise ValueError("fworker must be in {}".format(VALID_FWORKERS))
@@ -225,6 +226,9 @@ def wf_benchmark(
         return links, connected_to_top_wf, fw_consolidate
     else:
         wf_name = "benchmark {}: ({}) [{}]".format(benchmark_hash, name, fworker)
+        if prepend_name:
+            wf_name = "<<{}>> {}".format(prepend_name, wf_name)
+
         wf = Workflow(
             list(links.keys()),
             links_dict=links,

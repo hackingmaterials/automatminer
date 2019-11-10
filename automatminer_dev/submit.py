@@ -26,7 +26,7 @@ if __name__ == "__main__":
             "max_eval_time_mins": 20,
             "population_size": 200,
             #todo: change this back
-            # "memory": "auto",
+            "memory": "auto",
             "n_jobs": N_JOBS,
         },
         # "reducer_kwargs": {"reducers": ("corr",)},
@@ -80,9 +80,11 @@ if __name__ == "__main__":
 
     from automatminer_dev.config import EXPT_IS_METAL, EXPT_GAP, MP_E_FORM
     worker = "lrc"
+    # wf = wf_benchmark(worker, pipe_config, **EXPT_IS_METAL, cache=True, tags=tags, prepend_name="live run")
+    wf = wf_benchmark(worker, pipe_config, **EXPT_GAP, cache=True, tags=tags, prepend_name="live run")
+
+    # wf = wf_benchmark(worker, pipe_config, **EXPT_GAP, cache=True, tags=tags)
     # wf = wf_benchmark(worker, pipe_config, **EXPT_IS_METAL, cache=True, tags=tags)
-    wf = wf_benchmark(worker, pipe_config, **EXPT_GAP, cache=True, tags=tags)
-    # wf = wf_benchmark(worker, pipe_config_debug, **EXPT_IS_METAL, cache=True, tags=tags)
     # wf = wf_benchmark(worker, pipe_config_debug, **EXPT_GAP, cache=True, tags=tags)
 
 
