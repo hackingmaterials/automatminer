@@ -42,7 +42,7 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
         (dict) The desired preset config.
     """
     caching_kwargs = {"cache_src": powerups.get("cache_src", None)}
-    n_jobs_kwargs = {"n_jobs": powerups.get("n_jobs", -1)}
+    n_jobs_kwargs = {"n_jobs": powerups.get("n_jobs", None)}
 
     if preset not in get_available_presets():
         raise ValueError("{} unknown preset.".format(preset))

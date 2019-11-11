@@ -94,3 +94,5 @@ def publish(ctx):
     ctx.run("rm -r dist build", warn=True)
     ctx.run("python3 setup.py sdist bdist_wheel")
     ctx.run("twine upload dist/* --verbose")
+
+from multiprocessing import Pool
