@@ -4,6 +4,8 @@ Configurations for MatPipe.
 
 __author__ = ["Alex Dunn <ardunn@lbl.gov>"]
 
+import os
+
 from automatminer.automl import SinglePipelineAdaptor, TPOTAdaptor
 from automatminer.featurization import AutoFeaturizer
 from automatminer.preprocessing import DataCleaner, FeatureReducer
@@ -83,10 +85,11 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             "cleaner": DataCleaner(),
         }
     elif preset == "express_single":
+        nj = n_jobs_kwargs["n_jobs"]
         xgb_kwargs = {
             "n_estimators": 300,
             "max_depth": 3,
-            "n_jobs": n_jobs_kwargs["n_jobs"],
+            "n_jobs": nj if nj else os.cpu_count(),
         }
         config = {
             "learner": SinglePipelineAdaptor(
