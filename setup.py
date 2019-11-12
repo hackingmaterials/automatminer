@@ -7,7 +7,7 @@ reqs_raw = open(os.path.join(module_dir, "requirements.txt")).read()
 reqs_list = [r for r in reqs_raw.split("\n")]
 
 # Version is MAJOR.MINOR.PATCH.YYYYMMDD
-version = "1.0.2.20191110"
+version = "1.0.3.20191111"
 
 if __name__ == "__main__":
     setup(
