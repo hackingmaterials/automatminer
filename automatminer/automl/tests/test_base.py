@@ -126,7 +126,7 @@ class TestBaseAutoMLTransformers(unittest.TestCase):
         self.assertTrue("c" not in predicted2)
 
         with self.assertRaises(TypeError):
-            _ = TestAdaptorBad()
+            TestAdaptorBad()
 
 
 if __name__ == "__main__":

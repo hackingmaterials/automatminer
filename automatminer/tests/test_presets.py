@@ -67,4 +67,4 @@ class TestMatPipePresets(unittest.TestCase):
 
     def test_missing(self):
         with self.assertRaises(ValueError):
-            _ = get_preset_config("QWERTYUIOP1234567890")
+            get_preset_config("QWERTYUIOP1234567890")

@@ -92,7 +92,7 @@ class TestBaseTransformers(unittest.TestCase):
         self.assertTrue("b" in test.columns)
 
         with self.assertRaises(TypeError):
-            _ = TestTransformerBad()
+            TestTransformerBad()
 
     def test_DFTransformer_BaseEstimator_behavior(self):
         ttg = TestTransformerGood(5)
