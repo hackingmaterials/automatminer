@@ -85,12 +85,7 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             "cleaner": DataCleaner(),
         }
     elif preset == "express_single":
-        nj = n_jobs_kwargs["n_jobs"]
-        xgb_kwargs = {
-            "n_estimators": 300,
-            "max_depth": 3,
-            "n_jobs": n_jobs_kwargs,
-        }
+        xgb_kwargs = {"n_estimators": 300, "max_depth": 3, "n_jobs": n_jobs_kwargs}
         config = {
             "learner": SinglePipelineAdaptor(
                 regressor=XGBRegressor(**xgb_kwargs),
