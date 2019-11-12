@@ -94,8 +94,19 @@ class AutoFeaturizer(DFTransformer):
             state.
         multiiindex (bool): If True, returns a multiindexed dataframe. Not
             recommended for use in MatPipe.
+        do_precheck (bool): Execute a precheck on each featurizer before
+            featurizing with it. See matminer prechecking for more info.
         n_jobs (int): The number of parallel jobs to use during featurization
             for each featurizer. Default is n_cores
+                composition_col="composition",
+        composition_col (str): Name of the column containing structures to be
+            featurized.
+        structure_col (str)L Name of the column containing structures to be
+            featurized
+        bandstructure (str): Name of the column containing bandstructures to
+            be featurized.
+        dos_col (str): Name of the column containing density of states obejcts
+            to be featurized.
 
     Attributes:
         These attributes are set during fitting
