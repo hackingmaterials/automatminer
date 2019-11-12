@@ -44,7 +44,7 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
         (dict) The desired preset config.
     """
     caching_kwargs = {"cache_src": powerups.get("cache_src", None)}
-    n_jobs_kwargs = {"n_jobs": powerups.get("n_jobs", None)}
+    n_jobs_kwargs = {"n_jobs": powerups.get("n_jobs", os.cpu_count())}
 
     if preset not in get_available_presets():
         raise ValueError("{} unknown preset.".format(preset))
@@ -89,7 +89,7 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
         xgb_kwargs = {
             "n_estimators": 300,
             "max_depth": 3,
-            "n_jobs": nj if nj else os.cpu_count(),
+            "n_jobs": n_jobs_kwargs,
         }
         config = {
             "learner": SinglePipelineAdaptor(
