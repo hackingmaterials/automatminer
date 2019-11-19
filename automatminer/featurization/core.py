@@ -385,7 +385,7 @@ class AutoFeaturizer(DFTransformer):
 
     @log_progress(logger, AMM_LOG_TRANSFORM_STR)
     @check_fitted
-    def transform(self, df, target):
+    def transform(self, df, target, prevent_cache_overwrite=False):
         """
         Decorate a dataframe containing composition, structure, bandstructure,
         and/or DOS objects with descriptors.
@@ -393,6 +393,8 @@ class AutoFeaturizer(DFTransformer):
         Args:
             df (pandas.DataFrame): The dataframe not containing features.
             target (str): The ML-target property contained in the df.
+            prevent_cache_overwrite (bool): If True, does not try to write any
+                new features to the cache.
 
         Returns:
             df (pandas.DataFrame): Transformed dataframe containing features.
@@ -501,7 +503,11 @@ class AutoFeaturizer(DFTransformer):
                     multiindex=self.multiindex,
                     inplace=False,
                 )
-            if self.cache_src and not os.path.exists(self.cache_src):
+            if (
+                self.cache_src
+                and not os.path.exists(self.cache_src)
+                and not prevent_cache_overwrite
+            ):
                 store_dataframe_as_json(df, self.cache_src)
             return df
 
