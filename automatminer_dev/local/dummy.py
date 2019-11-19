@@ -5,15 +5,19 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.model_selection import cross_val_score, KFold, StratifiedKFold
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.ml import AMM_CLF_NAME, AMM_REG_NAME
-from automatminer_dev.config import BENCHMARK_FULL_SET
+from automatminer_dev.config import BENCHMARK_FULL_SET, GLASS, EXPT_IS_METAL, EXPT_GAP
+from matminer.utils.io import load_dataframe_from_json
 
 
 benchmark_dir = os.environ["AMM_DATASET_DIR"]
 
-for p in BENCHMARK_FULL_SET:
+bmarks = BENCHMARK_FULL_SET
+bmarks = [GLASS, EXPT_GAP, EXPT_IS_METAL]
+
+for p in bmarks:
     pname = p["name"]
     print("Loading {}".format(pname))
-    df = pd.read_pickle(os.path.join(benchmark_dir, p["data_pickle"]))
+    df = load_dataframe_from_json(os.path.join(benchmark_dir, p["data_file"]))
     target = p["target"]
     ltype = p["problem_type"]
     if ltype == AMM_REG_NAME:
@@ -36,3 +40,15 @@ for p in BENCHMARK_FULL_SET:
     cvs = multiplier * cvs
     mean_cvs = np.mean(cvs)
     print(pname, mean_cvs)
+
+
+# for p in bmarks:
+#     pname = p["name"]
+#     print("Loading {}".format(pname))
+#     df = load_dataframe_from_json(os.path.join(benchmark_dir, p["data_file"]))
+#     target = p["target"]
+#     ltype = p["problem_type"]
+#
+#     data = df[target]
+#     mad = data.mad()
+#     print(f"Mean average deviation for {p} is {mad}")

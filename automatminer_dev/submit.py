@@ -48,18 +48,18 @@ if __name__ == "__main__":
         },
     }
 
-    # pipe_config_debug = {
-    #     "autofeaturizer_kwargs": {"preset": "debug", "n_jobs": N_JOBS},
-    #     "reducer_kwargs": {"reducers": ()},
-    #     "learner_name": "rf",
-    #     "learner_kwargs": {"n_estimators": 500},
-    #     "cleaner_kwargs": {
-    #         "max_na_frac": 0.01,
-    #         "feature_na_method": "drop",
-    #         "na_method_fit": "mean",
-    #         "na_method_transform": "mean",
-    #     },
-    # }
+    pipe_config_debug = {
+        "autofeaturizer_kwargs": {"preset": "debug", "n_jobs": N_JOBS},
+        "reducer_kwargs": {"reducers": ()},
+        "learner_name": "rf",
+        "learner_kwargs": {"n_estimators": 500},
+        "cleaner_kwargs": {
+            "max_na_frac": 0.01,
+            "feature_na_method": "drop",
+            "na_method_fit": "mean",
+            "na_method_transform": "mean",
+        },
+    }
 
     tags = [
         # "data_full",
@@ -77,15 +77,18 @@ if __name__ == "__main__":
         "debug"
     ]
 
-    from automatminer_dev.config import EXPT_IS_METAL, EXPT_GAP, MP_E_FORM
+    from automatminer_dev.config import EXPT_IS_METAL, EXPT_GAP, MP_E_FORM, GLASS
     worker = "lrc"
     # wf = wf_benchmark(worker, pipe_config, **EXPT_IS_METAL, cache=True, tags=tags, prepend_name="heavy featurization")
-    wf = wf_benchmark(worker, pipe_config, **EXPT_IS_METAL, cache=True, tags=tags, prepend_name="heavy featurization")
+    # wf = wf_benchmark(worker, pipe_config, **EXPT_GAP, cache=True, tags=tags, prepend_name="heavy featurization")
+    # wf = wf_benchmark(worker, pipe_config, **GLASS, cache=True, tags=tags, prepend_name="heavy featurization")
+
 
 
     # wf = wf_benchmark(worker, pipe_config, **EXPT_GAP, cache=True, tags=tags)
     # wf = wf_benchmark(worker, pipe_config, **EXPT_IS_METAL, cache=True, tags=tags)
-    # wf = wf_benchmark(worker, pipe_config_debug, **EXPT_GAP, cache=True, tags=tags)
+    wf = wf_benchmark(worker, pipe_config_debug, **GLASS, cache=True, tags=tags, prepend_name="glass rf")
+
 
 
     # wf = wf_evaluate_build(

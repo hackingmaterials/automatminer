@@ -10,7 +10,7 @@ We love your input! We want to make contributing to automatminer as easy and tra
 
 ## Reporting bugs, getting help, and discussion
 
-At any time, feel free to start a thread on the automatminer [Discourse forum](https://discuss.matsci.org).
+At any time, feel free to start a thread on the automatminer [Discourse forum](https://discuss.matsci.org/c/matminer).
 
 If you are making a bug report, incorporate as many elements of the following as possible to ensure a timely response and avoid the need for followups:
 
