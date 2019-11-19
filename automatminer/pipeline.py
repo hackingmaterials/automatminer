@@ -237,7 +237,9 @@ class MatPipe(DFTransformer):
             ignore_df = pd.DataFrame()
 
         logger.info("Beginning MatPipe prediction using fitted pipeline.")
-        df = self.autofeaturizer.transform(df, self.target)
+        df = self.autofeaturizer.transform(
+            df, self.target, prevent_cache_overwrite=True
+        )
         df = self.cleaner.transform(df, self.target)
         df = self.reducer.transform(df, self.target)
         predictions = self.learner.predict(df, self.target)
