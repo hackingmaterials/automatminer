@@ -33,27 +33,35 @@ The basic procedure for making a PR is:
 - Fork the repo on GitHub and clone it to your machine.
 
   ```sh
-  git clone https://github.com/<your_github_name>/automatminer
+  git clone https://github.com/<your_github_name>/automatminer && cd automatminer
   ```
 
 - Install both regular and development dependencies and setup the `git` pre-commit hook.
-  
+
   ```sh
   pip install -r requirements.txt requirement && pre-commit install
   ```
 
   This step is important as your changes may otherwise contain style violations that will throw errors when running our CI on your pull request.
+
+- Test your changes by running our full test suite
+
+  ```sh
+  python -m unittest
+  ```
+
 - Commit your improvements and push to your GitHub fork.
+
 - When you're finished, go to your fork and make a pull request. It will automatically update if you need to make further changes.
 
 ### How to Make a **Great** Pull Request
 
 We have a few tips for writing good PRs that are accepted into the main repo:
 
-- Use the Google Code style for all of your code. Find an example [here.](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html)
+- Use the Google Code style for all of your code. Find an example [here](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).
 - Your code should have (4) spaces instead of tabs.
 - If needed, update the documentation.
-- **Write tests** for new features! Good tests are 100%, absolutely necessary for good code. We use the python `unittest` framework -- see some of the other tests in this repo for examples, or review the [Hitchhiker's guide to python](https://docs.python-guide.org/writing/tests/) for some good resources on writing good tests.
+- **Write tests** for new features! Good tests are 100%, absolutely necessary for good code. We use the [Python `unittest` framework](https://docs.python.org/3/library/unittest) -- see some of the other tests in this repo for examples, or review the [Hitchhiker's guide to python](https://docs.python-guide.org/writing/tests) for some good resources on writing good tests.
 - Understand your contributions will fall under the same license as this repo.
 
 When you submit your PR, our CI service will automatically run your tests.
