@@ -6,21 +6,20 @@ import pickle
 from typing import Dict
 
 import pandas as pd
-
 from automatminer import __name__ as amm_name
 from automatminer.base import DFTransformer
 from automatminer.presets import get_preset_config
+from automatminer.utils.log import initialize_logger
 from automatminer.utils.ml import regression_or_classification
 from automatminer.utils.pkg import (
-    check_fitted,
-    set_fitted,
-    return_attrs_recursively,
     AutomatminerError,
     VersionError,
+    check_fitted,
     get_version,
+    return_attrs_recursively,
     save_dict_to_file,
+    set_fitted,
 )
-from automatminer.utils.log import initialize_logger
 
 logger = initialize_logger(logger_name=amm_name)
 
@@ -192,7 +191,7 @@ class MatPipe(DFTransformer):
         return self.predict(df, **transform_kwargs)
 
     @check_fitted
-    def predict(self, df, ignore=None):
+    def predict(self, df, ignore=None, output_col=None):
         """
         Predict a target property of a set of materials.
 
@@ -240,7 +239,7 @@ class MatPipe(DFTransformer):
         df = self.autofeaturizer.transform(df, self.target)
         df = self.cleaner.transform(df, self.target)
         df = self.reducer.transform(df, self.target)
-        predictions = self.learner.predict(df, self.target)
+        predictions = self.learner.predict(df, self.target, output_col=output_col)
         logger.info("MatPipe prediction completed.")
         merged_df = predictions.join(ignore_df, how="left")
         return merged_df
