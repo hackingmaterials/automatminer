@@ -603,14 +603,9 @@ class AutoFeaturizer(DFTransformer):
                 except Exception as e:
                     logger.warning(
                         self._log_prefix + "Could not decorate oxidation states due "
-                        "to {}. Excluding featurizers based on "
-                        "composition oxistates".format(e)
+                        "to {}. Some featurizers based on composition oxidstates"
+                        "may not work".format(e)
                     )
-                    classes_require_oxi = [
-                        c.__class__.__name__
-                        for c in CompositionFeaturizers().need_oxi
-                    ]
-                    self.exclude.extend(classes_require_oxi)
 
         else:
             # Convert structure/bs/dos dicts to objects (robust already)
