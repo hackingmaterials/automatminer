@@ -317,9 +317,9 @@ class TestFeatureReduction(unittest.TestCase):
         y = self.test_df["gap expt"]
         tbfr = TreeFeatureReducer(mode="regression", random_state=self.random_state)
         tbfr.fit(X, y, cv=3)
-        self.assertEqual(len(tbfr.selected_features), 19)
+        pre_transform_feature_length = len(tbfr.selected_features)
         X_reduced = tbfr.transform(X)
-        self.assertEqual(X_reduced.shape, (len(X), 19))
+        self.assertEqual(X_reduced.shape, (len(X), pre_transform_feature_length))
         self.assertTrue("HOMO_energy" in X_reduced.columns)
 
     def test_rebate(self):
