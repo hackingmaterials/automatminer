@@ -3,12 +3,11 @@ Base classes for automl.
 """
 
 import abc
-from typing import List
 import logging
+from typing import List
 
 import numpy as np
 import pandas as pd
-
 from automatminer.base import DFTransformer
 from automatminer.utils.log import AMM_LOG_PREDICT_STR, log_progress
 from automatminer.utils.pkg import AutomatminerError, check_fitted
@@ -111,13 +110,15 @@ class DFMLAdaptor(DFTransformer):
 
     @check_fitted
     @log_progress(logger, AMM_LOG_PREDICT_STR)
-    def predict(self, df: pd.DataFrame, target: str) -> pd.DataFrame:
+    def predict(
+        self, df: pd.DataFrame, target: str, output_col=None
+    ) -> pd.DataFrame:
         """
         Predict the target property of materials given a df of features. This
         base method is widely applicanble across different AutoML backends.
 
-        The predictions are appended to the dataframe in a column called:
-            "{target} predicted"
+        The predictions are appended to the dataframe in a column named according
+        to output_col. Default value is "{target_name} predicted"
 
         Args:
             df (pandas.DataFrame): Contains all features needed for ML (i.e.,
@@ -148,7 +149,7 @@ class DFMLAdaptor(DFTransformer):
         else:
             X = df[self.features].values  # rectify feature order
             y_pred = self.best_pipeline.predict(X)
-            df[target + " predicted"] = y_pred
+            df[output_col or (target + " predicted")] = y_pred
 
             log_msg = "Prediction finished successfully."
             try:
