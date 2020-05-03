@@ -50,62 +50,62 @@ Here's a full list of the 13 datasets in Matbench v0.1:
      - :code:`gap expt`
      - 4604
      - regression
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_expt_gap.json.gz>`_
    * - :code:`matbench_expt_is_metal`
      - :code:`is_metal`
      - 4921
      - classification
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_expt_is_metal.json.gz>`_
    * - :code:`matbench_glass`
      - :code:`gfa`
      - 5680
      - classification
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_glass.json.gz>`_
    * - :code:`matbench_jdft2d`
      - :code:`exfoliation_en`
      - 636
      - regression
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_jdft2d.json.gz>`_
    * - :code:`matbench_log_gvrh`
      - :code:`log10(G_VRH)`
      - 10987
      - regression
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_log_gvrh.json.gz>`_
    * - :code:`matbench_log_kvrh`
      - :code:`log10(K_VRH)`
      - 10987
      - regression
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_log_kvrh.json.gz>`_
    * - :code:`matbench_mp_e_form`
      - :code:`e_form`
      - 132752
      - regression
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_mp_e_form.json.gz>`_
    * - :code:`matbench_mp_gap`
      - :code:`gap pbe`
      - 106113
      - regression
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_mp_gap.json.gz>`_
    * - :code:`matbench_mp_is_metal`
      - :code:`is_metal`
      - 106113
      - classification
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_mp_is_metal.json.gz>`_
    * - :code:`matbench_perovskites`
      - :code:`e_form`
      - 18928
      - regression
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_perovskites.json.gz>`_
    * - :code:`matbench_phonons`
      - :code:`last phdos peak`
      - 1265
      - regression
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_phonons.json.gz>`_
    * - :code:`matbench_steels`
      - :code:`yield strength`
      - 312
      - regression
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `link <https://ml.materialsproject.org/matbench_steels.json.gz>`_
 
 
 Getting dataset info
