@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>automatminer.featurization package &#8212; Automatminer 1.0.2.20191110 documentation</title>
+    <title>automatminer.featurization package &#8212; Automatminer 1.0.3.20191111 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -246,8 +246,21 @@ featurization after they are featurized.</p></li>
 state.</p></li>
 <li><p><strong>multiiindex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, returns a multiindexed dataframe. Not
 recommended for use in MatPipe.</p></li>
-<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of parallel jobs to use during featurization
-for each featurizer. Default is n_cores</p></li>
+<li><p><strong>do_precheck</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Execute a precheck on each featurizer before
+featurizing with it. See matminer prechecking for more info.</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – <p>The number of parallel jobs to use during featurization
+for each featurizer. Default is n_cores</p>
+<blockquote>
+<div><p>composition_col=”composition”,</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>composition_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of the column containing structures to be
+featurized.</p></li>
+<li><p><strong>structure_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – featurized</p></li>
+<li><p><strong>bandstructure</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of the column containing bandstructures to
+be featurized.</p></li>
+<li><p><strong>dos_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of the column containing density of states obejcts
+to be featurized.</p></li>
 </ul>
 </dd>
 </dl>

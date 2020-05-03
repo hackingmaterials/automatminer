@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>MatBench benchmark &#8212; Automatminer 1.0.2.20191110 documentation</title>
+    <title>MatBench benchmark &#8212; Automatminer 1.0.3.20191111 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -50,6 +50,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">MatBench benchmark</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#accessing-matbench">Accessing MatBench</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-dataset-info">Getting dataset info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#down-loading-datasets">(Down)loading datasets</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials and Support</a></li>
@@ -73,7 +75,7 @@
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>MatBench is an <a class="reference external" href="http://www.image-net.org">ImageNet</a> for materials science; a
-set of 13 benchmarking ML problems for fair comparison, across a wide domain of
+set of 13 supervised ML tasks for benchmarking and fair comparison spanning a wide domain of
 inorganic materials science applications.</p>
 <a class="reference internal image-reference" href="_images/matbench_pie_charts.png"><img alt="matbench" class="align-center" src="_images/matbench_pie_charts.png" style="width: 600px;" /></a>
 <p>Details on the benchmark are coming soon in a publication we have submitted.
@@ -85,11 +87,145 @@ section for more info.</p>
 <h2>Accessing MatBench<a class="headerlink" href="#accessing-matbench" title="Permalink to this headline">¶</a></h2>
 <p>We have made the MatBench benchmark publicly available via the <a class="reference external" href="https://hackingmaterials.lbl.gov/matminer/dataset_summary.html">matminer
 datasets repository</a>
-(and also via <a class="reference external" href="https://figshare.com/account/home#/projects/67337">Figshare</a>).</p>
-<p>You can download the datasets with the <code class="code docutils literal notranslate"><span class="pre">matminer.datasets.load_dataset</span></code>
-function; the names of the datasets are named <code class="code docutils literal notranslate"><span class="pre">matbench-*</span></code> where <code class="code docutils literal notranslate"><span class="pre">*</span></code>
-is the name of the benchmark problem.</p>
-<p>Here’s the MatBench benchmark for predicting refractive index (calculated with
+and through the <a class="reference external" href="https://ml.materialsproject.org">Materials Project MPContribs-ML Deployment</a>.
+All the Matbench datasets begin with <code class="code docutils literal notranslate"><span class="pre">matbench_</span></code>.</p>
+<p>Here’s a full list of the 13 datasets in Matbench v0.1:</p>
+<table class="docutils align-left">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>dataset name</p></th>
+<th class="head"><p>target column</p></th>
+<th class="head"><p>number of samples</p></th>
+<th class="head"><p>task type</p></th>
+<th class="head"><p>download link</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_dielectric</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">n</span></code></p></td>
+<td><p>4764</p></td>
+<td><p>regression</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_expt_gap</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">gap</span> <span class="pre">expt</span></code></p></td>
+<td><p>4604</p></td>
+<td><p>regression</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_expt_is_metal</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">is_metal</span></code></p></td>
+<td><p>4921</p></td>
+<td><p>classification</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_glass</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">gfa</span></code></p></td>
+<td><p>5680</p></td>
+<td><p>classification</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_jdft2d</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">exfoliation_en</span></code></p></td>
+<td><p>636</p></td>
+<td><p>regression</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_log_gvrh</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">log10(G_VRH)</span></code></p></td>
+<td><p>10987</p></td>
+<td><p>regression</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_log_kvrh</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">log10(K_VRH)</span></code></p></td>
+<td><p>10987</p></td>
+<td><p>regression</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_mp_e_form</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">e_form</span></code></p></td>
+<td><p>132752</p></td>
+<td><p>regression</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_mp_gap</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">gap</span> <span class="pre">pbe</span></code></p></td>
+<td><p>106113</p></td>
+<td><p>regression</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_mp_is_metal</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">is_metal</span></code></p></td>
+<td><p>106113</p></td>
+<td><p>classification</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_perovskites</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">e_form</span></code></p></td>
+<td><p>18928</p></td>
+<td><p>regression</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_phonons</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">last</span> <span class="pre">phdos</span> <span class="pre">peak</span></code></p></td>
+<td><p>1265</p></td>
+<td><p>regression</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_steels</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">yield</span> <span class="pre">strength</span></code></p></td>
+<td><p>312</p></td>
+<td><p>regression</p></td>
+<td><p><a class="reference external" href="https://ml.materialsproject.org/matbench_dielectric.json.gz">link</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="getting-dataset-info">
+<h2>Getting dataset info<a class="headerlink" href="#getting-dataset-info" title="Permalink to this headline">¶</a></h2>
+<p>You can get more info (such as the meaning of column names, brief cleaning
+procedures, etc.) on a dataset with <code class="code docutils literal notranslate"><span class="pre">matminer.datasets.get_all_dataset_info</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matminer.datasets</span> <span class="kn">import</span> <span class="n">get_all_dataset_info</span>
+
+<span class="c1"># Get dataset info from matminer</span>
+<span class="n">info</span> <span class="o">=</span> <span class="n">get_all_dataset_info</span><span class="p">(</span><span class="s2">&quot;matbench_steels&quot;</span><span class="p">)</span>
+
+<span class="c1"># Check out the info about the dataset.</span>
+<span class="k">print</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Dataset: matbench_steels
+Description: Matbench v0.1 dataset for predicting steel yield strengths from chemical composition alone. Retrieved from Citrine informatics. Deduplicated.
+Columns:
+    composition: Chemical formula.
+    yield strength: Target variable. Experimentally measured steel yield strengths, in GPa.
+Num Entries: 312
+Reference: https://citrination.com/datasets/153092/
+Bibtex citations: [&#39;@misc{Citrine Informatics,\ntitle = {Mechanical properties of some steels},\nhowpublished = {\\url{https://citrination.com/datasets/153092/},\n}&#39;]
+File type: json.gz
+Figshare URL: https://ml.materialsproject.org/matbench_steels.json.gz
+</pre></div>
+</div>
+<p>You can also view all the Matbench datasets on the matminer
+<a class="reference external" href="https://hackingmaterials.lbl.gov/matminer/dataset_summary.html">Dataset Summary page</a> (search
+for “matbench”).</p>
+</div>
+<div class="section" id="down-loading-datasets">
+<h2>(Down)loading datasets<a class="headerlink" href="#down-loading-datasets" title="Permalink to this headline">¶</a></h2>
+<p>While you can download the zipped json datasets via the download links above, we
+recommend using matminer’s tools to load datasets. Matminer intelligently manages the
+dataset downloads in its central folder and provides methods for robustly loading dataframes containing
+pymatgen primitives such as structures.</p>
+<p>You can load the datasets with the <code class="code docutils literal notranslate"><span class="pre">matminer.datasets.load_dataset</span></code>
+function; the function accepts the dataset name as an argument.
+Here’s an example of loading the Matbench task for predicting refractive index (calculated with
 DFPT) from crystal structure.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matminer.datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
 
@@ -101,6 +237,22 @@ DFPT) from crystal structure.</p>
 <span class="k">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                                              structure         n
+0     [[4.29304147 2.4785886  1.07248561] S, [4.2930...  1.752064
+1     [[3.95051434 4.51121437 0.28035002] K, [4.3099...  1.652859
+2     [[-1.78688104  4.79604117  1.53044621] Rb, [-1...  1.867858
+3     [[4.51438064 4.51438064 0.        ] Mn, [0.133...  2.676887
+4     [[-4.36731958  6.8886097   0.50929706] Li, [-2...  1.793232
+                                                 ...       ...
+4759  [[ 2.79280881  0.12499663 -1.84045389] Ca, [-2...  2.136837
+4760  [[0.         5.50363806 3.84192106] O, [4.7662...  2.690619
+4761  [[0. 0. 0.] Ba, [ 0.23821924  4.32393487 -0.35...  2.811494
+4762  [[0.         0.18884638 0.        ] K, [0.    ...  1.832887
+4763  [[0. 0. 0.] Cs, [2.80639641 2.80639641 2.80639...  2.559279
+[4764 rows x 2 columns]
+</pre></div>
+</div>
+<p>This loads the dataframe in this format:</p>
 <p><code class="code docutils literal notranslate"><span class="pre">df</span></code> (<code class="code docutils literal notranslate"><span class="pre">matbench_dielectric</span></code>)</p>
 <table class="docutils align-left">
 <colgroup>
@@ -127,9 +279,6 @@ DFPT) from crystal structure.</p>
 </tr>
 </tbody>
 </table>
-<p>Find all the MatBench problem names and info
-<a class="reference external" href="https://hackingmaterials.lbl.gov/matminer/dataset_summary.html">here</a> (search
-for “matbench”).</p>
 <p><em>Note: Larger datasets will take several minutes to load.</em></p>
 </div>
 </div>
