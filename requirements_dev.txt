@@ -1,5 +1,5 @@
 # Requirements of this dev
-FireWorks==1.8.7
+FireWorks==1.9.5
 GitPython==2.1.11
 black==19.3b0
 flake8==3.7.8
