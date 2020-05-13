@@ -14,5 +14,12 @@ automatminer is an automatic prediction engine for materials properties.
 You may also be interested in the parent code of automatminer, matminer:
 - **Matminer**: <https://github.com/hackingmaterials/matminer>
 
+If you find `automatminer` useful, please consider supporting its development by citing the [following preprint](https://arxiv.org/abs/2005.00707):
+
+```
+Dunn, A., Wang, Q., Ganose, A., Dopp, D., Jain, A. Benchmarking Materials Property Prediction 
+Methods: The Matbench Test Set and Automatminer Reference Algorithm. Preprint at 
+https://arxiv.org/abs/2005.00707 (2020).
+```
 
 `automatminer` is `pip` installable. Please use versions `1.0.0` forward.
