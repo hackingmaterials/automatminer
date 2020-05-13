@@ -66,7 +66,7 @@ def make_matpipe_test(config_preset, skip=None):
     skippables = [
         "transferability",
         "user_features",
-        "ignore",
+        "predict_kwargs",
         "benchmarking",
         "persistence",
         "digests",
@@ -135,16 +135,11 @@ def make_matpipe_test(config_preset, skip=None):
             test = df_test[self.target + " predicted"]
             self.assertTrue(r2_score(true, test) > 0.75)
 
-        @unittest.skipIf("ignore" in skip, reason)
-        def test_ignore(self):
-            df = self.df
-            # pd.set_option('display.max_rows', 500)
-            # pd.set_option('display.max_columns', 500)
-            # pd.set_option('display.width', 1000)
-            # print(df)
-
-            df_train = df.iloc[:200]
-            df_test = df.iloc[201:250]
+        @unittest.skipIf("predict_kwargs" in skip, reason)
+        def test_predict_kwargs(self):
+            # Test mat_pipe.predict()'s ignore and output_col kwargs.
+            df_train = self.df.iloc[:200]
+            df_test = self.df.iloc[201:250]
             ef = "ExtraFeature"
             df_test[ef] = [i + 100 for i in range(df_test.shape[0])]
             self.pipe.fit(df_train, self.target)
@@ -165,6 +160,12 @@ def make_matpipe_test(config_preset, skip=None):
             predicted_some = self.pipe.predict(df_test, ignore=some)
             self.assertFalse(ef in predicted_some.columns)
             self.assertTrue("composition" in predicted_some.columns)
+
+            output_col_name = self.target + "_pred"
+            predicted_custom_col = self.pipe.predict(
+                df_test, output_col=output_col_name
+            )
+            self.assertTrue(output_col_name in predicted_custom_col)
 
         @unittest.skipIf("benchmarking" in skip, reason)
         def test_benchmarking_no_cache(self):
