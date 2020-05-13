@@ -161,7 +161,14 @@ Citing Automatminer or MatBench
 --------------------------------
 If you find Automatminer or the MatBench benchmarks helpful in your research,
 please consider citing us. We have a publication under submission. For now,
-please cite our `Github repo <https://github.com/hackingmaterials/automatminer>`_!
+please cite our `preprint <https://arxiv.org/abs/2005.00707>`_:
+
+
+.. code-block:: text
+
+    Dunn, A., Wang, Q., Ganose, A., Dopp, D., Jain, A. Benchmarking Materials Property Prediction
+    Methods: The Matbench Test Set and Automatminer Reference Algorithm. Preprint at
+    https://arxiv.org/abs/2005.00707 (2020).
 
 
 API documentation

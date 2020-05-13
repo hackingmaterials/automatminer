@@ -14,7 +14,7 @@ inorganic materials science applications.
    :width: 600px
 
 Details on the benchmark are coming soon in a publication we have submitted.
-Stay tuned for more details on the evaluation procedure, best scores, and more!
+You can learn more about it in our `preprint <https://arxiv.org/abs/2005.00707>`_.
 
 For now, you can still access the benchmark datasets. See the "Accessing MatBench"
 section for more info.
