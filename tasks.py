@@ -59,7 +59,7 @@ def version_check(ctx):
 
 @task
 def update_changelog(ctx):
-    ctx.run('github_changelog_generator hackingmaterials/automatminer')
+    ctx.run('github_changelog_generator --user hackingmaterials --project automatminer')
     ctx.run("git add CHANGELOG.md")
     ctx.run("git commit CHANGELOG.md -m 'update changelog [skip ci]'")
 
