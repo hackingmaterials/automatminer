@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/hackingmaterials/automatminer/tree/HEAD)
+## [v1.0.3.20200727](https://github.com/hackingmaterials/automatminer/tree/v1.0.3.20200727) (2020-07-28)
 
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v1.0.3.20191111...HEAD)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v1.0.3.20191111...v1.0.3.20200727)
 
 **Implemented enhancements:**
 
@@ -86,7 +86,7 @@
 
 ## [v2019.10.14](https://github.com/hackingmaterials/automatminer/tree/v2019.10.14) (2019-10-15)
 
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.12...v2019.10.14)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.11...v2019.10.14)
 
 **Implemented enhancements:**
 
@@ -128,13 +128,13 @@
 - refactor setting loggers [\#243](https://github.com/hackingmaterials/automatminer/pull/243) ([janosh](https://github.com/janosh))
 - Add support for pipeline digest in JSON and YAML format [\#238](https://github.com/hackingmaterials/automatminer/pull/238) ([janosh](https://github.com/janosh))
 
-## [v2019.9.12](https://github.com/hackingmaterials/automatminer/tree/v2019.9.12) (2019-09-11)
-
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.11...v2019.9.12)
-
 ## [v2019.9.11](https://github.com/hackingmaterials/automatminer/tree/v2019.9.11) (2019-09-11)
 
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.08.07_beta...v2019.9.11)
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.12...v2019.9.11)
+
+## [v2019.9.12](https://github.com/hackingmaterials/automatminer/tree/v2019.9.12) (2019-09-11)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.08.07_beta...v2019.9.12)
 
 **Closed issues:**
 
@@ -380,6 +380,7 @@
 - Cleanup is\_greater\_better function  [\#76](https://github.com/hackingmaterials/automatminer/pull/76) ([Doppe1g4nger](https://github.com/Doppe1g4nger))
 - fix logger issue duplicated in notebooks [\#75](https://github.com/hackingmaterials/automatminer/pull/75) ([albalu](https://github.com/albalu))
 - Add classifier/regressor config\_dicts for customizing pipeline operators [\#74](https://github.com/hackingmaterials/automatminer/pull/74) ([Qi-max](https://github.com/Qi-max))
+- Split + improve existing glass datasets and add a new dataset [\#72](https://github.com/hackingmaterials/automatminer/pull/72) ([Qi-max](https://github.com/Qi-max))
 - Change default for max\_na\_frac, add notebook [\#71](https://github.com/hackingmaterials/automatminer/pull/71) ([ardunn](https://github.com/ardunn))
 
 
