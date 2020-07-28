@@ -10,7 +10,7 @@ from automatminer.automl import SinglePipelineAdaptor, TPOTAdaptor
 from automatminer.featurization import AutoFeaturizer
 from automatminer.preprocessing import DataCleaner, FeatureReducer
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from xgboost import XGBClassifier, XGBRegressor
+# from xgboost import XGBClassifier, XGBRegressor
 
 
 def get_preset_config(preset: str = "express", **powerups) -> dict:
@@ -85,11 +85,12 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             "cleaner": DataCleaner(),
         }
     elif preset == "express_single":
-        xgb_kwargs = {"n_estimators": 300, "max_depth": 3, "n_jobs": n_jobs_kwargs}
+        rf_args = {"n_estimators": 500, "max_depth": 5}
+        rf_args.update(n_jobs_kwargs)
         config = {
             "learner": SinglePipelineAdaptor(
-                regressor=XGBRegressor(**xgb_kwargs),
-                classifier=XGBClassifier(**xgb_kwargs),
+                regressor=RandomForestRegressor(**rf_args),
+                classifier=RandomForestClassifier(**rf_args),
             ),
             "reducer": FeatureReducer(reducers=("corr",)),
             "autofeaturizer": AutoFeaturizer(
