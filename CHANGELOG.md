@@ -1,6 +1,63 @@
-# Change Log
+# Changelog
+
+## [Unreleased](https://github.com/hackingmaterials/automatminer/tree/HEAD)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v1.0.3.20191111...HEAD)
+
+**Implemented enhancements:**
+
+- various doc updates [\#275](https://github.com/hackingmaterials/automatminer/issues/275)
+- Keyword arg for predicted column name [\#266](https://github.com/hackingmaterials/automatminer/issues/266)
+
+**Fixed bugs:**
+
+- Check dfcleaner corr value works with negatively cross-correlated sampes [\#316](https://github.com/hackingmaterials/automatminer/issues/316)
+
+**Closed issues:**
+
+- Import fails [\#306](https://github.com/hackingmaterials/automatminer/issues/306)
+- add link to arxiv paper on README / doc [\#298](https://github.com/hackingmaterials/automatminer/issues/298)
+- Add Xcessiv Adaptor [\#265](https://github.com/hackingmaterials/automatminer/issues/265)
+
+**Merged pull requests:**
+
+- specify requirements for time being [\#299](https://github.com/hackingmaterials/automatminer/pull/299) ([ardunn](https://github.com/ardunn))
+- update docs with updated matbench info [\#282](https://github.com/hackingmaterials/automatminer/pull/282) ([ardunn](https://github.com/ardunn))
+- remove .needs\_oxi check in AutoFeaturizer [\#280](https://github.com/hackingmaterials/automatminer/pull/280) ([ardunn](https://github.com/ardunn))
+- Add testing instructions to CONTRIBUTNG.md [\#271](https://github.com/hackingmaterials/automatminer/pull/271) ([janosh](https://github.com/janosh))
+- add ability to prevent a feature cache overwrite on transform [\#269](https://github.com/hackingmaterials/automatminer/pull/269) ([ardunn](https://github.com/ardunn))
+- Make name of new column with predictions appended to dataframe configurable [\#267](https://github.com/hackingmaterials/automatminer/pull/267) ([janosh](https://github.com/janosh))
+
+## [v1.0.3.20191111](https://github.com/hackingmaterials/automatminer/tree/v1.0.3.20191111) (2019-11-12)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v1.0.2.20191110...v1.0.3.20191111)
+
+**Implemented enhancements:**
+
+- Look into caching via nearest neighbors  [\#194](https://github.com/hackingmaterials/automatminer/issues/194)
+
+**Fixed bugs:**
+
+- The .git folder is absolutely enormous.  [\#189](https://github.com/hackingmaterials/automatminer/issues/189)
+
+**Closed issues:**
+
+- Consider integrating with python dask [\#237](https://github.com/hackingmaterials/automatminer/issues/237)
+
+## [v1.0.2.20191110](https://github.com/hackingmaterials/automatminer/tree/v1.0.2.20191110) (2019-11-11)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v1.0.1.20191110...v1.0.2.20191110)
+
+**Merged pull requests:**
+
+- update version \[skip ci\] \[ci skip\] [\#264](https://github.com/hackingmaterials/automatminer/pull/264) ([ardunn](https://github.com/ardunn))
+
+## [v1.0.1.20191110](https://github.com/hackingmaterials/automatminer/tree/v1.0.1.20191110) (2019-11-11)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v1.0.0.20191110...v1.0.1.20191110)
 
 ## [v1.0.0.20191110](https://github.com/hackingmaterials/automatminer/tree/v1.0.0.20191110) (2019-11-10)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.10.14...v1.0.0.20191110)
 
 **Implemented enhancements:**
@@ -28,7 +85,8 @@
 - Code style enforcement [\#245](https://github.com/hackingmaterials/automatminer/pull/245) ([janosh](https://github.com/janosh))
 
 ## [v2019.10.14](https://github.com/hackingmaterials/automatminer/tree/v2019.10.14) (2019-10-15)
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.11...v2019.10.14)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.12...v2019.10.14)
 
 **Implemented enhancements:**
 
@@ -70,11 +128,13 @@
 - refactor setting loggers [\#243](https://github.com/hackingmaterials/automatminer/pull/243) ([janosh](https://github.com/janosh))
 - Add support for pipeline digest in JSON and YAML format [\#238](https://github.com/hackingmaterials/automatminer/pull/238) ([janosh](https://github.com/janosh))
 
-## [v2019.9.11](https://github.com/hackingmaterials/automatminer/tree/v2019.9.11) (2019-09-11)
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.12...v2019.9.11)
-
 ## [v2019.9.12](https://github.com/hackingmaterials/automatminer/tree/v2019.9.12) (2019-09-11)
-[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.08.07_beta...v2019.9.12)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.9.11...v2019.9.12)
+
+## [v2019.9.11](https://github.com/hackingmaterials/automatminer/tree/v2019.9.11) (2019-09-11)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.08.07_beta...v2019.9.11)
 
 **Closed issues:**
 
@@ -82,9 +142,11 @@
 - benchdev infrastructure changes [\#220](https://github.com/hackingmaterials/automatminer/issues/220)
 
 ## [v2019.08.07_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.08.07_beta) (2019-08-08)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.08.07_betaK...v2019.08.07_beta)
 
 ## [v2019.08.07_betaK](https://github.com/hackingmaterials/automatminer/tree/v2019.08.07_betaK) (2019-08-08)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.05.14_beta0...v2019.08.07_betaK)
 
 **Closed issues:**
@@ -98,6 +160,7 @@
 - Look at skater rule based models as a solution for small datasets [\#145](https://github.com/hackingmaterials/automatminer/issues/145)
 
 ## [v2019.05.14_beta0](https://github.com/hackingmaterials/automatminer/tree/v2019.05.14_beta0) (2019-05-15)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.03.27_beta...v2019.05.14_beta0)
 
 **Closed issues:**
@@ -115,6 +178,7 @@
 - make DFTransformer inherit BaseEstimator [\#201](https://github.com/hackingmaterials/automatminer/pull/201) ([Qi-max](https://github.com/Qi-max))
 
 ## [v2019.03.27_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.03.27_beta) (2019-03-27)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.03.26b0...v2019.03.27_beta)
 
 **Merged pull requests:**
@@ -122,6 +186,7 @@
 - Dev [\#200](https://github.com/hackingmaterials/automatminer/pull/200) ([ardunn](https://github.com/ardunn))
 
 ## [v2019.03.26b0](https://github.com/hackingmaterials/automatminer/tree/v2019.03.26b0) (2019-03-27)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.02.03_beta...v2019.03.26b0)
 
 **Closed issues:**
@@ -153,9 +218,11 @@
 - changing base classes [\#187](https://github.com/hackingmaterials/automatminer/pull/187) ([ardunn](https://github.com/ardunn))
 
 ## [v2019.02.03_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.02.03_beta) (2019-02-03)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.02.02_beta...v2019.02.03_beta)
 
 ## [v2019.02.02_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.02.02_beta) (2019-02-02)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.01.26_beta...v2019.02.02_beta)
 
 **Closed issues:**
@@ -173,6 +240,7 @@
 - Add optional to manually keep/remove features [\#172](https://github.com/hackingmaterials/automatminer/pull/172) ([utf](https://github.com/utf))
 
 ## [v2019.01.26_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.01.26_beta) (2019-01-26)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2019.01.25_beta...v2019.01.26_beta)
 
 **Closed issues:**
@@ -182,6 +250,7 @@
 - CircleCI + package reqs  needs update [\#150](https://github.com/hackingmaterials/automatminer/issues/150)
 
 ## [v2019.01.25_beta](https://github.com/hackingmaterials/automatminer/tree/v2019.01.25_beta) (2019-01-26)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/2018.12.11_beta...v2019.01.25_beta)
 
 **Closed issues:**
@@ -206,6 +275,7 @@
 - Better handling of adding oxidation states to large structures. [\#142](https://github.com/hackingmaterials/automatminer/pull/142) ([utf](https://github.com/utf))
 
 ## [2018.12.11_beta](https://github.com/hackingmaterials/automatminer/tree/2018.12.11_beta) (2018-12-12)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2018.11.16-beta...2018.12.11_beta)
 
 **Closed issues:**
@@ -227,9 +297,11 @@
 - dev\_scripts draft for evaluation + various fixes [\#131](https://github.com/hackingmaterials/automatminer/pull/131) ([ardunn](https://github.com/ardunn))
 
 ## [v2018.11.16-beta](https://github.com/hackingmaterials/automatminer/tree/v2018.11.16-beta) (2018-11-17)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2018.11.2-beta...v2018.11.16-beta)
 
 ## [v2018.11.2-beta](https://github.com/hackingmaterials/automatminer/tree/v2018.11.2-beta) (2018-11-17)
+
 [Full Changelog](https://github.com/hackingmaterials/automatminer/compare/v2018.11.2-alpha...v2018.11.2-beta)
 
 **Closed issues:**
@@ -258,6 +330,9 @@
 - Fix pipeline logger [\#119](https://github.com/hackingmaterials/automatminer/pull/119) ([utf](https://github.com/utf))
 
 ## [v2018.11.2-alpha](https://github.com/hackingmaterials/automatminer/tree/v2018.11.2-alpha) (2018-11-02)
+
+[Full Changelog](https://github.com/hackingmaterials/automatminer/compare/cc9702425531022dc76caf6bdc574be34b5c5ae8...v2018.11.2-alpha)
+
 **Closed issues:**
 
 - Logger needed [\#103](https://github.com/hackingmaterials/automatminer/issues/103)
@@ -305,62 +380,8 @@
 - Cleanup is\_greater\_better function  [\#76](https://github.com/hackingmaterials/automatminer/pull/76) ([Doppe1g4nger](https://github.com/Doppe1g4nger))
 - fix logger issue duplicated in notebooks [\#75](https://github.com/hackingmaterials/automatminer/pull/75) ([albalu](https://github.com/albalu))
 - Add classifier/regressor config\_dicts for customizing pipeline operators [\#74](https://github.com/hackingmaterials/automatminer/pull/74) ([Qi-max](https://github.com/Qi-max))
-- Split + improve existing glass datasets and add a new dataset [\#72](https://github.com/hackingmaterials/automatminer/pull/72) ([Qi-max](https://github.com/Qi-max))
 - Change default for max\_na\_frac, add notebook [\#71](https://github.com/hackingmaterials/automatminer/pull/71) ([ardunn](https://github.com/ardunn))
-- Fix issue with failing when no column [\#70](https://github.com/hackingmaterials/automatminer/pull/70) ([ardunn](https://github.com/ardunn))
-- Featurize changes [\#69](https://github.com/hackingmaterials/automatminer/pull/69) ([ardunn](https://github.com/ardunn))
-- Restructure project [\#68](https://github.com/hackingmaterials/automatminer/pull/68) ([ardunn](https://github.com/ardunn))
-- Organize featurize [\#67](https://github.com/hackingmaterials/automatminer/pull/67) ([ardunn](https://github.com/ardunn))
-- correct weights + multi-class [\#66](https://github.com/hackingmaterials/automatminer/pull/66) ([albalu](https://github.com/albalu))
-- cleanup of the gap notebook [\#64](https://github.com/hackingmaterials/automatminer/pull/64) ([albalu](https://github.com/albalu))
-- add notebook predicting experimental band gap dataset [\#63](https://github.com/hackingmaterials/automatminer/pull/63) ([albalu](https://github.com/albalu))
-- a more complete example [\#62](https://github.com/hackingmaterials/automatminer/pull/62) ([albalu](https://github.com/albalu))
-- featurize\_column + template for tricky target [\#55](https://github.com/hackingmaterials/automatminer/pull/55) ([albalu](https://github.com/albalu))
-- multiindex and relevant changes [\#53](https://github.com/hackingmaterials/automatminer/pull/53) ([albalu](https://github.com/albalu))
-- matminer version [\#52](https://github.com/hackingmaterials/automatminer/pull/52) ([albalu](https://github.com/albalu))
-- target\_col -\> target [\#51](https://github.com/hackingmaterials/automatminer/pull/51) ([albalu](https://github.com/albalu))
-- prune\_correlated\_features [\#50](https://github.com/hackingmaterials/automatminer/pull/50) ([albalu](https://github.com/albalu))
-- Add matminer flla dataset [\#48](https://github.com/hackingmaterials/automatminer/pull/48) ([ardunn](https://github.com/ardunn))
-- max\_colnull=0.05 default [\#47](https://github.com/hackingmaterials/automatminer/pull/47) ([albalu](https://github.com/albalu))
-- started feature\_importance [\#46](https://github.com/hackingmaterials/automatminer/pull/46) ([albalu](https://github.com/albalu))
-- Fixing boltztrap\_mp and phonon datasets to have formula and structures [\#45](https://github.com/hackingmaterials/automatminer/pull/45) ([ardunn](https://github.com/ardunn))
-- Improve metafeature design and add unittests for current composition/structure metafeatures [\#44](https://github.com/hackingmaterials/automatminer/pull/44) ([Qi-max](https://github.com/Qi-max))
-- Benchmark autosklearn [\#43](https://github.com/hackingmaterials/automatminer/pull/43) ([Qi-max](https://github.com/Qi-max))
-- exclude featurize\_formula that need oxidations [\#42](https://github.com/hackingmaterials/automatminer/pull/42) ([albalu](https://github.com/albalu))
-- separate slow composition featurizers [\#41](https://github.com/hackingmaterials/automatminer/pull/41) ([albalu](https://github.com/albalu))
-- fixed\_expt\_gap [\#40](https://github.com/hackingmaterials/automatminer/pull/40) ([albalu](https://github.com/albalu))
-- fixed bad formulas in load\_expt\_gap [\#39](https://github.com/hackingmaterials/automatminer/pull/39) ([albalu](https://github.com/albalu))
-- start ErrorAnalysis [\#37](https://github.com/hackingmaterials/automatminer/pull/37) ([albalu](https://github.com/albalu))
-- start TpotAutoml [\#36](https://github.com/hackingmaterials/automatminer/pull/36) ([albalu](https://github.com/albalu))
-- add steel\_strength dataset and Heusler\_magnetic dataset [\#35](https://github.com/hackingmaterials/automatminer/pull/35) ([Qi-max](https://github.com/Qi-max))
-- add load\_boltztrap\_mp [\#34](https://github.com/hackingmaterials/automatminer/pull/34) ([albalu](https://github.com/albalu))
-- small change in featurize + matbench tpot example [\#32](https://github.com/hackingmaterials/automatminer/pull/32) ([albalu](https://github.com/albalu))
-- expand PreProcess a bit [\#31](https://github.com/hackingmaterials/automatminer/pull/31) ([albalu](https://github.com/albalu))
-- Initial Design of the Composition/Structure/Missing\_value-related Metafeatures for the Input Dataset [\#30](https://github.com/hackingmaterials/automatminer/pull/30) ([Qi-max](https://github.com/Qi-max))
-- added tests for AllFeaturizers [\#29](https://github.com/hackingmaterials/automatminer/pull/29) ([albalu](https://github.com/albalu))
-- additional featurizers and tests [\#28](https://github.com/hackingmaterials/automatminer/pull/28) ([albalu](https://github.com/albalu))
-- start dos featurizers [\#27](https://github.com/hackingmaterials/automatminer/pull/27) ([albalu](https://github.com/albalu))
-- the rest of structure featurizers [\#26](https://github.com/hackingmaterials/automatminer/pull/26) ([albalu](https://github.com/albalu))
-- 1st attempt to make a complete collection of featurizers [\#25](https://github.com/hackingmaterials/automatminer/pull/25) ([albalu](https://github.com/albalu))
-- Add metalearning and some thoughts on meta-feature design, strategy and recommendation [\#24](https://github.com/hackingmaterials/automatminer/pull/24) ([Qi-max](https://github.com/Qi-max))
-- more organization for featurization [\#23](https://github.com/hackingmaterials/automatminer/pull/23) ([albalu](https://github.com/albalu))
-- Make all load\_\* return dict Structures and string Compositions \(as pretty\_formula\) [\#22](https://github.com/hackingmaterials/automatminer/pull/22) ([ardunn](https://github.com/ardunn))
-- improved metrics mapping in automl [\#21](https://github.com/hackingmaterials/automatminer/pull/21) ([Qi-max](https://github.com/Qi-max))
-- fix drop None in Featurize init [\#18](https://github.com/hackingmaterials/automatminer/pull/18) ([Qi-max](https://github.com/Qi-max))
-- added a class to perform auto machine learning [\#17](https://github.com/hackingmaterials/automatminer/pull/17) ([Qi-max](https://github.com/Qi-max))
-- fix loading mp [\#13](https://github.com/hackingmaterials/automatminer/pull/13) ([ardunn](https://github.com/ardunn))
-- update doc in load [\#12](https://github.com/hackingmaterials/automatminer/pull/12) ([ardunn](https://github.com/ardunn))
-- Add 4 datasets, cleanup + make load\_mp better [\#10](https://github.com/hackingmaterials/automatminer/pull/10) ([ardunn](https://github.com/ardunn))
-- add xlrd to reqs to support pd.read\_excel [\#9](https://github.com/hackingmaterials/automatminer/pull/9) ([albalu](https://github.com/albalu))
-- add tox.ini [\#8](https://github.com/hackingmaterials/automatminer/pull/8) ([albalu](https://github.com/albalu))
-- add test\_data to get testing started [\#7](https://github.com/hackingmaterials/automatminer/pull/7) ([albalu](https://github.com/albalu))
-- featurize just featurizes no cleanup, etc [\#6](https://github.com/hackingmaterials/automatminer/pull/6) ([albalu](https://github.com/albalu))
-- test PR direct from fork [\#5](https://github.com/hackingmaterials/automatminer/pull/5) ([albalu](https://github.com/albalu))
-- get preprocess started [\#4](https://github.com/hackingmaterials/automatminer/pull/4) ([albalu](https://github.com/albalu))
-- Doc updates and renaming [\#3](https://github.com/hackingmaterials/automatminer/pull/3) ([ardunn](https://github.com/ardunn))
-- moved packages inside matbench for expected behavior [\#2](https://github.com/hackingmaterials/automatminer/pull/2) ([albalu](https://github.com/albalu))
-- Test PR [\#1](https://github.com/hackingmaterials/automatminer/pull/1) ([ardunn](https://github.com/ardunn))
 
 
 
-\* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
+\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
