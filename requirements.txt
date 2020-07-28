@@ -3,7 +3,7 @@ matminer==0.6.2
 pymatgen==2020.01.28
 tpot==0.11.0
 skrebate==0.6
-pyyaml==5.1.2
+pyyaml==5.3.1
 scikit-learn==0.22.2
 
 # Also requirements of matminer
