@@ -85,7 +85,8 @@ def get_preset_config(preset: str = "express", **powerups) -> dict:
             "cleaner": DataCleaner(),
         }
     elif preset == "express_single":
-        rf_args = {"n_estimators": 500, "max_depth": 5, "n_jobs": n_jobs_kwargs}
+        rf_args = {"n_estimators": 500, "max_depth": 5}
+        rf_args.update(n_jobs_kwargs)
         config = {
             "learner": SinglePipelineAdaptor(
                 regressor=RandomForestRegressor(**rf_args),
