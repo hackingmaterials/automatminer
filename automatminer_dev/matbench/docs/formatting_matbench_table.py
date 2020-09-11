@@ -1,4 +1,12 @@
 from matminer.datasets.dataset_retrieval import load_dataset, get_available_datasets, get_all_dataset_info
+
+
+'''
+
+Helper function to format matbench documentation page.
+'''
+
+
 datasets = get_available_datasets(print_format=None)
 
 for dataset in datasets:

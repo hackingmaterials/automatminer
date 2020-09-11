@@ -29,6 +29,7 @@ LOG_KVRH = {
     "target": "log10(K_VRH)",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None,
+    "unit": None,
 }
 
 LOG_GVRH = {
@@ -37,6 +38,7 @@ LOG_GVRH = {
     "target": "log10(G_VRH)",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None,
+    "unit": None,
 }
 
 DIELECTRIC = {
@@ -45,6 +47,7 @@ DIELECTRIC = {
     "target": "n",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None,
+    "unit": None,
 }
 
 JDFT2D = {
@@ -53,6 +56,7 @@ JDFT2D = {
     "target": "exfoliation_en",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None,
+    "unit": "meV/atom"
 }
 
 MP_GAP = {
@@ -61,6 +65,7 @@ MP_GAP = {
     "target": "gap pbe",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None,
+    "unit": "eV"
 }
 
 MP_IS_METAL = {
@@ -69,6 +74,7 @@ MP_IS_METAL = {
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True,
+    "unit": None
 }
 
 MP_E_FORM = {
@@ -77,6 +83,7 @@ MP_E_FORM = {
     "target": "e_form",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None,
+    "unit": "eV/atom"
 }
 
 PEROVSKITES = {
@@ -85,6 +92,7 @@ PEROVSKITES = {
     "target": "e_form",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None,
+    "unit": "eV"
 }
 
 GLASS = {
@@ -93,6 +101,7 @@ GLASS = {
     "target": "gfa",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True,
+    "unit": None
 }
 
 EXPT_IS_METAL = {
@@ -101,6 +110,7 @@ EXPT_IS_METAL = {
     "target": "is_metal",
     "problem_type": AMM_CLF_NAME,
     "clf_pos_label": True,
+    "unit": None
 }
 
 EXPT_GAP = {
@@ -109,6 +119,7 @@ EXPT_GAP = {
     "target": "gap expt",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None,
+    "unit": "eV"
 }
 
 PHONONS = {
@@ -117,6 +128,7 @@ PHONONS = {
     "target": "last phdos peak",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None,
+    "unit": "cm^-1"
 }
 
 STEELS = {
@@ -125,6 +137,7 @@ STEELS = {
     "target": "yield strength",
     "problem_type": AMM_REG_NAME,
     "clf_pos_label": None,
+    "unit": "MPa"
 }
 
 BENCHMARK_DEBUG_SET = [JDFT2D, PHONONS, EXPT_IS_METAL, STEELS]
