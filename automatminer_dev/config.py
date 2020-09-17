@@ -156,3 +156,17 @@ BENCHMARK_FULL_SET = [
     STEELS,
     PHONONS,
 ]
+
+HAS_STRUCTURE = [
+    LOG_KVRH,
+    LOG_GVRH,
+    DIELECTRIC,
+    JDFT2D,
+    MP_GAP,
+    MP_IS_METAL,
+    MP_E_FORM,
+    PEROVSKITES,
+    PHONONS
+]
+
+BENCHMARK_DICT = {ds["name"]: ds for ds in BENCHMARK_FULL_SET}
