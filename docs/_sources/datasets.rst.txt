@@ -1,11 +1,11 @@
-MatBench benchmark
+MatBench v0.1 benchmark
 ===================
 
 Overview
 ------------
 
 MatBench is an `ImageNet <http://www.image-net.org>`_ for materials science; a
-set of 13 supervised ML tasks for benchmarking and fair comparison spanning a wide domain of
+set of 13 supervised, pre-cleaned, ready-to-use ML tasks for benchmarking and fair comparison. The tasks span a wide domain of
 inorganic materials science applications.
 
 .. image:: _static/matbench_pie_charts.png
@@ -13,21 +13,83 @@ inorganic materials science applications.
    :align: center
    :width: 600px
 
-Details on the benchmark are coming soon in a publication we have submitted.
-You can learn more about it in our `preprint <https://arxiv.org/abs/2005.00707>`_.
-
-For now, you can still access the benchmark datasets. See the "Accessing MatBench"
-section for more info.
+You can find details and results on the benchmark in our paper
+`Benchmarking materials property prediction methods: the Matbench test set and Automatminer reference algorithm <https://doi.org/10.1038/s41524-020-00406-3>`_. Please consider citing this paper if you use Matbench v0.1 for benchmarking, comparison, or prototyping.
 
 
+Leaderboard
+------------
 
-Accessing MatBench
-------------------
+.. list-table::
+   :align: left
+   :header-rows: 1
 
-We have made the MatBench benchmark publicly available via the `matminer
-datasets repository <https://hackingmaterials.lbl.gov/matminer/dataset_summary.html>`_
-and through the `Materials Project MPContribs-ML Deployment <https://ml.materialsproject.org>`_.
-All the Matbench datasets begin with :code:`matbench_`.
+   * - task name
+     - verified top score (MAE or ROCAUC)
+     - algorithm name, config,
+     - is algorithm general purpose? (same config on all problems)
+   * - :code:`matbench_dielectric`
+     - 0.299 (unitless)
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_expt_gap`
+     - 0.416 eV
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_expt_is_metal`
+     - 0.92
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_glass`
+     - 0.861
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_jdft2d`
+     - 38.6 meV/atom
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_log_gvrh`
+     - 0.0849 log(GPa)
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_log_kvrh`
+     - 0.0679 log(GPa)
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_mp_e_form`
+     - 0.0327 eV/atom
+     - MEGNet v0.2.2
+     - yes
+   * - :code:`matbench_mp_gap`
+     - 0.228 eV
+     - CGCNN (2019)
+     - yes
+   * - :code:`matbench_mp_is_metal`
+     - 0.977
+     - MEGNet v0.2.2
+     - yes
+   * - :code:`matbench_perovskites`
+     - 0.0417
+     - MEGNet v0.2.2
+     - yes
+   * - :code:`matbench_phonons`
+     - 36.9 cm^-1
+     - MEGNet v0.2.2
+     - yes
+   * - :code:`matbench_steels`
+     - 95.2 MPa
+     - Automatminer express v1.0.3.2019111
+     - yes
+
+
+Accessing the ML tasks
+-----------------------
+
+There are three ways to access the Matbench problems:
+
+1. Programmatically, via the `matminer datasets repository <https://hackingmaterials.lbl.gov/matminer/dataset_summary.html>`_. Recommended for benchmarking and test usage. See the code examples in the following sections for details on this process.
+2. Interactively, through the `Materials Project MPContribs-ML Deployment <https://ml.materialsproject.org>`_; links to each dataset are in the table below.
+3. Via static download links (given in table).
 
 
 Here's a full list of the 13 datasets in Matbench v0.1:
@@ -36,76 +98,78 @@ Here's a full list of the 13 datasets in Matbench v0.1:
    :align: left
    :header-rows: 1
 
-   * - dataset name
-     - target column
+   * - task name
+     - target column (unit)
      - number of samples
      - task type
-     - download link
+     - links
    * - :code:`matbench_dielectric`
-     - :code:`n`
+     - :code:`n` (unitless)
      - 4764
      - regression
-     - `link <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_dielectric/>`_
    * - :code:`matbench_expt_gap`
-     - :code:`gap expt`
+     - :code:`gap expt` (eV)
      - 4604
      - regression
-     - `link <https://ml.materialsproject.org/matbench_expt_gap.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_expt_gap.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_expt_gap/>`_
    * - :code:`matbench_expt_is_metal`
-     - :code:`is_metal`
+     - :code:`is_metal` (unitless)
      - 4921
      - classification
-     - `link <https://ml.materialsproject.org/matbench_expt_is_metal.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_expt_is_metal.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_expt_is_metal/>`_
    * - :code:`matbench_glass`
-     - :code:`gfa`
+     - :code:`gfa` (unitless)
      - 5680
      - classification
-     - `link <https://ml.materialsproject.org/matbench_glass.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_glass.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_glass/>`_
    * - :code:`matbench_jdft2d`
-     - :code:`exfoliation_en`
+     - :code:`exfoliation_en` (meV/atom)
      - 636
      - regression
-     - `link <https://ml.materialsproject.org/matbench_jdft2d.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_jdft2d.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_jdft2d/>`_
    * - :code:`matbench_log_gvrh`
-     - :code:`log10(G_VRH)`
+     - :code:`log10(G_VRH)` (log(GPa))
      - 10987
      - regression
-     - `link <https://ml.materialsproject.org/matbench_log_gvrh.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_log_gvrh.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_log_gvrh/>`_
    * - :code:`matbench_log_kvrh`
-     - :code:`log10(K_VRH)`
+     - :code:`log10(K_VRH)` (log(GPa))
      - 10987
      - regression
-     - `link <https://ml.materialsproject.org/matbench_log_kvrh.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_log_kvrh.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_log_kvrh/>`_
    * - :code:`matbench_mp_e_form`
-     - :code:`e_form`
+     - :code:`e_form` (eV/atom)
      - 132752
      - regression
-     - `link <https://ml.materialsproject.org/matbench_mp_e_form.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_mp_e_form.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_mp_e_form/>`_
    * - :code:`matbench_mp_gap`
-     - :code:`gap pbe`
+     - :code:`gap pbe` (eV)
      - 106113
      - regression
-     - `link <https://ml.materialsproject.org/matbench_mp_gap.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_mp_gap.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_mp_gap/>`_
    * - :code:`matbench_mp_is_metal`
-     - :code:`is_metal`
+     - :code:`is_metal` (unitless)
      - 106113
      - classification
-     - `link <https://ml.materialsproject.org/matbench_mp_is_metal.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_mp_is_metal.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_mp_is_metal/>`_
    * - :code:`matbench_perovskites`
-     - :code:`e_form`
+     - :code:`e_form` (eV, per unit cell)
      - 18928
      - regression
-     - `link <https://ml.materialsproject.org/matbench_perovskites.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_perovskites.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_perovskites/>`_
    * - :code:`matbench_phonons`
-     - :code:`last phdos peak`
+     - :code:`last phdos peak` (cm^-1)
      - 1265
      - regression
-     - `link <https://ml.materialsproject.org/matbench_phonons.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_phonons.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_phonons/>`_
    * - :code:`matbench_steels`
-     - :code:`yield strength`
+     - :code:`yield strength` (MPa)
      - 312
      - regression
-     - `link <https://ml.materialsproject.org/matbench_steels.json.gz>`_
+     - `download <https://ml.materialsproject.org/matbench_steels.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_steels/>`_
+
+
 
 
 Getting dataset info
@@ -207,3 +271,24 @@ This loads the dataframe in this format:
 
 
 *Note: Larger datasets will take several minutes to load.*
+
+
+Benchmarking and reporting your algorithm
+-----------------------------------------
+
+Benchmarking on Matbench v0.1 is done exclusively with nested cross validation
+(NCV). See more details on NCV on the :ref:`advanced_usage` page and the `original publication <https://doi.org/10.1038/s41524-020-00406-3>`_.
+
+If you want to evaluate your own (algorithm outside of the Automatminer framework) and compare to the scores on this page, please use the following steps:
+
+0. **Download the dataset programmatically through matminer (instructions above).** Note the dataset must be used in the exact order in which it was downloaded.
+1. **Generate test folds:** Use the scikit-learn :code:`KFold` (5 splits, shuffled, random seed 18012019) for regression problems and :code:`StratifiedKFold` (5 splits, shuffled, random seed 18012019) for classification problems.
+2. **For each fold**:
+    a. Train, validate, and select your best model using this fold's set of training data **only**. After training and validating, **no modiications may be made to the model based on the test set of this fold**.
+    b. Remove the target variable column from the test set. Use this model to predict the test set. **Note: this test data is for reporting only, and cannot be used for validation or training within this fold.**
+    c. Record the mean MAE or ROC-AUC for each fold's test set. Save the test fold data.
+    d. Save your model.
+3. **Post your results for verification.** Make a post on `the discussion forum <https://matsci.org/c/matminer/>`_ with the tag [Matbench] in the title. Once your results are verified, your algorithm will appear on the leaderboard!
+
+
+If you are benchmarking a general-purpose algorithm, please include results for all Matbench v0.1 datasets.

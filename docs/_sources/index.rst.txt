@@ -160,15 +160,14 @@ for more inspect. For a list of contributors, see our
 Citing Automatminer or MatBench
 --------------------------------
 If you find Automatminer or the MatBench benchmarks helpful in your research,
-please consider citing us. We have a publication under submission. For now,
-please cite our `preprint <https://arxiv.org/abs/2005.00707>`_:
+please consider citing our `publication in npj Computational Materials <https://doi.org/10.1038/s41524-020-00406-3>`_:
 
 
 .. code-block:: text
 
     Dunn, A., Wang, Q., Ganose, A., Dopp, D., Jain, A. Benchmarking Materials Property Prediction
-    Methods: The Matbench Test Set and Automatminer Reference Algorithm. Preprint at
-    https://arxiv.org/abs/2005.00707 (2020).
+    Methods: The Matbench Test Set and Automatminer Reference Algorithm. npj Computational Materials
+    6, 138 (2020). https://doi.org/10.1038/s41524-020-00406-3
 
 
 API documentation
