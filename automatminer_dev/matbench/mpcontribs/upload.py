@@ -160,65 +160,60 @@ target_map = {
 # perovskites....
 
 
+for ds in ["dielectric", "phonons", "mp_gap", "mp_is_metal", "perovskites", "mp_e_form"]:
+
+    ds_config = BENCHMARK_DICT[ds]
+
+    name = "matbench_" + ds_config["name"]
+    print(f"Loading {name}")
+    df = load_dataset(name)
+    target = ds_config["target"]
+    unit = f" {ds_config['unit']}" if ds_config["unit"] else ""
 
 
-ds_config = BENCHMARK_DICT["jdft2d"]
-
-name = "matbench_" + ds_config["name"]
-print(f"Loading {name}")
-df = load_dataset(name)
-target = ds_config["target"]
-unit = f" {ds_config['unit']}" if ds_config["unit"] else ""
-
-
-# print(f"Updating 'other' column entries of {name} with unicode.")
-# print(client.projects.update_entry(pk=name, project={
-#     'other.columns': {
-#         target_map[target]: metadata[name]["columns"][target],
-#         "structure": metadata[name]["columns"]["structure"]
-#         # "composition": metadata[name]["columns"]["composition"]
-#     }
-# }).result())
-
-
-
-print(f"Deleting contributions of {name}")
-client.delete_contributions(name)
+    # print(f"Updating 'other' column entries of {name} with unicode.")
+    # print(client.projects.update_entry(pk=name, project={
+    #     'other.columns': {
+    #         target_map[target]: metadata[name]["columns"][target],
+    #         "structure": metadata[name]["columns"]["structure"]
+    #         # "composition": metadata[name]["columns"]["composition"]
+    #     }
+    # }).result())
 
 
 
-print(f"Assembling and uploading contributions for {name}")
-structure_filename = "/Users/ardunn/Downloads/outfile.cif"
-contributions = []
-id_prefix = df.shape[0]
+    # print(f"Deleting contributions of {name}")
+    # client.delete_contributions(name)
 
 
-id_n_zeros = math.floor(math.log(df.shape[0], 10)) + 1
+    print(f"Assembling and uploading contributions for {name}")
+    structure_filename = "/Users/ardunn/Downloads/outfile.cif"
+    contributions = []
+    id_prefix = df.shape[0]
 
-df = df.iloc[:2]
 
-for i, row in tqdm.tqdm(enumerate(df.iterrows())):
-    entry = row[1]
-    contrib = {'project': name, 'is_public': True}
+    id_n_zeros = math.floor(math.log(df.shape[0], 10)) + 1
+    for i, row in tqdm.tqdm(enumerate(df.iterrows())):
+        entry = row[1]
+        contrib = {'project': name, 'is_public': True}
 
-    if "structure" in entry.index:
-        structures = []
-        s = entry.loc["structure"]
-        s.to("cif", structure_filename)
-        s = Structure.from_file(structure_filename)
-        c = s.composition.get_integer_formula_and_factor()[0]
-        contrib["structures"] = [s]
+        if "structure" in entry.index:
+            structures = []
+            s = entry.loc["structure"]
+            s.to("cif", structure_filename)
+            s = Structure.from_file(structure_filename)
+            c = s.composition.get_integer_formula_and_factor()[0]
+            contrib["structures"] = [s]
 
-    else:
-        c = entry["composition"]
+        else:
+            c = entry["composition"]
 
-    id_number = f"{i+1:0{id_n_zeros}d}"
-    identifier = f"mb-{ds_config['name']}-{id_number}"
-    contrib["identifier"] = identifier
+        id_number = f"{i+1:0{id_n_zeros}d}"
+        identifier = f"mb-{ds_config['name']}-{id_number}"
+        contrib["identifier"] = identifier
 
-    contrib["data"] = {target_map[target]: f"{entry.loc[target]}{unit}"}
-    contrib["formula"] = c
-    contributions.append(contrib)
+        contrib["data"] = {target_map[target]: f"{entry.loc[target]}{unit}"}
+        contrib["formula"] = c
+        contributions.append(contrib)
 
-pprint.pprint(contributions)
-client.submit_contributions(contributions)
+    client.submit_contributions(contributions, per_page=10)
