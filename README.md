@@ -19,9 +19,11 @@ You may also be interested in the parent code of automatminer, matminer:
 If you find `automatminer` or Matbench useful. useful, please consider supporting its development by citing [our paper](https://doi.org/10.1038/s41524-020-00406-3):
 
 ```
-Dunn, A., Wang, Q., Ganose, A., Dopp, D., Jain, A. Benchmarking Materials Property Prediction
-Methods: The Matbench Test Set and Automatminer Reference Algorithm. npj Computational Materials
-6, 138 (2020). https://doi.org/10.1038/s41524-020-00406-3
+Dunn, A., Wang, Q., Ganose, A., Dopp, D., Jain, A. 
+Benchmarking Materials Property Prediction Methods: 
+The Matbench Test Set and Automatminer Reference 
+Algorithm. npj Computational Materials 6, 138 (2020).
+https://doi.org/10.1038/s41524-020-00406-3
 ```
 
 `automatminer` is `pip` installable. Please use versions `1.0.0` forward.
