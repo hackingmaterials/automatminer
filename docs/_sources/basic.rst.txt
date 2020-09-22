@@ -68,7 +68,7 @@ might be of the form:
    * - ...
      - ...
 
-Where the structure column contains :code:`pymatgen` :code:`Structure`s and
+Where the structure column contains :code:`pymatgen` :code:`Structure` objects and
 the property column is the property you are interested in (the target). Use
 :code:`fit` to train, and specify the target column. For the dataframe we
 used above, you'd do:

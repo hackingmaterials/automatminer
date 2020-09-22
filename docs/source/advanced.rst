@@ -58,6 +58,9 @@ to get estimates of error, compare to other pipelines, etc.
 
 **Matbench**
 
+Interested in benchmarking your new algorithm in similar fashion? Or want to try
+an Automatminer configuration on benchmarking data?
+
 `Matminer <https://github.com/hackingmaterials/matminer>`_
 provides access to the MatBench benchmark suite, a curated set of 13 diverse
 materials ML problems which work in Automatminer benchmarks. Learn more here:

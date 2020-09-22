@@ -5,7 +5,7 @@ Overview
 ------------
 
 MatBench is an `ImageNet <http://www.image-net.org>`_ for materials science; a
-set of 13 supervised ML tasks for benchmarking and fair comparison spanning a wide domain of
+set of 13 supervised, pre-cleaned, ready-to-use ML tasks for benchmarking and fair comparison. The tasks span a wide domain of
 inorganic materials science applications.
 
 .. image:: _static/matbench_pie_charts.png
@@ -15,6 +15,71 @@ inorganic materials science applications.
 
 You can find details and results on the benchmark in our paper
 `Benchmarking materials property prediction methods: the Matbench test set and Automatminer reference algorithm <https://doi.org/10.1038/s41524-020-00406-3>`_. Please consider citing this paper if you use Matbench v0.1 for benchmarking, comparison, or prototyping.
+
+
+Leaderboard
+------------
+
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - task name
+     - verified top score (MAE or ROCAUC)
+     - algorithm name, config,
+     - is algorithm general purpose? (same config on all problems)
+   * - :code:`matbench_dielectric`
+     - 0.299 (unitless)
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_expt_gap`
+     - 0.416 eV
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_expt_is_metal`
+     - 0.92
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_glass`
+     - 0.861
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_jdft2d`
+     - 38.6 meV/atom
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_log_gvrh`
+     - 0.0849 log(GPa)
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_log_kvrh`
+     - 0.0679 log(GPa)
+     - Automatminer express v1.0.3.2019111
+     - yes
+   * - :code:`matbench_mp_e_form`
+     - 0.0327 eV/atom
+     - MEGNet v0.2.2
+     - yes
+   * - :code:`matbench_mp_gap`
+     - 0.228 eV
+     - CGCNN (2019)
+     - yes
+   * - :code:`matbench_mp_is_metal`
+     - 0.977
+     - MEGNet v0.2.2
+     - yes
+   * - :code:`matbench_perovskites`
+     - 0.0417
+     - MEGNet v0.2.2
+     - yes
+   * - :code:`matbench_phonons`
+     - 36.9 cm^-1
+     - MEGNet v0.2.2
+     - yes
+   * - :code:`matbench_steels`
+     - 95.2 MPa
+     - Automatminer express v1.0.3.2019111
+     - yes
 
 
 Accessing the ML tasks
@@ -105,70 +170,6 @@ Here's a full list of the 13 datasets in Matbench v0.1:
      - `download <https://ml.materialsproject.org/matbench_steels.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_steels/>`_
 
 
-
-Leaderboard
-------------
-
-.. list-table::
-   :align: left
-   :header-rows: 1
-
-   * - task name
-     - verified top score (MAE or ROCAUC)
-     - algorithm
-     - is algorithm general purpose?
-   * - :code:`matbench_dielectric`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_expt_gap`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_expt_is_metal`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_glass`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_jdft2d`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_log_gvrh`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_log_kvrh`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_mp_e_form`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_mp_gap`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_mp_is_metal`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_perovskites`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_phonons`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
-   * - :code:`matbench_steels`
-     - 95.2 MPa
-     - Automatminer v1.0.3.2019111
-     - yes
 
 
 Getting dataset info
@@ -281,7 +282,7 @@ Benchmarking on Matbench v0.1 is done exclusively with nested cross validation
 If you want to evaluate your own (algorithm outside of the Automatminer framework) and compare to the scores on this page, please use the following steps:
 
 0. **Download the dataset programmatically through matminer (instructions above).** Note the dataset must be used in the exact order in which it was downloaded.
-1. **Generating test folds:** Use the scikit-learn :code:`KFold` (5 splits, shuffled, random seed 18012019) for regression problems and :code:`StratifiedKFold` (5 splits, shuffled, random seed 18012019) for classification problems.
+1. **Generate test folds:** Use the scikit-learn :code:`KFold` (5 splits, shuffled, random seed 18012019) for regression problems and :code:`StratifiedKFold` (5 splits, shuffled, random seed 18012019) for classification problems.
 2. **For each fold**:
     a. Train, validate, and select your best model using this fold's set of training data **only**. After training and validating, **no modiications may be made to the model based on the test set of this fold**.
     b. Remove the target variable column from the test set. Use this model to predict the test set. **Note: this test data is for reporting only, and cannot be used for validation or training within this fold.**

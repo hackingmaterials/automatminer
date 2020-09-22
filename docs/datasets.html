@@ -49,8 +49,8 @@
 <li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced Usage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">MatBench v0.1 benchmark</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#accessing-the-ml-tasks">Accessing the ML tasks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#leaderboard">Leaderboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accessing-the-ml-tasks">Accessing the ML tasks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#getting-dataset-info">Getting dataset info</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#down-loading-datasets">(Down)loading datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#benchmarking-and-reporting-your-algorithm">Benchmarking and reporting your algorithm</a></li>
@@ -77,11 +77,96 @@
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>MatBench is an <a class="reference external" href="http://www.image-net.org">ImageNet</a> for materials science; a
-set of 13 supervised ML tasks for benchmarking and fair comparison spanning a wide domain of
+set of 13 supervised, pre-cleaned, ready-to-use ML tasks for benchmarking and fair comparison. The tasks span a wide domain of
 inorganic materials science applications.</p>
 <a class="reference internal image-reference" href="_images/matbench_pie_charts.png"><img alt="matbench" class="align-center" src="_images/matbench_pie_charts.png" style="width: 600px;" /></a>
 <p>You can find details and results on the benchmark in our paper
 <a class="reference external" href="https://doi.org/10.1038/s41524-020-00406-3">Benchmarking materials property prediction methods: the Matbench test set and Automatminer reference algorithm</a>. Please consider citing this paper if you use Matbench v0.1 for benchmarking, comparison, or prototyping.</p>
+</div>
+<div class="section" id="leaderboard">
+<h2>Leaderboard<a class="headerlink" href="#leaderboard" title="Permalink to this headline">¶</a></h2>
+<table class="docutils align-left">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>task name</p></th>
+<th class="head"><p>verified top score (MAE or ROCAUC)</p></th>
+<th class="head"><p>algorithm name, config,</p></th>
+<th class="head"><p>is algorithm general purpose? (same config on all problems)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_dielectric</span></code></p></td>
+<td><p>0.299 (unitless)</p></td>
+<td><p>Automatminer express v1.0.3.2019111</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_expt_gap</span></code></p></td>
+<td><p>0.416 eV</p></td>
+<td><p>Automatminer express v1.0.3.2019111</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_expt_is_metal</span></code></p></td>
+<td><p>0.92</p></td>
+<td><p>Automatminer express v1.0.3.2019111</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_glass</span></code></p></td>
+<td><p>0.861</p></td>
+<td><p>Automatminer express v1.0.3.2019111</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_jdft2d</span></code></p></td>
+<td><p>38.6 meV/atom</p></td>
+<td><p>Automatminer express v1.0.3.2019111</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_log_gvrh</span></code></p></td>
+<td><p>0.0849 log(GPa)</p></td>
+<td><p>Automatminer express v1.0.3.2019111</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_log_kvrh</span></code></p></td>
+<td><p>0.0679 log(GPa)</p></td>
+<td><p>Automatminer express v1.0.3.2019111</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_mp_e_form</span></code></p></td>
+<td><p>0.0327 eV/atom</p></td>
+<td><p>MEGNet v0.2.2</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_mp_gap</span></code></p></td>
+<td><p>0.228 eV</p></td>
+<td><p>CGCNN (2019)</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_mp_is_metal</span></code></p></td>
+<td><p>0.977</p></td>
+<td><p>MEGNet v0.2.2</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_perovskites</span></code></p></td>
+<td><p>0.0417</p></td>
+<td><p>MEGNet v0.2.2</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_phonons</span></code></p></td>
+<td><p>36.9 cm^-1</p></td>
+<td><p>MEGNet v0.2.2</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_steels</span></code></p></td>
+<td><p>95.2 MPa</p></td>
+<td><p>Automatminer express v1.0.3.2019111</p></td>
+<td><p>yes</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="accessing-the-ml-tasks">
 <h2>Accessing the ML tasks<a class="headerlink" href="#accessing-the-ml-tasks" title="Permalink to this headline">¶</a></h2>
@@ -190,91 +275,6 @@ inorganic materials science applications.</p>
 </tbody>
 </table>
 </div>
-<div class="section" id="leaderboard">
-<h2>Leaderboard<a class="headerlink" href="#leaderboard" title="Permalink to this headline">¶</a></h2>
-<table class="docutils align-left">
-<colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>task name</p></th>
-<th class="head"><p>verified top score (MAE or ROCAUC)</p></th>
-<th class="head"><p>algorithm</p></th>
-<th class="head"><p>is algorithm general purpose?</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_dielectric</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_expt_gap</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_expt_is_metal</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_glass</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_jdft2d</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_log_gvrh</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_log_kvrh</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_mp_e_form</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_mp_gap</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_mp_is_metal</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_perovskites</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_phonons</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">matbench_steels</span></code></p></td>
-<td><p>95.2 MPa</p></td>
-<td><p>Automatminer v1.0.3.2019111</p></td>
-<td><p>yes</p></td>
-</tr>
-</tbody>
-</table>
-</div>
 <div class="section" id="getting-dataset-info">
 <h2>Getting dataset info<a class="headerlink" href="#getting-dataset-info" title="Permalink to this headline">¶</a></h2>
 <p>You can get more info (such as the meaning of column names, brief cleaning
@@ -375,7 +375,7 @@ DFPT) from crystal structure.</p>
 <p>If you want to evaluate your own (algorithm outside of the Automatminer framework) and compare to the scores on this page, please use the following steps:</p>
 <ol class="arabic simple" start="0">
 <li><p><strong>Download the dataset programmatically through matminer (instructions above).</strong> Note the dataset must be used in the exact order in which it was downloaded.</p></li>
-<li><p><strong>Generating test folds:</strong> Use the scikit-learn <code class="code docutils literal notranslate"><span class="pre">KFold</span></code> (5 splits, shuffled, random seed 18012019) for regression problems and <code class="code docutils literal notranslate"><span class="pre">StratifiedKFold</span></code> (5 splits, shuffled, random seed 18012019) for classification problems.</p></li>
+<li><p><strong>Generate test folds:</strong> Use the scikit-learn <code class="code docutils literal notranslate"><span class="pre">KFold</span></code> (5 splits, shuffled, random seed 18012019) for regression problems and <code class="code docutils literal notranslate"><span class="pre">StratifiedKFold</span></code> (5 splits, shuffled, random seed 18012019) for classification problems.</p></li>
 <li><dl class="simple">
 <dt><strong>For each fold</strong>:</dt><dd><ol class="loweralpha simple">
 <li><p>Train, validate, and select your best model using this fold’s set of training data <strong>only</strong>. After training and validating, <strong>no modiications may be made to the model based on the test set of this fold</strong>.</p></li>
