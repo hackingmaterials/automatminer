@@ -1,2 +1,2 @@
-dash==1.4.1
+dash==1.16.2
 pandas
