@@ -59,23 +59,23 @@ Leaderboard
    * - :code:`matbench_mp_e_form`
      - 0.0327 eV/atom
      - MEGNet v0.2.2
-     - yes
+     - yes, structure only
    * - :code:`matbench_mp_gap`
      - 0.228 eV
      - CGCNN (2019)
-     - yes
+     - yes, structure only
    * - :code:`matbench_mp_is_metal`
      - 0.977
      - MEGNet v0.2.2
-     - yes
+     - yes, structure only
    * - :code:`matbench_perovskites`
      - 0.0417
      - MEGNet v0.2.2
-     - yes
+     - yes, structure only
    * - :code:`matbench_phonons`
      - 36.9 cm^-1
      - MEGNet v0.2.2
-     - yes
+     - yes, structure only
    * - :code:`matbench_steels`
      - 95.2 MPa
      - Automatminer express v1.0.3.2019111
