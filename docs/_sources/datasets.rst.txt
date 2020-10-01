@@ -107,67 +107,67 @@ Here's a full list of the 13 datasets in Matbench v0.1:
      - :code:`n` (unitless)
      - 4764
      - regression
-     - `download <https://ml.materialsproject.org/matbench_dielectric.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_dielectric/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_dielectric.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_dielectric/>`_
    * - :code:`matbench_expt_gap`
      - :code:`gap expt` (eV)
      - 4604
      - regression
-     - `download <https://ml.materialsproject.org/matbench_expt_gap.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_expt_gap/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_expt_gap.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_expt_gap/>`_
    * - :code:`matbench_expt_is_metal`
      - :code:`is_metal` (unitless)
      - 4921
      - classification
-     - `download <https://ml.materialsproject.org/matbench_expt_is_metal.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_expt_is_metal/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_expt_is_metal.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_expt_is_metal/>`_
    * - :code:`matbench_glass`
      - :code:`gfa` (unitless)
      - 5680
      - classification
-     - `download <https://ml.materialsproject.org/matbench_glass.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_glass/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_glass.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_glass/>`_
    * - :code:`matbench_jdft2d`
      - :code:`exfoliation_en` (meV/atom)
      - 636
      - regression
-     - `download <https://ml.materialsproject.org/matbench_jdft2d.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_jdft2d/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_jdft2d.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_jdft2d/>`_
    * - :code:`matbench_log_gvrh`
      - :code:`log10(G_VRH)` (log(GPa))
      - 10987
      - regression
-     - `download <https://ml.materialsproject.org/matbench_log_gvrh.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_log_gvrh/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_log_gvrh.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_log_gvrh/>`_
    * - :code:`matbench_log_kvrh`
      - :code:`log10(K_VRH)` (log(GPa))
      - 10987
      - regression
-     - `download <https://ml.materialsproject.org/matbench_log_kvrh.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_log_kvrh/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_log_kvrh.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_log_kvrh/>`_
    * - :code:`matbench_mp_e_form`
      - :code:`e_form` (eV/atom)
      - 132752
      - regression
-     - `download <https://ml.materialsproject.org/matbench_mp_e_form.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_mp_e_form/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_mp_e_form.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_mp_e_form/>`_
    * - :code:`matbench_mp_gap`
      - :code:`gap pbe` (eV)
      - 106113
      - regression
-     - `download <https://ml.materialsproject.org/matbench_mp_gap.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_mp_gap/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_mp_gap.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_mp_gap/>`_
    * - :code:`matbench_mp_is_metal`
      - :code:`is_metal` (unitless)
      - 106113
      - classification
-     - `download <https://ml.materialsproject.org/matbench_mp_is_metal.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_mp_is_metal/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_mp_is_metal.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_mp_is_metal/>`_
    * - :code:`matbench_perovskites`
      - :code:`e_form` (eV, per unit cell)
      - 18928
      - regression
-     - `download <https://ml.materialsproject.org/matbench_perovskites.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_perovskites/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_perovskites.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_perovskites/>`_
    * - :code:`matbench_phonons`
      - :code:`last phdos peak` (cm^-1)
      - 1265
      - regression
-     - `download <https://ml.materialsproject.org/matbench_phonons.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_phonons/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_phonons.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_phonons/>`_
    * - :code:`matbench_steels`
      - :code:`yield strength` (MPa)
      - 312
      - regression
-     - `download <https://ml.materialsproject.org/matbench_steels.json.gz>`_, `interactive <https://ml.materialsproject.cloud/matbench_steels/>`_
+     - `download <https://ml.materialsproject.org/projects/matbench_steels.json.gz>`_, `interactive <https://ml.materialsproject.org/projects/matbench_steels/>`_
 
 
 
@@ -195,12 +195,12 @@ procedures, etc.) on a dataset with :code:`matminer.datasets.get_all_dataset_inf
     Description: Matbench v0.1 dataset for predicting steel yield strengths from chemical composition alone. Retrieved from Citrine informatics. Deduplicated.
     Columns:
         composition: Chemical formula.
-        yield strength: Target variable. Experimentally measured steel yield strengths, in GPa.
+        yield strength: Target variable. Experimentally measured steel yield strengths, in MPa.
     Num Entries: 312
     Reference: https://citrination.com/datasets/153092/
     Bibtex citations: ['@misc{Citrine Informatics,\ntitle = {Mechanical properties of some steels},\nhowpublished = {\\url{https://citrination.com/datasets/153092/},\n}']
     File type: json.gz
-    Figshare URL: https://ml.materialsproject.org/matbench_steels.json.gz
+    Figshare URL: https://ml.materialsproject.org/projects/matbench_steels.json.gz
 
 
 You can also view all the Matbench datasets on the matminer
