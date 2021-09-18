@@ -12,8 +12,8 @@ automatminer is an automatic prediction engine for materials properties.
 - [**Source**](https://github.com/hackingmaterials/automatminer)
 
 If you're interested in the benchmarking datasets, see our dedicated package [Matbench](https://github.com/hackingmaterials/matbench):
-- [**Leaderboard and Docs**](https://hackingmaterials.lbl.gov/matbench/)
-- [**Source**](https://github.com/hackingmaterials/matbench)
+- [**Leaderboard and Docs**](https://matbench.materialsproject.org)
+- [**Source**](https://github.com/materialsproject/matbench)
 
 You may also be interested in the parent code of automatminer, matminer:
 - [**Matminer**](https://github.com/hackingmaterials/matminer)
