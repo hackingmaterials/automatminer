@@ -18,7 +18,7 @@ Support
 -------
 
 Online support for all of our codes can be found on our
-`support forum <https://hackingmaterials.discourse.group>`_. This is the place
+`support forum <https://discuss.matsci.org/c/matminer>`_. This is the place
 to troubleshoot any problems you might have with the software developers.
 
 .. image:: _static/forum.png
