@@ -74,6 +74,10 @@ df_new = df_new.reset_index(drop=True)
 
 df_new["is_metal"] = df_new["is_metal"] == 1
 
+# you need to manually change GaAs0.1P0.9G1128 to its correct composition, which
+# is GaAs0.1P0.9 from Solid Solutions in Semiconducting Systems.Handbook,
+# M., Nauka 1978, 200 p. and was gathered from http://bg.imet-db.ru
+
 store_dataframe_as_json(df_new, "expt_is_metal.json.gz", compression="gz")
 
 print(df_new)

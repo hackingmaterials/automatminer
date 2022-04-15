@@ -150,7 +150,7 @@ Want to see something added or changed? Some ways to get involved are:
 - Contribute code! You can do this by forking
   `Automatminer on Github <https://github.com/hackingmaterials/automatminer>`_
   and submitting a pull request.
-- Post to our `support forum <https://hackingmaterials.discourse.group/c/matminer>`_. Don't be shy, we look forward to feedback!
+- Post to our `support forum <https://matsci.org/c/matminer/>`_. Don't be shy, we look forward to feedback!
 
 See our `contribution guidelines
 <https://github.com/hackingmaterials/automatminer/blob/master/CONTRIBUTING.md>`_
