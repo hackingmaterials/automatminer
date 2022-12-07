@@ -1,8 +1,8 @@
 # Direct requirements of this project alone
-matminer==0.6.2
+matminer==0.8.0
 pymatgen==2020.01.28
-tpot==0.11.0
-skrebate==0.6
+tpot==0.11.7
+skrebate==0.62
 pyyaml==5.1.2
 scikit-learn==0.22.2
 
