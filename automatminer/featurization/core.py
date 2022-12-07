@@ -6,7 +6,7 @@ import os
 import math
 import logging
 
-from pymatgen import Composition
+from pymatgen.core.comosition import Composition
 from matminer.featurizers.conversions import (
     StrToComposition,
     DictToObject,
