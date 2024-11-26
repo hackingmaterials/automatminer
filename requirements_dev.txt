@@ -5,5 +5,5 @@ black==19.3b0
 flake8==3.7.8
 isort==4.3.21
 pre-commit==1.18.3
-paramiko==2.6.0
+paramiko==2.7.2
 scp==0.13.2
